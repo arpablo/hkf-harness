@@ -38,11 +38,38 @@ Gebraucht werden Python 3 und PyYAML (`pip3 install pyyaml`).
 |---|---|---|
 | `hk-init <ziel>` | legt eine Wissensbasis an: Grundausstattung, Obsidian-Konfiguration, README, `.gitignore`, `git init` und ein erster Commit | **läuft** |
 | `hk-lint [pfad]` | prüft Frontmatter gegen das Schema aus Anhang B.4 und die Grammatik der Wikilinks und Typangaben aus Anhang B | **teilweise** |
-| `hk-import <bundle>` | übernimmt eine Lieferung (§6.1) | Platzhalter |
+| `hk-import <bundle>` | übernimmt eine Lieferung (§6.1): Typen abgleichen, Notizen und Mediendateien einsortieren, Verweise umschreiben, verknüpfen, Bundle-Notiz und Typtabelle fortschreiben | **läuft** |
 | `hk-export <id> <ziel>` | schreibt eine Lieferung heraus (§6.2) | Platzhalter |
 
-`hk-lint --help` nennt, welche Prüfungen aus §6.3 noch fehlen. Die beiden
-Platzhalter sagen beim Aufruf, was sie tun sollen, und enden mit 3.
+`hk-lint --help` nennt, welche Prüfungen aus §6.3 noch fehlen. `hk-export`
+sagt beim Aufruf, was es tun soll, und endet mit 3.
+
+`hk-import --check` führt den Lauf bis zu dem Punkt aus, an dem geschrieben
+würde, und berichtet in drei Abschnitten: was geschieht, was zu entscheiden
+ist, was zu tun ist. `--force` entscheidet, welche von zwei Fassungen gilt —
+nie, ob zwei Dinge dasselbe meinen.
+
+## Was der Import nicht entscheidet
+
+Drei Stellen der Spezifikation enden mit einem Urteil, und keines davon fällt
+ein Programm: die Bedeutungsprüfung zweier gleichnamiger Typen (§5.5), die
+Identität einer ankommenden Notiz, die es unter demselben Namen schon gibt
+(§6.1 Schritt 5), und alles an der Verknüpfung, was über die mechanischen
+Beobachtungen hinausgeht (§5.6).
+
+`hk-import` legt diese Fälle vor und **schreibt nichts**, solange eine
+Bedeutungsprüfung offen ist. Eine offene Identitätsfrage lässt nur die eine
+Notiz liegen; die übrigen laufen durch. Ist die Frage einmal beantwortet und
+als Zeile in `# Entscheidungen` der Bundle-Notiz festgehalten (§5.7), fragt
+der nächste Lauf nicht wieder — das Aufzeichnen selbst ist Sache dessen, der
+geurteilt hat, also eines Menschen oder eines Skills.
+
+Selbsttätig verknüpft wird nur die erste der drei Beobachtungen aus §6.1
+Schritt 9: Nennt der Body einer Notiz den Titel oder einen Alias einer anderen
+wörtlich und verlinkt ihn nicht ohnehin schon, entsteht ein Eintrag unter
+`# Siehe auch`. Gleiche `hkf-wikidata`-Kennungen werden als
+Zusammenführungskandidat vorgelegt; unbelegte Properties mit Zieltyp noch
+nicht.
 
 ## Was wo liegt
 
@@ -91,7 +118,11 @@ Kopien zu führen. Sie findet den Harness über `HKF_HARNESS`, sonst nebenan.
 
 ## Offen
 
-- **`hk-import` und `hk-export`** — der mechanische Teil zuerst.
+- **`hk-export`** — die Umkehrung: Ablagepfad aus jedem Verweis
+  herausrechnen, `bundles`, `imported` und die Nachweise draußen lassen,
+  Mediendateien nach ihrer Endung mitnehmen (§4.3, §6.2).
+- **Vorschläge aus unbelegten Properties** (§6.1 Schritt 9, dritte
+  Beobachtung).
 - **`HKF_BUNDLE_PATH`** — Vorgabeverzeichnis für Lieferungen; festlegen, wenn
   `hk-export` steht.
 - **`hk-lint --fix`** — die abgeleiteten Tabellen in `hkb.md` und die

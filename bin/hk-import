@@ -1,18 +1,103 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""hk-import — ein Bundle in die Wissensbasis uebernehmen (§6.1).
+"""hk-import — ein Bundle in die Wissensbasis übernehmen (Core §6.1).
 
-    hk-import <bundle-pfad> [ziel] [--check]
+    hk-import [--check] [--force] [--no-link] <bundle-pfad> [hkb-pfad]
 
-Noch nicht umgesetzt. Die Methode hat acht Schritte, und drei davon enden mit
-einem Urteil, das ein Mensch oder ein Sprachmodell faellt: die Bedeutungs-
-pruefung (§5.5), die Identitaet einer ankommenden Notiz (§6.1 Schritt 5) und
-die Verknuepfung (§5.6). Bevor davon etwas laeuft, muss der mechanische Teil
-stehen — Verweise umrechnen, Zugehoerigkeit setzen, Import- und
-Entscheidungsnachweis schreiben.
+Ohne `hkb-pfad` gilt $HKB_PATH, sonst ~/hkb.
+
+    --check     bis zu dem Punkt ausführen, an dem geschrieben würde, und
+                nichts schreiben
+    --force     die ankommende Fassung auch dann übernehmen, wenn sie älter
+                oder unvergleichbar ist, und Mediendateien überschreiben.
+                Auf die Frage, ob zwei Dinge dasselbe meinen, wirkt es nicht.
+    --no-link   Schritt 9 überspringen — die Lieferung bleibt unverknüpft
+
+Berichtet wird in drei Abschnitten: was geschieht, was zu entscheiden ist, was
+zu tun ist. Was ein Urteil verlangt — die Bedeutungsprüfung (§5.5), die
+Identität einer ankommenden Notiz (§6.1 Schritt 5) —, wird vorgelegt und nicht
+geraten; der Import bricht dann ab, ohne zu schreiben.
 """
-import sys
+import os, sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
+from hkf import ablage, importieren                            # noqa: E402
+
+
+def bericht(plan, geschrieben):
+    z = plan.zaehlung()
+    print()
+    print("Was geschieht" if not geschrieben else "Was geschehen ist")
+    if plan.notizen:
+        teile = ["%d %s" % (z[k], k) for k in ("neu", "aktualisiert", "übersprungen",
+                                               "abgelehnt") if z.get(k)]
+        print("  %d Notizen: %s" % (len(plan.notizen), ", ".join(teile)))
+    medien = [m for m in plan.medien if m["zustand"] != "übersprungen"]
+    if medien:
+        print("  %d Mediendateien: %s"
+              % (len(medien), ", ".join(sorted({m["zustand"] for m in medien}))))
+    for name in sorted(plan.typen):
+        t = plan.typen[name]
+        if t["zustand"] in ("neu", "vorläufig", "abgelöst", "ergänzt"):
+            anzahl = sum(1 for n in plan.notizen if n["typ"] == name)
+            print("  %-14s %s → %s%s"
+                  % (("Typ " + t["zustand"] + ":"), name, t["dir"],
+                     " (%d Notizen)" % anzahl if anzahl else ""))
+    if plan.verweise:
+        print("  Verknüpfung:   %d Verweise mechanisch sicher" % len(plan.verweise))
+    if not plan.notizen and not plan.medien:
+        print("  nichts")
+
+    entscheidungen = plan.zu_entscheiden()
+    konflikte = [b for b in plan.konflikte() if b.text != plan.abgewiesen or True]
+    if entscheidungen or konflikte:
+        print()
+        print("Was zu entscheiden ist")
+        for b in konflikte + entscheidungen:
+            print("  " + b.text.replace("\n", "\n  "))
+
+    tun = [b.tun for b in plan.befunde if b.tun]
+    hinweise = [b for b in plan.hinweise() if not b.tun]
+    if tun or hinweise:
+        print()
+        print("Was zu tun ist")
+        for t in tun:
+            print("  → " + t.replace("\n", "\n    "))
+        for b in hinweise:
+            print("  · " + b.text.replace("\n", "\n    "))
+    print()
+    print("Nichts wurde geschrieben." if not geschrieben else "Übernommen.")
+
+
+def main(argv):
+    if "--help" in argv or "-h" in argv or not argv:
+        print(__doc__.strip())
+        return 0
+    check = "--check" in argv
+    force = "--force" in argv
+    ohne = "--no-link" in argv
+    args = [a for a in argv if not a.startswith("-")]
+    if not args:
+        sys.stderr.write("Ein Bundle-Pfad fehlt.\n")
+        return 2
+    quelle = os.path.abspath(os.path.expanduser(args[0]))
+    try:
+        hkb = ablage.finde(args[1] if len(args) > 1 else None)
+    except ablage.KeineAblage as e:
+        sys.stderr.write(str(e) + "\n")
+        return 2
+
+    print("hk-import%s %s → %s" % (" --check" if check else "", args[0], hkb))
+    plan = importieren.planen(hkb, quelle, force=force, ohne_verknuepfung=ohne)
+    if plan.abgewiesen:
+        bericht(plan, False)
+        print("Der Import wurde abgewiesen.")
+        return 1
+    if not check:
+        importieren.ausfuehren(plan)
+    bericht(plan, not check)
+    return 1 if plan.zu_entscheiden() or plan.konflikte() else 0
+
 
 if __name__ == "__main__":
-    sys.stderr.write(__doc__.strip() + "\n")
-    sys.exit(3)
+    sys.exit(main(sys.argv[1:]))

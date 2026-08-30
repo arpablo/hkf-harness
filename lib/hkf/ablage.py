@@ -46,6 +46,25 @@ def basis(pfad):
     return os.path.join(pfad, str(daten.get("base") or "").strip("/"))
 
 
+def ablagepfad(pfad):
+    """Pfad von der Vault-Wurzel zur Ablage (§3.1), ohne fuehrenden Strich.
+
+    Die Vault-Wurzel ist das naechste Verzeichnis auf dem Weg nach oben, in dem
+    `.obsidian` liegt. Liegt die HKB selbst dort, ist der Ablagepfad leer. Er
+    steht in jedem qualifizierten Wikilink vor der Notiz-ID (§3.6).
+    """
+    pfad = os.path.abspath(pfad)
+    p = pfad
+    while True:
+        if os.path.isdir(os.path.join(p, ".obsidian")):
+            rel = os.path.relpath(pfad, p)
+            return "" if rel == "." else rel.replace(os.sep, "/")
+        eltern = os.path.dirname(p)
+        if eltern == p:
+            return ""
+        p = eltern
+
+
 def typen(pfad):
     """Die Typtabelle aus dem Abschnitt `# Typen` der Wurzeldatei."""
     _, body = frontmatter.lesen(os.path.join(pfad, "hkb.md"))
