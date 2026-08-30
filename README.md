@@ -48,7 +48,7 @@ Platzhalter sagen beim Aufruf, was sie tun sollen, und enden mit 3.
 
 ```
 spec/        die Fassung, die dieser Harness umsetzt
-lib/hkf/     ablage, frontmatter, schema, grammatik
+lib/hkf/     ablage, frontmatter, schema, grammatik, vorlage
 bin/         hk-init, hk-lint, hk-import, hk-export
 templates/   AGENTS.md und die Grundausstattung, aus der hk-init schöpft
 skills/      die KI-Schicht — noch leer, siehe skills/README.md
@@ -75,12 +75,22 @@ mehr — sie nannte ein Produkt.
 Core führte dafür einmal einen Abschnitt „Einstieg für Werkzeuge"; er ist
 gestrichen. Den ersten Satz sagt der Harness, nicht die Ablage.
 
+## Woher `templates/hkb` kommt
+
+Die Grundausstattung wird nicht hier gepflegt, sondern aus der
+Beispiel-Wissensbasis der Werkbank abgeleitet — alle Notizen in `typedefs/`
+und `proptypes/`, die keine `bundles`-Property tragen (§5.3):
+
+```
+cd ../HenniHKF-Lab
+python3 tools/make-hkb-template.py ../HenniHKF-Harness/templates/hkb --nackt --force
+```
+
+Umgekehrt prüft und erzeugt die Werkbank mit dieser Bibliothek, statt eigene
+Kopien zu führen. Sie findet den Harness über `HKF_HARNESS`, sonst nebenan.
+
 ## Offen
 
-- **Doppelte Werkzeuge.** `check-frontmatter.py` und `check-grammar.py` in
-  `HenniHKF-Lab/tools/` sind die Vorlagen für `lib/hkf/schema.py` und
-  `lib/hkf/grammatik.py`. Solange beide bestehen, laufen sie auseinander. Das
-  Lab sollte den Harness aufrufen, statt eigene Kopien zu führen.
 - **`hk-import` und `hk-export`** — der mechanische Teil zuerst.
 - **`HKF_BUNDLE_PATH`** — Vorgabeverzeichnis für Lieferungen; festlegen, wenn
   `hk-export` steht.

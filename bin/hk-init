@@ -15,23 +15,9 @@ Anleitung fuer Werkzeuge und gehoert nicht zur Ablage.
 import io, os, re, shutil, subprocess, sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
-from hkf import CORE, TEMPLATES, ablage, frontmatter            # noqa: E402
+from hkf import CORE, TEMPLATES, ablage, frontmatter, vorlage   # noqa: E402
 
 VORLAGE = os.path.join(TEMPLATES, "hkb")
-
-GITIGNORE = """# Sitzungsprotokolle und Suchindex der Werkzeugumgebung
-.memsearch/
-
-# Anleitungen, die ein Werkzeug erzeugt — sie gehören nicht zur Ablage
-AGENTS.md
-CLAUDE.md
-
-# persönliches Fensterlayout von Obsidian
-.obsidian/workspace.json
-
-# macOS
-.DS_Store
-"""
 
 README = """# %(name)s
 
@@ -80,20 +66,6 @@ def kopf_schreiben(pfad, name, tz):
     io.open(pfad, "w", encoding="utf-8").write(text)
 
 
-def agents_schreiben(ziel, name, tz):
-    """Regeln woertlich aus der Vorlage, Kopf und Typtabelle aus der Ablage."""
-    src = io.open(os.path.join(TEMPLATES, "AGENTS.md"), encoding="utf-8").read()
-    regeln = src[src.index("## Sieben Regeln"):src.index("## Typen")]
-    schluss = src[src.index("Mediendateien"):]
-    kopf = ("# %s\n\nEine Wissensbasis im Format **HKF Core %s**. Einstieg "
-            "ist `hkb.md`.\nZeiten gelten in `%s`.\n\n" % (name, CORE, tz))
-    zeilen = ["| %s |" % " | ".join(r) for r in ablage.typen(ziel)]
-    tabelle = ("## Typen dieser Wissensbasis\n\n| Typ | Verzeichnis | Zweck |\n"
-               "|---|---|---|\n" + "\n".join(zeilen) + "\n\n")
-    io.open(os.path.join(ziel, "AGENTS.md"), "w", encoding="utf-8").write(
-        kopf + regeln + tabelle + schluss)
-
-
 def git(ziel, *args):
     return subprocess.run(["git", "-C", ziel] + list(args),
                           capture_output=True, text=True)
@@ -136,10 +108,10 @@ def main(argv):
                          if rel != "." else os.path.join(ziel, f))
 
     kopf_schreiben(os.path.join(ziel, "hkb.md"), name, tz)
-    io.open(os.path.join(ziel, ".gitignore"), "w", encoding="utf-8").write(GITIGNORE)
+    vorlage.gitignore_schreiben(ziel)
     io.open(os.path.join(ziel, "README.md"), "w", encoding="utf-8").write(
         README % {"name": name, "core": CORE, "pfad": ziel})
-    agents_schreiben(ziel, name, tz)
+    vorlage.agents_schreiben(ziel, name, tz)
 
     # Notiz ist, was `type` traegt (§3.3) — nicht die Wurzeldatei, nicht
     # README und nicht die Anleitung fuer Werkzeuge.
