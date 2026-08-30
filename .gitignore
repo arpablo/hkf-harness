@@ -1,0 +1,8 @@
+# Sitzungsprotokolle und Suchindex der Werkzeugumgebung
+.memsearch/
+
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store

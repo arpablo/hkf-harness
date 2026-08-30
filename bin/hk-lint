@@ -1,0 +1,66 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""hk-lint — prueft eine Wissensbasis gegen HKF Core (§6.3).
+
+    hk-lint [pfad] [--strict]
+
+Ohne Pfad gilt $HKB_PATH, sonst ~/hkb.
+
+Umgesetzt sind bisher zwei der Pruefungen aus §6.3: das Frontmatter gegen
+das Schema aus Anhang B.4 und die Grammatik der Wikilinks und Typangaben
+aus Anhang B. Was noch fehlt, nennt --help.
+"""
+import os, sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
+from hkf import ablage, frontmatter, grammatik, schema        # noqa: E402
+
+FEHLT = """Noch nicht umgesetzt (§6.3): aufloesbare Verweise, Typverzeichnis
+gegen `type`, Property-Tabellen der Typdefinitionen, `# Siehe auch` nach §5.6,
+Importnachweise nach §5.1, die abgeleiteten Tabellen in `hkb.md`, und --fix."""
+
+
+def main(argv):
+    if "--help" in argv or "-h" in argv:
+        print(__doc__.strip()); print(); print(FEHLT); return 0
+    strict = "--strict" in argv
+    args = [a for a in argv if not a.startswith("-")]
+    try:
+        hkb = ablage.finde(args[0] if args else None)
+    except ablage.KeineAblage as e:
+        sys.stderr.write(str(e) + "\n"); return 2
+
+    wurzel = schema.laden()
+    fm_befunde, gr_befunde = [], []
+    geprueft = 0
+
+    for p in ablage.dateien(hkb):
+        rel = os.path.relpath(p, hkb)
+        try:
+            daten, _ = frontmatter.lesen(p)
+        except Exception as e:
+            fm_befunde.append("%s: %s" % (rel, e))
+            continue
+        if not daten:
+            continue                      # keine Notiz, keine Wurzeldatei
+        art = schema.einstieg(p)
+        if art == "notiz" and "type" not in daten:
+            continue                      # §4.3: ohne `type` keine Notiz
+        geprueft += 1
+        for b in schema.pruefen(daten, wurzel["$defs"][art], wurzel):
+            fm_befunde.append("%s: %s" % (rel, b))
+        grammatik.pruefe_datei(p, gr_befunde, name=rel)
+
+    print("%s — %d Dateien geprüft" % (hkb, geprueft))
+    for titel, befunde in (("Frontmatter (Anhang B.4)", fm_befunde),
+                           ("Grammatik (Anhang B)", gr_befunde)):
+        print("  %-26s %d Befunde" % (titel, len(befunde)))
+        for b in befunde:
+            print("    -", b)
+    if strict:
+        print("  --strict ist noch ohne Wirkung.")
+    return 1 if fm_befunde or gr_befunde else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

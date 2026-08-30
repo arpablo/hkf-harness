@@ -1,0 +1,30 @@
+{
+  "types": {
+    "type": "text",
+    "title": "text",
+    "description": "text",
+    "tags": "tags",
+    "aliases": "aliases",
+    "cssclasses": "multitext",
+    "status": "text",
+    "created": "date",
+    "modified": "datetime",
+    "modified_by": "text",
+    "bundles": "multitext",
+    "related": "multitext",
+    "rejected_links": "multitext",
+    "dir": "text",
+    "provisional": "checkbox",
+    "form": "text",
+    "pattern": "text",
+    "values": "multitext",
+    "unit": "text",
+    "min": "number",
+    "max": "number",
+    "id": "text",
+    "version": "text",
+    "required_bundles": "multitext",
+    "source": "text",
+    "imported": "datetime"
+  }
+}

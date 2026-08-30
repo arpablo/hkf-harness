@@ -1,0 +1,18 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""hk-import — ein Bundle in die Wissensbasis uebernehmen (§6.1).
+
+    hk-import <bundle-pfad> [ziel] [--check]
+
+Noch nicht umgesetzt. Die Methode hat acht Schritte, und drei davon enden mit
+einem Urteil, das ein Mensch oder ein Sprachmodell faellt: die Bedeutungs-
+pruefung (§5.5), die Identitaet einer ankommenden Notiz (§6.1 Schritt 5) und
+die Verknuepfung (§5.6). Bevor davon etwas laeuft, muss der mechanische Teil
+stehen — Verweise umrechnen, Zugehoerigkeit setzen, Import- und
+Entscheidungsnachweis schreiben.
+"""
+import sys
+
+if __name__ == "__main__":
+    sys.stderr.write(__doc__.strip() + "\n")
+    sys.exit(3)

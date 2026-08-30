@@ -1,0 +1,165 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""hk-init — eine leere Wissensbasis anlegen.
+
+    hk-init <zielverzeichnis> [--name NAME] [--timezone ZONE] [--no-git] [--force]
+
+Erzeugt die Grundausstattung nach §3.8 — die drei Kern-Typen, die dreizehn
+Standard-Property-Typen, die Verzeichnisse —, dazu die Wurzeldatei, eine
+Obsidian-Konfiguration, README und .gitignore, und macht das Verzeichnis zu
+einem Git-Repository mit einem ersten Commit.
+
+Die AGENTS.md entsteht daneben, wird aber nicht versioniert: Sie ist eine
+Anleitung fuer Werkzeuge und gehoert nicht zur Ablage.
+"""
+import io, os, re, shutil, subprocess, sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
+from hkf import CORE, TEMPLATES, ablage, frontmatter            # noqa: E402
+
+VORLAGE = os.path.join(TEMPLATES, "hkb")
+
+GITIGNORE = """# Sitzungsprotokolle und Suchindex der Werkzeugumgebung
+.memsearch/
+
+# Anleitungen, die ein Werkzeug erzeugt — sie gehören nicht zur Ablage
+AGENTS.md
+CLAUDE.md
+
+# persönliches Fensterlayout von Obsidian
+.obsidian/workspace.json
+
+# macOS
+.DS_Store
+"""
+
+README = """# %(name)s
+
+Eine Wissensbasis nach **HKF Core %(core)s**. Dieses Verzeichnis ist zugleich
+ein Obsidian-Vault und ein Git-Repository. Es enthält die Grundausstattung und
+sonst nichts — keinen Inhalt, keine Bundles, kein Vokabular.
+
+## Erste Schritte
+
+1. **Verzeichnis in Obsidian als Vault öffnen.** Die Konfiguration unter
+   `.obsidian/` ist bereits auf das Format eingestellt: Wikilinks statt
+   Markdown-Links, vollständige Pfade, registrierte Property-Typen.
+2. **Vokabular dazuladen** — das Bundle `hkf-base` bringt neun Typen für
+   Person, Körperschaft, Ort, Ereignis, Quelle, Begriff, Thema, Notiz und
+   Spezifikation mit. Freiwillig; wer andere Gegenstände verwaltet, legt
+   eigene Typdefinitionen in `typedefs/` an.
+3. **Schreiben.** Der Pfad bestimmt den Typ, das Frontmatter bleibt flach,
+   Verweise sind qualifizierte Wikilinks.
+
+## Was hier liegt
+
+| Pfad | Inhalt |
+|---|---|
+| `hkb.md` | Wurzeldatei: Formatversion, Name, Pfade, Typtabelle |
+| `typedefs/` | die drei Kern-Typen `typedef`, `proptype`, `bundle` |
+| `proptypes/` | die dreizehn Standard-Property-Typen |
+| `bundles/` | je eine Notiz pro importiertem Bundle — noch leer |
+| `media/` | `images`, `videos`, `audios`, `documents` — noch leer |
+
+## Werkzeuge
+
+Prüfen, importieren und exportieren tut der Harness, nicht diese Ablage:
+
+```
+export HKB_PATH=%(pfad)s
+hk-lint
+```
+"""
+
+
+def kopf_schreiben(pfad, name, tz):
+    """`name` und `timezone` in der Wurzeldatei setzen."""
+    text = io.open(pfad, encoding="utf-8").read()
+    text = re.sub(r"^name:.*$", "name: " + name, text, count=1, flags=re.M)
+    text = re.sub(r"^timezone:.*$", "timezone: " + tz, text, count=1, flags=re.M)
+    io.open(pfad, "w", encoding="utf-8").write(text)
+
+
+def agents_schreiben(ziel, name, tz):
+    """Regeln woertlich aus der Vorlage, Kopf und Typtabelle aus der Ablage."""
+    src = io.open(os.path.join(TEMPLATES, "AGENTS.md"), encoding="utf-8").read()
+    regeln = src[src.index("## Sieben Regeln"):src.index("## Typen")]
+    schluss = src[src.index("Mediendateien"):]
+    kopf = ("# %s\n\nEine Wissensbasis im Format **HKF Core %s**. Einstieg "
+            "ist `hkb.md`.\nZeiten gelten in `%s`.\n\n" % (name, CORE, tz))
+    zeilen = ["| %s |" % " | ".join(r) for r in ablage.typen(ziel)]
+    tabelle = ("## Typen dieser Wissensbasis\n\n| Typ | Verzeichnis | Zweck |\n"
+               "|---|---|---|\n" + "\n".join(zeilen) + "\n\n")
+    io.open(os.path.join(ziel, "AGENTS.md"), "w", encoding="utf-8").write(
+        kopf + regeln + tabelle + schluss)
+
+
+def git(ziel, *args):
+    return subprocess.run(["git", "-C", ziel] + list(args),
+                          capture_output=True, text=True)
+
+
+def main(argv):
+    if "--help" in argv or "-h" in argv or not argv:
+        print(__doc__.strip())
+        return 0
+    def wert(flag, vorgabe):
+        return argv[argv.index(flag) + 1] if flag in argv else vorgabe
+    pfade = []
+    ueberspringen = False
+    for i, a in enumerate(argv):
+        if ueberspringen:
+            ueberspringen = False
+        elif a in ("--name", "--timezone"):
+            ueberspringen = True
+        elif not a.startswith("-"):
+            pfade.append(a)
+    if not pfade:
+        sys.stderr.write("Ein Zielverzeichnis fehlt.\n")
+        return 2
+
+    ziel = os.path.abspath(os.path.expanduser(pfade[0]))
+    name = wert("--name", os.path.basename(ziel))
+    tz = wert("--timezone", "Europe/Berlin")
+
+    if os.path.exists(ziel) and set(os.listdir(ziel)) - {".git"} and "--force" not in argv:
+        sys.stderr.write("%s ist nicht leer. --force überschreibt.\n" % ziel)
+        return 2
+
+    for r, dirs, fs in os.walk(VORLAGE):
+        rel = os.path.relpath(r, VORLAGE)
+        os.makedirs(os.path.join(ziel, rel) if rel != "." else ziel, exist_ok=True)
+        for f in fs:
+            if f == ".DS_Store":
+                continue
+            shutil.copy2(os.path.join(r, f), os.path.join(ziel, rel, f)
+                         if rel != "." else os.path.join(ziel, f))
+
+    kopf_schreiben(os.path.join(ziel, "hkb.md"), name, tz)
+    io.open(os.path.join(ziel, ".gitignore"), "w", encoding="utf-8").write(GITIGNORE)
+    io.open(os.path.join(ziel, "README.md"), "w", encoding="utf-8").write(
+        README % {"name": name, "core": CORE, "pfad": ziel})
+    agents_schreiben(ziel, name, tz)
+
+    # Notiz ist, was `type` traegt (§3.3) — nicht die Wurzeldatei, nicht
+    # README und nicht die Anleitung fuer Werkzeuge.
+    n = sum(1 for p in ablage.dateien(ziel) if "type" in frontmatter.lesen(p)[0])
+    print("%s: Grundausstattung mit %d Notizen, HKF Core %s" % (ziel, n, CORE))
+
+    if "--no-git" in argv:
+        print("  ohne Git (--no-git)")
+        return 0
+    if not os.path.isdir(os.path.join(ziel, ".git")):
+        git(ziel, "init", "-q")
+    git(ziel, "add", "-A")
+    if not git(ziel, "diff", "--cached", "--quiet").returncode:
+        print("  nichts zu committen")
+        return 0
+    r = git(ziel, "commit", "-q", "-m", "hkb: Grundausstattung")
+    print("  Git: " + ("erster Commit" if not r.returncode
+                       else "Commit fehlgeschlagen — " + (r.stderr or "").strip()))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
