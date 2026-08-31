@@ -28,7 +28,7 @@ nebenan; was hier liegt, ist eine Art, es zu tun.
 
 | Repository | Inhalt |
 |---|---|
-| [`hkf-spec`](https://github.com/arpablo/hkf-spec) | Die Spezifikation: HKF Core 1.0 und HKF Base 1.0 |
+| [`hkf-spec`](https://github.com/arpablo/hkf-spec) | Die Spezifikation: HKF Core 1.0 und HKF Config 1.0 |
 | [`hkf-kb-template`](https://github.com/arpablo/hkf-kb-template) | Vorlage für eine neue Wissensbasis; `hk-init` schöpft aus derselben Grundausstattung |
 | [`hkf-base`](https://github.com/arpablo/hkf-base) | Das Bundle mit dem Standardvokabular |
 | [`hkf-harness`](https://github.com/arpablo/hkf-harness) | Dieses Repository |
@@ -174,7 +174,7 @@ sich und sagte nichts, was nicht schon dastand. Eine `CLAUDE.md` entsteht
 ebenfalls nicht; sie nannte ein Produkt.
 
 Die Hinweise, die einmal in ihrem letzten Abschnitt standen, haben einen
-besseren Ort bekommen: HKF Base führt den Typ `hint`. Jede Festlegung, wie
+besseren Ort bekommen: HKF Config führt den Typ `hint`. Jede Festlegung, wie
 diese Wissensbasis geführt wird, ist dort eine Notiz unter `Hints/` — geprüft,
 verlinkt, versioniert, und mit `applies_to` an der Typdefinition, für die sie
 gilt. Wer daneben trotzdem eine `AGENTS.md` will, legt sie von Hand an; kein
@@ -267,7 +267,7 @@ Standard-Property-Typen ebenso — dort als Tabelle in §3.5.1.
 python3 tools/grundausstattung.py
 ```
 
-Das Gegenstück für HKF Base ist `tools/check-base.py` im Spec-Repository. Für
+Das Gegenstück für das Vokabular ist `tools/check-config.py` im Spec-Repository. Für
 Core fehlte es, und genau deshalb konnte `bundle` die Property `version` als
 Pflicht führen, obwohl §4.1 eine Lieferung ohne Fassung ausdrücklich zulässt.
 Gefunden hat das erst die Prüfung der Property-Tabellen gegen die Werte — an

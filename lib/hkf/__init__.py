@@ -8,7 +8,7 @@ sich diese Nummer mit.
 import os, sys
 
 CORE = "1.0"
-BASE = "1.0"
+CONFIG = "1.0"
 
 WURZEL = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 SPEC = os.path.join(WURZEL, "spec")

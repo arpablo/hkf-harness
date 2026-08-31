@@ -37,7 +37,7 @@ Was eine der beiden Proben nicht besteht, liegt am falschen Ort.
 ```
 hkf-harness/
   HKF-Harness-V1.0.md   dieses Dokument
-  spec/                 die Fassung von HKF Core und Base, die er umsetzt
+  spec/                 die Fassung von HKF Core und Config, die er umsetzt
   bin/                  hk-init, hk-lint, hk-import, hk-export
   lib/hkf/              Ablage, Frontmatter, Schema, Grammatik, Vorlage, Fassung
   py                    das Python des Harness
@@ -141,7 +141,7 @@ der bringt die Spezifikation mit. Wer ohne Harness kommt, findet den Einstieg
 im Format selbst: `hkb.md` trägt `spec` mit der URL.
 
 Was für **diese** Wissensbasis gilt, gehört seitdem nicht in eine Datei
-daneben, sondern hinein. HKF Base führt dafür den Typ `hint`: Jede Festlegung
+daneben, sondern hinein. HKF Config führt dafür den Typ `hint`: Jede Festlegung
 ist eine eigene Notiz unter `Hints/`, mit `applies_to` auf die Typdefinition,
 für die sie gilt. Sie wird geprüft, verlinkt und mit der Ablage versioniert —
 alles, was eine erzeugte und ignorierte `AGENTS.md` nie war.
@@ -253,7 +253,7 @@ Sie gehört aber auch nicht in den Harness. Wann in **dieser** Wissensbasis
 etwas eine eigene Notiz wert ist, welche Quellen als belastbar gelten, wie
 weit zusammengefasst werden darf — das gehört zu dieser einen Wissensbasis und
 zieht mit ihr um. Der Vorschlag: **eine gewöhnliche Notiz in der Ablage**,
-Typ `specification` aus HKF Base. Sie ist dann Inhalt wie jeder andere —
+Typ `specification` aus HKF Config. Sie ist dann Inhalt wie jeder andere —
 versioniert, verlinkbar, prüfbar — und sie besteht die erste Probe: Ein
 Mensch, der die Wissensbasis ohne KI führt, hat denselben Nutzen davon.
 

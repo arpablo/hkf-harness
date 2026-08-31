@@ -2,12 +2,13 @@
 # -*- coding: utf-8 -*-
 """Prueft, dass die Grundausstattung und HKF Core dasselbe sagen.
 
-Die Kern-Typen stehen zweimal: als eingebetteter Markdown-Block in Anhang A
+Die Kern-Typen stehen zweimal: als eingebetteter Markdown-Block in HKF Config
 der Spezifikation und als ausgelieferte Datei unter templates/hkb/. Die
-dreizehn Standard-Property-Typen ebenso — dort als Tabelle in §3.5.1. Die
+dreizehn Standard-Property-Typen ebenso — dort als Tabelle in §2.1. Die
 Spezifikation ist die normative Fassung.
 
-Das Gegenstueck fuer HKF Base ist `tools/check-base.py` im Spec-Repository.
+Das Gegenstueck fuer das Vokabular ist `tools/check-config.py` im
+Spec-Repository.
 Fuer Core fehlte es, und genau deshalb konnte `bundle` monatelang `version`
 als Pflicht fuehren, obwohl A.5 sie freistellt.
 
@@ -19,22 +20,22 @@ WURZEL = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(WURZEL, "lib"))
 import hkf                                                    # noqa: E402,F401
 import yaml                                                   # noqa: E402
-from hkf import CORE, frontmatter                             # noqa: E402
+from hkf import CONFIG, frontmatter                           # noqa: E402
 
-BLOCK = re.compile(r"^## A\.\d+ `(\w+)`\n\n```markdown\n(.*?)\n```", re.S | re.M)
+BLOCK = re.compile(r"^## 3\.[123] `(\w+)`\n\n```markdown\n(.*?)\n```", re.S | re.M)
 ZEITEN = re.compile(r"^(created|modified|modified_by):.*\n", re.M)
 EINSCHRAENKUNG = re.compile(r"`([a-z]+): ([^`]+)`")
 
 
 def spec_text():
-    return io.open(os.path.join(WURZEL, "spec", "HKF-Core-V%s.md" % CORE),
+    return io.open(os.path.join(WURZEL, "spec", "HKF-Config-V%s.md" % CONFIG),
                    encoding="utf-8").read()
 
 
 def kern_typen(spec, vorlage, melde):
     bloecke = BLOCK.findall(spec)
     if len(bloecke) != 3:
-        melde("Anhang A enthält %d Kern-Typen, erwartet 3" % len(bloecke), True)
+        melde("§3.1 bis §3.3 enthalten %d Kern-Typen, erwartet 3" % len(bloecke), True)
         return
     for typ, block in bloecke:
         p = os.path.join(vorlage, "Typedefs", typ + ".md")
@@ -53,7 +54,8 @@ def kern_typen(spec, vorlage, melde):
 
 
 def standard_proptypes(spec, vorlage, melde):
-    teil = spec.split("### 3.5.1 Standard-Property-Typen", 1)[-1]
+    teil = spec.split("## 2.1 Die dreizehn Standard-Property-Typen", 1)[-1]
+    teil = teil.split("## 2.2", 1)[0]      # die beiden Aufzaehlungen nicht
     teil = teil.split("### 3.5.2", 1)[0]
     erwartet = {}
     for zeile in teil.splitlines():
@@ -69,7 +71,7 @@ def standard_proptypes(spec, vorlage, melde):
                 soll[schluessel] = wert
         erwartet[name] = soll
     if len(erwartet) != 13:
-        melde("§3.5.1 nennt %d Property-Typen, erwartet 13" % len(erwartet), True)
+        melde("§2.1 nennt %d Property-Typen, erwartet 13" % len(erwartet), True)
 
     verz = os.path.join(vorlage, "Proptypes")
     vorhanden = set(f[:-3] for f in os.listdir(verz) if f.endswith(".md"))
@@ -85,7 +87,7 @@ def standard_proptypes(spec, vorlage, melde):
                 abweichung.append("%s: %r statt %r" % (schluessel, ist, soll))
         for schluessel in ("pattern", "values", "min", "max"):
             if schluessel in daten and schluessel not in erwartet[name]:
-                abweichung.append("%s: %r, §3.5.1 nennt keins"
+                abweichung.append("%s: %r, §2.1 nennt keins"
                                   % (schluessel, daten[schluessel]))
         if abweichung:
             melde("%-18s WEICHT AB" % name, True)
@@ -94,7 +96,7 @@ def standard_proptypes(spec, vorlage, melde):
         else:
             melde("%-18s ok" % name, False)
     for name in sorted(vorhanden - set(erwartet)):
-        melde("%-18s liegt in der Vorlage, §3.5.1 nennt ihn nicht" % name, True)
+        melde("%-18s liegt in der Vorlage, §2.1 nennt ihn nicht" % name, True)
 
 
 def main(argv):
@@ -116,12 +118,12 @@ def main(argv):
 
     spec = spec_text()
     print("Vorlage: %s" % vorlage)
-    print("Spezifikation: HKF Core %s" % CORE)
+    print("Spezifikation: HKF Config %s" % CONFIG)
     print()
-    print("Kern-Typen (Anhang A)")
+    print("Kern-Typen (§3.1 bis §3.3)")
     kern_typen(spec, vorlage, melde)
     print()
-    print("Standard-Property-Typen (§3.5.1)")
+    print("Standard-Property-Typen (§2.1)")
     standard_proptypes(spec, vorlage, melde)
     print()
     if schlecht[0]:

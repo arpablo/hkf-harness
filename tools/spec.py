@@ -46,7 +46,7 @@ def dateien(q):
     """[(name, quellpfad)] — die Spezifikationen und das Schema."""
     aus = []
     for f in sorted(os.listdir(q)):
-        if re.match(r"^HKF-(Core|Base)-V\d+\.\d+\.md$", f):
+        if re.match(r"^HKF-(Core|Config)-V\d+\.\d+\.md$", f):
             aus.append((f, os.path.join(q, f)))
     schema = os.path.join(q, "schema")
     if os.path.isdir(schema):
@@ -105,7 +105,7 @@ def main(argv):
     # Nur was aussieht wie eine Auslieferung des Spec-Repositorys zaehlt als
     # verwaist. Alles andere unter spec/ hat jemand mit Absicht dorthin
     # gelegt, und --update ist kein Grund, es wegzuraeumen.
-    gehoert_uns = re.compile(r"^(HKF-(Core|Base)-V\d+\.\d+\.md|.*\.schema\.json)$")
+    gehoert_uns = re.compile(r"^(HKF-(Core|Config)-V\d+\.\d+\.md|.*\.schema\.json)$")
     verwaist = [f for f in sorted(os.listdir(ZIEL))
                 if gehoert_uns.match(f) and f not in [n for n, _ in liste]]
     for f in verwaist:

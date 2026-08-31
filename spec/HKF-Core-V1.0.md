@@ -21,27 +21,28 @@ darin, was sie zusätzlich dürfen.
 HKF ist kein Ontologiesystem. Ein Typ ist ein Verzeichnis mit einer
 Beschreibung. Mehr nicht.
 
-## Core und Base
+## Core und Config
 
 Das Format ist auf zwei Dokumente verteilt, weil es zwei Fragen beantwortet:
 
-- **HKF Core** — dieses Dokument. Wie eine Ablage aufgebaut ist: Verzeichnisse,
-  Wertformen, Property-Typen, Verweise, Typdefinitionen, das Bundle-Format und
-  die drei Methoden. Es nennt **keinen einzigen inhaltlichen Typ**.
-- **HKF Base** — das Vokabular: zwölf Typdefinitionen für Person,
-  Körperschaft, Ort, Ereignis, Quelle, Begriff, Konzept, Vergleich, Thema,
-  Notiz, Spezifikation und Hinweis, dazu zwei Property-Typen. Es wird als Bundle geliefert und ist freiwillig.
+- **HKF Core** — dieses Dokument. Wie eine Ablage funktioniert: Verzeichnisse,
+  Wertformen, Verweise, Typdefinitionen als Bauform, das Bundle-Format und die
+  drei Methoden. Es nennt **keine einzige konkrete Definition**.
+- **[HKF Config](HKF-Config-V1.0.md)** — das Inventar: fünfzehn
+  Typdefinitionen und fünfzehn Property-Typen. Drei Typen und dreizehn
+  Property-Typen davon bilden die Grundausstattung jeder Ablage; die übrigen
+  zwölf Typen und zwei Property-Typen kommen als Bundle `hkf-base` und sind
+  freiwillig.
 
-Konform ist eine Wissensbasis nach **Core**. Wer nur Core erfüllt, hat eine
-leere, aber vollständige Ablage und definiert seine Typen selbst. Wer Base
-lädt, verpflichtet sich zusätzlich auf die dort festgelegte Bedeutung dieser
-zwölf Typen — der Preis dafür, dass Bundles zwischen fremden Wissensbasen
-austauschbar sind.
+Konform ist eine Wissensbasis nach **Core** samt der Grundausstattung aus
+Config. Wer nur das erfüllt, hat eine leere, aber vollständige Ablage und
+definiert seine Typen selbst. Wer das Vokabular lädt, verpflichtet sich
+zusätzlich auf die dort festgelegte Bedeutung jener zwölf Typen — der Preis
+dafür, dass Bundles zwischen fremden Wissensbasen austauschbar sind.
 
-Der Schnitt liegt dort, wo die Beliebigkeit anfängt. Dass eine Notiz in dem
-Verzeichnis ihres Typs liegt, gilt für jede Wissensbasis. Dass eine Person
-`born` und `died` trägt, ist eine Verabredung, die man auch anders treffen
-kann.
+Der Schnitt liegt zwischen **Mechanik und Inventar**. Dass eine Notiz in dem
+Verzeichnis ihres Typs liegt, sagt Core. Welche Typen es gibt und dass eine
+Person `born` und `died` trägt, sagt Config.
 
 ---
 
@@ -82,7 +83,7 @@ Wurzel des Vaults sein.
 6. **Dieses Dokument nennt keine inhaltlichen Typen.** Welche Typen eine
    Wissensbasis führt, steht in der Typtabelle ihrer Wurzeldatei; in einer
    Lieferung sagt es der `type` jeder Notiz. Ein verbreitetes
-   Vokabular liefert **HKF Base**.
+   Vokabular liefert **HKF Config**.
 7. **Grundausstattung und Zuladung.** Die dreizehn Property-Typen und die drei
    Kern-Typen entstehen mit der Wissensbasis — ohne sie ließe sich nichts
    importieren. Alles Weitere kommt als Bundle dazu und ist freiwillig (§5.3).
@@ -397,95 +398,25 @@ Absolute HTTP- oder HTTPS-Adresse.
   `values` (Liste erlaubter Werte), `unit`, `min`, `max`.
 - Namen sind `kebab-case`. Das Präfix `hkf-` ist den Property-Typen dieser
   Spezifikation vorbehalten — gleich ob sie zur Grundausstattung gehören
-  (§3.5.1) oder mit einem Bundle wie HKF Base kommen.
+  (§3.5.1) oder mit einem Bundle wie `hkf-base` kommen.
 
 Für die sechs Wertformen selbst wird **kein** Property-Typ angelegt. Ebenso
 wenig für Obsidian-eigene Properties wie `tags`, `aliases` und `cssclasses`.
 
-### 3.5.1 Standard-Property-Typen
+### 3.5.1 Die Standard-Property-Typen
 
-Diese dreizehn Property-Typen kennt jede HKB. Sie sind Teil dieser
-Spezifikation und gehören zur **Grundausstattung**: Eine HKB legt sie beim
-Anlegen als Notizen in `Proptypes/` an (§5.3).
+Dreizehn Property-Typen kennt jede HKB. Sie sind Teil dieser Spezifikation und
+gehören zur **Grundausstattung**: Eine HKB legt sie beim Anlegen als Notizen in
+`Proptypes/` an (§5.3).
 
-| Property-Typ | Wertform | Einschränkung |
-|---|---|---|
-| `hkf-url` | `text` | `pattern: "^https?://\\S+$"` |
-| `hkf-email` | `text` | `pattern: "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"` |
-| `hkf-phone` | `text` | `pattern: "^\\+[1-9]\\d{6,14}$"` — E.164, also `+4993131885` |
-| `hkf-lang` | `text` | `pattern: "^[a-z]{2}$"` — ISO 639-1, also `de`, `en` |
-| `hkf-country` | `text` | `pattern: "^[A-Z]{2}$"` — ISO 3166-1 alpha-2, also `DE`, `GB` |
-| `hkf-latitude` | `number` | `min: -90`, `max: 90`, `unit: Grad` |
-| `hkf-longitude` | `number` | `min: -180`, `max: 180`, `unit: Grad` |
-| `hkf-year` | `number` | `min: -4000`, `max: 9999` |
-| `hkf-wikidata` | `text` | `pattern: "^Q[1-9]\\d*$"` — Wikidata-Kennung, etwa `Q7259` |
-| `hkf-file` | `text` | Wikilink auf eine Mediendatei, **mit** Dateiendung |
-| `hkf-link` | `text` | genau ein qualifizierter Wikilink nach §3.6 |
-| `hkf-link-list` | `list` | jeder Eintrag ein qualifizierter Wikilink nach §3.6 |
-| `hkf-link-or-url` | `text` | entweder ein qualifizierter Wikilink nach §3.6 oder eine Adresse nach `hkf-url` |
-
-`hkf-year` trägt eine Jahreszahl, wenn kein vollständiges Datum bekannt ist.
-Negative Werte bezeichnen Jahre vor der Zeitenwende. Ein bekanntes Datum
-gehört als `date` ins Frontmatter, nicht als Jahr.
-
-`hkf-wikidata` verankert eine Notiz an einem Gegenstand der realen Welt.
-Anders als alle übrigen Property-Typen beschreibt er nicht die Notiz, sondern
-das, worüber sie handelt: `Q7259` bezeichnet Ada Lovelace, gleich wie die
-Notiz heißt und in welcher Wissensbasis sie liegt. Damit lässt sich erkennen,
-dass zwei Notizen aus verschiedenen Lieferungen dasselbe meinen — was die
-pfadbasierte Identität aus §3.2 nicht leisten kann.
-
-Er ist der einzige standardisierte Normdaten-Bezug, weil Wikidata als
-einziges Verzeichnis Personen, Körperschaften, Orte, Werke und Begriffe
-gleichermaßen abdeckt. Fachliche Normdateien wie GND, VIAF oder ORCID gehören
-als eigene Property-Typen in die jeweilige Wissensbasis (§3.5).
-
-Der Body der Notiz `Proptypes/hkf-wikidata.md` beschreibt, wie sich aus der
-Kennung weitere Angaben beschaffen lassen. Eine Wissensbasis SOLLTE diesen
-Text führen: Er ist die einzige Stelle, an der ein Werkzeug erfährt, was mit
-der Kennung anzufangen ist.
-
-`hkf-file` verweist auf eine Mediendatei, nicht auf eine Notiz. Der Wert ist
-ein qualifizierter Wikilink nach §3.6, der aber die **Dateiendung behält**,
-weil sie bei einer Mediendatei zum Namen gehört:
-
-```yaml
-portrait: "[[media/images/personen/portraet-ada.png|portraet-ada.png]]"
-```
-
-- Das Ziel MUSS in einem der vier Medienverzeichnisse aus §3.2.1 liegen und
-  eine Dateiendung tragen, die nicht `.md` ist.
-- In Properties steht der Link ohne `!`. Einbettungen wie `![[…]]` sind
-  gewöhnliches Markdown und nur im Body erlaubt.
-- `hkf-file` darf mit einer **Medienart** eingeschränkt werden:
-  `hkf-file:image`, `hkf-file:image,video`. Ohne Angabe ist jede Art
-  zulässig. Das Verfahren entspricht dem der Zieltypen (§3.7.1).
-- Die Listenform `hkf-file-list` ergibt sich aus §3.5.2 und darf ebenfalls
-  eine Medienart tragen: `hkf-file-list:image`.
+**Welche es sind, steht in [HKF Config §2.1](HKF-Config-V1.0.md).** Dort stehen
+Name, Wertform und Einschränkung jedes einzelnen, dazu was `hkf-wikidata`,
+`hkf-file` und `hkf-link-or-url` bedeuten. Dieses Dokument sagt nur, was ein
+Property-Typ ist (§3.5) und wie eine Property-Tabelle ihn benutzt (§3.7).
 
 Ihre Bedeutung ist festgelegt und darf von einer Ablage nicht umdefiniert
 werden. Ein Bundle darf sie weglassen, weil jede HKB sie ohnehin kennt; jede
 andere verwendete Property-Typ-Notiz muss es mitliefern (§4).
-
-`hkf-link` und `hkf-link-list` sind die einzige Art, einen Verweis in einer
-Property zu führen. Auf welchen Typ der Verweis zeigt, legt die
-Property-Tabelle fest, nicht der Property-Typ — siehe §3.7.1.
-
-`hkf-link-or-url` lässt beides zu: einen Verweis in die eigene Ablage oder eine
-Adresse im Netz. Er ist für Properties gedacht, bei denen das Ziel ebenso gut
-außerhalb liegen kann — die verwandte Sache ist mal eine Notiz, mal ein
-Aufsatz irgendwo. Beide Formen sind `text`, die Property hat also eine
-eindeutige Wertform.
-
-Geprüft wird der Reihe nach: Sieht der Wert wie `[[…]]` aus, gilt §3.6, sonst
-das Muster von `hkf-url`. Erfüllt er keines von beiden, ist das ein Befund, der
-beide nennt — geraten wird nicht.
-
-**Er nimmt keinen `:`-Zusatz.** Wer einen Zieltyp fordern will und trotzdem
-eine Adresse zulassen, schreibt die Alternative aus: `hkf-link:person /
-hkf-url` (§3.7.2). Das ist dasselbe in ausführlich und sagt in der Tabelle
-deutlicher, was gemeint ist. `hkf-link-or-url` ist die Abkürzung für den
-häufigen Fall, in dem der Zieltyp gleichgültig ist.
 
 ### 3.5.2 Listenformen
 
@@ -606,7 +537,7 @@ participants:
 ## 3.7 Typdefinitionen
 
 Eine Typdefinition registriert einen Typ. Der **Dateiname ist der Typname**.
-Das folgende Beispiel ist ein gekürzter Auszug des Typs `person` aus HKF Base;
+Das folgende Beispiel ist ein gekürzter Auszug des Typs `person` aus HKF Config;
 dort steht seine verbindliche Fassung.
 
 ```markdown
@@ -635,7 +566,7 @@ Dateiname ist Nachname-Vorname in kebab-case.
 - `dir` ist der Ablageort der Instanzen als **Pfad relativ zum Basispfad**.
   Optional; Vorgabe ist der Typname mit **großem Anfangsbuchstaben** und
   angehängtem `s`: aus `person` wird `Persons`. Die Kern-Typen und das
-  Vokabular aus HKF Base kommen damit aus; nur ein Typ, der abweichend
+  Vokabular aus HKF Config kommen damit aus; nur ein Typ, der abweichend
   abgelegt werden soll, schreibt ihn.
 
   Die Regel ist mechanisch und kein Sprachgefühl: erster Buchstabe groß, Rest
@@ -724,7 +655,7 @@ fehlende Checkbox dagegen ist ohne Vorgabe schlicht unbekannt — deshalb tragen
 Und eine Vorgabe reist mit der Typdefinition, nicht mit der Wissensbasis. Sie
 darf nichts vorgeben, was von der aufnehmenden Ablage abhinge, sonst änderte
 eine Notiz beim Import ihre Bedeutung. Aus demselben Grund führt `term` in HKF
-Base seine Sprache als Pflicht und nicht als Vorgabe: Ein Bundle muss für sich
+Config seine Sprache als Pflicht und nicht als Vorgabe: Ein Bundle muss für sich
 lesbar bleiben (§4).
 
 ### 3.7.1 Die Typ-Angabe
@@ -924,12 +855,13 @@ ergibt genau die drei Pflichtverzeichnisse aus §3.2.
 | `proptype` | `Proptypes` | Schränkt eine Wertform ein. |
 | `bundle` | `Bundles` | Beschreibt eine Lieferung. |
 
-Ihre Typdefinitionen und die erlaubten Properties stehen in Anhang A, dort
-zusammen mit den Properties der Wurzeldateien und den notizübergreifenden
-Properties.
+Ihre Typdefinitionen und die erlaubten Properties stehen in
+[HKF Config §3.1 bis §3.3](HKF-Config-V1.0.md), zusammen mit allen übrigen.
+Die Properties der Wurzeldateien und die notizübergreifenden Properties stehen
+in Anhang A.
 
 Mehr definiert dieses Dokument nicht. Jede Ablage ergänzt die Typen, die sie
-braucht; ein verbreitetes Vokabular liefert **HKF Base**.
+braucht; ein verbreitetes Vokabular liefert **HKF Config**.
 
 Die drei Kern-Typen und die dreizehn Property-Typen aus §3.5.1 bilden zusammen
 die **Grundausstattung** einer HKB. Sie entsteht mit der Wissensbasis und wird
@@ -967,7 +899,7 @@ Drei Festlegungen bleiben:
 
    - die **Grundausstattung** aus §3.8, die jede HKB führt;
    - alles, was ein **vorausgesetztes Bundle** liefert (§4.1). Wer `hkf-base`
-     voraussetzt, darf die Typen aus HKF Base weglassen.
+     voraussetzt, darf die Typen aus HKF Config weglassen.
 
    Ohne eine solche Voraussetzung liefert ein Bundle auch die zugeladenen
    Typen mit, die es benutzt: Eine HKB muss sie nicht führen, ein Bundle darf
@@ -1350,14 +1282,14 @@ können, bevor er irgendetwas anderes tut. Damit ist die Wissensbasis konform,
 wenn auch leer.
 
 Alles Weitere wird zugeladen. Das nächstliegende Bundle ist `hkf-base`, das
-Vokabular aus **HKF Base**: zwölf Typdefinitionen und die beiden Property-Typen,
+Vokabular aus **HKF Config**: zwölf Typdefinitionen und die beiden Property-Typen,
 die nur mit ihnen Sinn ergeben. Notizen, Mediendateien, die Kern-Typen und die
 Property-Typen der Grundausstattung enthält es nicht — die hat die
 Wissensbasis bereits.
 
 Der Import ist **freiwillig**. Eine Wissensbasis, die keine Personen und Orte
 verwaltet, kommt ohne ihn aus und definiert stattdessen eigene Typen. Wer aber
-einen Typ dieses Namens führt, führt ihn in der Fassung aus HKF Base — nur so
+einen Typ dieses Namens führt, führt ihn in der Fassung aus HKF Config — nur so
 bleiben Bundles austauschbar.
 
 Warum die Grundausstattung nicht ebenfalls ein Bundle ist: Sie zu importieren
@@ -1832,7 +1764,7 @@ Schnittstelle. Ein Bundle stellt keine Methoden bereit.
    Ein Werkzeug weiß nicht, welche Typen ein Bundle mitbrächte, das es nicht
    hat. Der Befund nennt deshalb das fehlende Bundle, nicht die Typen, die
    von ihm zu erwarten wären — auch dann nicht, wenn es `hkf-base` ist. Core
-   kennt das Vokabular von Base nicht und nennt es nicht.
+   kennt das Vokabular nicht und nennt es nicht.
 2. **Typen abgleichen.** Bevor irgendetwas geschrieben wird, wird jeder Typ
    bestimmt, den die Lieferung verwendet: aus den mitgelieferten
    Typdefinitionen und aus dem `type` jeder Notiz. Für jeden gilt:
@@ -2302,7 +2234,7 @@ beiden Fälle vorliegt, entscheidet ein Mensch.
    aus §3.2.1 liegen,
 3. die Grundausstattung aus §3.8 vorhanden ist — die Kern-Typen `typedef`,
    `proptype` und `bundle` sowie die dreizehn Property-Typen aus §3.5.1,
-4. jeder geführte Typ aus HKF Base dessen Fassung entspricht,
+4. jeder geführte Typ aus HKF Config dessen Fassung entspricht,
 5. jede Notiz `type` trägt und im passenden Typverzeichnis liegt,
 6. alle Frontmatter-Werte den Wertformen aus §3.4 entsprechen und die
    Property-Tabellen ihrer Typen erfüllen,
@@ -2327,20 +2259,20 @@ bestehende Bundles oder HKBs ungültig zu machen. Eine Major-Version darf
 Identität, Wertformen, die Standard-Property-Typen oder die Ablagestruktur
 ändern.
 
-**Core und Base werden getrennt fortgeschrieben.** Die Property `hkf` in der
+**Core und Config werden getrennt fortgeschrieben.** Die Property `hkf` in der
 Wurzeldatei nennt die Fassung von Core und sonst nichts. Welche Fassung des
 Vokabulars eine Wissensbasis führt, steht in der `version` der zugehörigen
-Bundle-Notiz — dort, wo jede andere Lieferung auch verbucht wird. Base darf
+Bundle-Notiz — dort, wo jede andere Lieferung auch verbucht wird. Config darf
 damit Typen und Werte ergänzen, ohne dass Core eine neue Nummer bekommt; und
 Core darf sich ändern, ohne dass jede Wissensbasis ihr Vokabular neu lädt.
-Base 1.0 setzt Core 1.0 voraus.
+Config 1.0 setzt Core 1.0 voraus.
 
 Erkennt eine HKB die `hkf`-Version eines Bundles nicht, liest sie die Dateien,
 leitet aber keine Identitäten ab und importiert nicht.
 
 ---
 
-# Anhang A — Kern-Typen und allgemeine Properties
+# Anhang A — Wurzeldateien und allgemeine Properties
 
 Dieser Anhang beantwortet abschließend, welche Properties wo erlaubt sind: in
 den Wurzeldateien, in jeder Notiz unabhängig vom Typ, und in den drei
@@ -2377,11 +2309,11 @@ spec: https://example.org/hkf/1.0
 ```
 
 Die Wikilink-Form setzt voraus, dass die Wissensbasis den Typ `specification`
-führt — er kommt aus HKF Base oder wird selbst definiert. Eine Wissensbasis,
+führt — er kommt aus HKF Config oder wird selbst definiert. Eine Wissensbasis,
 die nur Core erfüllt, kennt ihn nicht und schreibt eine URL.
 
 `hbundle.md` ist zugleich die Bundle-Notiz und trägt darum zusätzlich alle
-Properties des Typs `bundle` aus A.5.
+Properties des Typs `bundle` aus HKF Config §3.3.
 
 Der Body beider Dateien enthält den Abschnitt `# Typen` (§3.1).
 
@@ -2427,7 +2359,8 @@ geführt: Fehlt eines beim Import oder beim Anlegen, wird es gesetzt (§6.1);
 `hk-lint` meldet ein fehlendes als Hinweis und `--fix` ergänzt es.
 
 Die Property-Tabelle eines Typs darf eine dieser Properties **verschärfen**,
-also als Pflicht führen — so verlangt `bundle` eine `description` (A.5). Was
+also als Pflicht führen — so verlangt `bundle` eine `description`
+(HKF Config §3.3). Was
 hier steht, ist die Vorgabe, nicht die Obergrenze.
 
 Darüber hinaus darf jede Notiz weitere flache Properties tragen; sie werden
@@ -2436,103 +2369,15 @@ sie als Hinweis auf (§6.3). Wer `status` auf feste Werte
 festlegen will, definiert dafür einen eigenen Property-Typ mit `values` — HKF
 schreibt keine vor, weil die Werte sich je Wissensbasis unterscheiden.
 
-## A.3 `typedef`
+## A.3 Die Kern-Typen
 
-```markdown
----
-type: typedef
-title: Typdefinition
-description: Registriert einen Typ und legt sein Verzeichnis fest.
----
+Die Typdefinitionen von `typedef`, `proptype` und `bundle` stehen in
+[HKF Config §3.1 bis §3.3](HKF-Config-V1.0.md) — zusammen mit allen übrigen,
+damit keine Typdefinition an zwei Orten gepflegt wird.
 
-# Properties
-
-| Property | Typ | Pflicht | Vorgabe | Beschreibung |
-|---|---|---|---|---|
-| description | text | ja | — | Einzeiliger Zweck; erscheint in der Typtabelle der Wurzeldatei |
-| dir | text | nein | — | Verzeichnis der Instanzen; Vorgabe ist der groß geschriebene Typname mit angehängtem `s` (§3.7) |
-| provisional | checkbox | nein | false | Beim Import angelegt, weil niemand den Typ definiert hat (§5.4) |
-
-# Konventionen
-
-Der Dateiname ist der Typname (§3.7). Der Body trägt die Property-Tabelle und
-die Konventionen des Typs. `dir` ist ein relativer Pfad zum Basispfad, mit
-`/` als Trennzeichen und beliebig vielen Abschnitten, ohne führenden und
-abschließenden `/` und ohne `.`- oder `..`-Abschnitte; er darf nicht unter
-`media_base` liegen.
-
-`provisional` steht nur an einer Typdefinition, nur mit dem Wert `true` und
-nur in einer HKB — ein Bundle enthält keine vorläufige Typdefinition (§7.1).
-Eine solche Notiz trägt kein `dir`, keinen Abschnitt `# Properties` und kein
-`bundles`.
-```
-
-## A.4 `proptype`
-
-```markdown
----
-type: typedef
-title: Property-Typ
-description: Schränkt eine Wertform ein.
----
-
-# Properties
-
-| Property | Typ | Pflicht | Vorgabe | Beschreibung |
-|---|---|---|---|---|
-| form | text | ja | — | Eine der sechs Wertformen aus §3.4 |
-| pattern | text | nein | — | Regulärer Ausdruck; nur bei `text` und `list`, dort je Eintrag |
-| values | list | nein | — | Erlaubte Werte; als Text geführt, auch wenn sie wie Zahlen aussehen |
-| unit | text | nein | — | Maßeinheit; beschreibend, nicht geprüft |
-| min | number | nein | — | Kleinster zulässiger Wert; nur bei `form: number` |
-| max | number | nein | — | Größter zulässiger Wert; nur bei `form: number` |
-
-# Konventionen
-
-Der Dateiname ist der Name des Property-Typs (§3.5) und endet nicht auf
-`-list`. Für eine der sechs Wertformen wird kein Property-Typ angelegt. `min`
-und `max` gibt es nur für Zahlen: Obsidian ordnet einem Property-Namen genau
-eine Wertform zu, sie könnten also nicht zugleich Datumsgrenzen sein.
-```
-
-Die Tabelle beschreibt die Properties **einer** `proptype`-Notiz. Die
-Typdefinition selbst liegt als `Typedefs/proptype.md` und trägt wie jede
-Typdefinition `type: typedef`.
-
-## A.5 `bundle`
-
-```markdown
----
-type: typedef
-title: Bundle
-description: Beschreibt eine Lieferung.
----
-
-# Properties
-
-| Property | Typ | Pflicht | Vorgabe | Beschreibung |
-|---|---|---|---|---|
-| id | text | ja | — | Kennung der Lieferreihe in `kebab-case` (§4.1); in der HKB gleich dem Dateinamen |
-| version | text | nein | — | Unveränderliche Kennung der gelieferten Fassung; ohne sie hat die Lieferung keine Geschichte, nur einen letzten Stand (§4.1) |
-| description | text | ja | — | Ein Satz darüber, was die Lieferung enthält |
-| required_bundles | list | nein | — | Bundles, die vorher importiert sein sollen (§4.1) |
-| source | text | nein | — | Herkunft, etwa eine URL oder ein Repository |
-| imported | datetime | nein | — | Zeitpunkt der Übernahme, in **UTC** (§3.4); nur in der HKB (§5.1). Fehlt es an einer Bundle-Notiz der HKB, wurde die Lieferung geprüft und nicht übernommen (§5.7) |
-
-# Konventionen
-
-Als `hbundle.md` in der Wurzel eines Bundles trägt die Notiz zusätzlich die
-Wurzeldatei-Properties aus A.1 und die Typtabelle im Body; `imported` entfällt
-dort. In der HKB liegt sie als `Bundles/<id>.md` ohne diese Zusätze.
-
-`source` ist `text` und nicht `hkf-url`, weil auch ein Repository-Verweis oder
-ein Datenträger als Herkunft in Frage kommt.
-
-`description` ist bei einer Bundle-Notiz **Pflicht**, obwohl sie nach A.2 sonst
-freigestellt ist: Wer eine Lieferung vor sich hat, muss ohne sie den Body lesen
-oder die Dateien zählen, um zu erfahren, worum es geht. Sie ist zudem die
-einzige Angabe, die in der Bundle-Liste einer Wissensbasis abfragbar ist.
-```
+Sie gehören zur Grundausstattung: angelegt, nicht geliefert (§5.3), und von
+einem Bundle nicht mitzubringen (§7.1). Welches Verzeichnis sie beanspruchen,
+sagt §3.8.
 
 ---
 
