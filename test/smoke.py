@@ -148,7 +148,7 @@ def main():
         print("hk-init")
         r = lauf(os.path.join(BIN, "hk-init"), ziel, "--name", "Probe")
         probe("legt an", r.returncode == 0, r.stderr.strip())
-        probe("16 Notizen", "16 Notizen" in r.stdout, r.stdout.strip())
+        probe("32 Notizen", "32 Notizen" in r.stdout, r.stdout.strip())
         probe("Wurzeldatei traegt den Namen",
               "name: Probe" in io.open(os.path.join(ziel, "hkb.md"), encoding="utf-8").read())
         probe("Git-Repository mit einem Commit",

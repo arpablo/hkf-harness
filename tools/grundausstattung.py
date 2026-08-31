@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Prueft, dass die Grundausstattung und HKF Core dasselbe sagen.
+"""Prueft, dass die Grundausstattung und HKF Config dasselbe sagen.
 
-Die Kern-Typen stehen zweimal: als eingebetteter Markdown-Block in HKF Config
-der Spezifikation und als ausgelieferte Datei unter templates/hkb/. Die
-dreizehn Standard-Property-Typen ebenso — dort als Tabelle in §2.1. Die
-Spezifikation ist die normative Fassung.
+Das ganze Inventar steht zweimal: als eingebetteter Markdown-Block in HKF
+Config §3 und als ausgelieferte Datei unter templates/hkb/. Die Property-Typen
+ebenso — als Tabellen in §2. Die Spezifikation ist die normative Fassung.
 
-Das Gegenstueck fuer das Vokabular ist `tools/check-config.py` im
-Spec-Repository.
-Fuer Core fehlte es, und genau deshalb konnte `bundle` monatelang `version`
-als Pflicht fuehren, obwohl A.5 sie freistellt.
+Seit das Vokabular zur Grundausstattung gehoert, ist dies die einzige
+Gegenprobe; `check-config.py` im Spec-Repository ist entfallen. Fuer die
+Kern-Typen fehlte sie lange, und genau deshalb konnte `bundle` monatelang
+`version` als Pflicht fuehren, obwohl die Spezifikation sie freistellt.
 
     python3 tools/grundausstattung.py [vorlagenverzeichnis]
 """
@@ -22,7 +21,8 @@ import hkf                                                    # noqa: E402,F401
 import yaml                                                   # noqa: E402
 from hkf import CONFIG, frontmatter                           # noqa: E402
 
-BLOCK = re.compile(r"^## 3\.[123] `(\w+)`\n\n```markdown\n(.*?)\n```", re.S | re.M)
+BLOCK = re.compile(r"^## 3\.\d+ `(\w+)`\n\n```markdown\n(.*?)\n```", re.S | re.M)
+TYPEN, PROPTYPES = 17, 15
 ZEITEN = re.compile(r"^(created|modified|modified_by):.*\n", re.M)
 EINSCHRAENKUNG = re.compile(r"`([a-z]+): ([^`]+)`")
 
@@ -34,8 +34,8 @@ def spec_text():
 
 def kern_typen(spec, vorlage, melde):
     bloecke = BLOCK.findall(spec)
-    if len(bloecke) != 3:
-        melde("§3.1 bis §3.3 enthalten %d Kern-Typen, erwartet 3" % len(bloecke), True)
+    if len(bloecke) != TYPEN:
+        melde("§3 enthält %d Typdefinitionen, erwartet %d" % (len(bloecke), TYPEN), True)
         return
     for typ, block in bloecke:
         p = os.path.join(vorlage, "Typedefs", typ + ".md")
@@ -55,8 +55,7 @@ def kern_typen(spec, vorlage, melde):
 
 def standard_proptypes(spec, vorlage, melde):
     teil = spec.split("## 2.1 Die dreizehn Standard-Property-Typen", 1)[-1]
-    teil = teil.split("## 2.2", 1)[0]      # die beiden Aufzaehlungen nicht
-    teil = teil.split("### 3.5.2", 1)[0]
+    teil = teil.split("\n# 3.", 1)[0]
     erwartet = {}
     for zeile in teil.splitlines():
         m = re.match(r"^\| `(hkf-[a-z-]+)` \| `(\w+)` \| (.*?) \|$", zeile)
@@ -70,8 +69,8 @@ def standard_proptypes(spec, vorlage, melde):
             except yaml.YAMLError:
                 soll[schluessel] = wert
         erwartet[name] = soll
-    if len(erwartet) != 13:
-        melde("§2.1 nennt %d Property-Typen, erwartet 13" % len(erwartet), True)
+    if len(erwartet) != PROPTYPES:
+        melde("§2 nennt %d Property-Typen, erwartet %d" % (len(erwartet), PROPTYPES), True)
 
     verz = os.path.join(vorlage, "Proptypes")
     vorhanden = set(f[:-3] for f in os.listdir(verz) if f.endswith(".md"))
@@ -120,10 +119,10 @@ def main(argv):
     print("Vorlage: %s" % vorlage)
     print("Spezifikation: HKF Config %s" % CONFIG)
     print()
-    print("Kern-Typen (§3.1 bis §3.3)")
+    print("Typdefinitionen (§3)")
     kern_typen(spec, vorlage, melde)
     print()
-    print("Standard-Property-Typen (§2.1)")
+    print("Property-Typen (§2)")
     standard_proptypes(spec, vorlage, melde)
     print()
     if schlecht[0]:

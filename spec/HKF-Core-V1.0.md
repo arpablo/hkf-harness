@@ -29,16 +29,14 @@ Das Format ist auf zwei Dokumente verteilt, weil es zwei Fragen beantwortet:
   Wertformen, Verweise, Typdefinitionen als Bauform, das Bundle-Format und die
   drei Methoden. Es nennt **keine einzige konkrete Definition**.
 - **[HKF Config](HKF-Config-V1.0.md)** — das Inventar: siebzehn
-  Typdefinitionen und fünfzehn Property-Typen. Drei Typen und dreizehn
-  Property-Typen davon bilden die Grundausstattung jeder Ablage; die übrigen
-  vierzehn Typen und zwei Property-Typen kommen als Bundle `hkf-base` und sind
-  freiwillig.
+  Typdefinitionen und fünfzehn Property-Typen. Sie bilden zusammen die
+  **Grundausstattung** jeder Ablage und entstehen mit ihr; geliefert wird
+  keine davon.
 
 Konform ist eine Wissensbasis nach **Core** samt der Grundausstattung aus
-Config. Wer nur das erfüllt, hat eine leere, aber vollständige Ablage und
-definiert seine Typen selbst. Wer das Vokabular lädt, verpflichtet sich
-zusätzlich auf die dort festgelegte Bedeutung jener vierzehn Typen — der Preis
-dafür, dass Bundles zwischen fremden Wissensbasen austauschbar sind.
+Config. Damit ist sie leer, aber vollständig: Jeder Typ steht bereit, und wer
+mehr braucht, legt einen eigenen daneben. Ein Bundle liefert Inhalte, nie das
+Inventar.
 
 Der Schnitt liegt zwischen **Mechanik und Inventar**. Dass eine Notiz in dem
 Verzeichnis ihres Typs liegt, sagt Core. Welche Typen es gibt und dass eine
@@ -860,14 +858,16 @@ Ihre Typdefinitionen und die erlaubten Properties stehen in
 Die Properties der Wurzeldateien und die notizübergreifenden Properties stehen
 in Anhang A.
 
-Mehr definiert dieses Dokument nicht. Jede Ablage ergänzt die Typen, die sie
-braucht; ein verbreitetes Vokabular liefert **HKF Config**.
+Mehr definiert dieses Dokument nicht. Welche Typen es sonst noch gibt, sagt
+**HKF Config**; jede Ablage ergänzt darüber hinaus, was sie braucht.
 
-Die drei Kern-Typen und die dreizehn Property-Typen aus §3.5.1 bilden zusammen
-die **Grundausstattung** einer HKB. Sie entsteht mit der Wissensbasis und wird
-nicht geliefert: Ohne den Typ `typedef` ließe sich keine Typdefinition
-ablegen, ohne `bundle` keine Lieferung verbuchen, ohne `proptype` kein
-Property-Typ einordnen. Ein Import setzt sie voraus.
+Alles, was in HKF Config steht — siebzehn Typdefinitionen und fünfzehn
+Property-Typen —, bildet die **Grundausstattung** einer HKB. Sie entsteht mit
+der Wissensbasis und wird nicht geliefert. Für die drei Kern-Typen ist das
+zwingend: Ohne den Typ `typedef` ließe sich keine Typdefinition ablegen, ohne
+`bundle` keine Lieferung verbuchen, ohne `proptype` kein Property-Typ
+einordnen. Ein Import setzt sie voraus. Die übrigen liegen aus demselben Grund
+daneben — was jede Wissensbasis ohnehin bekommt, muss niemand ausliefern.
 
 ---
 
@@ -1274,23 +1274,22 @@ gepflegt oder geparst werden muss.
 
 ## 5.3 Grundausstattung und Zuladung
 
-Eine HKB entsteht mit ihrer **Grundausstattung**: den dreizehn Property-Typen aus
-§3.5.1 und den drei Kern-Typen `typedef`, `proptype` und `bundle`. Sie wird
-nicht geliefert, sondern angelegt, denn ein Import setzt sie voraus — er muss
+Eine HKB entsteht mit ihrer **Grundausstattung**: allem, was in **HKF Config**
+steht — siebzehn Typdefinitionen und fünfzehn Property-Typen. Sie wird nicht
+geliefert, sondern angelegt, denn ein Import setzt sie voraus: Er muss
 Typdefinitionen ablegen, Property-Typen einordnen und die Lieferung verbuchen
 können, bevor er irgendetwas anderes tut. Damit ist die Wissensbasis konform,
 wenn auch leer.
 
-Alles Weitere wird zugeladen. Das nächstliegende Bundle ist `hkf-base`, das
-Vokabular aus **HKF Config**: vierzehn Typdefinitionen und die beiden Property-Typen,
-die nur mit ihnen Sinn ergeben. Notizen, Mediendateien, die Kern-Typen und die
-Property-Typen der Grundausstattung enthält es nicht — die hat die
+Alles Weitere sind **Inhalte**. Ein Bundle liefert Notizen und Mediendateien
+und, wenn es einen Typ braucht, den Config nicht kennt, dessen Typdefinition
+dazu (§7.1). Einen Typ aus Config liefert es nie — den hat die aufnehmende
 Wissensbasis bereits.
 
-Der Import ist **freiwillig**. Eine Wissensbasis, die keine Personen und Orte
-verwaltet, kommt ohne ihn aus und definiert stattdessen eigene Typen. Wer aber
-einen Typ dieses Namens führt, führt ihn in der Fassung aus HKF Config — nur so
-bleiben Bundles austauschbar.
+Eine Wissensbasis, die keine Personen und Orte verwaltet, lässt die Typen
+ungenutzt; ein Typverzeichnis, das leer bliebe, darf entfallen (§3.2). Sie
+wandelt aber keinen ab: Wer einen Typ dieses Namens führt, führt ihn in der
+Fassung aus HKF Config — nur so bleiben Bundles austauschbar.
 
 Warum die Grundausstattung nicht ebenfalls ein Bundle ist: Sie zu importieren
 setzte voraus, dass sie schon da ist. Der Typ `typedef` müsste sich selbst
@@ -2232,9 +2231,9 @@ beiden Fälle vorliegt, entscheidet ein Mensch.
 2. `Typedefs`, `Proptypes` und `Bundles` im Basispfad existieren, soweit sie
    nicht leer wären, und unter `media_base` nur die vier Medienverzeichnisse
    aus §3.2.1 liegen,
-3. die Grundausstattung aus §3.8 vorhanden ist — die Kern-Typen `typedef`,
-   `proptype` und `bundle` sowie die dreizehn Property-Typen aus §3.5.1,
-4. jeder geführte Typ aus HKF Config dessen Fassung entspricht,
+3. die Grundausstattung aus §3.8 vorhanden ist — jede Typdefinition und jeder
+   Property-Typ aus HKF Config,
+4. jeder davon der dortigen Fassung entspricht,
 5. jede Notiz `type` trägt und im passenden Typverzeichnis liegt,
 6. alle Frontmatter-Werte den Wertformen aus §3.4 entsprechen und die
    Property-Tabellen ihrer Typen erfüllen,

@@ -30,7 +30,7 @@ nebenan; was hier liegt, ist eine Art, es zu tun.
 |---|---|
 | [`hkf-spec`](https://github.com/arpablo/hkf-spec) | Die Spezifikation: HKF Core 1.0 und HKF Config 1.0 |
 | [`hkf-kb-template`](https://github.com/arpablo/hkf-kb-template) | Vorlage für eine neue Wissensbasis; `hk-init` schöpft aus derselben Grundausstattung |
-| [`hkf-base`](https://github.com/arpablo/hkf-base) | Das Bundle mit dem Standardvokabular |
+| [`hkf-base`](https://github.com/arpablo/hkf-base) | Stillgelegt — das Vokabular gehört seit Config 1.0 zur Grundausstattung |
 | [`hkf-harness`](https://github.com/arpablo/hkf-harness) | Dieses Repository |
 
 ## Die Ablage wird nicht geraten
@@ -162,7 +162,7 @@ hervorgehen und nicht aus dem Zustand eines fremden Repositorys. Die Nummer
 steht in `lib/hkf/__init__.py` und nirgends sonst.
 
 Die Spezifikation selbst wird in [`hkf-spec`](https://github.com/arpablo/hkf-spec)
-fortgeschrieben, das Vokabular als Bundle in [`hkf-base`](https://github.com/arpablo/hkf-base).
+fortgeschrieben, das Inventar daneben in `HKF-Config-V1.0.md`.
 
 ## Kein Werkzeug legt eine Anleitung daneben
 
@@ -267,7 +267,7 @@ Standard-Property-Typen ebenso — dort als Tabelle in §3.5.1.
 python3 tools/grundausstattung.py
 ```
 
-Das Gegenstück für das Vokabular ist `tools/check-config.py` im Spec-Repository. Für
+Seit das Vokabular zur Grundausstattung gehört, ist dies die einzige Gegenprobe. Für
 Core fehlte es, und genau deshalb konnte `bundle` die Property `version` als
 Pflicht führen, obwohl §4.1 eine Lieferung ohne Fassung ausdrücklich zulässt.
 Gefunden hat das erst die Prüfung der Property-Tabellen gegen die Werte — an

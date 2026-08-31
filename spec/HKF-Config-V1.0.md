@@ -22,39 +22,28 @@ Verweise der Form „Core §3.6" zeigen in jenes Dokument.
 
 ---
 
-# 1. Zwei Gruppen, zwei Wege
+# 1. Wie das hier in eine Ablage kommt
 
-Was hier steht, kommt auf zwei verschiedene Weisen in eine Ablage. Der
-Unterschied ist keiner des Rangs, sondern der Reihenfolge.
+Alles in diesem Dokument gehört zur **Grundausstattung** einer Wissensbasis:
+Es wird angelegt, wenn die Ablage entsteht, und niemals geliefert.
 
-| | Grundausstattung | Vokabular |
-|---|---|---|
-| Was | 3 Typdefinitionen (§3.1–3.3), 13 Property-Typen (§2.1) | 14 Typdefinitionen (§3.4–3.17), 2 Property-Typen (§2.2) |
-| Wie | wird **angelegt**, wenn die Ablage entsteht | wird **importiert**, als Bundle |
-| Pflicht | ja — ohne sie ist keine Ablage lesbar | nein, freiwillig |
-
-**Die Grundausstattung wird nie geliefert.** Ein Import muss Typdefinitionen
+Für die drei Kern-Typen ist das zwingend. Ein Import muss Typdefinitionen
 ablegen, Property-Typen einordnen und die Lieferung verbuchen können, bevor er
 irgendetwas anderes tut; er setzt `typedef`, `proptype` und `bundle` also
 voraus. Ein Bundle, das sie mitbrächte, müsste sich selbst schon kennen. Core
-§5.3 führt das aus, und Core §7.1 verbietet einem Bundle darum, sie zu
-enthalten. Dass sie hier stehen, ändert daran nichts: **Dieses Dokument sagt,
-was gilt, nicht, wie es ankommt.**
+§5.3 führt das aus.
 
-**Das Vokabular kommt als Bundle mit der Kennung `hkf-base`.** Sie bleibt so,
-obwohl das Dokument jetzt HKF Config heißt: Eine `id` benennt nach Core §4.1
-die Lieferreihe und ist unveränderlich. Sie umzubenennen begänne eine neue
-Reihe, und jede Wissensbasis, die schon importiert hat, sähe eine fremde
-Lieferung.
+Für die übrigen gilt dieselbe Antwort aus einem einfacheren Grund: **Was jede
+Wissensbasis ohnehin bekommt, muss niemand ausliefern.** Ein Bundle bringt
+Inhalte mit und, wenn es einen Typ braucht, den dieses Dokument nicht kennt,
+dessen Typdefinition dazu. Einen Typ von hier liefert es nie (Core §7.1).
 
-Eine Wissensbasis **muss** das Vokabular nicht führen. Führt sie aber einen
-Typ dieses Namens, MUSS er die hier festgelegte Bedeutung und das hier
-festgelegte Verzeichnis haben. Nur so bleiben Bundles zwischen verschiedenen
-Wissensbasen austauschbar.
-
-Weil das Vokabular freiwillig ist, darf sich ein Inhalts-Bundle nicht darauf
-verlassen: Es liefert die Typen mit, die es benutzt, oder nennt `hkf-base` in
-`required_bundles` (Core §4.1).
+Eine Wissensbasis darf einzelne Typen ungenutzt lassen — ein Typverzeichnis,
+das leer bliebe, darf entfallen (Core §3.2). Sie darf keinen abwandeln: Wer
+einen Typ dieses Namens führt, führt ihn in der hier festgelegten Bedeutung
+und unter dem hier festgelegten Verzeichnis. Nur so bleiben Bundles zwischen
+verschiedenen Wissensbasen austauschbar. Wer mehr braucht, legt einen eigenen
+Typ daneben (Core §3.7).
 
 ---
 
@@ -151,14 +140,14 @@ häufigen Fall, in dem der Zieltyp gleichgültig ist.
 
 ## 2.2 Die beiden Aufzählungen
 
-Zwei Property-Typen gehören zu diesem Vokabular. Sie sind nicht Teil der
-Grundausstattung, weil sie ohne die Typen `person` und `organisation` nichts
-zu tun hätten.
+Zwei Property-Typen zählen Werte auf, statt eine Form einzuschränken. Sie
+stehen für sich, weil sie ohne die Typen `person` und `organisation` nichts zu
+tun hätten.
 
-| Property-Typ | Wertform | Werte |
+| Property-Typ | Wertform | Einschränkung |
 |---|---|---|
-| `hkf-person-category` | `text` | `artist`, `athlete`, `author`, `cleric`, `engineer`, `entrepreneur`, `jurist`, `musician`, `physician`, `politician`, `ruler`, `scholar`, `scientist`, `soldier` |
-| `hkf-organisation-category` | `text` | `association`, `authority`, `company`, `foundation`, `institute`, `ngo`, `party`, `religious`, `school`, `union`, `university` |
+| `hkf-person-category` | `text` | `values: [artist, athlete, author, cleric, engineer, entrepreneur, jurist, musician, physician, politician, ruler, scholar, scientist, soldier]` |
+| `hkf-organisation-category` | `text` | `values: [association, authority, company, foundation, institute, ngo, party, religious, school, union, university]` |
 
 Beide werden als **Listenform** verwendet (Core §3.5.2), also als
 `hkf-person-category-list` und `hkf-organisation-category-list`. Eine Person
@@ -782,19 +771,16 @@ Körperschaft und bekommt eine eigene Notiz.
 Eine Wissensbasis führt HKF Config konform, wenn
 
 1. sie HKF Core 1.0 erfüllt,
-2. die drei Kern-Typen aus §3.1 bis §3.3 und die dreizehn Property-Typen aus
-   §2.1 vorhanden sind und der dortigen Fassung entsprechen,
-3. jeder geführte Typ aus §3.4 bis §3.17 der dortigen Fassung entspricht —
-   Verzeichnis, Property-Namen und deren Typangaben,
-4. kein Typ dieses Dokuments ein `dir` trägt,
-5. die beiden Property-Typen aus §2.2 vorhanden sind, sofern ein geführter Typ
-   sie verwendet, und ihre `values` nicht gekürzt wurden, und
-6. die Bundle-Notiz die Fassung nennt, in der das Vokabular übernommen wurde.
+2. jede Typdefinition aus §3 und jeder Property-Typ aus §2 vorhanden ist und
+   der dortigen Fassung entspricht — Verzeichnis, Property-Namen und deren
+   Typangaben,
+3. kein Typ dieses Dokuments ein `dir` trägt, und
+4. die `values` der beiden Aufzählungen aus §2.2 nicht gekürzt wurden.
 
-Die Punkte 1 und 2 gelten für jede Ablage. Die übrigen betreffen nur, was
-zugeladen wurde: Eine Wissensbasis darf einzelne Typen aus §3.4 bis §3.17
-führen und andere weglassen. Sie darf keinen davon abwandeln; wer mehr
-braucht, legt einen eigenen Typ daneben (Core §3.7).
+Vorhanden heißt: als Notiz in `Typedefs/` beziehungsweise `Proptypes/`. Ob
+darunter Instanzen liegen, ist gleichgültig — eine Wissensbasis über
+Werkstoffe führt `person` und benutzt es nie. Abwandeln darf sie keinen; wer
+mehr braucht, legt einen eigenen Typ daneben (Core §3.7).
 
 ---
 
@@ -803,16 +789,15 @@ braucht, legt einen eigenen Typ daneben (Core §3.7).
 Diese Fassung ist **HKF Config 1.0** und setzt HKF Core 1.0 voraus.
 
 Config wird getrennt von Core fortgeschrieben. Eine Minor-Version darf Typen
-ergänzen, Properties ergänzen und die `values` der Property-Typen aus §2.2
+ergänzen, Properties ergänzen und die `values` der Aufzählungen aus §2.2
 erweitern. Sie darf keine Property und keinen Wert entfernen und keine
 Bedeutung ändern, weil das vorhandene Notizen ungültig machte.
 
-Für die Grundausstattung gilt dieselbe Schranke, und sie wiegt schwerer: Eine
-geänderte Kern-Typdefinition erreicht bestehende Wissensbasen durch keinen
-Import, weil die Grundausstattung nicht geliefert wird (§1). Was hier steht,
-muss beim Anlegen stimmen.
+Die Schranke wiegt hier schwerer als bei einer Lieferung: **Eine neue Fassung
+erreicht bestehende Wissensbasen durch keinen Import**, weil nichts von hier
+geliefert wird (§1). Wer fortschreibt, ergänzt in einer bestehenden Ablage von
+Hand oder legt sie neu an. Was hier steht, muss beim Anlegen stimmen.
 
-Fortschreibung des Vokabulars in einer Wissensbasis ist ein erneuter Import:
-Der Vergleich aus Core §6.1 übernimmt geänderte Notizen und überspringt
-unveränderte. Welche Fassung geführt wird, sagt die `version` der
-Bundle-Notiz.
+Welche Fassung eine Wissensbasis führt, sagt darum nicht sie selbst, sondern
+`spec` in ihrer Wurzeldatei (Core A.1) — der Verweis auf das Dokument, dem sie
+folgt.
