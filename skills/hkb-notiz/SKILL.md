@@ -52,6 +52,11 @@ modified_by: claude-opus-5
   erlaubt, wird aber von niemandem geprüft und taucht in `hk-lint --strict`
   als undeklariert auf. Wenn du eine brauchst, die es nicht gibt: sag es,
   statt sie stillschweigend zu setzen.
+- **Lies die Spalte `Vorgabe`.** Steht dort ein Wert, heißt die Abwesenheit
+  der Property genau diesen Wert — `cancelled` ohne Eintrag heißt „nicht
+  abgesagt", nicht „unbekannt". Dann schreibst du ihn **nicht** hin; er gilt
+  ohnehin (§3.7). Steht dort `—`, heißt Abwesenheit „weiß ich nicht", und du
+  darfst sie offen lassen, statt etwas zu erfinden.
 - **Flach bleiben** (§3.4): Text, Liste, Zahl, Checkbox, Datum, Datum mit
   Uhrzeit. Keine verschachtelten Abbildungen, keine leeren Werte — eine leere
   Property wird weggelassen, nicht leer geschrieben.

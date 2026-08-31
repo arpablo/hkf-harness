@@ -91,11 +91,17 @@ Kein Typ dieses Vokabulars trägt ein `dir`. Ihre Verzeichnisse ergeben sich
 ausnahmslos aus der Vorgabe „Typname mit angehängtem `s`" (Core §3.7). Ein
 Werkzeug kennt den Ablageort damit, ohne die Typdefinition zu lesen.
 
-Bis auf zwei sind alle aufgeführten Properties optional: `version` in
-`specification` und `compares` in `comparison`. Beide tragen den Gegenstand
-ihrer Notiz — eine Spezifikation ohne Fassung und ein Vergleich ohne
-Verglichene sagen nichts. Sonst fordert keiner dieser Typen etwas über `type`
-hinaus; er sichert nur zu, was die genannten Properties bedeuten.
+Drei Properties sind Pflicht, alle übrigen optional: `version` in
+`specification`, `compares` in `comparison` und `lang` in `term`. Jede trägt
+den Gegenstand ihrer Notiz — eine Spezifikation ohne Fassung, ein Vergleich
+ohne Verglichene und ein Begriff ohne Sprache sagen nichts. Sonst fordert
+keiner dieser Typen etwas über `type` hinaus; er sichert nur zu, was die
+genannten Properties bedeuten.
+
+Eine **Vorgabe** (Core §3.7) trägt in diesem Vokabular allein `cancelled` in
+`event`: Eine Veranstaltung, an der niemand etwas vermerkt hat, ist nicht
+abgesagt. Überall sonst heißt eine fehlende Angabe „unbekannt", und das ist
+eine andere Aussage als jeder konkrete Wert.
 
 ## 3.1 `person`
 
@@ -108,22 +114,22 @@ description: Ein Mensch.
 
 # Properties
 
-| Property | Typ | Pflicht | Beschreibung |
-|---|---|---|---|
-| full_name | text | nein | Vollständiger Name, wenn er vom Titel abweicht |
-| born | date | nein | Geburtsdatum |
-| born_year | hkf-year | nein | Geburtsjahr, wenn kein vollständiges Datum bekannt ist |
-| died | date | nein | Sterbedatum |
-| died_year | hkf-year | nein | Sterbejahr, wenn kein vollständiges Datum bekannt ist |
-| birthplace | hkf-link:place | nein | Geburtsort |
-| p_categories | hkf-person-category-list | nein | Rollen der Person |
-| affiliations | hkf-link-list:organisation | nein | Zugehörigkeiten |
-| homepage | hkf-url | nein | Persönliche Webseite |
-| email | hkf-email | nein | Kontaktadresse |
-| phone | hkf-phone | nein | Telefonnummer |
-| portrait | hkf-file:image / hkf-url | nein | Bild der Person, als Datei in der Ablage oder als Adresse im Netz |
-| wikidata_id | hkf-wikidata | nein | Kennung des Gegenstands in Wikidata |
-| related | hkf-link-or-url-list | nein | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| Property | Typ | Pflicht | Vorgabe | Beschreibung |
+|---|---|---|---|---|
+| full_name | text | nein | — | Vollständiger Name, wenn er vom Titel abweicht |
+| born | date | nein | — | Geburtsdatum |
+| born_year | hkf-year | nein | — | Geburtsjahr, wenn kein vollständiges Datum bekannt ist |
+| died | date | nein | — | Sterbedatum |
+| died_year | hkf-year | nein | — | Sterbejahr, wenn kein vollständiges Datum bekannt ist |
+| birthplace | hkf-link:place | nein | — | Geburtsort |
+| p_categories | hkf-person-category-list | nein | — | Rollen der Person |
+| affiliations | hkf-link-list:organisation | nein | — | Zugehörigkeiten |
+| homepage | hkf-url | nein | — | Persönliche Webseite |
+| email | hkf-email | nein | — | Kontaktadresse |
+| phone | hkf-phone | nein | — | Telefonnummer |
+| portrait | hkf-file:image / hkf-url | nein | — | Bild der Person, als Datei in der Ablage oder als Adresse im Netz |
+| wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
 
 # Konventionen
 
@@ -142,21 +148,21 @@ description: 'Eine Körperschaft: Unternehmen, Institut, Verein, Behörde.'
 
 # Properties
 
-| Property | Typ | Pflicht | Beschreibung |
-|---|---|---|---|
-| founded | date | nein | Gründungsdatum |
-| founded_year | hkf-year | nein | Gründungsjahr, wenn kein Datum bekannt ist |
-| dissolved | date | nein | Auflösungsdatum |
-| dissolved_year | hkf-year | nein | Auflösungsjahr, wenn kein Datum bekannt ist |
-| o_categories | hkf-organisation-category-list | nein | Art der Körperschaft |
-| seat | hkf-link:place | nein | Sitz |
-| parent | hkf-link:organisation | nein | Übergeordnete Körperschaft |
-| homepage | hkf-url | nein | Webseite |
-| email | hkf-email | nein | Kontaktadresse |
-| phone | hkf-phone | nein | Telefonnummer |
-| logo | hkf-file:image / hkf-url | nein | Bildmarke, als Datei in der Ablage oder als Adresse im Netz |
-| wikidata_id | hkf-wikidata | nein | Kennung des Gegenstands in Wikidata |
-| related | hkf-link-or-url-list | nein | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| Property | Typ | Pflicht | Vorgabe | Beschreibung |
+|---|---|---|---|---|
+| founded | date | nein | — | Gründungsdatum |
+| founded_year | hkf-year | nein | — | Gründungsjahr, wenn kein Datum bekannt ist |
+| dissolved | date | nein | — | Auflösungsdatum |
+| dissolved_year | hkf-year | nein | — | Auflösungsjahr, wenn kein Datum bekannt ist |
+| o_categories | hkf-organisation-category-list | nein | — | Art der Körperschaft |
+| seat | hkf-link:place | nein | — | Sitz |
+| parent | hkf-link:organisation | nein | — | Übergeordnete Körperschaft |
+| homepage | hkf-url | nein | — | Webseite |
+| email | hkf-email | nein | — | Kontaktadresse |
+| phone | hkf-phone | nein | — | Telefonnummer |
+| logo | hkf-file:image / hkf-url | nein | — | Bildmarke, als Datei in der Ablage oder als Adresse im Netz |
+| wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
 
 # Konventionen
 
@@ -174,16 +180,16 @@ description: Ein geographischer Ort.
 
 # Properties
 
-| Property | Typ | Pflicht | Beschreibung |
-|---|---|---|---|
-| latitude | hkf-latitude | nein | Geographische Breite |
-| longitude | hkf-longitude | nein | Geographische Länge |
-| country | hkf-country | nein | Staat |
-| address | text | nein | Anschrift in einer Zeile |
-| part_of | hkf-link:place | nein | Übergeordneter Ort |
-| image | hkf-file:image / hkf-url | nein | Ansicht, als Datei in der Ablage oder als Adresse im Netz |
-| wikidata_id | hkf-wikidata | nein | Kennung des Gegenstands in Wikidata |
-| related | hkf-link-or-url-list | nein | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| Property | Typ | Pflicht | Vorgabe | Beschreibung |
+|---|---|---|---|---|
+| latitude | hkf-latitude | nein | — | Geographische Breite |
+| longitude | hkf-longitude | nein | — | Geographische Länge |
+| country | hkf-country | nein | — | Staat |
+| address | text | nein | — | Anschrift in einer Zeile |
+| part_of | hkf-link:place | nein | — | Übergeordneter Ort |
+| image | hkf-file:image / hkf-url | nein | — | Ansicht, als Datei in der Ablage oder als Adresse im Netz |
+| wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
 
 # Konventionen
 
@@ -202,17 +208,17 @@ description: Ein Geschehen zu einer bestimmten Zeit.
 
 # Properties
 
-| Property | Typ | Pflicht | Beschreibung |
-|---|---|---|---|
-| date | date | nein | Tag, wenn keine Uhrzeit bekannt ist |
-| starts_at | datetime | nein | Beginn |
-| ends_at | datetime | nein | Ende |
-| location | hkf-link:place | nein | Veranstaltungsort |
-| organizer | hkf-link:person,organisation | nein | Ausrichter |
-| participants | hkf-link-list:person,organisation | nein | Beteiligte |
-| cancelled | checkbox | nein | Abgesagt |
-| homepage | hkf-url | nein | Ankündigung |
-| related | hkf-link-or-url-list | nein | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| Property | Typ | Pflicht | Vorgabe | Beschreibung |
+|---|---|---|---|---|
+| date | date | nein | — | Tag, wenn keine Uhrzeit bekannt ist |
+| starts_at | datetime | nein | — | Beginn |
+| ends_at | datetime | nein | — | Ende |
+| location | hkf-link:place | nein | — | Veranstaltungsort |
+| organizer | hkf-link:person,organisation | nein | — | Ausrichter |
+| participants | hkf-link-list:person,organisation | nein | — | Beteiligte |
+| cancelled | checkbox | nein | false | Abgesagt |
+| homepage | hkf-url | nein | — | Ankündigung |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
 
 # Konventionen
 
@@ -231,19 +237,19 @@ description: 'Eine zitierbare Quelle: Buch, Aufsatz, Webseite, Vortrag.'
 
 # Properties
 
-| Property | Typ | Pflicht | Beschreibung |
-|---|---|---|---|
-| authors | hkf-link-list:person | nein | Urheber |
-| year | hkf-year | nein | Erscheinungsjahr |
-| publisher | hkf-link:organisation | nein | Verlag oder Herausgeber |
-| url | hkf-url | nein | Fundstelle im Netz |
-| doi | hkf-url | nein | DOI, vollständig als `https://doi.org/…` |
-| isbn | text | nein | ISBN |
-| lang | hkf-lang | nein | Sprache der Quelle |
-| accessed | date | nein | Datum des Abrufs |
-| file | hkf-file:document | nein | Beigelegtes Dokument |
-| wikidata_id | hkf-wikidata | nein | Kennung des Gegenstands in Wikidata |
-| related | hkf-link-or-url-list | nein | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| Property | Typ | Pflicht | Vorgabe | Beschreibung |
+|---|---|---|---|---|
+| authors | hkf-link-list:person | nein | — | Urheber |
+| year | hkf-year | nein | — | Erscheinungsjahr |
+| publisher | hkf-link:organisation | nein | — | Verlag oder Herausgeber |
+| url | hkf-url | nein | — | Fundstelle im Netz |
+| doi | hkf-url | nein | — | DOI, vollständig als `https://doi.org/…` |
+| isbn | text | nein | — | ISBN |
+| lang | hkf-lang | nein | — | Sprache der Quelle |
+| accessed | date | nein | — | Datum des Abrufs |
+| file | hkf-file:document | nein | — | Beigelegtes Dokument |
+| wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
 
 # Konventionen
 
@@ -267,18 +273,26 @@ description: Ein definierter Begriff.
 
 # Properties
 
-| Property | Typ | Pflicht | Beschreibung |
-|---|---|---|---|
-| lang | hkf-lang | nein | Sprache des Begriffs |
-| broader | hkf-link:term | nein | Übergeordneter Begriff |
-| sources | hkf-link-list:source | nein | Belege der Definition |
-| wikidata_id | hkf-wikidata | nein | Kennung des Gegenstands in Wikidata |
-| related | hkf-link-or-url-list | nein | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| Property | Typ | Pflicht | Vorgabe | Beschreibung |
+|---|---|---|---|---|
+| lang | hkf-lang | ja | — | Sprache des Begriffs |
+| broader | hkf-link:term | nein | — | Übergeordneter Begriff |
+| sources | hkf-link-list:source | nein | — | Belege der Definition |
+| wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
 
 # Konventionen
 
+Ein Begriff ist ein Ausdruck in **einer** Sprache, und `lang` nennt sie.
+Darum ist sie Pflicht und keine Vorgabe: Derselbe Gegenstand heißt in drei
+Sprachen dreierlei, und welche gemeint ist, darf nicht davon abhängen, in
+welcher Wissensbasis die Notiz gerade liegt — ein Bundle bliebe sonst nicht
+für sich lesbar (Core §4).
+
 Der Body beginnt mit einer Definition in einem Satz. Synonyme werden als
-Obsidian-`aliases` geführt, nicht als eigene Property.
+Obsidian-`aliases` geführt, nicht als eigene Property; sie sind Ausdrücke
+derselben Sprache. Die fremdsprachige Entsprechung ist kein Alias, sondern ein
+eigener Begriff.
 
 Ein Begriff legt einen Ausdruck fest und ist mit seiner Definition fertig.
 Wird die Notiz länger, gehört, was über die Definition hinausgeht, in ein
@@ -296,13 +310,13 @@ description: Eine Sache und der Stand des Wissens über sie.
 
 # Properties
 
-| Property | Typ | Pflicht | Beschreibung |
-|---|---|---|---|
-| term | hkf-link:term | nein | Der Begriff, unter dem die Wissensbasis die Sache führt |
-| broader | hkf-link:concept | nein | Übergeordnetes Konzept |
-| sources | hkf-link-list:source | nein | Quellen, aus denen der Stand des Wissens stammt |
-| wikidata_id | hkf-wikidata | nein | Kennung des Gegenstands in Wikidata |
-| related | hkf-link-or-url-list | nein | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| Property | Typ | Pflicht | Vorgabe | Beschreibung |
+|---|---|---|---|---|
+| terms | hkf-link-list:term | nein | — | Die Begriffe, unter denen die Wissensbasis die Sache führt |
+| broader | hkf-link:concept | nein | — | Übergeordnetes Konzept |
+| sources | hkf-link-list:source | nein | — | Quellen, aus denen der Stand des Wissens stammt |
+| wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
 
 # Konventionen
 
@@ -311,8 +325,9 @@ bekannt ist. Darum ist eine Begriffsnotiz mit ihrer Definition fertig, während
 eine Konzeptnotiz mit jeder ausgewerteten Quelle wächst: Der Body trägt den
 Stand des Wissens und die offenen Fragen.
 
-Ein Begriff ist sprachgebunden und trägt `lang`, ein Konzept nicht — dieselbe
-Sache hat in drei Sprachen drei Begriffe und bleibt dieselbe Sache.
+Ein Begriff ist sprachgebunden und führt `lang` als Pflicht, ein Konzept
+nicht: Dieselbe Sache hat in drei Sprachen drei Begriffe und bleibt dieselbe
+Sache. `terms` nimmt sie alle auf.
 
 Hat eine Konzeptnotiz keine eigenen Aussagen, sondern nur Verweise, ist sie
 ein `topic`.
@@ -329,11 +344,11 @@ description: Eine Gegenüberstellung mehrerer Gegenstände entlang benannter Dim
 
 # Properties
 
-| Property | Typ | Pflicht | Beschreibung |
-|---|---|---|---|
-| compares | hkf-link-list | ja | Die verglichenen Gegenstände, mindestens zwei |
-| sources | hkf-link-list:source | nein | Quellen des Vergleichs |
-| related | hkf-link-or-url-list | nein | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| Property | Typ | Pflicht | Vorgabe | Beschreibung |
+|---|---|---|---|---|
+| compares | hkf-link-list | ja | — | Die verglichenen Gegenstände, mindestens zwei |
+| sources | hkf-link-list:source | nein | — | Quellen des Vergleichs |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
 
 # Konventionen
 
@@ -359,10 +374,10 @@ description: Ein Themengebiet als Einstiegspunkt.
 
 # Properties
 
-| Property | Typ | Pflicht | Beschreibung |
-|---|---|---|---|
-| parent | hkf-link:topic | nein | Übergeordnetes Thema |
-| related | hkf-link-or-url-list | nein | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| Property | Typ | Pflicht | Vorgabe | Beschreibung |
+|---|---|---|---|---|
+| parent | hkf-link:topic | nein | — | Übergeordnetes Thema |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
 
 # Konventionen
 
@@ -382,11 +397,11 @@ description: Eine Notiz ohne spezifischeren Typ.
 
 # Properties
 
-| Property | Typ | Pflicht | Beschreibung |
-|---|---|---|---|
-| about | hkf-link-list | nein | Worauf sich die Notiz bezieht |
-| sources | hkf-link-list:source | nein | Verwendete Quellen |
-| related | hkf-link-or-url-list | nein | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| Property | Typ | Pflicht | Vorgabe | Beschreibung |
+|---|---|---|---|---|
+| about | hkf-link-list | nein | — | Worauf sich die Notiz bezieht |
+| sources | hkf-link-list:source | nein | — | Verwendete Quellen |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
 
 # Konventionen
 
@@ -409,15 +424,15 @@ description: Ein normatives Dokument, an das sich die Wissensbasis hält.
 
 # Properties
 
-| Property | Typ | Pflicht | Beschreibung |
-|---|---|---|---|
-| version | text | ja | Fassung, etwa `1.0` |
-| url | hkf-url | nein | Kanonische Adresse |
-| authority | hkf-link:organisation | nein | Herausgebende Stelle |
-| supersedes | hkf-link:specification | nein | Abgelöste Fassung |
-| lang | hkf-lang | nein | Sprache des Dokuments |
-| file | hkf-file:document | nein | Beigelegter Volltext |
-| related | hkf-link-or-url-list | nein | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| Property | Typ | Pflicht | Vorgabe | Beschreibung |
+|---|---|---|---|---|
+| version | text | ja | — | Fassung, etwa `1.0` |
+| url | hkf-url | nein | — | Kanonische Adresse |
+| authority | hkf-link:organisation | nein | — | Herausgebende Stelle |
+| supersedes | hkf-link:specification | nein | — | Abgelöste Fassung |
+| lang | hkf-lang | nein | — | Sprache des Dokuments |
+| file | hkf-file:document | nein | — | Beigelegter Volltext |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
 
 # Konventionen
 

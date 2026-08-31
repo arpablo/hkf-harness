@@ -208,16 +208,26 @@ def _property_tabelle(body):
 
 
 def _tabelle_schreiben(properties):
-    zeilen = ["# Properties", "", "| Property | Typ | Pflicht | Beschreibung |",
-              "|---|---|---|---|"]
+    zeilen = ["# Properties", "",
+              "| Property | Typ | Pflicht | Vorgabe | Beschreibung |",
+              "|---|---|---|---|---|"]
     for name in properties:
-        typ, pflicht, beschreibung = properties[name]
-        zeilen.append("| %s | %s | %s | %s |" % (name, typ, pflicht, beschreibung))
+        typ, pflicht, vorgabe, beschreibung = properties[name]
+        zeilen.append("| %s | %s | %s | %s | %s |"
+                      % (name, typ, pflicht, vorgabe or OHNE, beschreibung))
     return "\n".join(zeilen) + "\n"
 
 
+OHNE = "—"                 # leere Vorgabe-Zelle (§3.7)
+
+
 def _tabelle_voll(body):
-    """{property: (typ, pflicht, beschreibung)} — fuer das Zusammenfuehren."""
+    """{property: (typ, pflicht, vorgabe, beschreibung)} — zum Zusammenfuehren.
+
+    Vier Spalten schrieb Core vor der Vorgabe-Spalte; solche Tabellen stehen
+    in aelteren Lieferungen und werden weiter gelesen. Ihnen fehlt keine
+    Angabe, sie geben nur keine Vorgabe.
+    """
     aus = {}
     teil = notiz.abschnitt(body or "", "Properties")
     for zeile in (teil or "").splitlines():
@@ -226,8 +236,20 @@ def _tabelle_voll(body):
         s = [x.strip() for x in zeile.strip("|").split("|")]
         if len(s) < 4 or s[0] in ("Property", "") or set(s[0]) <= set("- "):
             continue
-        aus[s[0]] = (s[1], s[2], s[3])
+        aus[s[0]] = ((s[1], s[2], s[3] or OHNE, s[4]) if len(s) >= 5
+                     else (s[1], s[2], OHNE, s[3]))
     return aus
+
+
+
+def _zusicherung(body):
+    """Was eine Property-Tabelle zusichert: Typ, Pflicht, Vorgabe.
+
+    Die Beschreibung bleibt draussen — sie erklaert, sie sichert nichts zu.
+    Die Vorgabe gehoert dazu: Sie sagt, was Abwesenheit bedeutet (§3.7), und
+    zwei Typen, die darin auseinandergehen, meinen nicht dasselbe.
+    """
+    return {p: v[:3] for p, v in _tabelle_voll(body).items()}
 
 
 def _vorhandene_typen(plan):
@@ -286,7 +308,7 @@ def _typen_abgleichen(plan, kandidaten, vorliegende_bundles, fehlende_bundles,
                            for l in (vd.get("bundles") or []))
         gleich_in_der_sache = bool(gel) and not vorlaeufig and (
             str(gel[0].get("description") or "") == str(vd.get("description") or "")
-            and _property_tabelle(gel[1]) == _property_tabelle(vb))
+            and _zusicherung(gel[1]) == _zusicherung(vb))
         urteil = entscheidungen.get(("typ", name))
 
         if name in KERN_TYPEN or aus_required or gleich_in_der_sache:
@@ -354,12 +376,14 @@ def _typen_abgleichen(plan, kandidaten, vorliegende_bundles, fehlende_bundles,
                 continue
             else:
                 alt, neu = _tabelle_voll(vb), _tabelle_voll(gel[1])
-                streit = [p for p in neu if p in alt and alt[p][:2] != neu[p][:2]]
+                streit = [p for p in neu if p in alt and alt[p][:3] != neu[p][:3]]
                 if streit:
                     for p in streit:
                         plan.abweisen(
-                            "Property %s des Typs %s: %s/%s (hier) gegen %s/%s (Bundle)."
-                            % (p, name, alt[p][0], alt[p][1], neu[p][0], neu[p][1]),
+                            "Property %s des Typs %s: %s/%s/%s (hier) gegen "
+                            "%s/%s/%s (Bundle)."
+                            % (p, name, alt[p][0], alt[p][1], alt[p][2],
+                               neu[p][0], neu[p][1], neu[p][2]),
                             "Für %s entscheiden, welche Zusicherung gilt." % p)
                     continue
                 ergaenzt = [p for p in neu if p not in alt]

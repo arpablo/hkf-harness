@@ -60,6 +60,14 @@ def _tabellenfehler(ziel):
         "| krumm | hkf-krumm | nein | Gibt es nicht |\n"
         "| falsch | hkf-url:person | nein | Zusatz am falschen Typ |\n"
         "| gemischt | text / number | nein | Zwei Wertformen |\n")
+    io.open(os.path.join(ziel, "typedefs", "wurf.md"), "w", encoding="utf-8").write(
+        "---\ntype: typedef\ntitle: Wurf\ndescription: Vorgaben, gute und schlechte.\n"
+        "created: 2026-01-01\nmodified: 2026-01-01T00:00:00\n---\n\n"
+        "# Properties\n\n| Property | Typ | Pflicht | Vorgabe | Beschreibung |\n"
+        "|---|---|---|---|---|\n"
+        "| offen | checkbox | nein | false | So geht eine Vorgabe |\n"
+        "| zaehlt | number | nein | viele | Vorgabe ist keine Zahl |\n"
+        "| noetig | text | ja | irgendwas | Pflicht und Vorgabe zugleich |\n")
     io.open(os.path.join(ziel, "dinge", "eins.md"), "w", encoding="utf-8").write(
         "---\ntype: ding\ntitle: Das Erste\ncreated: 2026-01-01\n"
         "modified: 2026-01-01T00:00:00\nnetz: kein-url\n"
@@ -120,8 +128,9 @@ def _bundle_bauen(pfad):
     schreib("typedefs/ding.md",
             "---\ntype: typedef\ntitle: Ding\ndescription: Ein Ding.\ndir: dinge\n"
             "modified: 2026-01-01T00:00:00\n---\n\n# Properties\n\n"
-            "| Property | Typ | Pflicht | Beschreibung |\n|---|---|---|---|\n"
-            "| menge | number | nein | Wie viele |\n")
+            "| Property | Typ | Pflicht | Vorgabe | Beschreibung |\n"
+            "|---|---|---|---|---|\n"
+            "| menge | number | nein | — | Wie viele |\n")
     schreib("dinge/eins.md",
             "---\ntype: ding\ntitle: Das Erste\nmodified: 2026-01-01T00:00:00\n---\n\n"
             "Es steht neben Das Zweite, ohne es zu verlinken.\n\n"
@@ -217,8 +226,14 @@ def main():
                 ("nicht registrierten Zieltyp", "ist nicht registriert"),
                 ("den :-Zusatz am falschen Typ", "`:`-Zusatz steht nur"),
                 ("Alternativen mit verschiedenen Wertformen",
-                 "verschiedene Wertformen")):
+                 "verschiedene Wertformen"),
+                ("eine Vorgabe, die ihre Wertform verfehlt",
+                 "Die Vorgabe ist kein number"),
+                ("eine Vorgabe an einer Pflicht-Property",
+                 "ist Pflicht und trägt zugleich die Vorgabe")):
             probe("meldet %s" % was, muster in r.stdout, r.stdout)
+        probe("und laesst die gueltige Vorgabe in Ruhe",
+              "`offen`" not in r.stdout, r.stdout)
         probe("und keine dieser Meldungen ist behebbar",
               "menge" not in lauf(os.path.join(BIN, "hk-lint"), ziel,
                                   "--fix").stdout.split("Korrigiert")[-1]
@@ -268,6 +283,19 @@ def main():
               r.returncode == 1 and "abgewiesen" in r.stdout, r.stdout)
         probe("und schreibt dabei nichts", _abbild(ziel) == vorher)
         io.open(p, "w", encoding="utf-8").write(t)          # wieder herstellen
+
+        # §3.7: Eine Vorgabe sagt, was Abwesenheit bedeutet — zwei Typen, die
+        # darin auseinandergehen, sind nicht dasselbe.
+        io.open(p, "w", encoding="utf-8").write(
+            t.replace("| menge | number | nein | — |",
+                      "| menge | number | nein | 0 |"))
+        assert "| menge | number | nein | 0 |" in io.open(p, encoding="utf-8").read()
+        vorher = _abbild(ziel)
+        r = lauf(os.path.join(BIN, "hk-import"), bundle, ziel)
+        probe("eine abweichende Vorgabe hebt die Zusicherung auf (§3.7)",
+              r.returncode == 1 and "Bedeutungsprüfung" in r.stdout, r.stdout)
+        probe("und auch dann wird nichts geschrieben", _abbild(ziel) == vorher)
+        io.open(p, "w", encoding="utf-8").write(t)
 
         # §8 — eine Lieferung aus einer spaeteren Fassung wird gelesen,
         # aber nicht uebernommen

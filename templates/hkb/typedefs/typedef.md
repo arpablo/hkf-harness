@@ -3,17 +3,17 @@ type: typedef
 title: Typdefinition
 description: Registriert einen Typ und legt sein Verzeichnis fest.
 created: 2026-08-27
-modified: 2026-08-31T13:43:53
+modified: 2026-08-31T15:26:08
 modified_by: claude-opus-5
 ---
 
 # Properties
 
-| Property | Typ | Pflicht | Beschreibung |
-|---|---|---|---|
-| description | text | ja | Einzeiliger Zweck; erscheint in der Typtabelle der Wurzeldatei |
-| dir | text | nein | Verzeichnis der Instanzen; Vorgabe ist der Typname mit angehängtem `s` |
-| provisional | checkbox | nein | Beim Import angelegt, weil niemand den Typ definiert hat (§5.4) |
+| Property | Typ | Pflicht | Vorgabe | Beschreibung |
+|---|---|---|---|---|
+| description | text | ja | — | Einzeiliger Zweck; erscheint in der Typtabelle der Wurzeldatei |
+| dir | text | nein | — | Verzeichnis der Instanzen; Vorgabe ist der Typname mit angehängtem `s` (§3.7) |
+| provisional | checkbox | nein | false | Beim Import angelegt, weil niemand den Typ definiert hat (§5.4) |
 
 # Konventionen
 

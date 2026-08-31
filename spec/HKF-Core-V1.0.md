@@ -618,14 +618,14 @@ description: Ein Mensch als Gegenstand der Wissensbasis.
 
 # Properties
 
-| Property | Typ | Pflicht | Beschreibung |
-|---|---|---|---|
-| born | date | nein | Geburtsdatum |
-| died | date | nein | Sterbedatum |
-| homepage | hkf-url | nein | Persönliche Webseite |
-| email | hkf-email | nein | Kontaktadresse |
-| employer | hkf-link:organisation | nein | Arbeitgeber |
-| memberships | hkf-link-list:organisation | nein | Mitgliedschaften |
+| Property | Typ | Pflicht | Vorgabe | Beschreibung |
+|---|---|---|---|---|
+| born | date | nein | — | Geburtsdatum |
+| died | date | nein | — | Sterbedatum |
+| homepage | hkf-url | nein | — | Persönliche Webseite |
+| email | hkf-email | nein | — | Kontaktadresse |
+| employer | hkf-link:organisation | nein | — | Arbeitgeber |
+| memberships | hkf-link-list:organisation | nein | — | Mitgliedschaften |
 
 # Konventionen
 
@@ -673,6 +673,8 @@ Der Abschnitt `# Properties` ist optional. Ist er vorhanden, ist er
   Typen werden mit ` / ` getrennt, und die Beschreibung nennt sie in Worten
   (§3.7.2).
 - **Pflicht** — `ja` oder `nein`.
+- **Vorgabe** — der Wert, als der die **fehlende** Property gelesen wird.
+  `—` heißt: keine Vorgabe. Siehe unten.
 - **Beschreibung** — freier Text. Stehen in der Typ-Spalte Alternativen, nennt
   sie die Beschreibung ausdrücklich, damit die Zeile für sich verständlich ist.
 
@@ -680,6 +682,42 @@ Der Abschnitt `# Properties` ist optional. Ist er vorhanden, ist er
 in der Tabelle stehen, sind weiterhin erlaubt und werden nicht geprüft
 (§3.3). Die Tabelle beschränkt also nicht, sie sichert zu. Wer sehen will,
 was außerhalb der Zusicherungen liegt, ruft `hk-lint --strict` (§6.3).
+
+#### Die Vorgabe
+
+§3.4 sagt: Eine unbekannte Property entfällt. Abwesenheit heißt dort also
+„weiß ich nicht". Eine Vorgabe ist die Ausnahme davon — sie sagt für eine
+einzelne Property, dass Abwesenheit etwas Bestimmtes heißt.
+
+Sie wird **gelesen, nicht geschrieben**. Fehlt die Property, gilt der Wert; in
+die Notiz kommt nichts. So wirkt `dir` schon heute: Eine Typdefinition ohne
+`dir` legt ihre Instanzen unter dem Typnamen mit angehängtem `s` ab, und keine
+Datei hält das fest. In der Spalte steht `dir` trotzdem nicht — dort stehen
+nur **Werte**, keine Rechenvorschriften. Eine Vorgabe, die sich erst aus dem
+Typnamen ergibt, bleibt Prosa.
+
+Der Wert steht in der Wertform der Property, so wie er im Frontmatter stünde.
+`hk-lint` prüft ihn gegen die Typ-Angabe wie jeden anderen Wert. Eine Vorgabe
+an einer Pflicht-Property ist ein Widerspruch — was gefordert wird, darf nicht
+zugleich fehlen dürfen — und ist ein Befund.
+
+**Eine Vorgabe steht nur dort, wo die Abwesenheit wirklich diesen Wert
+bedeutet.** Bei `cancelled` tut sie das: Eine Veranstaltung, an der niemand
+etwas vermerkt hat, ist nicht abgesagt. Bei `lang` einer Quelle tut sie es
+nicht — dort heißt die Abwesenheit „unbekannt", und die Sprache der
+Wissensbasis vorzugeben machte aus einem französischen Buch stillschweigend
+ein deutsches. Wo Abwesenheit „unbekannt" heißt, bleibt die Spalte leer.
+
+Listen und Verweise brauchen darum keine: Eine fehlende Liste ist die leere
+Liste und ein fehlender Verweis ist keiner, beides schon nach §3.4. Eine
+fehlende Checkbox dagegen ist ohne Vorgabe schlicht unbekannt — deshalb tragen
+`cancelled` und `provisional` eine.
+
+Und eine Vorgabe reist mit der Typdefinition, nicht mit der Wissensbasis. Sie
+darf nichts vorgeben, was von der aufnehmenden Ablage abhinge, sonst änderte
+eine Notiz beim Import ihre Bedeutung. Aus demselben Grund führt `term` in HKF
+Base seine Sprache als Pflicht und nicht als Vorgabe: Ein Bundle muss für sich
+lesbar bleiben (§4).
 
 ### 3.7.1 Die Typ-Angabe
 
@@ -828,7 +866,7 @@ solche Fälle nennt die Typ-Spalte mehrere Property-Typen, getrennt durch
 wird:
 
 ```text
-| portrait | hkf-file:image / hkf-url | nein | als Datei in der Ablage oder als Adresse im Netz |
+| portrait | hkf-file:image / hkf-url | nein | — | als Datei in der Ablage oder als Adresse im Netz |
 ```
 
 **Die Beschreibung nennt die Alternativen in Worten.** Das ist keine Zierde:
@@ -1623,7 +1661,7 @@ Eine leere Property, deren Property-Tabelle einen Zieltyp fordert, ist die
 andere Stelle, an der eine Verknüpfung landet:
 
 ```text
-| employer | hkf-link:organisation | nein | Arbeitgeber |
+| employer | hkf-link:organisation | nein | — | Arbeitgeber |
 ```
 
 Steht `employer` leer und liegt im Bestand eine `organisation`, die in Frage
@@ -2096,6 +2134,8 @@ Bundle; die letzten vier Punkte gelten nur für eine HKB.
   Alternativen genügt eine (§3.7.2),
 - alle Alternativen einer Typ-Angabe haben dieselbe Wertform,
 - jede als Pflicht markierte Property ist vorhanden,
+- jede Vorgabe erfüllt die Typ-Angabe ihrer Property, und keine
+  Pflicht-Property trägt eine (§3.7),
 - jeder in einer Property-Tabelle genannte Typ existiert als Wertform, als
   Property-Typ oder als dessen Listenform nach §3.5.2, jeder genannte Zieltyp
   ist registriert, und der `:`-Zusatz steht nur an `hkf-link` oder
@@ -2336,21 +2376,21 @@ Der Body beider Dateien enthält den Abschnitt `# Typen` (§3.1).
 Diese Properties sind in **jeder** Notiz erlaubt, gleich welchen Typs. Sie
 brauchen keinen Eintrag in einer Property-Tabelle.
 
-| Property | Typ | Pflicht | Beschreibung |
-|---|---|---|---|
-| `type` | text | ja | Typ der Notiz; MUSS zum Verzeichnis passen (§3.2) |
-| `title` | text | nein | Anzeigetitel; ohne ihn gilt der Dateiname |
-| `description` | text | nein | Einzeiler zum Inhalt |
-| `tags` | list | nein | Obsidian-eigen |
-| `aliases` | list | nein | Obsidian-eigen; auch für Synonyme |
-| `cssclasses` | list | nein | Obsidian-eigen |
-| `status` | text | nein | Bearbeitungsstand |
-| `created` | date | nein | Tag der Entstehung |
-| `modified` | datetime | nein | Zeitpunkt der letzten Änderung, in **UTC** (§3.4) |
-| `modified_by` | text | nein | Wer zuletzt geändert hat |
-| `bundles` | hkf-link-list:bundle | nein | Zugehörigkeit; nur in einer HKB (§5.2) |
-| `related` | hkf-link-or-url-list | nein | Verwandtes: Verweise in die eigene Ablage oder Adressen im Netz (§5.6) |
-| `rejected_links` | hkf-link-list | nein | Ziele, die nicht selbsttätig verlinkt werden; nur in einer HKB (§5.6) |
+| Property | Typ | Pflicht | Vorgabe | Beschreibung |
+|---|---|---|---|---|
+| `type` | text | ja | — | Typ der Notiz; MUSS zum Verzeichnis passen (§3.2) |
+| `title` | text | nein | — | Anzeigetitel; ohne ihn gilt der Dateiname |
+| `description` | text | nein | — | Einzeiler zum Inhalt |
+| `tags` | list | nein | — | Obsidian-eigen |
+| `aliases` | list | nein | — | Obsidian-eigen; auch für Synonyme |
+| `cssclasses` | list | nein | — | Obsidian-eigen |
+| `status` | text | nein | — | Bearbeitungsstand |
+| `created` | date | nein | — | Tag der Entstehung |
+| `modified` | datetime | nein | — | Zeitpunkt der letzten Änderung, in **UTC** (§3.4) |
+| `modified_by` | text | nein | — | Wer zuletzt geändert hat |
+| `bundles` | hkf-link-list:bundle | nein | — | Zugehörigkeit; nur in einer HKB (§5.2) |
+| `related` | hkf-link-or-url-list | nein | — | Verwandtes: Verweise in die eigene Ablage oder Adressen im Netz (§5.6) |
+| `rejected_links` | hkf-link-list | nein | — | Ziele, die nicht selbsttätig verlinkt werden; nur in einer HKB (§5.6) |
 
 ### Die drei Zeitangaben
 
@@ -2393,11 +2433,11 @@ description: Registriert einen Typ und legt sein Verzeichnis fest.
 
 # Properties
 
-| Property | Typ | Pflicht | Beschreibung |
-|---|---|---|---|
-| description | text | ja | Einzeiliger Zweck; erscheint in der Typtabelle der Wurzeldatei |
-| dir | text | nein | Verzeichnis der Instanzen; Vorgabe ist der Typname mit angehängtem `s` |
-| provisional | checkbox | nein | Beim Import angelegt, weil niemand den Typ definiert hat (§5.4) |
+| Property | Typ | Pflicht | Vorgabe | Beschreibung |
+|---|---|---|---|---|
+| description | text | ja | — | Einzeiliger Zweck; erscheint in der Typtabelle der Wurzeldatei |
+| dir | text | nein | — | Verzeichnis der Instanzen; Vorgabe ist der Typname mit angehängtem `s` (§3.7) |
+| provisional | checkbox | nein | false | Beim Import angelegt, weil niemand den Typ definiert hat (§5.4) |
 
 # Konventionen
 
@@ -2424,14 +2464,14 @@ description: Schränkt eine Wertform ein.
 
 # Properties
 
-| Property | Typ | Pflicht | Beschreibung |
-|---|---|---|---|
-| form | text | ja | Eine der sechs Wertformen aus §3.4 |
-| pattern | text | nein | Regulärer Ausdruck; nur bei `text` und `list`, dort je Eintrag |
-| values | list | nein | Erlaubte Werte; als Text geführt, auch wenn sie wie Zahlen aussehen |
-| unit | text | nein | Maßeinheit; beschreibend, nicht geprüft |
-| min | number | nein | Kleinster zulässiger Wert; nur bei `form: number` |
-| max | number | nein | Größter zulässiger Wert; nur bei `form: number` |
+| Property | Typ | Pflicht | Vorgabe | Beschreibung |
+|---|---|---|---|---|
+| form | text | ja | — | Eine der sechs Wertformen aus §3.4 |
+| pattern | text | nein | — | Regulärer Ausdruck; nur bei `text` und `list`, dort je Eintrag |
+| values | list | nein | — | Erlaubte Werte; als Text geführt, auch wenn sie wie Zahlen aussehen |
+| unit | text | nein | — | Maßeinheit; beschreibend, nicht geprüft |
+| min | number | nein | — | Kleinster zulässiger Wert; nur bei `form: number` |
+| max | number | nein | — | Größter zulässiger Wert; nur bei `form: number` |
 
 # Konventionen
 
@@ -2456,14 +2496,14 @@ description: Beschreibt eine Lieferung.
 
 # Properties
 
-| Property | Typ | Pflicht | Beschreibung |
-|---|---|---|---|
-| id | text | ja | Kennung der Lieferreihe in `kebab-case` (§4.1); in der HKB gleich dem Dateinamen |
-| version | text | nein | Unveränderliche Kennung der gelieferten Fassung; ohne sie hat die Lieferung keine Geschichte, nur einen letzten Stand (§4.1) |
-| description | text | ja | Ein Satz darüber, was die Lieferung enthält |
-| required_bundles | list | nein | Bundles, die vorher importiert sein sollen (§4.1) |
-| source | text | nein | Herkunft, etwa eine URL oder ein Repository |
-| imported | datetime | nein | Zeitpunkt der Übernahme, in **UTC** (§3.4); nur in der HKB (§5.1). Fehlt es an einer Bundle-Notiz der HKB, wurde die Lieferung geprüft und nicht übernommen (§5.7) |
+| Property | Typ | Pflicht | Vorgabe | Beschreibung |
+|---|---|---|---|---|
+| id | text | ja | — | Kennung der Lieferreihe in `kebab-case` (§4.1); in der HKB gleich dem Dateinamen |
+| version | text | nein | — | Unveränderliche Kennung der gelieferten Fassung; ohne sie hat die Lieferung keine Geschichte, nur einen letzten Stand (§4.1) |
+| description | text | ja | — | Ein Satz darüber, was die Lieferung enthält |
+| required_bundles | list | nein | — | Bundles, die vorher importiert sein sollen (§4.1) |
+| source | text | nein | — | Herkunft, etwa eine URL oder ein Repository |
+| imported | datetime | nein | — | Zeitpunkt der Übernahme, in **UTC** (§3.4); nur in der HKB (§5.1). Fehlt es an einer Bundle-Notiz der HKB, wurde die Lieferung geprüft und nicht übernommen (§5.7) |
 
 # Konventionen
 

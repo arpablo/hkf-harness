@@ -39,10 +39,11 @@ modified_by: claude-opus-5
 
 # Properties
 
-| Property | Typ | Pflicht | Beschreibung |
-|---|---|---|---|
-| dichte | number | nein | in g/cm³ |
-| hersteller | hkf-link:organisation | nein | Wer ihn liefert |
+| Property | Typ | Pflicht | Vorgabe | Beschreibung |
+|---|---|---|---|---|
+| dichte | number | nein | — | in g/cm³ |
+| hersteller | hkf-link:organisation | nein | — | Wer ihn liefert |
+| genormt | checkbox | nein | false | Ob eine Norm ihn festlegt |
 
 # Konventionen
 
@@ -55,6 +56,11 @@ Was der Typ meint und was er nicht meint.
   Die Regel ist mechanisch, kein Sprachgefühl: `werkstoff` wird zu
   `werkstoffs`. Wer das nicht will, setzt `dir` — und dann so, dass es kein
   anderer Typ beansprucht und nicht unter `media_base` liegt.
+- **Eine Vorgabe steht nur dort, wo Abwesenheit wirklich diesen Wert
+  bedeutet.** `genormt` ohne Angabe heißt: nicht genormt — das stimmt. Eine
+  Sprache ohne Angabe heißt dagegen „unbekannt", nicht „deutsch"; dort bleibt
+  die Spalte `—`. Sie wird gelesen, nie geschrieben, und steht nie an einer
+  Pflicht-Property (Core §3.7).
 - **Der Body trägt den vollständigen Vertrag.** Wer die Typdefinition liest,
   soll den Typ benutzen können, ohne die Spezifikation zu kennen.
 

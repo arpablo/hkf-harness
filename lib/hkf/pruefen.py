@@ -11,9 +11,11 @@ aber nicht ungueltig.
 """
 import io, os, re
 
+import yaml
+
 from . import TEMPLATES, ablage, frontmatter, notiz
-from .importieren import (ARTVERZEICHNIS, KERN_TYPEN, STANDARD_PROPTYPES,
-                          _property_tabelle, _verzeichnis)
+from .importieren import (ARTVERZEICHNIS, KERN_TYPEN, OHNE, STANDARD_PROPTYPES,
+                          _property_tabelle, _tabelle_voll, _verzeichnis)
 
 FEHLER, HINWEIS = "fehler", "hinweis"
 LINK = re.compile(r"\[\[([^\]|\\]+)(?:\\?\|([^\]]*))?\]\]")
@@ -702,30 +704,55 @@ def _werte(b, befunde):
                     befunde.append(Befund(e["rel"], "`%s` ist Pflicht und fehlt "
                                           "(§3.7)." % prop))
                 continue
-            wert = e["daten"][prop]
-            gruende = []
-            for teil in re.split(r"\s*/\s*", angabe):
-                basis, liste, args = zerlege(teil)
-                if liste:
-                    if not isinstance(wert, list):
-                        gruende.append("ist keine Liste (%s verlangt es)" % teil)
-                        continue
-                    schlecht = [(w, g) for w, g in
-                                ((w, _skalar_passt(b, w, basis, args)) for w in wert)
-                                if not g[0]]
-                    if schlecht:
-                        gruende.append("Eintrag %r %s" % (schlecht[0][0],
-                                                          schlecht[0][1][1]))
-                        continue
-                    gruende = []
-                    break
-                ok, grund = _skalar_passt(b, wert, basis, args)
-                if ok:
-                    gruende = []
-                    break
-                gruende.append(grund)
-            for grund in gruende[:1]:
+            for grund in _passt(b, e["daten"][prop], angabe)[:1]:
                 befunde.append(Befund(e["rel"], "`%s` %s." % (prop, grund)))
+
+
+def _passt(b, wert, angabe):
+    """Gruende, warum `wert` die Typ-Angabe verfehlt; leer heisst: er passt."""
+    gruende = []
+    for teil in re.split(r"\s*/\s*", angabe):
+        basis, liste, args = zerlege(teil)
+        if liste:
+            if not isinstance(wert, list):
+                gruende.append("ist keine Liste (%s verlangt es)" % teil)
+                continue
+            schlecht = [(w, g) for w, g in
+                        ((w, _skalar_passt(b, w, basis, args)) for w in wert)
+                        if not g[0]]
+            if schlecht:
+                gruende.append("Eintrag %r %s" % (schlecht[0][0], schlecht[0][1][1]))
+                continue
+            return []
+        ok, grund = _skalar_passt(b, wert, basis, args)
+        if ok:
+            return []
+        gruende.append(grund)
+    return gruende
+
+
+def _vorgaben(b, befunde):
+    """Eine Vorgabe erfuellt ihre Typ-Angabe und steht an keiner Pflicht (§3.7)."""
+    for _name, e in sorted(b.typdefs.items()):
+        for prop, (angabe, pflicht, vorgabe, _t) in sorted(
+                _tabelle_voll(e["body"]).items()):
+            if vorgabe == OHNE:
+                continue
+            if pflicht.lower().startswith("ja"):
+                befunde.append(Befund(e["rel"], "`%s` ist Pflicht und trägt "
+                                      "zugleich die Vorgabe `%s`; was gefordert "
+                                      "wird, darf nicht fehlen dürfen (§3.7)."
+                                      % (prop, vorgabe)))
+                continue
+            try:
+                wert = yaml.safe_load(vorgabe)
+            except yaml.YAMLError:
+                befunde.append(Befund(e["rel"], "`%s`: Die Vorgabe `%s` ist kein "
+                                      "Wert (§3.7)." % (prop, vorgabe)))
+                continue
+            for grund in _passt(b, wert, angabe)[:1]:
+                befunde.append(Befund(e["rel"], "`%s`: Die Vorgabe %s (§3.7)."
+                                      % (prop, grund)))
 
 
 def _medienverzeichnisse(b, befunde):
@@ -747,7 +774,7 @@ def _medienverzeichnisse(b, befunde):
                                   grad))
 
 
-PRUEFUNGEN = PRUEFUNGEN + (_typangaben, _werte, _medienverzeichnisse)
+PRUEFUNGEN = PRUEFUNGEN + (_typangaben, _werte, _vorgaben, _medienverzeichnisse)
 
 
 # ── Was nur für ein Bundle gilt (§4, §7.1) ──────────────────────────────
