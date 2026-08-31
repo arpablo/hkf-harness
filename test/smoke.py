@@ -142,6 +142,25 @@ def main():
               r.returncode == 1 and "abgewiesen" in r.stdout, r.stdout)
         probe("und schreibt dabei nichts", _abbild(ziel) == vorher)
 
+        # §8 — eine Lieferung aus einer spaeteren Fassung wird gelesen,
+        # aber nicht uebernommen
+        fremd = os.path.join(os.path.dirname(bundle), "probe-fremd")
+        _bundle_bauen(fremd)
+        hb = os.path.join(fremd, "hbundle.md")
+        text = io.open(hb, encoding="utf-8").read()
+        io.open(hb, "w", encoding="utf-8").write(
+            text.replace('hkf: "1.0"', 'hkf: "9.9"').replace("id: probe", "id: fremd"))
+        vorher = _abbild(ziel)
+        r = lauf(os.path.join(BIN, "hk-import"), fremd, ziel)
+        probe("weist eine unbekannte Fassung ab (§8)",
+              r.returncode == 1 and "§8" in r.stdout, r.stdout)
+        probe("und schreibt auch dann nichts", _abbild(ziel) == vorher)
+
+        print("Fassung")
+        r = lauf(sys.executable, os.path.join(WURZEL, "tools", "spec.py"))
+        probe("spec.py meldet keinen Rueckstand",
+              r.returncode == 0, r.stdout + r.stderr)
+
         print("hk-export")
         r = lauf(os.path.join(BIN, "hk-export"))
         probe("hk-export sagt, dass es fehlt",

@@ -13,7 +13,7 @@ aus Anhang B. Was noch fehlt, nennt --help.
 import os, sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
-from hkf import ablage, frontmatter, grammatik, schema        # noqa: E402
+from hkf import CORE, ablage, fassung, frontmatter, grammatik, schema  # noqa: E402
 
 FEHLT = """Noch nicht umgesetzt (§6.3): aufloesbare Verweise, Typverzeichnis
 gegen `type`, Property-Tabellen der Typdefinitionen, `# Siehe auch` nach §5.6,
@@ -32,6 +32,10 @@ def main(argv):
 
     wurzel = schema.laden()
     fm_befunde, gr_befunde = [], []
+    ihre = frontmatter.lesen(os.path.join(hkb, "hkb.md"))[0].get("hkf")
+    if not fassung.lesbar(ihre):
+        fm_befunde.append("hkb.md: %s. Der Harness prüft gegen Regeln, die "
+                          "diese Ablage nicht meint." % fassung.satz(ihre))
     geprueft = 0
 
     for p in ablage.dateien(hkb):

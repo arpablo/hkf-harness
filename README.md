@@ -75,8 +75,9 @@ nicht.
 
 ```
 spec/        die Fassung, die dieser Harness umsetzt
-lib/hkf/     ablage, frontmatter, schema, grammatik, vorlage
+lib/hkf/     ablage, frontmatter, schema, grammatik, vorlage, fassung
 bin/         hk-init, hk-lint, hk-import, hk-export
+tools/       spec.py — hält die Kopie unter spec/ auf Stand
 templates/   AGENTS.md und die Grundausstattung, aus der hk-init schöpft
 skills/      die KI-Schicht — noch leer, siehe skills/README.md
 test/        Rauchprobe: python3 test/smoke.py
@@ -101,6 +102,30 @@ mehr — sie nannte ein Produkt.
 
 Core führte dafür einmal einen Abschnitt „Einstieg für Werkzeuge"; er ist
 gestrichen. Den ersten Satz sagt der Harness, nicht die Ablage.
+
+## Welche Fassung gilt
+
+`CORE` in [`lib/hkf/__init__.py`](lib/hkf/__init__.py) nennt die Fassung, die
+dieser Harness umsetzt; unter `spec/` liegt sie im Wortlaut. Beides gehört
+zusammen, und beides veraltet, sobald die Spezifikation fortgeschrieben wird.
+
+```
+python3 tools/spec.py            berichtet, ob die Kopie noch stimmt
+python3 tools/spec.py --update   holt den Stand des Spec-Repositorys
+```
+
+Das Skript findet die Quelle über `HKF_SPEC`, sonst neben diesem Repository;
+ohne Quelle endet es mit 0 und sagt es, damit ein Klon sich nicht daran stört.
+Kommt eine neue Fassung, nennt es sie und fordert, `CORE` nachzuziehen. Die
+Rauchprobe ruft es mit auf: Ein Rückstand fällt beim nächsten Testlauf auf,
+nicht erst beim nächsten Import.
+
+**Was der Harness liest** (§8): jede Fassung mit derselben Major-Nummer, deren
+Minor nicht größer ist als die eigene. Minor-Fassungen ergänzen Regeln, ohne
+Bestehendes ungültig zu machen — was Core 1.0 schrieb, versteht ein Harness
+1.2. Umgekehrt gilt es nicht, und §8 sagt, was dann geschieht: Die Dateien
+sind lesbar, übernommen wird nichts. `hk-import` weist eine solche Lieferung
+ab, `hk-lint` meldet eine Ablage, die neuer ist als er selbst.
 
 ## Woher `templates/hkb` kommt
 

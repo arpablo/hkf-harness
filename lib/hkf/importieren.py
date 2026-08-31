@@ -19,7 +19,7 @@ niemand beantworten kann.
 """
 import datetime, hashlib, io, os, re, shutil
 
-from . import ablage, frontmatter, notiz
+from . import CORE, ablage, fassung, frontmatter, notiz
 
 WERKZEUG = "hk-import"
 
@@ -875,6 +875,15 @@ def planen(hkb, quelle, force=False, ohne_verknuepfung=False):
     if "hkf" not in plan.bundle:
         plan.melde("hinweis", "hbundle.md nennt keine Fassung; die eigene wird "
                               "angenommen.")
+    elif not fassung.lesbar(plan.bundle["hkf"]):
+        # §8: Was die HKB nicht erkennt, liest sie, leitet aber keine
+        # Identitaeten daraus ab und importiert es nicht.
+        plan.abweisen(
+            "%s. Die Dateien sind lesbar, übernommen wird nichts (§8)."
+            % fassung.satz(plan.bundle["hkf"]),
+            "Einen Harness benutzen, der Core %s umsetzt, oder die Lieferung "
+            "für Core %s neu ausgeben." % (plan.bundle["hkf"], CORE))
+        return plan
 
     kandidaten, medien, uebergangen = _sammeln(quelle)
     vorhandene = _bundle_notizen(plan)
