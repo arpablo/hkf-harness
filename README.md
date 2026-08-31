@@ -21,6 +21,18 @@ Wissensbasis liegt etwas, was hierher gehört. Zwei Proben:
 Was ein Harness ist und wo die Grenze zur Wissensbasis verläuft, steht in
 [`HKF-Harness-V1.0.md`](HKF-Harness-V1.0.md). Diese Datei sagt, wie man ihn
 benutzt; jene sagt, was er ist.
+## Wo der Rest liegt
+
+Der Harness ist eine **Umsetzung**, nicht die Spezifikation. Was gilt, steht
+nebenan; was hier liegt, ist eine Art, es zu tun.
+
+| Repository | Inhalt |
+|---|---|
+| [`hkf-spec`](https://github.com/arpablo/hkf-spec) | Die Spezifikation: HKF Core 1.0 und HKF Base 1.0 |
+| [`hkf-kb-template`](https://github.com/arpablo/hkf-kb-template) | Vorlage für eine neue Wissensbasis; `hk-init` schöpft aus derselben Grundausstattung |
+| [`hkf-base`](https://github.com/arpablo/hkf-base) | Das Bundle mit dem Standardvokabular |
+| [`hkf-harness`](https://github.com/arpablo/hkf-harness) | Dieses Repository |
+
 ## Die Ablage wird nicht geraten
 
 Kein Werkzeug hier kennt einen festen Pfad. Es nimmt, was im Aufruf steht,
@@ -34,7 +46,9 @@ export PATH="$PATH:$(pwd)/bin"
 hk-lint
 ```
 
-Gebraucht werden Python 3 und PyYAML (`pip3 install pyyaml`).
+Python bringt der Harness selbst mit; `./bootstrap-python.sh` baut die venv,
+und jedes Werkzeug startet sich darunter neu. Wer das nicht will, braucht
+Python 3 und PyYAML.
 
 ## Die Methoden
 
