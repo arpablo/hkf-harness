@@ -1,13 +1,13 @@
 ---
 type: specification
 title: HKF Base V1.0 — Standardvokabular
-description: Neun Typdefinitionen und zwei Property-Typen für Person, Körperschaft, Ort, Ereignis, Quelle, Begriff, Thema, Notiz und Spezifikation. Wird als Bundle geliefert.
+description: Elf Typdefinitionen und zwei Property-Typen für Person, Körperschaft, Ort, Ereignis, Quelle, Begriff, Konzept, Vergleich, Thema, Notiz und Spezifikation. Wird als Bundle geliefert.
 status: draft
 ---
 
 # HKF Base V1.0
 
-Diese Spezifikation legt ein **Vokabular** fest: neun Typen, die in nahezu
+Diese Spezifikation legt ein **Vokabular** fest: elf Typen, die in nahezu
 jeder Wissensbasis vorkommen und zugleich die häufigsten Verweisziele sind,
 dazu zwei Property-Typen, die nur mit ihnen Sinn ergeben.
 
@@ -81,6 +81,8 @@ ungültig machte.
 | `event` | `events` | Ein Geschehen zu einer bestimmten Zeit. |
 | `source` | `sources` | Eine zitierbare Quelle: Buch, Aufsatz, Webseite, Vortrag. |
 | `term` | `terms` | Ein definierter Begriff. |
+| `concept` | `concepts` | Eine Sache und der Stand des Wissens über sie. |
+| `comparison` | `comparisons` | Eine Gegenüberstellung mehrerer Gegenstände entlang benannter Dimensionen. |
 | `topic` | `topics` | Ein Themengebiet als Einstiegspunkt. |
 | `note` | `notes` | Eine Notiz ohne spezifischeren Typ. |
 | `specification` | `specifications` | Ein normatives Dokument, an das sich die Wissensbasis hält. |
@@ -89,8 +91,11 @@ Kein Typ dieses Vokabulars trägt ein `dir`. Ihre Verzeichnisse ergeben sich
 ausnahmslos aus der Vorgabe „Typname mit angehängtem `s`" (Core §3.7). Ein
 Werkzeug kennt den Ablageort damit, ohne die Typdefinition zu lesen.
 
-Alle aufgeführten Properties sind optional. Keiner dieser Typen fordert etwas
-über `type` hinaus; er sichert nur zu, was die genannten Properties bedeuten.
+Bis auf zwei sind alle aufgeführten Properties optional: `version` in
+`specification` und `compares` in `comparison`. Beide tragen den Gegenstand
+ihrer Notiz — eine Spezifikation ohne Fassung und ein Vergleich ohne
+Verglichene sagen nichts. Sonst fordert keiner dieser Typen etwas über `type`
+hinaus; er sichert nur zu, was die genannten Properties bedeuten.
 
 ## 3.1 `person`
 
@@ -274,9 +279,76 @@ description: Ein definierter Begriff.
 
 Der Body beginnt mit einer Definition in einem Satz. Synonyme werden als
 Obsidian-`aliases` geführt, nicht als eigene Property.
+
+Ein Begriff legt einen Ausdruck fest und ist mit seiner Definition fertig.
+Wird die Notiz länger, gehört, was über die Definition hinausgeht, in ein
+`concept`.
 ```
 
-## 3.7 `topic`
+## 3.7 `concept`
+
+```markdown
+---
+type: typedef
+title: Konzept
+description: Eine Sache und der Stand des Wissens über sie.
+---
+
+# Properties
+
+| Property | Typ | Pflicht | Beschreibung |
+|---|---|---|---|
+| term | hkf-link:term | nein | Der Begriff, unter dem die Wissensbasis die Sache führt |
+| broader | hkf-link:concept | nein | Übergeordnetes Konzept |
+| sources | hkf-link-list:source | nein | Quellen, aus denen der Stand des Wissens stammt |
+| wikidata_id | hkf-wikidata | nein | Kennung des Gegenstands in Wikidata |
+| related | hkf-link-or-url-list | nein | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+
+# Konventionen
+
+Ein Begriff definiert einen Ausdruck, ein Konzept sammelt, was über eine Sache
+bekannt ist. Darum ist eine Begriffsnotiz mit ihrer Definition fertig, während
+eine Konzeptnotiz mit jeder ausgewerteten Quelle wächst: Der Body trägt den
+Stand des Wissens und die offenen Fragen.
+
+Ein Begriff ist sprachgebunden und trägt `lang`, ein Konzept nicht — dieselbe
+Sache hat in drei Sprachen drei Begriffe und bleibt dieselbe Sache.
+
+Hat eine Konzeptnotiz keine eigenen Aussagen, sondern nur Verweise, ist sie
+ein `topic`.
+```
+
+## 3.8 `comparison`
+
+```markdown
+---
+type: typedef
+title: Vergleich
+description: Eine Gegenüberstellung mehrerer Gegenstände entlang benannter Dimensionen.
+---
+
+# Properties
+
+| Property | Typ | Pflicht | Beschreibung |
+|---|---|---|---|
+| compares | hkf-link-list | ja | Die verglichenen Gegenstände, mindestens zwei |
+| sources | hkf-link-list:source | nein | Quellen des Vergleichs |
+| related | hkf-link-or-url-list | nein | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+
+# Konventionen
+
+Der Gegenstand eines Vergleichs ist kein Ding, sondern ein Verhältnis. Der
+Body nennt zuerst, was verglichen wird und warum, dann die Dimensionen — am
+besten als Tabelle mit einer Zeile je Dimension —, zuletzt das Urteil. Ein
+Vergleich ohne Urteil ist eine Tabelle und gehört in die Notiz eines der
+Verglichenen.
+
+`compares` nimmt Verweise beliebigen Typs auf: Verglichen wird, was sich
+vergleichen lässt — zwei Konzepte ebenso wie zwei Körperschaften. Was nur
+einen der Gegenstände betrifft, gehört in dessen eigene Notiz.
+```
+
+## 3.9 `topic`
 
 ```markdown
 ---
@@ -294,11 +366,12 @@ description: Ein Themengebiet als Einstiegspunkt.
 
 # Konventionen
 
-Ein Thema ordnet, ein Begriff definiert. Der Body ist eine Einstiegsseite mit
-Verweisen; Inhalte, die anderswo hingehören, stehen nicht hier.
+Ein Thema ordnet, ein Begriff definiert, ein Konzept sammelt. Der Body ist
+eine Einstiegsseite mit Verweisen; Inhalte, die anderswo hingehören, stehen
+nicht hier.
 ```
 
-## 3.8 `note`
+## 3.10 `note`
 
 ```markdown
 ---
@@ -319,9 +392,13 @@ description: Eine Notiz ohne spezifischeren Typ.
 
 Auffangtyp. Er wird verwendet, wenn kein anderer Typ passt — nicht, um die
 Wahl eines Typs zu vermeiden. `about` nimmt Verweise beliebigen Typs auf.
+
+Eine Notiz hält fest, was bei einem Anlass anfiel: die Auswertung einer
+Quelle, ein Protokoll, ein Gedanke. Überlebt ihr Gegenstand den Anlass, gehört
+er in ein `concept`, und die Notiz verweist per `about` dorthin.
 ```
 
-## 3.9 `specification`
+## 3.11 `specification`
 
 ```markdown
 ---

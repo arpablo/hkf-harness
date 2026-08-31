@@ -1,21 +1,31 @@
 # Die KI-Schicht
 
-Noch leer.
-
-Hier kommen die Skills hin, die ein Sprachmodell durch die Methoden führen.
-Für sie gilt eine Regel:
+Die Skills, die ein Sprachmodell durch die Methoden führen. Für sie gilt eine
+Regel:
 
 > **Kein Skill tut etwas, das kein Script tut.**
 
 Ein Skill wählt aus, erklärt, fragt zurück und urteilt dort, wo die
 Spezifikation ein Urteil verlangt — die Bedeutungsprüfung (§5.5), die
 Identität einer ankommenden Notiz (§6.1 Schritt 5), die Verknüpfung (§5.6).
-Alles Mechanische gehört nach `bin/` und `lib/`.
+Alles Mechanische steht in `bin/` und `lib/`.
 
 Der Grund ist die Zusage aus dem README: Eine Wissensbasis lässt sich ohne KI
 benutzen und füllen. Sobald eine Operation nur über ein Modell erreichbar ist,
 stimmt das nicht mehr. Dazu kommt die Verlässlichkeit — ein Programm findet
 einen gebrochenen Wikilink immer, ein Modell meistens.
 
-Daraus folgt die Reihenfolge: erst `bin/`, dann `skills/`. Solange
-`hk-import` und `hk-export` Platzhalter sind, gibt es hier nichts zu tun.
+| Skill | Wofür |
+|---|---|
+| [`hkb`](hkb/SKILL.md) | Die Grundlage: wo die Ablage liegt, welche Regeln gelten, welche Werkzeuge es gibt. Die übrigen setzen ihn voraus. |
+| [`hkb-notiz`](hkb-notiz/SKILL.md) | Eine Notiz anlegen oder fortschreiben |
+| [`hkb-typ`](hkb-typ/SKILL.md) | Einen eigenen Typ anlegen oder seine Property-Tabelle erweitern |
+| [`hkb-import`](hkb-import/SKILL.md) | Eine Lieferung übernehmen — und die Urteile fällen und aufschreiben, die `hk-import` verweigert |
+| [`hkb-export`](hkb-export/SKILL.md) | Eine Lieferung herausschreiben und beurteilen, ob sie weitergegeben werden kann |
+| [`hkb-lint`](hkb-lint/SKILL.md) | Prüfen, korrigieren lassen, und die Befunde abarbeiten, die kein Werkzeug beheben darf |
+
+Zwei davon tragen die eigentliche Last. **`hkb-import`** ist der Ort, an dem
+die drei Urteile aus der Spezifikation fallen und als Zeile in
+`# Entscheidungen` festgehalten werden (§5.7) — ohne das fragt jeder weitere
+Lauf dieselbe Frage neu. **`hkb-notiz`** ist die einzige Operation, die kein
+Script erledigt: Inhalt entsteht nicht mechanisch.

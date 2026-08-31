@@ -188,6 +188,22 @@ weiter — dann sagt der Frontmatter-Leser, wenn PyYAML fehlt, und nennt den
 Bootstrap. Ein `python -c` wird nicht umgeleitet: Dort steht in `argv[0]` kein
 Skript, und ein Neustart verlöre den Code.
 
+## Die KI-Schicht
+
+Unter [`skills/`](skills/) liegen sechs Skills, die ein Sprachmodell durch die
+Methoden führen. [`hkb`](skills/hkb/SKILL.md) ist die Grundlage, die übrigen
+setzen ihn voraus: [`hkb-notiz`](skills/hkb-notiz/SKILL.md),
+[`hkb-typ`](skills/hkb-typ/SKILL.md),
+[`hkb-import`](skills/hkb-import/SKILL.md),
+[`hkb-export`](skills/hkb-export/SKILL.md),
+[`hkb-lint`](skills/hkb-lint/SKILL.md).
+
+Sie fügen nichts hinzu, was die Werkzeuge nicht können — sie tun genau das,
+was ein Programm nicht darf. Am deutlichsten bei `hkb-import`: `hk-import`
+legt eine Bedeutungsprüfung vor und weist ab, der Skill urteilt und trägt das
+Urteil als Zeile in `# Entscheidungen` der Bundle-Notiz ein (§5.7). Ohne
+diesen Eintrag stellt der nächste Lauf dieselbe Frage neu.
+
 ## Welche Fassung gilt
 
 `CORE` in [`lib/hkf/__init__.py`](lib/hkf/__init__.py) nennt die Fassung, die

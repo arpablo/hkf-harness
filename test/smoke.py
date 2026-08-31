@@ -7,7 +7,7 @@
 Kein Testrahmen, keine Fremdpakete. Der Lauf endet mit 0, wenn alle Proben
 zutreffen, sonst mit 1 und einer Zeile pro Fehlschlag.
 """
-import io, os, shutil, subprocess, sys, tempfile
+import io, os, re, shutil, subprocess, sys, tempfile
 
 WURZEL = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 BIN = os.path.join(WURZEL, "bin")
@@ -304,6 +304,28 @@ def main():
         r = lauf(sys.executable, "-c", "import sys; print(sys.executable)")
         probe("python -c wird nicht umgeleitet",
               r.stdout.strip() == sys.executable, r.stdout)
+
+        print("Die KI-Schicht")
+        skills = os.path.join(WURZEL, "skills")
+        namen = sorted(d for d in os.listdir(skills)
+                       if os.path.isdir(os.path.join(skills, d)))
+        probe("es gibt Skills", len(namen) >= 5, ", ".join(namen))
+        befehle, fehlt = set(), []
+        for name in namen:
+            p_skill = os.path.join(skills, name, "SKILL.md")
+            if not os.path.isfile(p_skill):
+                fehlt.append("%s/SKILL.md" % name)
+                continue
+            t = io.open(p_skill, encoding="utf-8").read()
+            kopf = t.split("---")[1] if t.startswith("---") else ""
+            if ("name: %s" % name) not in kopf or "description:" not in kopf:
+                fehlt.append("%s: Frontmatter" % name)
+            befehle |= set(re.findall(r"\bhk-[a-z]+", t))
+        probe("jeder hat ein SKILL.md mit passendem Frontmatter",
+              not fehlt, ", ".join(fehlt))
+        ohne = sorted(b for b in befehle
+                      if not os.path.exists(os.path.join(BIN, b)))
+        probe("jeder genannte Befehl liegt in bin/", not ohne, ", ".join(ohne))
 
         print("Fassung")
         r = lauf(sys.executable, os.path.join(WURZEL, "tools", "grundausstattung.py"))

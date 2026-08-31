@@ -43,7 +43,7 @@ hkf-harness/
   py                    das Python des Harness
   tools/                spec.py — hält die Kopie unter spec/ auf Stand
   templates/            AGENTS.md und die Grundausstattung für hk-init
-  skills/               die KI-Schicht, ruft bin/ auf
+  skills/               die KI-Schicht: hkb und fünf Operationen
   test/                 die Rauchprobe
 ```
 

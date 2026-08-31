@@ -850,7 +850,7 @@ def _bundle_notiz(plan, zeitpunkt, tag, vorher):
     ent = notiz.abschnitt(alt_body, "Entscheidungen") if alt_kopf is not None else None
     teile = [beschreibung]
     if ent:
-        teile.append("# Entscheidungen\n" + ent.strip("\n"))
+        teile.append("# Entscheidungen\n\n" + ent.strip("\n"))
     teile += [t.strip("\n") for t in neu + nachweise]
     return kopf, "\n\n".join(t for t in teile if t).rstrip("\n") + "\n"
 
