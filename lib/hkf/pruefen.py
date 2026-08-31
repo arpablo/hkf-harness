@@ -814,20 +814,21 @@ def _lieferung(b, befunde):
     def melde_fehlend(mehrzahl, einzahl, namen):
         if not namen:
             return
+        liste = ", ".join("`%s`" % n for n in namen)
         if vorausgesetzt:
             # §6.1: Ein Werkzeug weiss nicht, welche Typen ein Bundle
             # mitbraechte, das es nicht hat.
+            text = ("%s %s liegt nicht bei; er muss aus einem vorausgesetzten "
+                    "Bundle kommen (§7.1)." % (einzahl, liste)
+                    if len(namen) == 1 else
+                    "%s %s liegen nicht bei; sie müssen aus einem vorausgesetzten "
+                    "Bundle kommen (§7.1)." % (mehrzahl, liste))
+            befunde.append(Befund("hbundle.md", text, HINWEIS))
+            return
+        for n in namen:
             befunde.append(Befund("hbundle.md",
-                                  "%s %s liegen nicht bei; sie müssen aus einem "
-                                  "vorausgesetzten Bundle kommen (§7.1)."
-                                  % (mehrzahl, ", ".join("`%s`" % n for n in namen)),
-                                  HINWEIS))
-        else:
-            for n in namen:
-                befunde.append(Befund("hbundle.md",
-                                      "%s `%s` wird verwendet, aber weder "
-                                      "geliefert noch vorausgesetzt (§7.1)."
-                                      % (einzahl, n)))
+                                  "%s `%s` wird verwendet, aber weder geliefert "
+                                  "noch vorausgesetzt (§7.1)." % (einzahl, n)))
 
     melde_fehlend("Die Typen", "Der Typ", fehlend)
     gebraucht = set()
