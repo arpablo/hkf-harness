@@ -23,10 +23,10 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..
 from hkf import (CORE, ablage, fassung, frontmatter, grammatik,   # noqa: E402
                  korrigieren, pruefen as pruefmodul, schema)
 
-FEHLT = """Noch nicht umgesetzt (§6.3): die Property-Tabellen der Typdefinitionen
-gegen die Werte der Notizen — Pflichtangaben, `pattern`, `values`, `min`, `max`,
-Zieltyp bei `hkf-link` und Medienart bei `hkf-file`. Ebenso `hk-lint` auf einem
-Bundle statt auf einer Wissensbasis."""
+FEHLT = """Noch nicht umgesetzt (§6.3): `hk-lint` auf einem Bundle statt auf
+einer Wissensbasis — dort entfallen die Typverzeichnisse, und geprueft wird
+stattdessen, dass keine zwei Notizen desselben Typs denselben Dateinamen
+tragen (§4.3)."""
 
 
 def main(argv):

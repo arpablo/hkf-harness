@@ -181,6 +181,9 @@ def _proptypes(b, befunde):
         befunde.append(Befund("proptypes/", "Der Standard-Property-Typ `%s` fehlt "
                                             "(§3.5.1)." % name))
     for name, e in sorted(b.proptypes.items()):
+        if name in WERTFORMEN:
+            befunde.append(Befund(e["rel"], "Für eine Wertform wird kein "
+                                            "Property-Typ angelegt (§3.5)."))
         if name.endswith("-list") and name not in STANDARD_PROPTYPES:
             befunde.append(Befund(e["rel"], "Ein Property-Typ endet nicht auf "
                                             "`-list`; die Listenform entsteht aus "
@@ -448,3 +451,198 @@ def pruefen(hkb):
     for f in PRUEFUNGEN:
         f(b, befunde)
     return b, befunde
+
+
+# ── Die Property-Tabellen gegen die Werte (§3.7.1, §6.3) ────────────────
+
+WERTFORMEN = ("text", "list", "number", "checkbox", "date", "datetime")
+MIT_ZUSATZ = ("hkf-link", "hkf-file")
+DATUM = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+ZEITPUNKT = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$")
+
+
+def zerlege(angabe):
+    """`hkf-link-list:person,organisation` → ('hkf-link', True, [...]).
+
+    Das `-list` wird **zuerst** abgetrennt (§3.5.2): Sonst hielte ein Werkzeug
+    `hkf-link-list:person` für unzulässig, obwohl §3.7.1 es erlaubt.
+    """
+    rest, _, args = angabe.strip().partition(":")
+    liste = rest.endswith("-list")
+    basis = rest[:-5] if liste else rest
+    return basis, liste, [a for a in args.split(",") if a]
+
+
+def _wertform(b, basis, liste):
+    """Die Wertform hinter einer Typ-Angabe, oder None, wenn unbekannt."""
+    if basis in WERTFORMEN:
+        return "list" if liste else basis
+    e = b.proptypes.get(basis)
+    if e is None:
+        return None
+    return "list" if liste else str(e["daten"].get("form") or "")
+
+
+def _form_passt(wert, form):
+    if form == "text":
+        return isinstance(wert, str)
+    if form == "number":
+        return isinstance(wert, (int, float)) and not isinstance(wert, bool)
+    if form == "checkbox":
+        return isinstance(wert, bool)
+    if form == "date":
+        return isinstance(wert, str) and bool(DATUM.match(wert))
+    if form == "datetime":
+        return isinstance(wert, str) and bool(ZEITPUNKT.match(wert))
+    if form == "list":
+        return isinstance(wert, list)
+    return True
+
+
+def _skalar_passt(b, wert, basis, args):
+    """(ok, Grund). Prueft einen Einzelwert gegen eine Typ-Angabe."""
+    if basis in WERTFORMEN:
+        return (_form_passt(wert, basis),
+                "ist kein %s" % basis)
+    e = b.proptypes.get(basis)
+    if e is None:
+        return True, ""                       # der Typ selbst wird eigens gemeldet
+    d = e["daten"]
+    form = str(d.get("form") or "text")
+    if not _form_passt(wert, form):
+        return False, "ist kein %s (%s verlangt es)" % (form, basis)
+    if basis == "hkf-link":
+        return _link_passt(b, wert, args, medien=False)
+    if basis == "hkf-file":
+        return _link_passt(b, wert, args, medien=True)
+    text = str(wert)
+    muster = d.get("pattern")
+    if muster and not re.search(str(muster), text):
+        return False, "passt nicht auf das `pattern` von %s" % basis
+    werte = d.get("values")
+    if werte and text not in [str(v) for v in werte]:
+        return False, "steht nicht in den `values` von %s" % basis
+    for grenze, name, schlechter in ((d.get("min"), "min", lambda a, g: a < g),
+                                     (d.get("max"), "max", lambda a, g: a > g)):
+        if grenze is not None and isinstance(wert, (int, float)) and \
+           schlechter(wert, grenze):
+            return False, "verletzt `%s: %s` von %s" % (name, grenze, basis)
+    return True, ""
+
+
+def _link_passt(b, wert, args, medien):
+    m = re.match(r"^\[\[([^\]|\\]+)(?:\|[^\]]*)?\]\]$", str(wert).strip())
+    if not m:
+        return False, "ist kein qualifizierter Wikilink (§3.6)"
+    art, rest = b.aufloesen(m.group(1))
+    if medien:
+        if art != "medium":
+            return False, "zeigt auf keine Mediendatei (§3.7.1)"
+        if rest not in b.medien:
+            return False, "zeigt auf keine vorhandene Datei"
+        name = rest.rsplit("/", 1)[-1]
+        if "." not in name or name.endswith(".md"):
+            return False, "trägt keine brauchbare Dateiendung (§6.3)"
+        teile = rest.split("/")
+        verz = teile[1] if b.media_basis else teile[0]
+        ist = {v: k for k, v in ARTVERZEICHNIS.items()}.get(verz)
+        if args and ist not in args:
+            return False, "ist ein %s, verlangt ist %s" % (ist, " oder ".join(args))
+        return True, ""
+    if art != "notiz":
+        return False, "lässt sich nicht auf eine Notiz auflösen (§3.6)"
+    typ = b.notizen[rest]["typ"]
+    if args and typ not in args:
+        return False, "zeigt auf `%s`, verlangt ist %s" % (typ, " oder ".join(args))
+    return True, ""
+
+
+def _typangaben(b, befunde):
+    """Was in der Typ-Spalte steht, muss es geben (§3.7.1)."""
+    for name, e in sorted(b.typdefs.items()):
+        for prop, (angabe, _pflicht) in sorted(
+                _property_tabelle(e["body"]).items()):
+            formen = []
+            for teil in re.split(r"\s*/\s*", angabe):
+                basis, liste, args = zerlege(teil)
+                form = _wertform(b, basis, liste)
+                if form is None:
+                    befunde.append(Befund(e["rel"], "`%s`: %r ist weder Wertform "
+                                          "noch Property-Typ (§3.7.1)." % (prop, teil)))
+                    continue
+                formen.append(form)
+                if args and basis not in MIT_ZUSATZ:
+                    befunde.append(Befund(e["rel"], "`%s`: Der `:`-Zusatz steht nur "
+                                          "an hkf-link und hkf-file (§3.7.1), nicht "
+                                          "an %r." % (prop, basis)))
+                if basis == "hkf-link":
+                    for ziel in args:
+                        if ziel not in b.typdefs:
+                            befunde.append(Befund(e["rel"], "`%s`: Der Zieltyp `%s` "
+                                                  "ist nicht registriert (§3.7.1)."
+                                                  % (prop, ziel)))
+                if basis == "hkf-file":
+                    for a in args:
+                        if a not in ARTVERZEICHNIS:
+                            befunde.append(Befund(e["rel"], "`%s`: %r ist keine "
+                                                  "Medienart (§3.7.1)." % (prop, a)))
+            if len(set(formen)) > 1:
+                befunde.append(Befund(e["rel"], "`%s`: Die Alternativen haben "
+                                      "verschiedene Wertformen (%s) — §6.3 verlangt "
+                                      "dieselbe." % (prop, ", ".join(sorted(set(formen))))))
+
+
+def _werte(b, befunde):
+    """Jede Property gegen ihre Typ-Angabe; bei Alternativen genügt eine."""
+    for rel, e in sorted(b.notizen.items()):
+        tabelle = _property_tabelle(b.typdefs.get(e["typ"], {}).get("body", ""))
+        for prop, (angabe, pflicht) in sorted(tabelle.items()):
+            if prop not in e["daten"]:
+                if pflicht.lower().startswith("ja"):
+                    befunde.append(Befund(e["rel"], "`%s` ist Pflicht und fehlt "
+                                          "(§3.7)." % prop))
+                continue
+            wert = e["daten"][prop]
+            gruende = []
+            for teil in re.split(r"\s*/\s*", angabe):
+                basis, liste, args = zerlege(teil)
+                if liste:
+                    if not isinstance(wert, list):
+                        gruende.append("ist keine Liste (%s verlangt es)" % teil)
+                        continue
+                    schlecht = [(w, g) for w, g in
+                                ((w, _skalar_passt(b, w, basis, args)) for w in wert)
+                                if not g[0]]
+                    if schlecht:
+                        gruende.append("Eintrag %r %s" % (schlecht[0][0],
+                                                          schlecht[0][1][1]))
+                        continue
+                    gruende = []
+                    break
+                ok, grund = _skalar_passt(b, wert, basis, args)
+                if ok:
+                    gruende = []
+                    break
+                gruende.append(grund)
+            for grund in gruende[:1]:
+                befunde.append(Befund(e["rel"], "`%s` %s." % (prop, grund)))
+
+
+def _medienverzeichnisse(b, befunde):
+    """Unter media_base liegen nur die vier Arten (§3.2.1)."""
+    mb = os.path.join(b.hkb, b.media_basis) if b.media_basis else b.hkb
+    if not b.media_basis or not os.path.isdir(mb):
+        return
+    erlaubt = set(ARTVERZEICHNIS.values())
+    for f in sorted(os.listdir(mb)):
+        if f.startswith("."):
+            continue
+        if os.path.isdir(os.path.join(mb, f)) and f not in erlaubt:
+            grad = FEHLER if f in b.verzeichnisse() else HINWEIS
+            befunde.append(Befund("%s/%s" % (b.media_basis, f),
+                                  "liegt unter `media_base`; dort liegen nur "
+                                  "images, videos, audios und documents (§3.2.1).",
+                                  grad))
+
+
+PRUEFUNGEN = PRUEFUNGEN + (_typangaben, _werte, _medienverzeichnisse)

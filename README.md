@@ -64,6 +64,13 @@ Imports (§6.1 Schritt 9), Entfernen Sache eines Menschen (§5.6). Und es legt
 keine vorläufige Typdefinition an und entfernt keine: Dazwischen liegt eine
 Entscheidung über Bedeutung, und die trifft kein Linter (§5.4).
 
+Geprüft wird dabei auch die **Property-Tabelle jedes Typs gegen die Werte
+seiner Notizen**: Pflichtangaben, Wertform, `pattern`, `values`, `min`, `max`,
+bei `hkf-link` der Zieltyp und bei `hkf-file` die Medienart — bei Alternativen
+genügt eine (§3.7.2). Dazu die Tabelle selbst: ob jeder genannte Typ existiert,
+jeder Zieltyp registriert ist, der `:`-Zusatz nur an `hkf-link` und `hkf-file`
+steht und alle Alternativen dieselbe Wertform haben.
+
 `--strict` meldet zusätzlich undeklarierte Properties, je Typ und Name
 zusammengefasst — `maschine: designed_year in 2 von 2 Notizen`. Wenige Notizen
 sind meist ein Versehen; fast alle bedeuten, die Property gehört in die
@@ -222,9 +229,6 @@ Kopien zu führen. Sie findet den Harness über `HKF_HARNESS`, sonst nebenan.
 
 - **Vorschläge aus unbelegten Properties** (§6.1 Schritt 9, dritte
   Beobachtung).
-- **Die Property-Tabellen gegen die Werte der Notizen** — Pflichtangaben,
-  `pattern`, `values`, `min`, `max`, Zieltyp bei `hkf-link`, Medienart bei
-  `hkf-file` (§6.3).
 - **`hk-lint` auf einem Bundle** statt auf einer Wissensbasis (§6.3).
 - **`HKF_BUNDLE_PATH`** — Vorgabeverzeichnis für Lieferungen; festlegen, wenn
   eine Lieferung öfter am selben Ort landet.

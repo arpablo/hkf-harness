@@ -24,6 +24,31 @@ def probe(name, bedingung, hinweis=""):
         fehler.append(name + ((" — " + hinweis) if hinweis else ""))
 
 
+def _tabellenfehler(ziel):
+    """Eine Typdefinition, die gegen §3.7.1 verstoesst, und Notizen dazu."""
+    os.makedirs(os.path.join(ziel, "dinge"), exist_ok=True)
+    io.open(os.path.join(ziel, "typedefs", "ding.md"), "w", encoding="utf-8").write(
+        "---\ntype: typedef\ntitle: Ding\ndescription: Ein Ding.\ndir: dinge\n"
+        "created: 2026-01-01\nmodified: 2026-01-01T00:00:00\n---\n\n"
+        "# Properties\n\n| Property | Typ | Pflicht | Beschreibung |\n"
+        "|---|---|---|---|\n"
+        "| menge | number | ja | Wie viele |\n"
+        "| netz | hkf-url | nein | Eine Adresse |\n"
+        "| kiste | hkf-link:kiste | nein | Zeigt auf eine Kiste |\n"
+        "| bild | hkf-file:image | nein | Ein Bild |\n"
+        "| krumm | hkf-krumm | nein | Gibt es nicht |\n"
+        "| falsch | hkf-url:person | nein | Zusatz am falschen Typ |\n"
+        "| gemischt | text / number | nein | Zwei Wertformen |\n")
+    io.open(os.path.join(ziel, "dinge", "eins.md"), "w", encoding="utf-8").write(
+        "---\ntype: ding\ntitle: Das Erste\ncreated: 2026-01-01\n"
+        "modified: 2026-01-01T00:00:00\nnetz: kein-url\n"
+        "kiste: \"[[dinge/zwei|Das Zweite]]\"\n"
+        "bild: \"[[dinge/zwei|Das Zweite]]\"\n---\n\nEins.\n")
+    io.open(os.path.join(ziel, "dinge", "zwei.md"), "w", encoding="utf-8").write(
+        "---\ntype: ding\ntitle: Das Zweite\nmenge: 2\ncreated: 2026-01-01\n"
+        "modified: 2026-01-01T00:00:00\n---\n\nZwei.\n")
+
+
 def _kaputt(ziel):
     """Baut in eine frische Ablage ein, was --fix wieder gerade zieht."""
     import re as _re
@@ -153,6 +178,30 @@ def main():
         r = lauf(os.path.join(BIN, "hk-lint"), ziel, "--strict")
         probe("--strict fasst je Typ zusammen",
               "ding: menge" not in r.stdout, r.stdout)
+        shutil.rmtree(ziel)
+        lauf(os.path.join(BIN, "hk-init"), ziel, "--name", "Probe")
+
+        print("Property-Tabellen gegen die Werte")
+        shutil.rmtree(ziel)
+        lauf(os.path.join(BIN, "hk-init"), ziel, "--name", "Probe")
+        _tabellenfehler(ziel)
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        for was, muster in (
+                ("Pflichtangabe", "`menge` ist Pflicht und fehlt"),
+                ("pattern", "passt nicht auf das `pattern`"),
+                ("Zieltyp eines hkf-link", "zeigt auf `ding`, verlangt ist kiste"),
+                ("Medienart eines hkf-file", "zeigt auf keine Mediendatei"),
+                ("unbekannten Typ in der Tabelle",
+                 "weder Wertform noch Property-Typ"),
+                ("nicht registrierten Zieltyp", "ist nicht registriert"),
+                ("den :-Zusatz am falschen Typ", "`:`-Zusatz steht nur"),
+                ("Alternativen mit verschiedenen Wertformen",
+                 "verschiedene Wertformen")):
+            probe("meldet %s" % was, muster in r.stdout, r.stdout)
+        probe("und keine dieser Meldungen ist behebbar",
+              "menge" not in lauf(os.path.join(BIN, "hk-lint"), ziel,
+                                  "--fix").stdout.split("Korrigiert")[-1]
+              .split("Dateien geprüft")[0])
         shutil.rmtree(ziel)
         lauf(os.path.join(BIN, "hk-init"), ziel, "--name", "Probe")
 
