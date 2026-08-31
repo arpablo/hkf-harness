@@ -28,16 +28,16 @@ Das Format ist auf zwei Dokumente verteilt, weil es zwei Fragen beantwortet:
 - **HKF Core** — dieses Dokument. Wie eine Ablage funktioniert: Verzeichnisse,
   Wertformen, Verweise, Typdefinitionen als Bauform, das Bundle-Format und die
   drei Methoden. Es nennt **keine einzige konkrete Definition**.
-- **[HKF Config](HKF-Config-V1.0.md)** — das Inventar: fünfzehn
+- **[HKF Config](HKF-Config-V1.0.md)** — das Inventar: siebzehn
   Typdefinitionen und fünfzehn Property-Typen. Drei Typen und dreizehn
   Property-Typen davon bilden die Grundausstattung jeder Ablage; die übrigen
-  zwölf Typen und zwei Property-Typen kommen als Bundle `hkf-base` und sind
+  vierzehn Typen und zwei Property-Typen kommen als Bundle `hkf-base` und sind
   freiwillig.
 
 Konform ist eine Wissensbasis nach **Core** samt der Grundausstattung aus
 Config. Wer nur das erfüllt, hat eine leere, aber vollständige Ablage und
 definiert seine Typen selbst. Wer das Vokabular lädt, verpflichtet sich
-zusätzlich auf die dort festgelegte Bedeutung jener zwölf Typen — der Preis
+zusätzlich auf die dort festgelegte Bedeutung jener vierzehn Typen — der Preis
 dafür, dass Bundles zwischen fremden Wissensbasen austauschbar sind.
 
 Der Schnitt liegt zwischen **Mechanik und Inventar**. Dass eine Notiz in dem
@@ -1282,7 +1282,7 @@ können, bevor er irgendetwas anderes tut. Damit ist die Wissensbasis konform,
 wenn auch leer.
 
 Alles Weitere wird zugeladen. Das nächstliegende Bundle ist `hkf-base`, das
-Vokabular aus **HKF Config**: zwölf Typdefinitionen und die beiden Property-Typen,
+Vokabular aus **HKF Config**: vierzehn Typdefinitionen und die beiden Property-Typen,
 die nur mit ihnen Sinn ergeben. Notizen, Mediendateien, die Kern-Typen und die
 Property-Typen der Grundausstattung enthält es nicht — die hat die
 Wissensbasis bereits.

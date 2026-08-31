@@ -1,14 +1,14 @@
 ---
 type: specification
 title: HKF Config V1.0 — Typen und Property-Typen
-description: Fünfzehn Typdefinitionen und fünfzehn Property-Typen an einem Ort: die Grundausstattung jeder Wissensbasis und das Vokabular, das als Bundle dazukommt.
+description: Siebzehn Typdefinitionen und fünfzehn Property-Typen an einem Ort: die Grundausstattung jeder Wissensbasis und das Vokabular, das als Bundle dazukommt.
 status: draft
 ---
 
 # HKF Config V1.0
 
 Dieses Dokument enthält alles, was HKF konkret festlegt: **jede Typdefinition
-und jeden Property-Typ**. HKF Core beschreibt daneben nur noch, wie eine
+und jeden Property-Typ** — siebzehn und fünfzehn. HKF Core beschreibt daneben nur noch, wie eine
 Ablage funktioniert — Verzeichnisse, Wertformen, Verweise, Typdefinitionen als
 Bauform, das Bundle-Format, die drei Methoden — und verweist für jede einzelne
 Definition hierher.
@@ -29,7 +29,7 @@ Unterschied ist keiner des Rangs, sondern der Reihenfolge.
 
 | | Grundausstattung | Vokabular |
 |---|---|---|
-| Was | 3 Typdefinitionen (§3.1–3.3), 13 Property-Typen (§2.1) | 12 Typdefinitionen (§3.4–3.15), 2 Property-Typen (§2.2) |
+| Was | 3 Typdefinitionen (§3.1–3.3), 13 Property-Typen (§2.1) | 14 Typdefinitionen (§3.4–3.17), 2 Property-Typen (§2.2) |
 | Wie | wird **angelegt**, wenn die Ablage entsteht | wird **importiert**, als Bundle |
 | Pflicht | ja — ohne sie ist keine Ablage lesbar | nein, freiwillig |
 
@@ -176,8 +176,8 @@ ungültig machte.
 
 # 3. Typdefinitionen
 
-Fünfzehn Typen. Die ersten drei sind die **Kern-Typen** — ohne sie ließe sich
-keine Ablage beschreiben. Die zwölf danach sind das **Vokabular**: Gegenstände,
+Siebzehn Typen. Die ersten drei sind die **Kern-Typen** — ohne sie ließe sich
+keine Ablage beschreiben. Die vierzehn danach sind das **Vokabular**: Gegenstände,
 die in nahezu jeder Wissensbasis vorkommen, und die wenigen, mit denen eine
 Wissensbasis über sich selbst spricht.
 
@@ -189,6 +189,8 @@ Wissensbasis über sich selbst spricht.
 | `person` | `Persons` | Ein Mensch. |
 | `organisation` | `Organisations` | Eine Körperschaft: Unternehmen, Institut, Verein, Behörde. |
 | `place` | `Places` | Ein geographischer Ort. |
+| `city` | `Citys` | Eine Stadt. |
+| `country` | `Countrys` | Ein Staat. |
 | `event` | `Events` | Ein Geschehen zu einer bestimmten Zeit. |
 | `source` | `Sources` | Eine zitierbare Quelle: Buch, Aufsatz, Webseite, Vortrag. |
 | `term` | `Terms` | Ein definierter Begriff. |
@@ -335,7 +337,7 @@ description: Ein Mensch.
 | born_year | hkf-year | nein | — | Geburtsjahr, wenn kein vollständiges Datum bekannt ist |
 | died | date | nein | — | Sterbedatum |
 | died_year | hkf-year | nein | — | Sterbejahr, wenn kein vollständiges Datum bekannt ist |
-| birthplace | hkf-link:place | nein | — | Geburtsort |
+| birthplace | hkf-link:place,city,country | nein | — | Geburtsort |
 | p_categories | hkf-person-category-list | nein | — | Rollen der Person |
 | affiliations | hkf-link-list:organisation | nein | — | Zugehörigkeiten |
 | homepage | hkf-url | nein | — | Persönliche Webseite |
@@ -369,7 +371,7 @@ description: 'Eine Körperschaft: Unternehmen, Institut, Verein, Behörde.'
 | dissolved | date | nein | — | Auflösungsdatum |
 | dissolved_year | hkf-year | nein | — | Auflösungsjahr, wenn kein Datum bekannt ist |
 | o_categories | hkf-organisation-category-list | nein | — | Art der Körperschaft |
-| seat | hkf-link:place | nein | — | Sitz |
+| seat | hkf-link:place,city,country | nein | — | Sitz |
 | parent | hkf-link:organisation | nein | — | Übergeordnete Körperschaft |
 | homepage | hkf-url | nein | — | Webseite |
 | email | hkf-email | nein | — | Kontaktadresse |
@@ -400,7 +402,7 @@ description: Ein geographischer Ort.
 | longitude | hkf-longitude | nein | — | Geographische Länge |
 | country | hkf-country | nein | — | Staat |
 | address | text | nein | — | Anschrift in einer Zeile |
-| part_of | hkf-link:place | nein | — | Übergeordneter Ort |
+| part_of | hkf-link:place,city,country | nein | — | Übergeordneter Ort |
 | image | hkf-file:image / hkf-url | nein | — | Ansicht, als Datei in der Ablage oder als Adresse im Netz |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
@@ -427,7 +429,7 @@ description: Ein Geschehen zu einer bestimmten Zeit.
 | date | date | nein | — | Tag, wenn keine Uhrzeit bekannt ist |
 | starts_at | datetime | nein | — | Beginn |
 | ends_at | datetime | nein | — | Ende |
-| location | hkf-link:place | nein | — | Veranstaltungsort |
+| location | hkf-link:place,city,country | nein | — | Veranstaltungsort |
 | organizer | hkf-link:person,organisation | nein | — | Ausrichter |
 | participants | hkf-link-list:person,organisation | nein | — | Beteiligte |
 | cancelled | checkbox | nein | false | Abgesagt |
@@ -700,6 +702,79 @@ noch aufheben.
 jede Notiz dieses Typs. Ohne `applies_to` gilt er für die ganze Wissensbasis.
 ```
 
+## 3.16 `city`
+
+```markdown
+---
+type: typedef
+title: Stadt
+description: Eine Stadt.
+---
+
+# Properties
+
+| Property | Typ | Pflicht | Vorgabe | Beschreibung |
+|---|---|---|---|---|
+| latitude | hkf-latitude | nein | — | Geographische Breite |
+| longitude | hkf-longitude | nein | — | Geographische Länge |
+| country | hkf-link:country | nein | — | Staat, in dem die Stadt liegt |
+| part_of | hkf-link:place,country | nein | — | Übergeordnete Einheit, etwa Region, Provinz oder Staat |
+| founded_year | hkf-year | nein | — | Jahr der Gründung, soweit überliefert |
+| image | hkf-file:image / hkf-url | nein | — | Ansicht, als Datei in der Ablage oder als Adresse im Netz |
+| wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+
+# Konventionen
+
+Eine Stadt ist ein Ort, aber **HKF kennt keine Untertypen** (Core §3.7.1):
+`hkf-link:place` nimmt keine `city` an. Wo ein Verweis beides zulassen soll,
+werden beide genannt — `birthplace`, `seat`, `location` und `part_of` tun das
+und schreiben `hkf-link:place,city,country`.
+
+Wer die Unterscheidung nicht braucht, führt `city` nicht und legt Städte als
+`place` ab. Wer sie führt, entscheidet einmal und bleibt dabei: Dieselbe Stadt
+zweimal, einmal als `place` und einmal als `city`, sind für jedes Werkzeug
+zwei Gegenstände.
+
+`latitude` und `longitude` werden nur gemeinsam gesetzt.
+```
+
+## 3.17 `country`
+
+```markdown
+---
+type: typedef
+title: Staat
+description: Ein Staat.
+---
+
+# Properties
+
+| Property | Typ | Pflicht | Vorgabe | Beschreibung |
+|---|---|---|---|---|
+| code | hkf-country | nein | — | Kennung nach ISO 3166-1 alpha-2, etwa `DE` |
+| capital | hkf-link:city | nein | — | Hauptstadt |
+| founded_year | hkf-year | nein | — | Jahr der Staatsgründung |
+| dissolved_year | hkf-year | nein | — | Jahr des Untergangs, wenn der Staat nicht mehr besteht |
+| flag | hkf-file:image / hkf-url | nein | — | Flagge, als Datei in der Ablage oder als Adresse im Netz |
+| wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+
+# Konventionen
+
+`code` und der Property-Typ `hkf-country` sagen dasselbe auf zwei Wegen, und
+beide werden gebraucht. `place` trägt die Kennung unmittelbar, weil ein Ort in
+einem Staat liegen kann, zu dem die Wissensbasis keine Notiz führt. Führt sie
+eine, verweist sie darauf — und `code` verbindet die beiden Schreibweisen.
+
+`dissolved_year` macht den Typ für historische Bestände brauchbar: Ein Staat,
+der untergegangen ist, bleibt der Staat, in dem jemand geboren wurde. Er wird
+nicht gelöscht und nicht durch seinen Nachfolger ersetzt.
+
+Ein Staat ist kein `organisation`. Die Regierung eines Staates ist eine
+Körperschaft und bekommt eine eigene Notiz.
+```
+
 ---
 
 # 4. Konformität
@@ -709,7 +784,7 @@ Eine Wissensbasis führt HKF Config konform, wenn
 1. sie HKF Core 1.0 erfüllt,
 2. die drei Kern-Typen aus §3.1 bis §3.3 und die dreizehn Property-Typen aus
    §2.1 vorhanden sind und der dortigen Fassung entsprechen,
-3. jeder geführte Typ aus §3.4 bis §3.15 der dortigen Fassung entspricht —
+3. jeder geführte Typ aus §3.4 bis §3.17 der dortigen Fassung entspricht —
    Verzeichnis, Property-Namen und deren Typangaben,
 4. kein Typ dieses Dokuments ein `dir` trägt,
 5. die beiden Property-Typen aus §2.2 vorhanden sind, sofern ein geführter Typ
@@ -717,7 +792,7 @@ Eine Wissensbasis führt HKF Config konform, wenn
 6. die Bundle-Notiz die Fassung nennt, in der das Vokabular übernommen wurde.
 
 Die Punkte 1 und 2 gelten für jede Ablage. Die übrigen betreffen nur, was
-zugeladen wurde: Eine Wissensbasis darf einzelne Typen aus §3.4 bis §3.15
+zugeladen wurde: Eine Wissensbasis darf einzelne Typen aus §3.4 bis §3.17
 führen und andere weglassen. Sie darf keinen davon abwandeln; wer mehr
 braucht, legt einen eigenen Typ daneben (Core §3.7).
 
