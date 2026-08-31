@@ -4,7 +4,11 @@
 
     hk-lint [pfad] [--fix] [--strict]
 
-Ohne Pfad gilt $HKB_PATH, sonst ~/hkb.
+Ohne Pfad gilt $HKB_PATH, sonst ~/hkb. Geprueft wird eine Wissensbasis
+(`hkb.md`) oder eine Lieferung (`hbundle.md`) — §6.3 gilt fuer beide, mit
+den Unterschieden, die §4 und §7.1 machen: Ein Bundle hat keine
+Typverzeichnisse, seine Notizen liegen, wo sie wollen, und `bundles` und
+`rejected_links` stehen dort nicht.
 
     --fix      die elf Handgriffe aus §6.3 ausfuehren und danach erneut pruefen
     --strict   zusaetzlich undeklarierte Properties melden, je Typ zusammengefasst
@@ -23,10 +27,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..
 from hkf import (CORE, ablage, fassung, frontmatter, grammatik,   # noqa: E402
                  korrigieren, pruefen as pruefmodul, schema)
 
-FEHLT = """Noch nicht umgesetzt (§6.3): `hk-lint` auf einem Bundle statt auf
-einer Wissensbasis — dort entfallen die Typverzeichnisse, und geprueft wird
-stattdessen, dass keine zwei Notizen desselben Typs denselben Dateinamen
-tragen (§4.3)."""
+FEHLT = """Alle Pruefungen aus §6.3 sind umgesetzt."""
 
 
 def main(argv):
@@ -36,11 +37,16 @@ def main(argv):
     fix = "--fix" in argv
     args = [a for a in argv if not a.startswith("-")]
     try:
-        hkb = ablage.finde(args[0] if args else None)
+        hkb, art = ablage.finde_ablage(args[0] if args else None)
     except ablage.KeineAblage as e:
         sys.stderr.write(str(e) + "\n"); return 2
 
-    print("%s%s" % (hkb, " — mit --fix" if fix else ""))
+    print("%s — %s%s" % (hkb, "Wissensbasis" if art == "hkb" else "Lieferung",
+                         ", mit --fix" if fix else ""))
+    if fix and art != "hkb":
+        sys.stderr.write("--fix gilt nur für eine Wissensbasis; eine Lieferung "
+                         "wird gelesen, nicht geändert (§6.2).\n")
+        return 2
     if fix:
         getan = korrigieren.korrigieren(hkb)
         print()
@@ -51,8 +57,9 @@ def main(argv):
 
     wurzel = schema.laden()
     fm_befunde, gr_befunde = [], []
-    ihre = frontmatter.lesen(os.path.join(hkb, "hkb.md"))[0].get("hkf")
-    if not fassung.lesbar(ihre):
+    ihre = frontmatter.lesen(os.path.join(
+        hkb, "hkb.md" if art == "hkb" else "hbundle.md"))[0].get("hkf")
+    if ihre is not None and not fassung.lesbar(ihre):
         fm_befunde.append("hkb.md: %s. Der Harness prüft gegen Regeln, die "
                           "diese Ablage nicht meint." % fassung.satz(ihre))
     geprueft = 0
@@ -65,15 +72,15 @@ def main(argv):
             continue
         if not daten:
             continue                      # keine Notiz, keine Wurzeldatei
-        art = schema.einstieg(p)
-        if art == "notiz" and "type" not in daten:
+        form = schema.einstieg(p)
+        if form == "notiz" and "type" not in daten:
             continue                      # §4.3: ohne `type` keine Notiz
         geprueft += 1
-        for b in schema.pruefen(daten, wurzel["$defs"][art], wurzel):
+        for b in schema.pruefen(daten, wurzel["$defs"][form], wurzel):
             fm_befunde.append("%s: %s" % (rel, b))
         grammatik.pruefe_datei(p, gr_befunde, name=rel)
 
-    bestand, struktur = pruefmodul.pruefen(hkb)
+    bestand, struktur = pruefmodul.pruefen(hkb, art)
     fehler = [b for b in struktur if b.grad == pruefmodul.FEHLER]
     hinweise = [b for b in struktur if b.grad == pruefmodul.HINWEIS]
 

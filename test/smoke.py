@@ -24,6 +24,27 @@ def probe(name, bedingung, hinweis=""):
         fehler.append(name + ((" — " + hinweis) if hinweis else ""))
 
 
+def _lieferung_kaputt(bundle):
+    """Was §7.1 einer Lieferung verbietet."""
+    io.open(os.path.join(bundle, "hbundle.md"), "a", encoding="utf-8").write(
+        "\n# Import 1\n\nGehoert der aufnehmenden Wissensbasis.\n")
+    io.open(os.path.join(bundle, "dinge", "eins.md"), "a", encoding="utf-8")
+    p = os.path.join(bundle, "dinge", "eins.md")
+    t = io.open(p, encoding="utf-8").read()
+    io.open(p, "w", encoding="utf-8").write(
+        t.replace("---\n\n", "bundles:\n  - \"[[bundles/probe|Probe]]\"\n---\n\n", 1))
+    os.makedirs(os.path.join(bundle, "woanders"), exist_ok=True)
+    io.open(os.path.join(bundle, "woanders", "zwei.md"), "w",
+            encoding="utf-8").write(
+        "---\ntype: ding\ntitle: Noch ein Zweites\n"
+        "modified: 2026-01-01T00:00:00\n---\n\nDoppelter Dateiname.\n")
+    io.open(os.path.join(bundle, "typedefs", "kiste.md"), "w",
+            encoding="utf-8").write(
+        "---\ntype: typedef\nprovisional: true\n"
+        "description: Vorläufig, gehört nicht in eine Lieferung.\n"
+        "modified: 2026-01-01T00:00:00\n---\n")
+
+
 def _tabellenfehler(ziel):
     """Eine Typdefinition, die gegen §3.7.1 verstoesst, und Notizen dazu."""
     os.makedirs(os.path.join(ziel, "dinge"), exist_ok=True)
@@ -295,6 +316,24 @@ def main():
                        encoding="utf-8").read().strip()
         probe("spec.py sagt, unter welchem Python der Harness steht",
               ("Python %s aus %s" % (soll, hkf_venv())) in r.stdout, r.stdout)
+
+        print("hk-lint auf einer Lieferung")
+        r = lauf(os.path.join(BIN, "hk-lint"), bundle)
+        probe("erkennt eine Lieferung an hbundle.md",
+              "— Lieferung" in r.stdout and r.returncode == 0, r.stdout)
+        r = lauf(os.path.join(BIN, "hk-lint"), bundle, "--fix")
+        probe("--fix gilt dort nicht", r.returncode == 2, r.stdout + r.stderr)
+        _lieferung_kaputt(bundle)
+        r = lauf(os.path.join(BIN, "hk-lint"), bundle)
+        for was, muster in (
+                ("bundles in einer Lieferung", "in einem Bundle steht es nicht"),
+                ("zwei Notizen mit derselben Notiz-ID", "dieselbe Notiz-ID"),
+                ("eine vorläufige Typdefinition",
+                 "keine vorläufige Typdefinition"),
+                ("den Importnachweis", "weder Import- noch Entscheidungsnachweis")):
+            probe("meldet %s" % was, muster in r.stdout, r.stdout)
+        shutil.rmtree(bundle)
+        _bundle_bauen(bundle)
 
         print("hk-export")
         aus = os.path.join(os.path.dirname(bundle), "wieder-raus")

@@ -11,7 +11,7 @@ aber nicht ungueltig.
 """
 import io, os, re
 
-from . import ablage, frontmatter, notiz
+from . import TEMPLATES, ablage, frontmatter, notiz
 from .importieren import (ARTVERZEICHNIS, KERN_TYPEN, STANDARD_PROPTYPES,
                           _property_tabelle, _verzeichnis)
 
@@ -39,45 +39,90 @@ class Befund(object):
 
 
 class Bestand(object):
-    """Was mehrere Pruefungen brauchen, einmal gelesen."""
+    """Was mehrere Pruefungen brauchen, einmal gelesen.
 
-    def __init__(self, hkb):
+    `art` ist "hkb" oder "bundle". Ein Bundle hat keine Typverzeichnisse,
+    keinen Ablagepfad und keinen Basispfad (§4); als Notiz gilt dort, was
+    `type` traegt, gleich wo es liegt, und eine Mediendatei erkennt man an
+    ihrer Endung (§4.3).
+    """
+
+    def __init__(self, hkb, art="hkb"):
         self.hkb = hkb
-        self.basis = ablage.basis(hkb)
-        self.ablagepfad = ablage.ablagepfad(hkb)
+        self.art = art
+        wurzeldatei = "hkb.md" if art == "hkb" else "hbundle.md"
         self.wurzel, self.wurzel_body = frontmatter.lesen(
-            os.path.join(hkb, "hkb.md"))
-        self.media_basis = str(self.wurzel.get("media_base") or "").strip("/")
-        self.base = str(self.wurzel.get("base") or "").strip("/")
-        self.notizen = {}
-        self.typdefs = {}
-        self.proptypes = {}
+            os.path.join(hkb, wurzeldatei))
+        self.notizen, self.typdefs, self.proptypes = {}, {}, {}
+        self.medien = set()
+        if art == "hkb":
+            self.basis = ablage.basis(hkb)
+            self.ablagepfad = ablage.ablagepfad(hkb)
+            self.media_basis = str(self.wurzel.get("media_base") or "").strip("/")
+            self.base = str(self.wurzel.get("base") or "").strip("/")
+            self._hkb_lesen()
+        else:
+            self.basis, self.ablagepfad = hkb, ""
+            self.media_basis, self.base = "", ""
+            self._bundle_lesen()
+        self.nach_namen = {}
+        for rel in self.notizen:
+            self.nach_namen.setdefault(rel.rsplit("/", 1)[-1], []).append(rel)
+        self.medien_namen = {}
+        for rel in self.medien:
+            self.medien_namen.setdefault(rel.rsplit("/", 1)[-1], []).append(rel)
+
+    def _eintrag(self, p, rel):
+        daten, body = frontmatter.lesen(p)
+        kopf = notiz.teilen(io.open(p, encoding="utf-8").read())[0]
+        return {"pfad": p, "rel": rel, "daten": daten, "body": body,
+                "kopf": kopf, "typ": str(daten.get("type") or "")}
+
+    def _hkb_lesen(self):
         for p in ablage.dateien(self.basis):
             rel = os.path.relpath(p, self.basis).replace(os.sep, "/")
             if "/" not in rel:
                 continue
-            daten, body = frontmatter.lesen(p)
-            if "type" not in daten:
+            e = self._eintrag(p, rel)
+            if not e["typ"]:
                 continue
-            kopf = notiz.teilen(io.open(p, encoding="utf-8").read())[0]
-            e = {"pfad": p, "rel": rel, "daten": daten, "body": body,
-                 "kopf": kopf, "typ": str(daten["type"])}
             self.notizen[rel[:-3]] = e
             verz, name = rel.split("/", 1)
             if verz == "typedefs":
                 self.typdefs[name[:-3]] = e
             elif verz == "proptypes":
                 self.proptypes[name[:-3]] = e
-        self.medien = set()
-        mb = os.path.join(hkb, self.media_basis) if self.media_basis else hkb
+        mb = os.path.join(self.hkb, self.media_basis) if self.media_basis else self.hkb
         for art in ARTVERZEICHNIS.values():
-            d = os.path.join(mb, art)
-            for r, _dirs, fs in os.walk(d):
+            for r, _dirs, fs in os.walk(os.path.join(mb, art)):
                 for f in fs:
                     if f.startswith("."):
                         continue
                     rel = os.path.relpath(os.path.join(r, f), self.hkb)
                     self.medien.add(rel.replace(os.sep, "/"))
+
+    def _bundle_lesen(self):
+        """§4.3: eine `.md` mit `type` ist eine Notiz, alles andere Medium."""
+        for r, dirs, fs in os.walk(self.hkb):
+            dirs[:] = sorted(d for d in dirs if not d.startswith("."))
+            for f in sorted(fs):
+                if f.startswith("."):
+                    continue
+                p = os.path.join(r, f)
+                rel = os.path.relpath(p, self.hkb).replace(os.sep, "/")
+                if not f.endswith(".md"):
+                    self.medien.add(rel)
+                    continue
+                if rel == "hbundle.md":
+                    continue
+                e = self._eintrag(p, rel)
+                if not e["typ"]:
+                    continue                  # uebergangen, nicht bemaengelt
+                self.notizen[rel[:-3]] = e
+                if e["typ"] == "typedef":
+                    self.typdefs[f[:-3]] = e
+                elif e["typ"] == "proptype":
+                    self.proptypes[f[:-3]] = e
 
     def praefix(self):
         return "/".join(t for t in (self.ablagepfad, self.base) if t)
@@ -90,6 +135,21 @@ class Bestand(object):
 
     def aufloesen(self, ziel, aus_wurzeldatei=False):
         """(art, rest) — art ist 'notiz', 'medium' oder None."""
+        if self.art == "bundle":
+            # In einer Lieferung genuegt ein Ziel ohne Verzeichnis, solange
+            # genau eine Datei so heisst (§3.6).
+            if ziel in self.notizen:
+                return ("notiz", ziel)
+            if ziel in self.medien:
+                return ("medium", ziel)
+            for tabelle, name in ((self.nach_namen, "notiz"),
+                                  (self.medien_namen, "medium")):
+                treffer = tabelle.get(ziel) or []
+                if len(treffer) == 1:
+                    return (name, treffer[0])
+                if len(treffer) > 1:
+                    return ("mehrdeutig", ziel)
+            return (None, ziel)
         pre = self.praefix() if not aus_wurzeldatei else self.base
         if pre and ziel.startswith(pre + "/"):
             rest = ziel[len(pre) + 1:]
@@ -111,6 +171,8 @@ class Bestand(object):
 # ── Die Pruefungen ──────────────────────────────────────────────────────
 
 def _wurzeldatei(b, befunde):
+    if b.art != "hkb":
+        return
     if not b.wurzel.get("hkf"):
         befunde.append(Befund("hkb.md", "`hkf` fehlt (§3.1)."))
     if not b.wurzel.get("name"):
@@ -124,6 +186,8 @@ def _wurzeldatei(b, befunde):
 
 
 def _typen(b, befunde):
+    if b.art != "hkb":
+        return
     verz = b.verzeichnisse()
     for d, namen in sorted(verz.items()):
         if len(namen) > 1:
@@ -159,6 +223,10 @@ def _vorlaeufige(b, befunde):
             befunde.append(Befund(e["rel"], "`provisional` trägt %r; erlaubt ist "
                                             "nur `true` (§5.4)." % vor))
             continue
+        if b.art == "bundle":
+            befunde.append(Befund(e["rel"], "Ein Bundle enthält keine vorläufige "
+                                            "Typdefinition (§7.1)."))
+            continue
         d = _verzeichnis(name, e["daten"])
         anzahl = sum(1 for r, n in b.notizen.items() if n["typ"] == name)
         befunde.append(Befund(e["rel"], "Der Typ `%s` ist vorläufig; %d Notizen "
@@ -176,10 +244,15 @@ def _vorlaeufige(b, befunde):
 
 
 def _proptypes(b, befunde):
-    fehlen = sorted(STANDARD_PROPTYPES - set(b.proptypes))
-    for name in fehlen:
-        befunde.append(Befund("proptypes/", "Der Standard-Property-Typ `%s` fehlt "
-                                            "(§3.5.1)." % name))
+    if b.art == "hkb":
+        for name in sorted(STANDARD_PROPTYPES - set(b.proptypes)):
+            befunde.append(Befund("proptypes/", "Der Standard-Property-Typ `%s` "
+                                                "fehlt (§3.5.1)." % name))
+    else:
+        for name in sorted(STANDARD_PROPTYPES & set(b.proptypes)):
+            befunde.append(Befund(b.proptypes[name]["rel"],
+                                  "Ein Bundle definiert keinen "
+                                  "Standard-Property-Typ um (§7.1)."))
     for name, e in sorted(b.proptypes.items()):
         if name in WERTFORMEN:
             befunde.append(Befund(e["rel"], "Für eine Wertform wird kein "
@@ -198,9 +271,11 @@ def _proptypes(b, befunde):
 def _zeiten(b, befunde):
     for rel, e in sorted(b.notizen.items()):
         d = e["daten"]
-        for feld in ("created", "modified"):
-            if feld not in d:
-                befunde.append(Befund(e["rel"], "`%s` fehlt (§6.3)." % feld, HINWEIS))
+        if b.art == "hkb":
+            for feld in ("created", "modified"):
+                if feld not in d:
+                    befunde.append(Befund(e["rel"], "`%s` fehlt (§6.3)." % feld,
+                                          HINWEIS))
         c, m = str(d.get("created") or ""), str(d.get("modified") or "")
         if c and m and m[:10] < c[:10]:
             befunde.append(Befund(e["rel"], "`modified` (%s) liegt vor `created` "
@@ -216,6 +291,13 @@ def _leere_properties(b, befunde):
             if v is None or (isinstance(v, (list, dict, str)) and len(v) == 0):
                 grad = FEHLER if k in ("bundles", "rejected_links") else HINWEIS
                 befunde.append(Befund(e["rel"], "`%s` ist leer (§3.4)." % k, grad))
+        if b.art == "bundle":
+            for k in ("bundles", "rejected_links"):
+                if k in e["daten"]:
+                    befunde.append(Befund(e["rel"], "`%s` beschreibt, wie eine "
+                                          "Wissensbasis die Lieferung einsortiert "
+                                          "hat; in einem Bundle steht es nicht "
+                                          "(§7.1)." % k))
 
 
 def _verweise(b, befunde):
@@ -224,7 +306,10 @@ def _verweise(b, befunde):
         for m in LINK.finditer(text):
             ziel, alias = m.group(1), m.group(2)
             art, rest = b.aufloesen(ziel)
-            if art is None:
+            if art == "mehrdeutig":
+                befunde.append(Befund(e["rel"], "[[%s]] ist mehrdeutig — mehrere "
+                                      "Dateien heißen so (§3.6)." % ziel))
+            elif art is None:
                 befunde.append(Befund(e["rel"], "[[%s]] lässt sich nicht auflösen "
                                                 "(§3.6)." % ziel))
             elif art == "medium" and rest not in b.medien:
@@ -233,7 +318,7 @@ def _verweise(b, befunde):
             if alias is None:
                 befunde.append(Befund(e["rel"], "[[%s]] trägt keinen Alias (§3.6)."
                                       % ziel, HINWEIS))
-        if "/" in rel and rel.split("/", 1)[0] == "bundles":
+        if b.art != "hkb" or rel.split("/", 1)[0] == "bundles":
             continue
         for l in e["daten"].get("bundles") or []:
             m = re.match(r"^\[\[([^\]|]+)", str(l))
@@ -247,6 +332,8 @@ def _verweise(b, befunde):
 
 def _typtabelle(b, befunde):
     """Die abgeleitete Tabelle gegen die Typdefinitionen (§3.1)."""
+    if b.art != "hkb":
+        return
     ist = {}
     teil = notiz.abschnitt(b.wurzel_body, "Typen") or ""
     for zeile in teil.splitlines():
@@ -300,7 +387,7 @@ def _siehe_auch(b, befunde):
             if any(ziel in x for x in abgelehnt):
                 befunde.append(Befund(e["rel"], "%s steht zugleich unter `# Siehe "
                                       "auch` und in `rejected_links` (§5.6)." % link))
-            if not any(ziel in x for x in verwandt):
+            if b.art == "hkb" and not any(ziel in x for x in verwandt):
                 andere = notiz.entfernen(notiz.entfernen(
                     e["kopf"], "related"), "rejected_links")
                 if ziel not in andere:
@@ -309,7 +396,7 @@ def _siehe_auch(b, befunde):
         if aliase != sorted(aliase):
             befunde.append(Befund(e["rel"], "Die Einträge unter `# Siehe auch` stehen "
                                             "nicht alphabetisch (§5.6).", HINWEIS))
-        for ziel, link in ziele:
+        for ziel, link in (ziele if b.art == "hkb" else []):
             art, rest = b.aufloesen(ziel)
             if art != "notiz":
                 continue
@@ -327,6 +414,8 @@ def _siehe_auch(b, befunde):
 
 
 def _bundle_notizen(b, befunde):
+    if b.art != "hkb":
+        return
     for rel, e in sorted(b.notizen.items()):
         if not rel.startswith("bundles/") or e["typ"] != "bundle":
             continue
@@ -403,6 +492,8 @@ def _wikidata(b, befunde):
 
 
 def _verwaist(b, befunde):
+    if b.art != "hkb":
+        return
     zeigt_auf = set()
     for rel, e in sorted(b.notizen.items()):
         for m in LINK.finditer(notiz.bauen(e["kopf"], ohne_code(e["body"]))):
@@ -445,14 +536,6 @@ PRUEFUNGEN = (_wurzeldatei, _typen, _vorlaeufige, _proptypes, _zeiten,
               _bundle_notizen, _wikidata, _verwaist)
 
 
-def pruefen(hkb):
-    b = Bestand(hkb)
-    befunde = []
-    for f in PRUEFUNGEN:
-        f(b, befunde)
-    return b, befunde
-
-
 # ── Die Property-Tabellen gegen die Werte (§3.7.1, §6.3) ────────────────
 
 WERTFORMEN = ("text", "list", "number", "checkbox", "date", "datetime")
@@ -477,10 +560,28 @@ def _wertform(b, basis, liste):
     """Die Wertform hinter einer Typ-Angabe, oder None, wenn unbekannt."""
     if basis in WERTFORMEN:
         return "list" if liste else basis
-    e = b.proptypes.get(basis)
-    if e is None:
+    d = _proptype_daten(b, basis)
+    if d is None:
         return None
-    return "list" if liste else str(e["daten"].get("form") or "")
+    return "list" if liste else str(d.get("form") or "")
+
+
+def _proptype_daten(b, name):
+    """Das Frontmatter eines Property-Typs — auch wenn er nicht beiliegt.
+
+    Eine Lieferung schickt die Standard-Property-Typen nicht mit (§7.1); jede
+    Wissensbasis hat sie ohnehin. Der Harness kennt sie aus seiner Vorlage und
+    kann eine Lieferung darum pruefen, ohne dass sie ihm etwas mitgibt.
+    """
+    e = b.proptypes.get(name)
+    if e is not None:
+        return e["daten"]
+    if name not in STANDARD_PROPTYPES:
+        return None
+    p = os.path.join(TEMPLATES, "hkb", "proptypes", name + ".md")
+    if not os.path.isfile(p):
+        return None
+    return frontmatter.lesen(p)[0]
 
 
 def _form_passt(wert, form):
@@ -504,10 +605,9 @@ def _skalar_passt(b, wert, basis, args):
     if basis in WERTFORMEN:
         return (_form_passt(wert, basis),
                 "ist kein %s" % basis)
-    e = b.proptypes.get(basis)
-    if e is None:
+    d = _proptype_daten(b, basis)
+    if d is None:
         return True, ""                       # der Typ selbst wird eigens gemeldet
-    d = e["daten"]
     form = str(d.get("form") or "text")
     if not _form_passt(wert, form):
         return False, "ist kein %s (%s verlangt es)" % (form, basis)
@@ -630,6 +730,8 @@ def _werte(b, befunde):
 
 def _medienverzeichnisse(b, befunde):
     """Unter media_base liegen nur die vier Arten (§3.2.1)."""
+    if b.art != "hkb":
+        return
     mb = os.path.join(b.hkb, b.media_basis) if b.media_basis else b.hkb
     if not b.media_basis or not os.path.isdir(mb):
         return
@@ -646,3 +748,105 @@ def _medienverzeichnisse(b, befunde):
 
 
 PRUEFUNGEN = PRUEFUNGEN + (_typangaben, _werte, _medienverzeichnisse)
+
+
+# ── Was nur für ein Bundle gilt (§4, §7.1) ──────────────────────────────
+
+def _lieferung(b, befunde):
+    if b.art != "bundle":
+        return
+    d = b.wurzel
+    if not d.get("id"):
+        befunde.append(Befund("hbundle.md", "`id` fehlt (§4.1)."))
+    elif not re.match(r"^[a-z][a-z0-9-]*$", str(d["id"])):
+        befunde.append(Befund("hbundle.md", "`id` ist nicht kebab-case (§4.1)."))
+    if not d.get("description"):
+        befunde.append(Befund("hbundle.md", "`description` fehlt (§4.1)."))
+    if "hkf" not in d:
+        befunde.append(Befund("hbundle.md", "Die Lieferung nennt keine Fassung; "
+                              "die aufnehmende Wissensbasis liest sie nach ihrer "
+                              "eigenen (§8).", HINWEIS))
+    if not d.get("version"):
+        befunde.append(Befund("hbundle.md", "`version` fehlt; die Lieferung hat "
+                              "dann keine Geschichte, nur einen letzten Stand "
+                              "(§5.1).", HINWEIS))
+    for eintrag in d.get("required_bundles") or []:
+        m = re.match(r"^\s*([a-z][a-z0-9-]*)\s*(?:>=\s*(\d+\.\d+))?\s*$",
+                     str(eintrag))
+        if not m:
+            befunde.append(Befund("hbundle.md", "`required_bundles`: %r hat nicht "
+                                  "die Form aus §4.1." % eintrag))
+        elif m.group(1) == str(d.get("id") or ""):
+            befunde.append(Befund("hbundle.md", "`required_bundles` setzt das "
+                                                "eigene Bundle voraus (§6.3)."))
+    for schluessel in ("imported",):
+        if schluessel in d:
+            befunde.append(Befund("hbundle.md", "`%s` gehört der aufnehmenden "
+                                  "Wissensbasis, nicht der Lieferung (§5.1)."
+                                  % schluessel))
+    for ueberschrift in ("Import", "Entscheidungen"):
+        if re.search(r"^# %s\b" % ueberschrift, b.wurzel_body, re.M):
+            befunde.append(Befund("hbundle.md", "Ein Bundle trägt weder Import- "
+                                  "noch Entscheidungsnachweis (§7.1)."))
+            break
+
+    # §4.1: eine zweite Notiz mit `type: bundle` gehört nicht in ein Bundle
+    for rel, e in sorted(b.notizen.items()):
+        if e["typ"] == "bundle":
+            befunde.append(Befund(e["rel"], "Eine zweite Notiz vom Typ `bundle` "
+                                            "gehört nicht in eine Lieferung (§4.1)."))
+
+    # §4.3: zwei Notizen desselben Typs mit demselben Dateinamen faelen beim
+    # Import zu einer Notiz-ID zusammen
+    gesehen = {}
+    for rel, e in sorted(b.notizen.items()):
+        schluessel = (e["typ"], rel.rsplit("/", 1)[-1])
+        if schluessel in gesehen:
+            befunde.append(Befund(e["rel"], "ergäbe beim Import dieselbe Notiz-ID "
+                                  "wie %s (§4.3)." % gesehen[schluessel]))
+        gesehen[schluessel] = e["rel"]
+
+    # §7.1: jede verwendete Typdefinition und jeder Property-Typ liegt bei,
+    # sofern nicht Grundausstattung oder aus einem vorausgesetzten Bundle
+    vorausgesetzt = bool(b.wurzel.get("required_bundles"))
+    fehlend = sorted({e["typ"] for e in b.notizen.values()} - set(b.typdefs)
+                     - KERN_TYPEN)
+    def melde_fehlend(mehrzahl, einzahl, namen):
+        if not namen:
+            return
+        if vorausgesetzt:
+            # §6.1: Ein Werkzeug weiss nicht, welche Typen ein Bundle
+            # mitbraechte, das es nicht hat.
+            befunde.append(Befund("hbundle.md",
+                                  "%s %s liegen nicht bei; sie müssen aus einem "
+                                  "vorausgesetzten Bundle kommen (§7.1)."
+                                  % (mehrzahl, ", ".join("`%s`" % n for n in namen)),
+                                  HINWEIS))
+        else:
+            for n in namen:
+                befunde.append(Befund("hbundle.md",
+                                      "%s `%s` wird verwendet, aber weder "
+                                      "geliefert noch vorausgesetzt (§7.1)."
+                                      % (einzahl, n)))
+
+    melde_fehlend("Die Typen", "Der Typ", fehlend)
+    gebraucht = set()
+    for name, e in b.typdefs.items():
+        for _prop, (angabe, _p) in _property_tabelle(e["body"]).items():
+            for teil in re.split(r"\s*/\s*", angabe):
+                basis, _liste, _args = zerlege(teil)
+                if basis not in WERTFORMEN:
+                    gebraucht.add(basis)
+    melde_fehlend("Die Property-Typen", "Der Property-Typ",
+                  sorted(gebraucht - set(b.proptypes) - STANDARD_PROPTYPES))
+
+
+PRUEFUNGEN = PRUEFUNGEN + (_lieferung,)
+
+
+def pruefen(hkb, art="hkb"):
+    b = Bestand(hkb, art)
+    befunde = []
+    for f in PRUEFUNGEN:
+        f(b, befunde)
+    return b, befunde

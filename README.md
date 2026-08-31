@@ -41,11 +41,19 @@ Gebraucht werden Python 3 und PyYAML (`pip3 install pyyaml`).
 | | | |
 |---|---|---|
 | `hk-init <ziel>` | legt eine Wissensbasis an: Grundausstattung, Obsidian-Konfiguration, README, `.gitignore`, `git init` und ein erster Commit | **läuft** |
-| `hk-lint [--fix] [--strict]` | prüft die Ablage (§6.3): Frontmatter gegen Anhang B.4, Grammatik gegen Anhang B, dazu die strukturellen Prüfungen; `--fix` führt die elf erlaubten Handgriffe aus | **läuft** |
+| `hk-lint [--fix] [--strict]` | prüft eine Wissensbasis **oder eine Lieferung** (§6.3): Frontmatter gegen Anhang B.4, Grammatik gegen Anhang B, dazu die strukturellen Prüfungen; `--fix` führt die elf erlaubten Handgriffe aus | **läuft** |
 | `hk-import <bundle>` | übernimmt eine Lieferung (§6.1): Typen abgleichen, Notizen und Mediendateien einsortieren, Verweise umschreiben, verknüpfen, Bundle-Notiz und Typtabelle fortschreiben | **läuft** |
 | `hk-export <id> <ziel>` | schreibt eine Lieferung heraus (§6.2): Notizen, Typdefinitionen und Mediendateien der Lieferung in den typbezogenen Baum, Verweise ohne Ablagepfad | **läuft** |
 
-`hk-lint --help` nennt, welche Prüfungen aus §6.3 noch fehlen. Gemeldet wird
+Was geprüft wird, entscheidet die Wurzeldatei: `hkb.md` heißt Wissensbasis,
+`hbundle.md` heißt Lieferung. §6.3 gilt für beide, mit den Unterschieden aus §4
+und §7.1 — ein Bundle hat keine Typverzeichnisse, seine Notizen liegen, wo sie
+wollen, `bundles` und `rejected_links` stehen dort nicht, und geprüft wird
+stattdessen, ob es in seinen Typen geschlossen ist und ob zwei Notizen beim
+Import dieselbe Notiz-ID ergäben. `--fix` gilt nur für eine Wissensbasis: Eine
+Lieferung wird gelesen, nicht geändert.
+
+Gemeldet wird
 in drei Gruppen und getrennt nach Schweregrad: `fehler` heißt, die Ablage ist
 nicht konform (§7.2); `hinweis` heißt, es fällt auf, macht sie aber nicht
 ungültig. Der Rückgabewert ist 1 nur bei Fehlern.

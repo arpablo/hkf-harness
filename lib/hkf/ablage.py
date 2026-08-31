@@ -40,6 +40,23 @@ def finde(arg=None):
     return pfad
 
 
+def finde_ablage(arg=None):
+    """(pfad, art) — art ist "hkb" oder "bundle" (§3.1).
+
+    `hk-lint` gilt fuer beide (§6.3). Ein Bundle hat keine Typverzeichnisse und
+    keinen Ablagepfad; was dort sonst noch anders ist, entscheidet die Art.
+    """
+    pfad = arg or os.environ.get("HKB_PATH") or VORGABE
+    pfad = os.path.abspath(os.path.expanduser(pfad))
+    if os.path.isfile(os.path.join(pfad, "hkb.md")):
+        return finde(pfad), "hkb"
+    if os.path.isfile(os.path.join(pfad, "hbundle.md")):
+        return pfad, "bundle"
+    raise KeineAblage("%s: weder hkb.md noch hbundle.md — dort liegt keine "
+                      "Ablage (§3.1).\nDer Pfad kommt aus %s."
+                      % (pfad, herkunft(arg)))
+
+
 def basis(pfad):
     """Basispfad der Typverzeichnisse (§3.1), absolut."""
     daten, _ = frontmatter.lesen(os.path.join(pfad, "hkb.md"))
