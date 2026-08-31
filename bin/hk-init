@@ -111,10 +111,9 @@ def main(argv):
     vorlage.gitignore_schreiben(ziel)
     io.open(os.path.join(ziel, "README.md"), "w", encoding="utf-8").write(
         README % {"name": name, "core": CORE, "pfad": ziel})
-    vorlage.agents_schreiben(ziel, name, tz)
 
-    # Notiz ist, was `type` traegt (§3.3) — nicht die Wurzeldatei, nicht
-    # README und nicht die Anleitung fuer Werkzeuge.
+    # Notiz ist, was `type` traegt (§3.3) — nicht die Wurzeldatei und nicht
+    # das README.
     n = sum(1 for p in ablage.dateien(ziel) if "type" in frontmatter.lesen(p)[0])
     print("%s: Grundausstattung mit %d Notizen, HKF Core %s" % (ziel, n, CORE))
 

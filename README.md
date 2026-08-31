@@ -151,8 +151,8 @@ bin/         hk-init, hk-lint, hk-import, hk-export
 py           das Python des Harness — baut die venv und startet sie
 tools/       spec.py hält die Kopie unter spec/ auf Stand,
              grundausstattung.py die Vorlage gegen Anhang A und §3.5.1
-templates/   AGENTS.md und die Grundausstattung, aus der hk-init schöpft
-skills/      die KI-Schicht — noch leer, siehe skills/README.md
+templates/   die Grundausstattung, aus der hk-init schöpft
+skills/      die KI-Schicht: hkb und fünf Operationen, siehe skills/README.md
 test/        Rauchprobe: python3 test/smoke.py
 ```
 
@@ -164,14 +164,18 @@ steht in `lib/hkf/__init__.py` und nirgends sonst.
 Die Spezifikation selbst wird in [`hkf-spec`](https://github.com/arpablo/hkf-spec)
 fortgeschrieben, das Vokabular als Bundle in [`hkf-base`](https://github.com/arpablo/hkf-base).
 
-## AGENTS.md gehört dem Werkzeug
+## Kein Werkzeug legt eine Anleitung daneben
 
-`hk-init` schreibt eine `AGENTS.md` neben die Wurzeldatei — die wenigen
-Regeln, deren Verletzung Schaden anrichtet, dazu die Typtabelle aus `hkb.md`.
-Sie steht aber in der `.gitignore` der erzeugten Wissensbasis: Sie ist keine
-Notiz, sie wird weder geprüft noch ausgeliefert, und ihr Inhalt ist bis auf
-den Abschnitt `# Hinweise` abgeleitet. Eine `CLAUDE.md` entsteht gar nicht
-mehr — sie nannte ein Produkt.
+`hk-init` schrieb einmal eine `AGENTS.md` neben die Wurzeldatei: sieben
+Regeln und die Typtabelle. Beides gibt es jetzt besser. Die Regeln stehen in
+den Skills unter `skills/` — einmal, versioniert, geprüft —, die Typtabelle
+steht in `hkb.md`, wo sie hingehört. Eine erzeugte Kopie daneben veraltete für
+sich und sagte nichts, was nicht schon dastand. Eine `CLAUDE.md` entsteht
+ebenfalls nicht; sie nannte ein Produkt.
+
+Wer für seine Wissensbasis eigene Hinweise aufschreiben will, legt eine
+`AGENTS.md` selbst an. Sie ist dann seine, wird versioniert und von keinem
+Werkzeug überschrieben.
 
 Core führte dafür einmal einen Abschnitt „Einstieg für Werkzeuge"; er ist
 gestrichen. Den ersten Satz sagt der Harness, nicht die Ablage.
@@ -284,6 +288,5 @@ Kopien zu führen. Sie findet den Harness über `HKF_HARNESS`, sonst nebenan.
 
 - **Vorschläge aus unbelegten Properties** (§6.1 Schritt 9, dritte
   Beobachtung).
-- **`hk-lint` auf einem Bundle** statt auf einer Wissensbasis (§6.3).
 - **`HKF_BUNDLE_PATH`** — Vorgabeverzeichnis für Lieferungen; festlegen, wenn
   eine Lieferung öfter am selben Ort landet.

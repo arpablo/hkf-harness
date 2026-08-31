@@ -42,7 +42,7 @@ hkf-harness/
   lib/hkf/              Ablage, Frontmatter, Schema, Grammatik, Vorlage, Fassung
   py                    das Python des Harness
   tools/                spec.py — hält die Kopie unter spec/ auf Stand
-  templates/            AGENTS.md und die Grundausstattung für hk-init
+  templates/            die Grundausstattung für hk-init
   skills/               die KI-Schicht: hkb und fünf Operationen
   test/                 die Rauchprobe
 ```
@@ -108,7 +108,7 @@ HKB="${HKB_PATH:-$HOME/hkb}"
 
 ## 4. Keine Werkzeugdatei liegt in der Wissensbasis
 
-`HenniHKF-Core` führt heute `AGENTS.md` und `CLAUDE.md`. Beide gehören dem
+`HenniHKF-Core` führte einmal `AGENTS.md` und `CLAUDE.md`. Beide gehören dem
 Werkzeug, nicht der Ablage, und beide gehen denselben Weg.
 
 `CLAUDE.md` ist der klarere Fall: ein Satz, der auf `AGENTS.md` zeigt, benannt
@@ -123,16 +123,27 @@ bis §5.7.
 
 Die Spezifikation sagte dort schon fast alles selbst: Die Datei „ist keine
 Notiz und gehört nicht zur Ablage", sie wird „weder geprüft noch
-ausgeliefert", ihr Inhalt ist „zum größten Teil abgeleitet". Es fehlte nur der
-letzte Schritt — was nicht zur Ablage gehört, gehört auch nicht in ihr
-Repository. Der Harness erzeugt sie ins Arbeitsverzeichnis, die `.gitignore`
-hält sie draußen.
+ausgeliefert", ihr Inhalt ist „zum größten Teil abgeleitet". Zuerst zog der
+Harness daraus den Schluss, sie ins Arbeitsverzeichnis zu erzeugen und über
+die `.gitignore` draußen zu halten.
 
-Der Einwand, den der Abschnitt vorbrachte, war: „Ein Modell, das einen Vault
-öffnet, sieht zunächst nur Markdown-Dateien." Das stimmt — aber ein Modell
-öffnet keinen Vault allein. Es kommt mit einem Harness, und der bringt die
-Spezifikation mit. Wer ohne Harness kommt, findet den Einstieg im Format
-selbst: `hkb.md` trägt `spec` mit der URL.
+**Auch das ist gestrichen.** Der Grund liegt in der KI-Schicht: Seit die
+Skills unter `skills/` liegen, stehen die sieben Regeln dort — einmal, beim
+Werkzeug, versioniert und geprüft. Eine erzeugte Kopie daneben sagte
+dasselbe noch einmal, veraltete für sich und trug an eigenem Inhalt nur die
+Typtabelle, die ohnehin in `hkb.md` steht. Was ein Modell wissen muss, bringt
+es mit; was diese eine Wissensbasis auszeichnet, steht in ihr.
+
+Der Einwand, den der gestrichene Core-Abschnitt vorbrachte, war: „Ein Modell,
+das einen Vault öffnet, sieht zunächst nur Markdown-Dateien." Das stimmt —
+aber ein Modell öffnet keinen Vault allein. Es kommt mit einem Harness, und
+der bringt die Spezifikation mit. Wer ohne Harness kommt, findet den Einstieg
+im Format selbst: `hkb.md` trägt `spec` mit der URL.
+
+Wer für **seine** Wissensbasis etwas aufschreiben will, legt eine `AGENTS.md`
+von Hand an. Sie gehört dann ihm, nicht dem Werkzeug, und wird versioniert wie
+jede andere Datei — kein Werkzeug überschreibt sie, keine `.gitignore` hält
+sie zurück.
 
 Aus demselben Grund ist **§7.2 Punkt 9 entfallen**. Dort hing die Konformität
 einer HKB daran, dass `hk-import`, `hk-export` und `hk-lint` „verfügbar sind"
@@ -141,10 +152,10 @@ Zip-Archiv hat keine Werkzeuge und ist trotzdem korrekt aufgebaut.
 
 Was daraus folgt:
 
-- `CLAUDE.md` und `AGENTS.md` aus `HenniHKF-Core` entfernen und in die
-  `.gitignore` aufnehmen.
+- `CLAUDE.md` und `AGENTS.md` aus `HenniHKF-Core` entfernen.
 - Die Kopierzeile für `CLAUDE.md` und die Erzeugung von `AGENTS.md` aus
-  `make-hkb-template.py` herausnehmen — die Erzeugung wandert nach `hk-init`.
+  `make-hkb-template.py` und aus `hk-init` herausnehmen; `templates/AGENTS.md`
+  entfällt.
 - Den Abschnitt „Einstieg für Werkzeuge" in `HenniHKF-Lab/README.md`
   nachziehen; er beschreibt beide Dateien noch als Teil der Beispiel-HKB.
 
@@ -164,10 +175,6 @@ Grundausstattung an, sondern auch das Repository:
 ```gitignore
 # Sitzungsprotokolle und Suchindex der Werkzeugumgebung
 .memsearch/
-
-# Anleitungen, die ein Harness erzeugt
-AGENTS.md
-CLAUDE.md
 
 # persönliches Fensterlayout von Obsidian
 .obsidian/workspace.json

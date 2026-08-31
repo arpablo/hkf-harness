@@ -77,8 +77,8 @@ der `title` des Ziels.
 ```
 
 Der erste Abschnitt ist der Ablagepfad; er entfällt, wenn die Wissensbasis in
-der Vault-Wurzel liegt. In `hkb.md` und `AGENTS.md` steht er nie — diese
-beiden verweisen relativ zu sich selbst.
+der Vault-Wurzel liegt. In `hkb.md` steht er nie — die Wurzeldatei verweist
+relativ zu sich selbst.
 
 **Im Body verlinkst du beim Schreiben**, wo der Text es hergibt. Was nicht
 aus dem Text hervorgeht, kommt unter `# Siehe auch` — als letzter Abschnitt,

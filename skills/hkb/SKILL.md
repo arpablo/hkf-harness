@@ -31,9 +31,9 @@ hk-lint /pfad/zur/ablage     # eine andere
 ```
 
 Bevor du etwas tust: `hkb.md` lesen — dort stehen `name`, `base`,
-`media_base`, `timezone` und die Typtabelle. Und `AGENTS.md` daneben, wenn es
-sie gibt: dort stehen die sieben Regeln und die Hinweise, die ein Mensch für
-**diese** Wissensbasis aufgeschrieben hat.
+`media_base`, `timezone` und die Typtabelle. Und eine `AGENTS.md` daneben,
+falls jemand eine angelegt hat: Kein Werkzeug erzeugt sie, wo sie liegt, hat
+ein Mensch sie für **diese** Wissensbasis geschrieben.
 
 ## Die vier Werkzeuge
 
@@ -49,7 +49,7 @@ damit an.**
 
 ## Die sieben Regeln
 
-Sie stehen in `AGENTS.md` der Ablage. Kurz, weil du sie ständig brauchst:
+Sie stehen hier und nirgends sonst — du brauchst sie ständig:
 
 1. **Der Pfad bestimmt den Typ.** Eine Notiz gehört zu dem Typ, unter dessen
    Verzeichnis sie liegt; `type` muss dazu passen.

@@ -153,9 +153,11 @@ def main():
               "name: Probe" in io.open(os.path.join(ziel, "hkb.md"), encoding="utf-8").read())
         probe("Git-Repository mit einem Commit",
               lauf("git", "-C", ziel, "log", "--oneline").stdout.count("\n") == 1)
-        probe("AGENTS.md liegt da", os.path.exists(os.path.join(ziel, "AGENTS.md")))
-        probe("AGENTS.md ist nicht versioniert",
-              "AGENTS.md" not in lauf("git", "-C", ziel, "ls-files").stdout)
+        probe("legt keine AGENTS.md an",
+              not os.path.exists(os.path.join(ziel, "AGENTS.md")))
+        probe("und ignoriert sie auch nicht",
+              "AGENTS.md" not in io.open(os.path.join(ziel, ".gitignore"),
+                                         encoding="utf-8").read())
         probe("CLAUDE.md gibt es nicht", not os.path.exists(os.path.join(ziel, "CLAUDE.md")))
         probe("verweigert ein nicht leeres Ziel",
               lauf(os.path.join(BIN, "hk-init"), ziel).returncode == 2)
