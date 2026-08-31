@@ -3,7 +3,7 @@ type: typedef
 title: Bundle
 description: Beschreibt eine Lieferung.
 created: 2026-08-27
-modified: 2026-08-31T15:26:08
+modified: 2026-08-31T16:49:53
 modified_by: claude-opus-5
 ---
 
@@ -22,7 +22,7 @@ modified_by: claude-opus-5
 
 Als `hbundle.md` in der Wurzel eines Bundles trägt die Notiz zusätzlich die
 Wurzeldatei-Properties aus A.1 und die Typtabelle im Body; `imported` entfällt
-dort. In der HKB liegt sie als `bundles/<id>.md` ohne diese Zusätze.
+dort. In der HKB liegt sie als `Bundles/<id>.md` ohne diese Zusätze.
 
 `source` ist `text` und nicht `hkf-url`, weil auch ein Repository-Verweis oder
 ein Datenträger als Herkunft in Frage kommt.

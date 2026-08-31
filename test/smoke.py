@@ -32,13 +32,13 @@ def _lieferung_kaputt(bundle):
     p = os.path.join(bundle, "dinge", "eins.md")
     t = io.open(p, encoding="utf-8").read()
     io.open(p, "w", encoding="utf-8").write(
-        t.replace("---\n\n", "bundles:\n  - \"[[bundles/probe|Probe]]\"\n---\n\n", 1))
+        t.replace("---\n\n", "bundles:\n  - \"[[Bundles/probe|Probe]]\"\n---\n\n", 1))
     os.makedirs(os.path.join(bundle, "woanders"), exist_ok=True)
     io.open(os.path.join(bundle, "woanders", "zwei.md"), "w",
             encoding="utf-8").write(
         "---\ntype: ding\ntitle: Noch ein Zweites\n"
         "modified: 2026-01-01T00:00:00\n---\n\nDoppelter Dateiname.\n")
-    io.open(os.path.join(bundle, "typedefs", "kiste.md"), "w",
+    io.open(os.path.join(bundle, "Typedefs", "kiste.md"), "w",
             encoding="utf-8").write(
         "---\ntype: typedef\nprovisional: true\n"
         "description: Vorläufig, gehört nicht in eine Lieferung.\n"
@@ -48,7 +48,7 @@ def _lieferung_kaputt(bundle):
 def _tabellenfehler(ziel):
     """Eine Typdefinition, die gegen §3.7.1 verstoesst, und Notizen dazu."""
     os.makedirs(os.path.join(ziel, "dinge"), exist_ok=True)
-    io.open(os.path.join(ziel, "typedefs", "ding.md"), "w", encoding="utf-8").write(
+    io.open(os.path.join(ziel, "Typedefs", "ding.md"), "w", encoding="utf-8").write(
         "---\ntype: typedef\ntitle: Ding\ndescription: Ein Ding.\ndir: dinge\n"
         "created: 2026-01-01\nmodified: 2026-01-01T00:00:00\n---\n\n"
         "# Properties\n\n| Property | Typ | Pflicht | Beschreibung |\n"
@@ -60,7 +60,7 @@ def _tabellenfehler(ziel):
         "| krumm | hkf-krumm | nein | Gibt es nicht |\n"
         "| falsch | hkf-url:person | nein | Zusatz am falschen Typ |\n"
         "| gemischt | text / number | nein | Zwei Wertformen |\n")
-    io.open(os.path.join(ziel, "typedefs", "wurf.md"), "w", encoding="utf-8").write(
+    io.open(os.path.join(ziel, "Typedefs", "wurf.md"), "w", encoding="utf-8").write(
         "---\ntype: typedef\ntitle: Wurf\ndescription: Vorgaben, gute und schlechte.\n"
         "created: 2026-01-01\nmodified: 2026-01-01T00:00:00\n---\n\n"
         "# Properties\n\n| Property | Typ | Pflicht | Vorgabe | Beschreibung |\n"
@@ -85,9 +85,9 @@ def _kaputt(ziel):
     t = io.open(p, encoding="utf-8").read()
     io.open(p, "w", encoding="utf-8").write(
         _re.sub(r"^\| bundle \|.*\n", "", t, flags=_re.M))
-    os.remove(os.path.join(ziel, "proptypes", "hkf-phone.md"))
+    os.remove(os.path.join(ziel, "Proptypes", "hkf-phone.md"))
     os.makedirs(os.path.join(ziel, "dinge"), exist_ok=True)
-    io.open(os.path.join(ziel, "typedefs", "ding.md"), "w", encoding="utf-8").write(
+    io.open(os.path.join(ziel, "Typedefs", "ding.md"), "w", encoding="utf-8").write(
         "---\ntype: typedef\ntitle: Ding\ndescription: Ein Ding.\ndir: dinge\n"
         "created: 2026-01-01\nmodified: 2026-01-01T00:00:00\n---\n")
     io.open(os.path.join(ziel, "dinge", "zwei.md"), "w", encoding="utf-8").write(
@@ -117,7 +117,7 @@ def _abbild(wurzel):
 def _bundle_bauen(pfad):
     """Eine kleine Lieferung: ein Typ, zwei Notizen, eine Mediendatei."""
     shutil.rmtree(pfad, ignore_errors=True)
-    for sub in ("typedefs", "dinge", "bilder"):
+    for sub in ("Typedefs", "dinge", "bilder"):
         os.makedirs(os.path.join(pfad, sub))
     def schreib(rel, text):
         io.open(os.path.join(pfad, rel), "w", encoding="utf-8").write(text)
@@ -125,7 +125,7 @@ def _bundle_bauen(pfad):
             "---\nhkf: \"1.0\"\ntype: bundle\nid: probe\ntitle: Probe\n"
             "description: Zwei Dinge und ein Bild.\nversion: \"1\"\n---\n\n"
             "Eine Lieferung für die Rauchprobe.\n")
-    schreib("typedefs/ding.md",
+    schreib("Typedefs/ding.md",
             "---\ntype: typedef\ntitle: Ding\ndescription: Ein Ding.\ndir: dinge\n"
             "modified: 2026-01-01T00:00:00\n---\n\n# Properties\n\n"
             "| Property | Typ | Pflicht | Vorgabe | Beschreibung |\n"
@@ -171,7 +171,7 @@ def main():
               lauf(os.path.join(BIN, "hk-lint"), tempfile.gettempdir()).returncode == 2)
 
         # eine Notiz mit falschem Frontmatter und kaputtem Wikilink
-        io.open(os.path.join(ziel, "typedefs", "kaputt.md"), "w", encoding="utf-8").write(
+        io.open(os.path.join(ziel, "Typedefs", "kaputt.md"), "w", encoding="utf-8").write(
             "---\ntype: typedef\ntitle: \ncreated: gestern\n---\n\n"
             "Siehe [[persons/ada|Ada]] in einer Tabelle:\n\n"
             "| a | b |\n|---|---|\n| [[persons/ada|Ada]] | x |\n")
@@ -194,7 +194,7 @@ def main():
               and "lässt sich nicht auflösen" in r.stdout, r.stdout)
         r = lauf(os.path.join(BIN, "hk-lint"), ziel, "--fix")
         probe("legt den fehlenden Standard-Property-Typ an",
-              os.path.exists(os.path.join(ziel, "proptypes", "hkf-phone.md")))
+              os.path.exists(os.path.join(ziel, "Proptypes", "hkf-phone.md")))
         probe("erzeugt die Typtabelle neu",
               "| ding | dinge |" in io.open(os.path.join(ziel, "hkb.md"),
                                             encoding="utf-8").read())
@@ -254,11 +254,11 @@ def main():
 
         r = lauf(os.path.join(BIN, "hk-import"), bundle, ziel)
         probe("übernimmt die Lieferung", r.returncode == 0, r.stdout + r.stderr)
-        for f in ("typedefs/ding.md", "dinge/eins.md", "dinge/zwei.md",
-                  "bundles/probe.md", "media/images/bilder/bild.png"):
+        for f in ("Typedefs/ding.md", "dinge/eins.md", "dinge/zwei.md",
+                  "Bundles/probe.md", "media/images/bilder/bild.png"):
             probe("legt %s an" % f, os.path.exists(os.path.join(ziel, f)))
         eins = io.open(os.path.join(ziel, "dinge", "eins.md"), encoding="utf-8").read()
-        probe("trägt die Zugehörigkeit ein", "bundles/probe|Probe" in eins, eins)
+        probe("trägt die Zugehörigkeit ein", "Bundles/probe|Probe" in eins, eins)
         probe("schreibt den Verweis, den der Body hergibt",
               "# Siehe auch" in eins and "dinge/zwei|Das Zweite" in eins, eins)
         probe("führt ihn auch in related", "related:" in eins, eins)
@@ -275,7 +275,7 @@ def main():
         probe("ein zweiter Lauf ändert nichts", _abbild(ziel) == vorher)
 
         # Bedeutungspruefung: derselbe Name, andere Beschreibung
-        p = os.path.join(ziel, "typedefs", "ding.md")
+        p = os.path.join(ziel, "Typedefs", "ding.md")
         t = io.open(p, encoding="utf-8").read()
         io.open(p, "w", encoding="utf-8").write(
             t.replace("description: Ein Ding.", "description: Ein Datensatz."))
@@ -392,7 +392,7 @@ def main():
         shutil.rmtree(aus, ignore_errors=True)
         r = lauf(os.path.join(BIN, "hk-export"), "probe", aus, ziel)
         probe("schreibt heraus", r.returncode == 0, r.stdout + r.stderr)
-        for f in ("hbundle.md", "typedefs/ding.md", "dinge/eins.md",
+        for f in ("hbundle.md", "Typedefs/ding.md", "dinge/eins.md",
                   "dinge/zwei.md", "media/images/bilder/bild.png"):
             probe("legt %s an" % f, os.path.exists(os.path.join(aus, f)))
         hb = io.open(os.path.join(aus, "hbundle.md"), encoding="utf-8").read()
@@ -421,7 +421,7 @@ def main():
         from hkf import frontmatter as fm
         fluechtig = ("created", "modified", "modified_by")
         unterschiede = []
-        for rel in ("dinge/eins.md", "dinge/zwei.md", "typedefs/ding.md"):
+        for rel in ("dinge/eins.md", "dinge/zwei.md", "Typedefs/ding.md"):
             a, ab = fm.lesen(os.path.join(ziel, rel))
             b, bb = fm.lesen(os.path.join(zurueck, rel))
             fuer = lambda d: {k: v for k, v in d.items() if k not in fluechtig}
@@ -430,7 +430,7 @@ def main():
         probe("Bundle → HKB → Bundle → HKB gibt dieselben Notizen",
               not unterschiede, ", ".join(unterschiede))
         probe("und schickt keinen Kern-Typ mit (§7.1)",
-              not os.path.exists(os.path.join(aus, "typedefs", "typedef.md")))
+              not os.path.exists(os.path.join(aus, "Typedefs", "typedef.md")))
     finally:
         shutil.rmtree(ziel, ignore_errors=True)
 

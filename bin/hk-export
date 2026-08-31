@@ -9,7 +9,7 @@ Ohne `hkb-pfad` gilt $HKB_PATH, sonst ~/hkb.
     --media-base   Verzeichnis für die Mediendateien der Lieferung (Vorgabe: media)
     --force        in ein nicht leeres Zielverzeichnis schreiben
 
-Geschrieben wird der typbezogene Baum: `typedefs/`, `proptypes/`, je ein
+Geschrieben wird der typbezogene Baum: `Typedefs/`, `Proptypes/`, je ein
 Verzeichnis pro Typ und `media/<art>/`. Ein Bundle dürfte beliebig aufgebaut
 sein (§4) — streng im Schreiben, großzügig im Lesen.
 

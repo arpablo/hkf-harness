@@ -175,7 +175,7 @@ ebenfalls nicht; sie nannte ein Produkt.
 
 Die Hinweise, die einmal in ihrem letzten Abschnitt standen, haben einen
 besseren Ort bekommen: HKF Base führt den Typ `hint`. Jede Festlegung, wie
-diese Wissensbasis geführt wird, ist dort eine Notiz unter `hints/` — geprüft,
+diese Wissensbasis geführt wird, ist dort eine Notiz unter `Hints/` — geprüft,
 verlinkt, versioniert, und mit `applies_to` an der Typdefinition, für die sie
 gilt. Wer daneben trotzdem eine `AGENTS.md` will, legt sie von Hand an; kein
 Werkzeug fasst sie an.
@@ -260,7 +260,7 @@ ab, `hk-lint` meldet eine Ablage, die neuer ist als er selbst.
 ## Die Grundausstattung gegen die Spezifikation
 
 Die Kern-Typen stehen zweimal: als Markdown-Block in Anhang A und als
-ausgelieferte Datei unter `templates/hkb/typedefs/`. Die dreizehn
+ausgelieferte Datei unter `templates/hkb/Typedefs/`. Die dreizehn
 Standard-Property-Typen ebenso — dort als Tabelle in §3.5.1.
 
 ```
@@ -276,8 +276,8 @@ einer Bundle-Notiz, die in Ordnung war. Die Rauchprobe ruft es jetzt mit auf.
 ## Woher `templates/hkb` kommt
 
 Die Grundausstattung wird nicht hier gepflegt, sondern aus der
-Beispiel-Wissensbasis der Werkbank abgeleitet — alle Notizen in `typedefs/`
-und `proptypes/`, die keine `bundles`-Property tragen (§5.3):
+Beispiel-Wissensbasis der Werkbank abgeleitet — alle Notizen in `Typedefs/`
+und `Proptypes/`, die keine `bundles`-Property tragen (§5.3):
 
 ```
 cd ../HenniHKF-Lab

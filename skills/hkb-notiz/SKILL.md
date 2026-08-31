@@ -15,7 +15,7 @@ prüfst du am Ende mit `hk-lint`.
 und Zweck. Passt keiner, ist das eine Frage an [[hkb-typ]] — und keine, die
 du nebenbei mit einem neuen Verzeichnis beantwortest.
 
-**② Die Typdefinition lesen.** `typedefs/<typ>.md`. Dort steht der
+**② Die Typdefinition lesen.** `Typedefs/<typ>.md`. Dort steht der
 vollständige Vertrag: welche Properties es gibt, welchen Typ sie haben, was
 Pflicht ist, und in den Konventionen, was der Typ meint.
 
@@ -39,7 +39,7 @@ hk-lint
 type: person
 title: Ada Lovelace
 born: 1815-12-10
-birthplace: "[[places/london|London]]"
+birthplace: "[[Places/london|London]]"
 created: 2026-08-31
 modified: 2026-08-31T09:14:00
 modified_by: claude-opus-5
@@ -73,7 +73,7 @@ der Vault-Wurzel ohne `.md`, dann `|`, dann der Anzeigetext — in der Regel
 der `title` des Ziels.
 
 ```markdown
-[[wissen/persons/ada-lovelace|Ada Lovelace]]
+[[wissen/Persons/ada-lovelace|Ada Lovelace]]
 ```
 
 Der erste Abschnitt ist der Ablagepfad; er entfällt, wenn die Wissensbasis in
@@ -87,7 +87,7 @@ alphabetisch, jede Zeile mit ` — ` und einem Grund:
 ```markdown
 # Siehe auch
 
-- [[maschines/analytical-engine|Analytical Engine]] — beide Notizen nennen einander
+- [[Maschines/analytical-engine|Analytical Engine]] — beide Notizen nennen einander
 ```
 
 **Der Grund ist Pflicht.** Er sagt, *warum* verlinkt wurde, nicht, was am Ziel
@@ -103,4 +103,4 @@ steht. Und: hinzufügen ja, entfernen nein.
 - **`# Siehe auch` bleibt vollständig.** Du darfst Zeilen hinzufügen — mit
   Grund —, aber keine entfernen. Ein Ziel in `rejected_links` verlinkst du
   nicht.
-- **`typedefs/` und `proptypes/` fasst du nicht an.**
+- **`Typedefs/` und `Proptypes/` fasst du nicht an.**

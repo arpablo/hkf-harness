@@ -11,6 +11,6 @@ spec: https://github.com/arpablo/hkf-spec/blob/main/HKF-Core-V1.0.md
 
 | Typ | Verzeichnis | Zweck |
 |---|---|---|
-| bundle | bundles | Beschreibt eine Lieferung. |
-| proptype | proptypes | Schränkt eine Wertform ein. |
-| typedef | typedefs | Registriert einen Typ und legt sein Verzeichnis fest. |
+| bundle | Bundles | Beschreibt eine Lieferung. |
+| proptype | Proptypes | Schränkt eine Wertform ein. |
+| typedef | Typedefs | Registriert einen Typ und legt sein Verzeichnis fest. |

@@ -7,7 +7,7 @@ description: "Einen eigenen Typ in einer Wissensbasis nach HKF Core anlegen oder
 
 Zuerst [[hkb]] lesen. Ein Typ ist ein Verzeichnis mit einer Beschreibung —
 mehr verlangt HKF nicht, und mehr sollte er auch nicht behaupten. Dies ist
-die **einzige** Gelegenheit, bei der du in `typedefs/` schreibst.
+die **einzige** Gelegenheit, bei der du in `Typedefs/` schreibst.
 
 ## Erst prüfen, ob es ihn braucht
 
@@ -23,7 +23,7 @@ liegt, lässt sich nur Notiz für Notiz wieder trennen. Drei Fragen vorher:
 
 ## Anlegen
 
-`<base>/typedefs/<typname>.md`. Der Dateiname ist der Typname, `kebab-case`,
+`<base>/Typedefs/<typname>.md`. Der Dateiname ist der Typname, `kebab-case`,
 Einzahl.
 
 ```markdown
@@ -67,7 +67,7 @@ Was der Typ meint und was er nicht meint.
 ## Die Typ-Spalte
 
 Eine Wertform (`text`, `list`, `number`, `checkbox`, `date`, `datetime`), ein
-Property-Typ aus `proptypes/`, oder eine Listenform mit angehängtem `-list`.
+Property-Typ aus `Proptypes/`, oder eine Listenform mit angehängtem `-list`.
 
 | Zelle | Bedeutung |
 |---|---|
@@ -111,7 +111,7 @@ zeigt sich, ob die Zusicherung trägt.
 ## Einen neuen Property-Typ
 
 Nur, wenn eine Einschränkung sich wiederholt und keine der sechs Wertformen
-sie ausdrückt. `<base>/proptypes/<name>.md` mit `form` (Pflicht) und wahlweise
+sie ausdrückt. `<base>/Proptypes/<name>.md` mit `form` (Pflicht) und wahlweise
 `pattern`, `values`, `unit`, `min`, `max`.
 
 - **Das Präfix `hkf-` ist der Spezifikation vorbehalten.** Ein eigener

@@ -140,7 +140,7 @@ def _sammeln(quelle):
 
 def _bundle_notizen(plan):
     """Die Bundle-Notizen der HKB, nach id."""
-    verz = os.path.join(plan.basis, "bundles")
+    verz = os.path.join(plan.basis, "Bundles")
     aus = {}
     if os.path.isdir(verz):
         for f in sorted(os.listdir(verz)):
@@ -253,8 +253,8 @@ def _zusicherung(body):
 
 
 def _vorhandene_typen(plan):
-    """{name: (daten, body)} aus <base>/typedefs/."""
-    verz = os.path.join(plan.basis, "typedefs")
+    """{name: (daten, body)} aus <base>/Typedefs/."""
+    verz = os.path.join(plan.basis, "Typedefs")
     aus = {}
     if os.path.isdir(verz):
         for f in sorted(os.listdir(verz)):
@@ -265,7 +265,7 @@ def _vorhandene_typen(plan):
 
 
 def _verzeichnis(name, daten):
-    return str(daten.get("dir") or (name + "s"))
+    return str(daten.get("dir") or (name[:1].upper() + name[1:] + "s"))
 
 
 def _typen_abgleichen(plan, kandidaten, vorliegende_bundles, fehlende_bundles,
@@ -303,7 +303,7 @@ def _typen_abgleichen(plan, kandidaten, vorliegende_bundles, fehlende_bundles,
         vorlaeufig = bool(vd.get("provisional"))
 
         # ── Zusicherung (§5.5)
-        aus_required = any(re.search(r"\[\[[^\]]*bundles/(%s)\|" % re.escape(b), l)
+        aus_required = any(re.search(r"\[\[[^\]]*Bundles/(%s)\|" % re.escape(b), l)
                            for b in vorliegende_bundles
                            for l in (vd.get("bundles") or []))
         gleich_in_der_sache = bool(gel) and not vorlaeufig and (
@@ -397,7 +397,7 @@ def _typen_abgleichen(plan, kandidaten, vorliegende_bundles, fehlende_bundles,
 
 
 def _proptypes_abgleichen(plan, kandidaten):
-    verz = os.path.join(plan.basis, "proptypes")
+    verz = os.path.join(plan.basis, "Proptypes")
     for p, rel, daten, kopf, body in kandidaten:
         if daten.get("type") != "proptype":
             continue
@@ -450,7 +450,7 @@ def _wikidata_properties(plan, typ):
     if eintrag.get("geliefert"):
         tabelle = _property_tabelle(eintrag["geliefert"][1])
     if not tabelle:
-        p = os.path.join(plan.basis, "typedefs", typ + ".md")
+        p = os.path.join(plan.basis, "Typedefs", typ + ".md")
         if os.path.exists(p):
             tabelle = _property_tabelle(frontmatter.lesen(p)[1])
     return [k for k, (t, _) in tabelle.items() if t.split(" / ")[0] == "hkf-wikidata"]
@@ -496,7 +496,7 @@ def _identitaet(plan, e, ziel, bundle_id, entscheidungen, force):
     voll = ("%s/%s" % (plan.ablagepfad, id_link)) if plan.ablagepfad else id_link
 
     dieselbe = None
-    if any(re.search(r"\[\[[^\]]*bundles/%s\|" % re.escape(bundle_id), l)
+    if any(re.search(r"\[\[[^\]]*Bundles/%s\|" % re.escape(bundle_id), l)
            for l in (vd.get("bundles") or [])):
         dieselbe = True
     else:
@@ -829,7 +829,7 @@ def _neue_fassung(plan, alt_body):
 
 
 def _bundle_notiz(plan, zeitpunkt, tag, vorher):
-    """Frontmatter und Body der Notiz `<base>/bundles/<id>.md`."""
+    """Frontmatter und Body der Notiz `<base>/Bundles/<id>.md`."""
     alt_kopf, alt_body = vorher if vorher else (None, "")
     kopf = alt_kopf
     if kopf is None:
@@ -941,6 +941,8 @@ def planen(hkb, quelle, force=False, ohne_verknuepfung=False):
 def _vorlaeufige_typdefinition(plan, name, tag, zeitpunkt):
     kopf = "\n".join([
         "type: typedef",
+        # Der Typname unveraendert: So steht er in jeder Notiz, die ihn nennt.
+        "title: %s" % name,
         "provisional: true",
         "description: Vorläufig beim Import von %s angelegt; keine Typdefinition "
         "geliefert." % plan.bundle["id"],
@@ -982,7 +984,7 @@ def _typtabelle(plan):
     hkbmd = os.path.join(plan.hkb, "hkb.md")
     kopf, body = notiz.teilen(io.open(hkbmd, encoding="utf-8").read())
     zeilen = ["# Typen", "", "| Typ | Verzeichnis | Zweck |", "|---|---|---|"]
-    verz = os.path.join(plan.basis, "typedefs")
+    verz = os.path.join(plan.basis, "Typedefs")
     for f in sorted(os.listdir(verz)):
         if not f.endswith(".md"):
             continue
@@ -1000,12 +1002,12 @@ def ausfuehren(plan):
         return plan
     tag, zeitpunkt = jetzt()
     bundle_id = str(plan.bundle["id"])
-    bundle_rel = "bundles/%s" % bundle_id
+    bundle_rel = "Bundles/%s" % bundle_id
     bundle_link = plan.link(bundle_rel, str(plan.bundle.get("title") or bundle_id))
 
     # Umzuege zuerst, damit die Notizen danach am richtigen Ort landen
     for name, t in plan.typen.items():
-        p = os.path.join(plan.basis, "typedefs", name + ".md")
+        p = os.path.join(plan.basis, "Typedefs", name + ".md")
         if t["zustand"] == "abgelöst" and os.path.exists(p):
             alt = _verzeichnis(name, frontmatter.lesen(p)[0])
             if alt != t["dir"]:
@@ -1015,7 +1017,7 @@ def ausfuehren(plan):
     for name, t in plan.typen.items():
         if t["zustand"] != "vorläufig":
             continue
-        p = os.path.join(plan.basis, "typedefs", name + ".md")
+        p = os.path.join(plan.basis, "Typedefs", name + ".md")
         if not os.path.exists(p):
             os.makedirs(os.path.dirname(p), exist_ok=True)
             io.open(p, "w", encoding="utf-8").write(
@@ -1063,7 +1065,7 @@ def ausfuehren(plan):
         io.open(datei, "w", encoding="utf-8").write(notiz.bauen(kopf, body))
 
     # 10. Bundle-Notiz und Typtabelle
-    p = os.path.join(plan.basis, "bundles", bundle_id + ".md")
+    p = os.path.join(plan.basis, "Bundles", bundle_id + ".md")
     vorher = notiz.teilen(io.open(p, encoding="utf-8").read()) if os.path.exists(p) else None
     kopf, body = _bundle_notiz(plan, zeitpunkt, tag, vorher)
     os.makedirs(os.path.dirname(p), exist_ok=True)

@@ -30,7 +30,7 @@ Wertpapiere kommt ohne sie aus.
 Base wird nicht angelegt, sondern **importiert**. Es kommt als Bundle mit der
 Kennung `hkf-base`; seine `version` ist die Fassung dieses Dokuments, hier `1.0`.
 Der Import ist der gewöhnliche `hk-import` aus Core §6.1, und danach steht in
-`bundles/` eine Notiz, die festhält, was übernommen wurde.
+`Bundles/` eine Notiz, die festhält, was übernommen wurde.
 
 Das Bundle enthält ausschließlich die Typdefinitionen aus §3 und die
 Property-Typen aus §2. Keine Notizen, keine Mediendateien, keine
@@ -76,22 +76,23 @@ ungültig machte.
 
 | Typ | Verzeichnis | Zweck |
 |---|---|---|
-| `person` | `persons` | Ein Mensch. |
-| `organisation` | `organisations` | Eine Körperschaft: Unternehmen, Institut, Verein, Behörde. |
-| `place` | `places` | Ein geographischer Ort. |
-| `event` | `events` | Ein Geschehen zu einer bestimmten Zeit. |
-| `source` | `sources` | Eine zitierbare Quelle: Buch, Aufsatz, Webseite, Vortrag. |
-| `term` | `terms` | Ein definierter Begriff. |
-| `concept` | `concepts` | Eine Sache und der Stand des Wissens über sie. |
-| `comparison` | `comparisons` | Eine Gegenüberstellung mehrerer Gegenstände entlang benannter Dimensionen. |
-| `topic` | `topics` | Ein Themengebiet als Einstiegspunkt. |
-| `note` | `notes` | Eine Notiz ohne spezifischeren Typ. |
-| `specification` | `specifications` | Ein normatives Dokument, an das sich die Wissensbasis hält. |
-| `hint` | `hints` | Eine Festlegung, wie diese Wissensbasis geführt wird. |
+| `person` | `Persons` | Ein Mensch. |
+| `organisation` | `Organisations` | Eine Körperschaft: Unternehmen, Institut, Verein, Behörde. |
+| `place` | `Places` | Ein geographischer Ort. |
+| `event` | `Events` | Ein Geschehen zu einer bestimmten Zeit. |
+| `source` | `Sources` | Eine zitierbare Quelle: Buch, Aufsatz, Webseite, Vortrag. |
+| `term` | `Terms` | Ein definierter Begriff. |
+| `concept` | `Concepts` | Eine Sache und der Stand des Wissens über sie. |
+| `comparison` | `Comparisons` | Eine Gegenüberstellung mehrerer Gegenstände entlang benannter Dimensionen. |
+| `topic` | `Topics` | Ein Themengebiet als Einstiegspunkt. |
+| `note` | `Notes` | Eine Notiz ohne spezifischeren Typ. |
+| `specification` | `Specifications` | Ein normatives Dokument, an das sich die Wissensbasis hält. |
+| `hint` | `Hints` | Eine Festlegung, wie diese Wissensbasis geführt wird. |
 
 Kein Typ dieses Vokabulars trägt ein `dir`. Ihre Verzeichnisse ergeben sich
-ausnahmslos aus der Vorgabe „Typname mit angehängtem `s`" (Core §3.7). Ein
-Werkzeug kennt den Ablageort damit, ohne die Typdefinition zu lesen.
+ausnahmslos aus der Vorgabe „Typname groß geschrieben, mit angehängtem `s`"
+(Core §3.7). Ein Werkzeug kennt den Ablageort damit, ohne die Typdefinition zu
+lesen.
 
 Drei Properties sind Pflicht, alle übrigen optional: `version` in
 `specification`, `compares` in `comparison` und `lang` in `term`. Jede trägt

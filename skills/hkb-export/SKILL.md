@@ -15,8 +15,8 @@ weitergegeben werden kann.
 hk-export <bundle-id> <zielpfad>
 ```
 
-Welche Bundles es gibt, sagt `<base>/bundles/`. Geschrieben wird der
-typbezogene Baum mit `typedefs/`, `proptypes/`, je einem Verzeichnis pro Typ
+Welche Bundles es gibt, sagt `<base>/Bundles/`. Geschrieben wird der
+typbezogene Baum mit `Typedefs/`, `Proptypes/`, je einem Verzeichnis pro Typ
 und `media/<art>/` — auch wenn ein Bundle beliebig aufgebaut sein dürfte.
 Streng im Schreiben, großzügig im Lesen.
 
@@ -40,7 +40,7 @@ ist.
 
 ### Verweise aus dem Bundle hinaus (§6.2 Schritt 8)
 
-> `[[maschines/analytical-engine]] zeigt aus dem Bundle hinaus und bleibt stehen.`
+> `[[Maschines/analytical-engine]] zeigt aus dem Bundle hinaus und bleibt stehen.`
 
 Sie bleiben erhalten und zeigen beim Empfänger ins Leere. Das ist zulässig —
 das Bundle ist dann in seinen Typen, aber nicht in allen Verweisen

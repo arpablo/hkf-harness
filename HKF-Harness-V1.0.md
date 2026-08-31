@@ -142,7 +142,7 @@ im Format selbst: `hkb.md` trägt `spec` mit der URL.
 
 Was für **diese** Wissensbasis gilt, gehört seitdem nicht in eine Datei
 daneben, sondern hinein. HKF Base führt dafür den Typ `hint`: Jede Festlegung
-ist eine eigene Notiz unter `hints/`, mit `applies_to` auf die Typdefinition,
+ist eine eigene Notiz unter `Hints/`, mit `applies_to` auf die Typdefinition,
 für die sie gilt. Sie wird geprüft, verlinkt und mit der Ablage versioniert —
 alles, was eine erzeugte und ignorierte `AGENTS.md` nie war.
 
@@ -235,8 +235,8 @@ Sie erfüllt vier Aufgaben auf einmal:
 | Was in `schema.md` steht | Wo es in HKF steht |
 |---|---|
 | Gegenstand der Wissensbasis | `name` in `hkb.md` |
-| „Concept pages live in `wiki/concepts/`" | der Abschnitt `# Typen` in `hkb.md`, normativ die `typedefs/` |
-| Frontmatter-Block, Tag-Taxonomie | Property-Tabelle des Typs, `proptypes/`, Anhang B.4 |
+| „Concept pages live in `wiki/concepts/`" | der Abschnitt `# Typen` in `hkb.md`, normativ die `Typedefs/` |
+| Frontmatter-Block, Tag-Taxonomie | Property-Tabelle des Typs, `Proptypes/`, Anhang B.4 |
 | Konventionen für Verweise und Zeitangaben | die Spezifikation |
 | **wann eine Notiz entsteht, was bei Widerspruch geschieht** | **nirgends** |
 

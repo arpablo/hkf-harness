@@ -37,7 +37,7 @@ def kern_typen(spec, vorlage, melde):
         melde("Anhang A enthält %d Kern-Typen, erwartet 3" % len(bloecke), True)
         return
     for typ, block in bloecke:
-        p = os.path.join(vorlage, "typedefs", typ + ".md")
+        p = os.path.join(vorlage, "Typedefs", typ + ".md")
         if not os.path.exists(p):
             melde("%-10s fehlt in der Vorlage" % typ, True)
             continue
@@ -71,7 +71,7 @@ def standard_proptypes(spec, vorlage, melde):
     if len(erwartet) != 13:
         melde("§3.5.1 nennt %d Property-Typen, erwartet 13" % len(erwartet), True)
 
-    verz = os.path.join(vorlage, "proptypes")
+    verz = os.path.join(vorlage, "Proptypes")
     vorhanden = set(f[:-3] for f in os.listdir(verz) if f.endswith(".md"))
     for name in sorted(erwartet):
         if name not in vorhanden:
@@ -103,7 +103,7 @@ def main(argv):
         return 0
     args = [a for a in argv if not a.startswith("-")]
     vorlage = args[0] if args else os.path.join(WURZEL, "templates", "hkb")
-    if not os.path.isdir(os.path.join(vorlage, "typedefs")):
+    if not os.path.isdir(os.path.join(vorlage, "Typedefs")):
         sys.stderr.write("Keine Vorlage unter %s\n" % os.path.abspath(vorlage))
         return 2
 

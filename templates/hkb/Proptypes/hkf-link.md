@@ -7,7 +7,7 @@ modified_by: claude-opus-5
 ---
 
 Genau ein qualifizierter Wikilink auf eine Notiz derselben Ablage, ohne
-`.md`: `[[test/persons/ada-lovelace]]`.
+`.md`: `[[test/Persons/ada-lovelace]]`.
 
 Der Zieltyp wird in der Property-Tabelle angehängt: `hkf-link:organisation`,
 `hkf-link:person,organisation`. Ohne Angabe ist jeder Typ zulässig.

@@ -43,15 +43,15 @@ def _typtabelle(b, getan):
 
 
 def _standard_proptypes(b, getan):
-    quelle = os.path.join(TEMPLATES, "hkb", "proptypes")
-    ziel = os.path.join(b.basis, "proptypes")
+    quelle = os.path.join(TEMPLATES, "hkb", "Proptypes")
+    ziel = os.path.join(b.basis, "Proptypes")
     for name in sorted(STANDARD_PROPTYPES - set(b.proptypes)):
         vorlage = os.path.join(quelle, name + ".md")
         if not os.path.isfile(vorlage):
             continue
         os.makedirs(ziel, exist_ok=True)
         shutil.copy2(vorlage, os.path.join(ziel, name + ".md"))
-        getan.append("proptypes/%s.md: angelegt (§3.5.1)" % name)
+        getan.append("Proptypes/%s.md: angelegt (§3.5.1)" % name)
 
 
 def _verweise(b, getan):

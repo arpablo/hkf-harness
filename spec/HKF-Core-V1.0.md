@@ -51,9 +51,9 @@ kann.
 HKB — Knowledge Base              HKF — Bundle
 ──────────────────────────────    ──────────────────────────────
 hkb.md                            hbundle.md   ← einziger feststehender Ort
-<base>/typedefs/<typ>.md
-<base>/proptypes/<prop-typ>.md    beliebige Verzeichnisse:
-<base>/bundles/<id>.md            eine .md-Datei mit `type` ist eine Notiz,
+<base>/Typedefs/<typ>.md
+<base>/Proptypes/<prop-typ>.md    beliebige Verzeichnisse:
+<base>/Bundles/<id>.md            eine .md-Datei mit `type` ist eine Notiz,
 <base>/<verzeichnis>/…            jede andere Datei eine Mediendatei nach
 <media_base>/images/…             ihrer Endung, alles Übrige wird übergangen
 <media_base>/videos/…
@@ -71,7 +71,7 @@ Wurzel des Vaults sein.
    Zweck; danach ist die ganze Ablage bekannt. Eine Bundle-Notiz braucht nur
    `id` und `description` (§4.1).
 2. **Brauchst du einen Typ genauer, lies genau eine Datei:**
-   `<base>/typedefs/<typ>.md`. Ihre Property-Tabelle ist der vollständige
+   `<base>/Typedefs/<typ>.md`. Ihre Property-Tabelle ist der vollständige
    Vertrag des Typs.
 3. **Jede Notiz hat genau eine Pflicht-Property:** `type`.
 4. **Jeder interne Verweis ist ein qualifizierter Wikilink:**
@@ -110,9 +110,9 @@ Mehr Kontext ist für das Lesen und Schreiben nicht nötig.
 | **Ablage** | Sammelbegriff für beides: ein Baum nach den Regeln von §3. |
 | **Notiz** | Markdown-Datei mit YAML-Frontmatter und Body. |
 | **Typ** | Name einer Notizart, registriert durch eine Typdefinition. |
-| **Typdefinition** | Notiz mit `type: typedef` in `typedefs/`. |
+| **Typdefinition** | Notiz mit `type: typedef` in `Typedefs/`. |
 | **Wertform** | Einer der sechs nativen Obsidian-Property-Typen. |
-| **Property-Typ** | Notiz mit `type: proptype` in `proptypes/`; schränkt eine Wertform ein. |
+| **Property-Typ** | Notiz mit `type: proptype` in `Proptypes/`; schränkt eine Wertform ein. |
 | **Bundle-Notiz** | Notiz mit `type: bundle`; die Wurzeldatei eines Bundles. |
 | **Notiz-ID** | Pfad der Notiz relativ zum Basispfad, ohne `.md`. |
 | **Vorläufige Typdefinition** | Beim Import erzeugte Typdefinition für einen Typ, den niemand mitgeliefert hat; trägt `provisional: true` (§5.4). |
@@ -161,7 +161,7 @@ vor der Notiz-ID (§3.6).
 Empfänger an beliebiger Stelle; seine Verweise sind deshalb immer auf die
 Bundle-Wurzel bezogen und tragen nie einen Präfix. Liegt ein Bundle innerhalb
 eines Vaults, kann Obsidian seine Verweise darum nicht richtig auflösen — im
-Zweifel zeigt `[[persons/ada-lovelace]]` dort auf die gleichnamige Notiz der
+Zweifel zeigt `[[Persons/ada-lovelace]]` dort auf die gleichnamige Notiz der
 Wissensbasis. Das ist der Preis dafür, dass ein Bundle überall auspackbar
 bleibt, und es ist der richtige Tausch: Ein Bundle ist eine Lieferung, kein
 Arbeitsbereich.
@@ -208,9 +208,9 @@ Alle Notizen liegen typbezogen unter dem Basispfad:
 
 Unterverzeichnisse innerhalb eines Typverzeichnisses sind erlaubt.
 
-Im Basispfad existieren **immer** die Verzeichnisse `typedefs`, `proptypes`
-und `bundles`. Dort liegen die Typdefinitionen, die Property-Typen und die
-Bundle-Notizen. In einem Bundle bleibt `bundles/` leer oder entfällt, weil
+Im Basispfad existieren **immer** die Verzeichnisse `Typedefs`, `Proptypes`
+und `Bundles`. Dort liegen die Typdefinitionen, die Property-Typen und die
+Bundle-Notizen. In einem Bundle bleibt `Bundles/` leer oder entfällt, weil
 die Bundle-Notiz dort in der Wurzel liegt (§4).
 
 Ein Pflichtverzeichnis, das leer bliebe, darf entfallen. Git kann leere
@@ -232,7 +232,7 @@ Unterverzeichnissen liegen.
 
 Die Wurzeldatei eines Bundles heißt `hbundle.md` und nicht `bundle.md` — der
 kürzere Name gehört bereits der Typdefinition des Kern-Typs `bundle`, die als
-`typedefs/bundle.md` in jeder Ablage liegt. Ein Werkzeug, das nach
+`Typedefs/bundle.md` in jeder Ablage liegt. Ein Werkzeug, das nach
 Wurzeldateien sucht, hielte sonst jede Ablage mit registriertem `bundle`-Typ
 für verschachtelt.
 
@@ -250,9 +250,9 @@ Erkennung unabhängig davon, ob jemand eine Notiz `hbundle` nennt.
    eindeutig. Derselbe Name darf in verschiedenen Typverzeichnissen
    vorkommen.
 4. Die **Notiz-ID** ist der Pfad ab dem Basispfad ohne `.md`, etwa
-   `persons/ada-lovelace`. Sie ist die Identität der Notiz **innerhalb einer
+   `Persons/ada-lovelace`. Sie ist die Identität der Notiz **innerhalb einer
    Ablage**. Über zwei Ablagen hinweg sagt sie nichts: Zwei Bundles dürfen
-   beide `persons/john-smith` liefern und dabei zwei verschiedene Menschen
+   beide `Persons/john-smith` liefern und dabei zwei verschiedene Menschen
    meinen. Was der Import damit macht, steht in §6.1 Schritt 5.
 5. Umbenennen oder Verschieben ändert die Identität. Ein Werkzeug MUSS
    dabei alle Verweise mitziehen.
@@ -283,7 +283,7 @@ vier Verzeichnissen:
 - Diese vier Namen sind unter `media_base` reserviert. Unmittelbar unter
   `media_base` darf **kein** anderes Verzeichnis liegen.
 - Innerhalb der vier Verzeichnisse ist jede Unterstruktur erlaubt, etwa
-  `images/persons/portraets/`.
+  `images/personen/portraets/`.
 - Ein Verzeichnis wird angelegt, sobald Medien seiner Art vorkommen.
 - Kein Typverzeichnis darf unter `media_base` liegen und keines der vier
   Medienverzeichnisse darf als `dir` einer Typdefinition beansprucht werden.
@@ -375,7 +375,7 @@ von Werkzeugen geschrieben werden und keine von Hand gepflegt wird.
 ## 3.5 Property-Typen
 
 Ein Property-Typ schränkt eine Wertform ein — etwa auf eine URL, eine
-geographische Breite oder einen Wikilink. Er ist eine Notiz in `proptypes/`;
+geographische Breite oder einen Wikilink. Er ist eine Notiz in `Proptypes/`;
 der **Dateiname ist der Name des Property-Typs**.
 
 Ein Property-Typ ist ein *Werttyp*, kein Property-Name. Welche Property eines
@@ -406,7 +406,7 @@ wenig für Obsidian-eigene Properties wie `tags`, `aliases` und `cssclasses`.
 
 Diese dreizehn Property-Typen kennt jede HKB. Sie sind Teil dieser
 Spezifikation und gehören zur **Grundausstattung**: Eine HKB legt sie beim
-Anlegen als Notizen in `proptypes/` an (§5.3).
+Anlegen als Notizen in `Proptypes/` an (§5.3).
 
 | Property-Typ | Wertform | Einschränkung |
 |---|---|---|
@@ -440,7 +440,7 @@ einziges Verzeichnis Personen, Körperschaften, Orte, Werke und Begriffe
 gleichermaßen abdeckt. Fachliche Normdateien wie GND, VIAF oder ORCID gehören
 als eigene Property-Typen in die jeweilige Wissensbasis (§3.5).
 
-Der Body der Notiz `proptypes/hkf-wikidata.md` beschreibt, wie sich aus der
+Der Body der Notiz `Proptypes/hkf-wikidata.md` beschreibt, wie sich aus der
 Kennung weitere Angaben beschaffen lassen. Eine Wissensbasis SOLLTE diesen
 Text führen: Er ist die einzige Stelle, an der ein Werkzeug erfährt, was mit
 der Kennung anzufangen ist.
@@ -450,7 +450,7 @@ ein qualifizierter Wikilink nach §3.6, der aber die **Dateiendung behält**,
 weil sie bei einer Mediendatei zum Namen gehört:
 
 ```yaml
-portrait: "[[media/images/persons/portraet-ada.png|portraet-ada.png]]"
+portrait: "[[media/images/personen/portraet-ada.png|portraet-ada.png]]"
 ```
 
 - Das Ziel MUSS in einem der vier Medienverzeichnisse aus §3.2.1 liegen und
@@ -496,7 +496,7 @@ heißt wie der Property-Typ mit angehängtem `-list`:
 > Einträge **je einzeln** den Property-Typ `<property-typ>` erfüllen.
 
 Damit sind `hkf-url-list`, `hkf-email-list`, `hkf-phone-list` und jede weitere
-Listenform sofort verwendbar, ohne dass eine Notiz in `proptypes/` angelegt
+Listenform sofort verwendbar, ohne dass eine Notiz in `Proptypes/` angelegt
 wird. Geprüft werden `pattern`, `values`, `min`, `max` und ein etwaiger
 Zieltyp je Eintrag; `unit` gilt für alle Einträge gemeinsam.
 
@@ -523,13 +523,13 @@ ohne die Endung `.md`. Er setzt sich zusammen aus dem Ablagepfad (§3.1), dem
 `base` und der Notiz-ID.
 
 ```markdown
-[[persons/ada-lovelace|Ada Lovelace]]
-[[wissen/persons/ada-lovelace|Ada Lovelace]]   ← bei base: wissen
+[[Persons/ada-lovelace|Ada Lovelace]]
+[[wissen/Persons/ada-lovelace|Ada Lovelace]]   ← bei base: wissen
 ```
 
 Ein Verweis trägt **standardmäßig einen Alias** — den Teil hinter `|`. Der
 vollständige Pfad ist für Werkzeuge da, für Lesende ist er Ballast: ohne Alias
-steht mitten im Satz `test/persons/ada-lovelace` statt `Ada Lovelace`. Der
+steht mitten im Satz `test/Persons/ada-lovelace` statt `Ada Lovelace`. Der
 Alias ist der `title` des Ziels, ersatzweise sein Dateiname; bei einer
 Mediendatei ihr Dateiname samt Endung. Ein Verweis ohne Alias bleibt zulässig
 und auflösbar, ist aber nicht die Vorzugsform — `hk-lint` meldet ihn als
@@ -543,7 +543,7 @@ dort die Spalten, und ein unmaskierter Alias-Strich zerlegt die Zelle und
 zerstört den Link:
 
 ```markdown
-| [[persons/ada-lovelace\|Ada Lovelace]] | person | neu |
+| [[Persons/ada-lovelace\|Ada Lovelace]] | person | neu |
 ```
 
 Das ist derselbe Verweis; nur die Tabellenzeile verlangt das `\`. Ausserhalb
@@ -553,17 +553,17 @@ meldet einen unmaskierten Strich in einer Tabellenzelle als Fehler.
 Auch in Properties. YAML verlangt dort Anführungszeichen:
 
 ```yaml
-organizer: "[[organisations/analytical-society|Analytical Society]]"
+organizer: "[[Organisations/analytical-society|Analytical Society]]"
 participants:
-  - "[[persons/ada-lovelace|Ada Lovelace]]"
-  - "[[persons/charles-babbage|Charles Babbage]]"
+  - "[[Persons/ada-lovelace|Ada Lovelace]]"
+  - "[[Persons/charles-babbage|Charles Babbage]]"
 ```
 
 - Ein Wikilink ohne Verzeichnisanteil wie `[[ada-lovelace]]` ist nur dann
   konform, wenn die Zieldatei unmittelbar in der Wurzel der Ablage liegt —
   dann ist der Dateiname bereits der vollständige Pfad. Das trifft in der
   Praxis auf die Wurzeldatei zu: `[[hkb]]` und `[[hbundle]]` sind konform.
-  Nicht `[[bundle]]` — so heißt die Typdefinition `typedefs/bundle.md`, und
+  Nicht `[[bundle]]` — so heißt die Typdefinition `Typedefs/bundle.md`, und
   ein Verweis darauf ist nach dieser Regel unzulässig, weil sie nicht in der
   Wurzel liegt (§3.2).
   Für jede Notiz in einem Typverzeichnis ist ein verzeichnisloser Link
@@ -590,7 +590,7 @@ participants:
 - **Die Wurzeldatei verweist relativ zu sich selbst.** In `hkb.md` und
   `hbundle.md` — und in einer begleitenden Datei, die ein Werkzeug daneben
   erzeugt — beginnt ein Ziel beim Wurzelverzeichnis der Ablage, ohne
-  Ablagepfad: `[[specifications/hkf-core-1.0|HKF Core 1.0]]`. Diese Dateien
+  Ablagepfad: `[[Specifications/hkf-core-1.0|HKF Core 1.0]]`. Diese Dateien
   beschreiben die Ablage von innen und dürfen nicht wissen müssen, wo sie im
   Vault liegt;
   sonst stünde der Ablagepfad doppelt da und ein Verschieben der Wissensbasis
@@ -633,26 +633,34 @@ Dateiname ist Nachname-Vorname in kebab-case.
 ```
 
 - `dir` ist der Ablageort der Instanzen als **Pfad relativ zum Basispfad**.
-  Optional; Vorgabe ist der Typname mit angehängtem `s`. Die Kern-Typen und
-  das Vokabular aus HKF Base kommen damit aus; nur ein Typ, der abweichend
+  Optional; Vorgabe ist der Typname mit **großem Anfangsbuchstaben** und
+  angehängtem `s`: aus `person` wird `Persons`. Die Kern-Typen und das
+  Vokabular aus HKF Base kommen damit aus; nur ein Typ, der abweichend
   abgelegt werden soll, schreibt ihn.
+
+  Die Regel ist mechanisch und kein Sprachgefühl: erster Buchstabe groß, Rest
+  unverändert, `s` angehängt. `werkstoff` wird zu `Werkstoffs`, `hkf-link` zu
+  `Hkf-links`. Der große Anfangsbuchstabe trennt die Verzeichnisse der Ablage
+  auf einen Blick von allem anderen, was in einem Vault daneben liegt —
+  `media`, `.obsidian`, was ein Mensch dazulegt. Er ist Teil der Vorgabe, nicht
+  des Typnamens: Typnamen sind und bleiben klein (§3.7).
 
   Der Pfad darf mehrere Abschnitte haben. Damit lassen sich Typverzeichnisse
   gruppieren, ohne die Typnamen zu verlängern:
 
   ```yaml
-  dir: reihen                  # ein Abschnitt
-  dir: veranstaltungen/reihen  # mehrere
-  dir: stammdaten/kunde        # Gruppierung nach Herkunft
+  dir: Reihen                  # ein Abschnitt
+  dir: Veranstaltungen/Reihen  # mehrere
+  dir: Stammdaten/Kunde        # Gruppierung nach Herkunft
   ```
 
   Es gelten die Regeln aus §3.2: Kein `dir` darf unter einem anderen liegen,
-  auch nicht unter einem der drei Pflichtverzeichnisse. `stammdaten/kunde` und
-  `stammdaten/lieferant` sind nebeneinander zulässig — sie teilen sich ein
-  Elternverzeichnis, aber keines liegt im anderen. `stammdaten` selbst wäre
+  auch nicht unter einem der drei Pflichtverzeichnisse. `Stammdaten/Kunde` und
+  `Stammdaten/Lieferant` sind nebeneinander zulässig — sie teilen sich ein
+  Elternverzeichnis, aber keines liegt im anderen. `Stammdaten` selbst wäre
   dann für keinen weiteren Typ mehr frei.
 
-  Ein Gruppierungsverzeichnis wie `stammdaten` ist selbst **kein**
+  Ein Gruppierungsverzeichnis wie `Stammdaten` ist selbst **kein**
   Typverzeichnis. Eine Notiz, die unmittelbar darin läge, gehörte zu keinem
   Typ und wäre ein Befund (§3.7.1).
 - `description` ist Pflicht und eine Zeile lang. Sie erscheint in der
@@ -668,7 +676,7 @@ Der Abschnitt `# Properties` ist optional. Ist er vorhanden, ist er
 
 - **Property** — der `snake_case`-Name im Frontmatter.
 - **Typ** — entweder eine Wertform aus §3.4 oder der Name eines
-  Property-Typs aus `proptypes/`. Bei `hkf-link` darf ein Zieltyp, bei
+  Property-Typs aus `Proptypes/`. Bei `hkf-link` darf ein Zieltyp, bei
   `hkf-file` eine Medienart angehängt werden (§3.7.1). Mehrere zulässige
   Typen werden mit ` / ` getrennt, und die Beschreibung nennt sie in Worten
   (§3.7.2).
@@ -691,8 +699,8 @@ einzelne Property, dass Abwesenheit etwas Bestimmtes heißt.
 
 Sie wird **gelesen, nicht geschrieben**. Fehlt die Property, gilt der Wert; in
 die Notiz kommt nichts. So wirkt `dir` schon heute: Eine Typdefinition ohne
-`dir` legt ihre Instanzen unter dem Typnamen mit angehängtem `s` ab, und keine
-Datei hält das fest. In der Spalte steht `dir` trotzdem nicht — dort stehen
+`dir` legt ihre Instanzen unter dem groß geschriebenen Typnamen mit
+angehängtem `s` ab, und keine Datei hält das fest. In der Spalte steht `dir` trotzdem nicht — dort stehen
 nur **Werte**, keine Rechenvorschriften. Eine Vorgabe, die sich erst aus dem
 Typnamen ergibt, bleibt Prosa.
 
@@ -795,8 +803,8 @@ Für einen Wert wird der Reihe nach ermittelt:
    **keine** Mediendatei ist — dann als Fehler.
 5. **Typverzeichnis suchen.** Gesucht wird die Typdefinition, deren `dir` ein
    **segmentweises Präfix** der Notiz-ID ist. Der Vergleich läuft über ganze
-   Pfadsegmente: `persons` ist ein Präfix von `persons/historisch/ada`,
-   aber nicht von `persons-archiv/ada`. Nach §3.2 trifft höchstens eine
+   Pfadsegmente: `Persons` ist ein Präfix von `Persons/historisch/ada`,
+   aber nicht von `Persons-archiv/ada`. Nach §3.2 trifft höchstens eine
    Typdefinition zu.
 6. **Tatsächlichen Typ bestimmen.** Er ist der Typname der gefundenen
    Typdefinition.
@@ -814,21 +822,21 @@ Alle Einträge unterliegen derselben Zieltypangabe.
 
 #### Beispiel
 
-Gegeben `base: wissen` und die Typdefinitionen `person` → `persons` sowie
-`organisation` → `organisations`:
+Gegeben `base: wissen` und die Typdefinitionen `person` → `Persons` sowie
+`organisation` → `Organisations`:
 
 ```yaml
-# in wissen/persons/ada-lovelace.md
-employer: "[[wissen/organisations/analytical-society|Analytical Society]]"
+# in wissen/Persons/ada-lovelace.md
+employer: "[[wissen/Organisations/analytical-society|Analytical Society]]"
 ```
 
 | Schritt | Ergebnis |
 |---|---|
-| 1. Wikilink | Ziel `wissen/organisations/analytical-society` |
+| 1. Wikilink | Ziel `wissen/Organisations/analytical-society` |
 | 2. Ziel | vollständiger Pfad, konform zu §3.6 |
-| 3. Basispfad `wissen` abziehen | Notiz-ID `organisations/analytical-society` |
-| 4. Mediendatei? | nein, `organisations` ist kein Medienverzeichnis |
-| 5. Typverzeichnis | `organisations` |
+| 3. Basispfad `wissen` abziehen | Notiz-ID `Organisations/analytical-society` |
+| 4. Mediendatei? | nein, `Organisations` ist kein Medienverzeichnis |
+| 5. Typverzeichnis | `Organisations` |
 | 6. Tatsächlicher Typ | `organisation` |
 | 7. Vergleich mit `hkf-link:organisation` | erfüllt |
 
@@ -912,9 +920,9 @@ ergibt genau die drei Pflichtverzeichnisse aus §3.2.
 
 | Typ | Verzeichnis | Zweck |
 |---|---|---|
-| `typedef` | `typedefs` | Registriert einen Typ und legt sein Verzeichnis fest. |
-| `proptype` | `proptypes` | Schränkt eine Wertform ein. |
-| `bundle` | `bundles` | Beschreibt eine Lieferung. |
+| `typedef` | `Typedefs` | Registriert einen Typ und legt sein Verzeichnis fest. |
+| `proptype` | `Proptypes` | Schränkt eine Wertform ein. |
+| `bundle` | `Bundles` | Beschreibt eine Lieferung. |
 
 Ihre Typdefinitionen und die erlaubten Properties stehen in Anhang A, dort
 zusammen mit den Properties der Wurzeldateien und den notizübergreifenden
@@ -971,13 +979,13 @@ gewachsene, den jemand von Hand zusammenstellt:
 ```text
 biografie-2026/                              rezeption/
   hbundle.md                                   hbundle.md
-  typedefs/person.md                           README.md          ← übergangen
-  typedefs/organisation.md                     typen/person.md
-  proptypes/hkf-url.md                         leute/ada.md
+  Typedefs/person.md                           README.md          ← übergangen
+  Typedefs/organisation.md                     typen/person.md
+  Proptypes/hkf-url.md                         leute/ada.md
   media/images/portraet-ada.png                leute/babbage.md
   media/documents/notes-1843.pdf               scans/portraet.png
-  persons/ada-lovelace.md                      scans/notizen.pdf
-  organisations/analytical-society.md
+  Persons/ada-lovelace.md                      scans/notizen.pdf
+  Organisations/analytical-society.md
 ```
 
 Links steht, was ein Export erzeugt; rechts, was ein Import ebenso annimmt.
@@ -1012,7 +1020,7 @@ Kurzbeschreibung des Inhalts.
   Buchstaben.
 
   Das ist keine Formsache. Die `id` wird in der aufnehmenden Wissensbasis zum
-  Dateinamen `bundles/<id>.md` (§5.1), und in `required_bundles` trennt ein
+  Dateinamen `Bundles/<id>.md` (§5.1), und in `required_bundles` trennt ein
   Leerzeichen sie von der Fassungsbedingung. Eine `id` mit Leerzeichen zerlegt
   also den Eintrag, der sie voraussetzt; eine mit `/` beansprucht ein
   Verzeichnis; eine mit Großbuchstaben kollidiert auf einem Dateisystem, das
@@ -1160,7 +1168,7 @@ Der `restpfad` ist der Pfad in der Lieferung, von dem ein führendes `media/`
 und ein anschließendes Verzeichnis mit dem Namen der Medienart entfernt wurden:
 
 ```text
-media/images/persons/portraet.png   →  <media_base>/images/persons/portraet.png
+media/images/personen/portraet.png   →  <media_base>/images/personen/portraet.png
 scans/portraet.png                  →  <media_base>/images/scans/portraet.png
 portraet.png                        →  <media_base>/images/portraet.png
 ```
@@ -1191,7 +1199,7 @@ Zusätzen:
 2. `base` darf gesetzt sein und verschiebt alle Typverzeichnisse innerhalb
    der HKB dorthin.
 3. Sie enthält die Standard-Property-Typen aus §3.5.1.
-4. Sie führt `bundles/` mit einer Notiz je importiertem oder exportierbarem
+4. Sie führt `Bundles/` mit einer Notiz je importiertem oder exportierbarem
    Bundle.
 5. Sie stellt die Methoden aus §6 bereit.
 
@@ -1220,10 +1228,10 @@ Beispiel mit `base: wissen`:
 
 ```text
 hkb.md
-wissen/typedefs/person.md
-wissen/proptypes/hkf-url.md
-wissen/bundles/biografie-2026.md
-wissen/persons/ada-lovelace.md
+wissen/Typedefs/person.md
+wissen/Proptypes/hkf-url.md
+wissen/Bundles/biografie-2026.md
+wissen/Persons/ada-lovelace.md
 media/images/portraet-ada.png
 ```
 
@@ -1232,7 +1240,7 @@ liegen hier neben dem Basispfad, nicht darin.
 
 ## 5.1 Bundle-Notizen in der HKB
 
-Ein importiertes Bundle wird als `<base>/bundles/<id>.md` abgelegt. Es ist
+Ein importiertes Bundle wird als `<base>/Bundles/<id>.md` abgelegt. Es ist
 dieselbe Notiz wie `hbundle.md` im Bundle, mit zwei Unterschieden:
 
 - Die Wurzeldatei-Properties `hkf`, `base` und `media_base` sowie die
@@ -1273,9 +1281,9 @@ Imports** enthielt. Je übernommener Fassung entsteht ein Abschnitt
 
 | Notiz | Typ | Zustand |
 |---|---|---|
-| [[persons/ada-lovelace\|Ada Lovelace]] | person | neu |
-| [[persons/charles-babbage\|Charles Babbage]] | person | neu |
-| [[places/london\|London]] | place | aktualisiert |
+| [[Persons/ada-lovelace\|Ada Lovelace]] | person | neu |
+| [[Persons/charles-babbage\|Charles Babbage]] | person | neu |
+| [[Places/london\|London]] | place | aktualisiert |
 
 | Mediendatei | Medienart | Zustand |
 |---|---|---|
@@ -1283,7 +1291,7 @@ Imports** enthielt. Je übernommener Fassung entsteht ein Abschnitt
 
 | Verweis | Gegenstelle | Grund |
 |---|---|---|
-| [[persons/ada-lovelace\|Ada Lovelace]] | [[places/london\|London]] | beide nennen einander |
+| [[Persons/ada-lovelace\|Ada Lovelace]] | [[Places/london\|London]] | beide nennen einander |
 ```
 
 - Die erste Spaltenüberschrift unterscheidet die drei Tabellen: `Notiz`,
@@ -1322,7 +1330,7 @@ nach Lieferung verloren. Sie wird deshalb als Property geführt:
 
 ```yaml
 bundles:
-  - "[[bundles/biografie-2026|Biografische Notizen, Ausgabe 2026]]"
+  - "[[Bundles/biografie-2026|Biografische Notizen, Ausgabe 2026]]"
 ```
 
 `bundles` hat den Typ `hkf-link-list:bundle` (§3.7.1). Eine Notiz
@@ -1355,14 +1363,15 @@ bleiben Bundles austauschbar.
 Warum die Grundausstattung nicht ebenfalls ein Bundle ist: Sie zu importieren
 setzte voraus, dass sie schon da ist. Der Typ `typedef` müsste sich selbst
 ablegen, bevor er registriert wäre. Diese Schleife lässt sich zwar durch die
-Vorgaberegel aus §3.7 auflösen — Verzeichnis gleich Typname mit angehängtem
+Vorgaberegel aus §3.7 auflösen — Verzeichnis gleich groß geschriebener
+Typname mit angehängtem
 `s` —, aber sie zu vermeiden ist einfacher, als sie zu beschreiben.
 
 Fortschreibung ist ein erneuter Import. Bringt eine spätere Fassung einen
 neuen Typ oder eine geänderte Property-Tabelle, entscheidet der Vergleich aus
 §6.1 Schritt 5 je Notiz: geänderte werden übernommen, unveränderte
 übersprungen. Welche Fassung eine HKB führt, sagt die `version` ihrer
-Bundle-Notiz `bundles/hkf-base.md`.
+Bundle-Notiz `Bundles/hkf-base.md`.
 
 Weder die Grundausstattung noch einen zugeladenen Typ darf eine HKB
 abwandeln. Wer
@@ -1389,6 +1398,7 @@ eine **vorläufige Typdefinition** an:
 ```markdown
 ---
 type: typedef
+title: werkstoff
 provisional: true
 description: Vorläufig beim Import von biografie-2026 angelegt; keine Typdefinition geliefert.
 created: 2026-08-27
@@ -1397,11 +1407,15 @@ modified_by: hk-import
 ---
 ```
 
+- `title` ist der **Typname**, unverändert. Nach A.2 gälte ohne ihn der
+  Dateiname, der dasselbe sagt — aber nur für den, der ihn sieht. Eine
+  Auswertung, die Titel vergleicht, fände nichts, und in jeder Notiz, die den
+  Typ nennt, steht er ohnehin so: `werkstoff`, nicht `Werkstoff`.
 - `provisional: true` kennzeichnet sie. Das ist die einzige Property, die eine
   vorläufige Typdefinition von einer endgültigen unterscheidet.
-- `dir` bleibt weg, es gilt also die Vorgabe aus §3.7: der Typname mit
-  angehängtem `s`. Die Regel ist mechanisch und kein Sprachgefühl —
-  `werkstoff` wird zu `werkstoffs`. Genau darauf kommt es an: Sie liefert
+- `dir` bleibt weg, es gilt also die Vorgabe aus §3.7: der groß geschriebene
+  Typname mit angehängtem `s`. Die Regel ist mechanisch und kein Sprachgefühl
+  — `werkstoff` wird zu `Werkstoffs`. Genau darauf kommt es an: Sie liefert
   denselben Ort, den auch die nachgereichte Typdefinition beansprucht, solange
   diese kein abweichendes `dir` setzt.
 - Sie trägt **keinen** Abschnitt `# Properties`. Eine Property-Tabelle sichert
@@ -1517,9 +1531,9 @@ eigenen Abschnitt:
 ```markdown
 # Siehe auch
 
-- [[organisations/analytical-society|Analytical Society]] — beide Notizen nennen einander
-- [[persons/charles-babbage|Charles Babbage]] — im Body dieser Notiz genannt
-- [[places/london|London]] — mit der Lieferung biografie-2026 als Wirkungsort gekommen
+- [[Organisations/analytical-society|Analytical Society]] — beide Notizen nennen einander
+- [[Persons/charles-babbage|Charles Babbage]] — im Body dieser Notiz genannt
+- [[Places/london|London]] — mit der Lieferung biografie-2026 als Wirkungsort gekommen
 ```
 
 - Der Abschnitt heißt `# Siehe auch` und ist der **letzte** der Notiz.
@@ -1555,7 +1569,7 @@ nicht beim nächsten Import wiederkehren, nennt die Notiz sein Ziel in
 
 ```yaml
 rejected_links:
-  - "[[places/london|London]]"
+  - "[[Places/london|London]]"
 ```
 
 `rejected_links` hat den Typ `hkf-link-list` und ist in jeder Notiz erlaubt
@@ -1599,7 +1613,7 @@ der Property `related` vom Typ `hkf-link-or-url-list` (A.2):
 
 ```yaml
 related:
-  - "[[persons/charles-babbage|Charles Babbage]]"
+  - "[[Persons/charles-babbage|Charles Babbage]]"
   - https://example.org/analytical-engine
 ```
 
@@ -1700,7 +1714,7 @@ den Importnachweisen:
 | Gegenstand | Urteil | Von | Beurteilt | Grund |
 |---|---|---|---|---|
 | Typ `person` | gleich | armin | Ein Mensch als Gegenstand der Wissensbasis. | dieselbe Sache, die Lieferung ergänzt nur Felder |
-| Notiz [[persons/john-smith\|John Smith]] | verschieden | claude-opus-5 | John Smith | Toningenieur; unserer ist Botaniker |
+| Notiz [[Persons/john-smith\|John Smith]] | verschieden | claude-opus-5 | John Smith | Toningenieur; unserer ist Botaniker |
 ```
 
 - **Gegenstand** ist entweder ein Typ, geschrieben als `` Typ `<name>` ``, oder
@@ -1766,7 +1780,7 @@ unterdrückte einen echten Konflikt für immer, ohne ihn zu beheben.
 
 Fällt eine Bedeutungsprüfung auf „verschieden", wird der Import abgewiesen und
 keine Notiz geschrieben (§6.1 Schritt 2). Für den Entscheidungsnachweis gilt
-das **nicht**: Er entsteht trotzdem, als `<base>/bundles/<id>.md` mit dem
+das **nicht**: Er entsteht trotzdem, als `<base>/Bundles/<id>.md` mit dem
 Abschnitt `# Entscheidungen` und sonst nichts.
 
 Anders ginge es nicht. Eine Ablehnung, die nirgends steht, wird bei jedem
@@ -1780,7 +1794,7 @@ Fehlen von `imported` ist die Auskunft: Diese Lieferung wurde geprüft und nicht
 übernommen. Keine Notiz der Wissensbasis nennt sie in `bundles`.
 
 Der Abschnitt gehört der Wissensbasis, nicht der Lieferung. Er steht nur in
-`<base>/bundles/<id>.md` und geht bei einem Export nicht mit — wie `imported`
+`<base>/Bundles/<id>.md` und geht bei einem Export nicht mit — wie `imported`
 und die Importnachweise (§6.2).
 
 ---
@@ -1868,7 +1882,7 @@ Schnittstelle. Ein Bundle stellt keine Methoden bereit.
 4. Jede Notiz nach `<base>/<dir des typs>/<dateiname>` schreiben.
 5. Existiert die Ziel-Notiz-ID bereits, ist zuerst zu klären, **ob es
    dieselbe Notiz ist**. Der Pfad allein beweist das nicht (§3.2 Regel 4):
-   `persons/john-smith` heißt in zwei Lieferungen leicht denselben Dateinamen
+   `Persons/john-smith` heißt in zwei Lieferungen leicht denselben Dateinamen
    und meint zwei verschiedene Menschen.
 
    Entschieden wird an drei Beobachtungen, in dieser Reihenfolge:
@@ -1974,7 +1988,7 @@ Schnittstelle. Ein Bundle stellt keine Methoden bereit.
 
    `--no-link` überspringt den Schritt. Eine Lieferung, die unverändert
    liegenbleiben soll, kommt so an.
-10. Bundle-Notiz nach §5.1 als `<base>/bundles/<id>.md` anlegen oder
+10. Bundle-Notiz nach §5.1 als `<base>/Bundles/<id>.md` anlegen oder
    aktualisieren: `version` und `imported` auf die eben übernommene Fassung
    setzen und den Importnachweis `# Import <version>` mit allen Notizen und
    Mediendateien voranstellen, dazu die angelegten Verweise samt Gegenstelle
@@ -2017,13 +2031,13 @@ Was geschieht
   14 Notizen: 12 neu, 1 aktualisiert, 1 abgelehnt (ältere Fassung)
   2 Mediendateien neu
   Typ angelegt:  quelle → quellen
-  Vorläufig:     werkstoff → werkstoffs (3 Notizen)
+  Vorläufig:     werkstoff → Werkstoffs (3 Notizen)
   Verknüpfung:   7 Verweise mechanisch sicher, 4 vorgelegt
 
 Was zu entscheiden ist
   person   Gleicher Name, Bedeutung nicht zugesichert.
            hier    Ein Mensch als Gegenstand der Wissensbasis. (eigene Definition)
-           Bundle  Datensatz der Personalverwaltung. (typedefs/person.md)
+           Bundle  Datensatz der Personalverwaltung. (Typedefs/person.md)
   place    dir weicht ab: orte (Bundle) gegen places (hier).
 
 Was zu tun ist
@@ -2034,7 +2048,7 @@ Was zu tun ist
   → hkf-base >= 1.0 ist vorausgesetzt, aber nicht importiert. Erst hkf-base
     importieren, dann diesen Import wiederholen; werkstoff bleibt bis dahin
     vorläufig.
-  → persons/ada-lovelace ist hier neuer als in der Lieferung. Prüfen, ob die
+  → Persons/ada-lovelace ist hier neuer als in der Lieferung. Prüfen, ob die
     Lieferung veraltet ist; sonst nichts tun.
   → 4 Verknüpfungen entscheiden, darunter employer an zwei Personen. Was
     nicht gewollt ist, gehört nach rejected_links, sonst kommt es beim
@@ -2056,12 +2070,12 @@ sondern nur, ob geschrieben wird.
 Schreibt ein HKF-Bundle heraus.
 
 Ein Bundle darf beliebig aufgebaut sein (§4), aber `hk-export` nutzt diese
-Freiheit nicht: Es schreibt den typbezogenen Baum, mit `typedefs/`,
-`proptypes/` und `media/<art>/`. Streng im Schreiben, großzügig im Lesen — ein
+Freiheit nicht: Es schreibt den typbezogenen Baum, mit `Typedefs/`,
+`Proptypes/` und `media/<art>/`. Streng im Schreiben, großzügig im Lesen — ein
 Ergebnis, das aussieht wie eine Wissensbasis, ist leichter zu prüfen und zu
 lesen als eines, das jede erlaubte Form annehmen dürfte.
 
-1. Alle Notizen sammeln, deren `bundles` auf `<base>/bundles/<bundle-id>`
+1. Alle Notizen sammeln, deren `bundles` auf `<base>/Bundles/<bundle-id>`
    verweist.
 2. Jede Notiz nach `<zielpfad>/<dir des typs>/<dateiname>` schreiben, die
    Properties `bundles` und `rejected_links` dabei entfernen (§4.2). Beide
@@ -2109,7 +2123,7 @@ Prüft eine Ablage, ohne sie zu verändern. Anwendbar auf eine HKB und auf ein
 Bundle; die letzten vier Punkte gelten nur für eine HKB.
 
 - Wurzeldatei vorhanden, `hkf` gesetzt, `base` und `media_base` auflösbar,
-- `typedefs`, `proptypes` und `bundles` im Basispfad vorhanden — **nur in
+- `Typedefs`, `Proptypes` und `Bundles` im Basispfad vorhanden — **nur in
   einer HKB**; ein Bundle hat keine Typverzeichnisse (§4),
 - jede Notiz hat `type`, und in einer HKB passt der Typ zu ihrem Verzeichnis.
   In einem Bundle gilt als Notiz, was `type` trägt; jede andere `.md`-Datei
@@ -2283,7 +2297,7 @@ beiden Fälle vorliegt, entscheidet ein Mensch.
 
 1. `hkb.md` mit `hkf: "1.0"` und `name` im Wurzelverzeichnis der HKB liegt
    und keine weitere Ablage darunter liegt,
-2. `typedefs`, `proptypes` und `bundles` im Basispfad existieren, soweit sie
+2. `Typedefs`, `Proptypes` und `Bundles` im Basispfad existieren, soweit sie
    nicht leer wären, und unter `media_base` nur die vier Medienverzeichnisse
    aus §3.2.1 liegen,
 3. die Grundausstattung aus §3.8 vorhanden ist — die Kern-Typen `typedef`,
@@ -2358,7 +2372,7 @@ Formen sind `text`. Als Wikilink verweist er nach §3.6 relativ zur
 Wurzeldatei, also ohne Ablagepfad:
 
 ```yaml
-spec: "[[specifications/hkf-core-1.0|HKF Core 1.0]]"
+spec: "[[Specifications/hkf-core-1.0|HKF Core 1.0]]"
 spec: https://example.org/hkf/1.0
 ```
 
@@ -2436,7 +2450,7 @@ description: Registriert einen Typ und legt sein Verzeichnis fest.
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
 | description | text | ja | — | Einzeiliger Zweck; erscheint in der Typtabelle der Wurzeldatei |
-| dir | text | nein | — | Verzeichnis der Instanzen; Vorgabe ist der Typname mit angehängtem `s` (§3.7) |
+| dir | text | nein | — | Verzeichnis der Instanzen; Vorgabe ist der groß geschriebene Typname mit angehängtem `s` (§3.7) |
 | provisional | checkbox | nein | false | Beim Import angelegt, weil niemand den Typ definiert hat (§5.4) |
 
 # Konventionen
@@ -2482,7 +2496,7 @@ eine Wertform zu, sie könnten also nicht zugleich Datumsgrenzen sein.
 ```
 
 Die Tabelle beschreibt die Properties **einer** `proptype`-Notiz. Die
-Typdefinition selbst liegt als `typedefs/proptype.md` und trägt wie jede
+Typdefinition selbst liegt als `Typedefs/proptype.md` und trägt wie jede
 Typdefinition `type: typedef`.
 
 ## A.5 `bundle`
@@ -2509,7 +2523,7 @@ description: Beschreibt eine Lieferung.
 
 Als `hbundle.md` in der Wurzel eines Bundles trägt die Notiz zusätzlich die
 Wurzeldatei-Properties aus A.1 und die Typtabelle im Body; `imported` entfällt
-dort. In der HKB liegt sie als `bundles/<id>.md` ohne diese Zusätze.
+dort. In der HKB liegt sie als `Bundles/<id>.md` ohne diese Zusätze.
 
 `source` ist `text` und nicht `hkf-url`, weil auch ein Repository-Verweis oder
 ein Datenträger als Herkunft in Frage kommt.

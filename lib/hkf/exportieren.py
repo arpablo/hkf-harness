@@ -3,7 +3,7 @@
 
 Streng im Schreiben, grosszuegig im Lesen: Ein Bundle duerfte beliebig
 aufgebaut sein (§4), aber geschrieben wird der typbezogene Baum mit
-`typedefs/`, `proptypes/` und `media/<art>/`.
+`Typedefs/`, `Proptypes/` und `media/<art>/`.
 
 Zwei Lesarten seien genannt, wo §6.2 offen ist:
 
@@ -61,7 +61,7 @@ class Plan(object):
 
 def _mitglied(daten, bundle_id):
     """Traegt die Notiz dieses Bundle in `bundles` (§5.2)?"""
-    ziel = "bundles/%s" % bundle_id
+    ziel = "Bundles/%s" % bundle_id
     for l in daten.get("bundles") or []:
         m = re.match(r"^\[\[([^\]|]+)", str(l))
         if m and m.group(1).endswith(ziel):
@@ -78,7 +78,7 @@ def _gelieferte_typen(plan, vorausgesetzt):
     aus = set()
     if not vorausgesetzt:
         return aus
-    for verz in ("typedefs", "proptypes"):
+    for verz in ("Typedefs", "Proptypes"):
         d = os.path.join(plan.basis, verz)
         if not os.path.isdir(d):
             continue
@@ -87,7 +87,7 @@ def _gelieferte_typen(plan, vorausgesetzt):
                 continue
             daten, _ = frontmatter.lesen(os.path.join(d, f))
             for l in daten.get("bundles") or []:
-                m = re.search(r"bundles/([a-z][a-z0-9-]*)\|", str(l))
+                m = re.search(r"Bundles/([a-z][a-z0-9-]*)\|", str(l))
                 if m and m.group(1) in vorausgesetzt:
                     aus.add("%s/%s" % (verz, f[:-3]))
     return aus
@@ -95,7 +95,7 @@ def _gelieferte_typen(plan, vorausgesetzt):
 
 def planen(hkb, bundle_id, ziel, media_base="media"):
     plan = Plan(hkb, bundle_id, ziel, media_base)
-    quelle = os.path.join(plan.basis, "bundles", bundle_id + ".md")
+    quelle = os.path.join(plan.basis, "Bundles", bundle_id + ".md")
     if not os.path.isfile(quelle):
         plan.abgebrochen = ("Die Wissensbasis führt kein Bundle `%s` — "
                             "%s gibt es nicht." % (bundle_id, quelle))
@@ -117,7 +117,7 @@ def planen(hkb, bundle_id, ziel, media_base="media"):
         daten, body = frontmatter.lesen(p)
         if "type" not in daten or not _mitglied(daten, bundle_id):
             continue
-        if rel.startswith("bundles/"):
+        if rel.startswith("Bundles/"):
             continue
         kopf = notiz.teilen(io.open(p, encoding="utf-8").read())[0]
         plan.notizen.append({"quelle": p, "rel": rel, "kopf": kopf,
@@ -135,7 +135,7 @@ def planen(hkb, bundle_id, ziel, media_base="media"):
             # §7.1: Was zur Grundausstattung gehoert (§3.8), muss ein Bundle
             # nicht mitbringen — jede konforme HKB fuehrt es ohnehin.
             continue
-        rel = "typedefs/%s" % typ
+        rel = "Typedefs/%s" % typ
         p = os.path.join(plan.basis, rel + ".md")
         if not os.path.isfile(p):
             plan.melde("konflikt", "Der Typ %s hat keine Typdefinition." % typ,
@@ -157,7 +157,7 @@ def planen(hkb, bundle_id, ziel, media_base="media"):
         if rel + ".md" not in schon:
             plan.typdefs.append(rel)
     for name in sorted(proptypes):
-        rel = "proptypes/%s" % name
+        rel = "Proptypes/%s" % name
         if name in STANDARD_PROPTYPES or rel in von_anderen:
             continue
         if not os.path.isfile(os.path.join(plan.basis, rel + ".md")):
@@ -299,11 +299,11 @@ def _hbundle(plan):
     # bleiben draussen — sie hat jede HKB (§3.8).
     typen = {n["typ"] for n in plan.notizen} - KERN_TYPEN
     for n in plan.notizen:
-        if n["rel"].startswith("typedefs/"):
+        if n["rel"].startswith("Typedefs/"):
             typen.add(os.path.basename(n["rel"])[:-3])
     zeilen = ["# Typen", "", "| Typ | Verzeichnis | Zweck |", "|---|---|---|"]
     for typ in sorted(typen):
-        p = os.path.join(plan.basis, "typedefs", typ + ".md")
+        p = os.path.join(plan.basis, "Typedefs", typ + ".md")
         d = frontmatter.lesen(p)[0] if os.path.isfile(p) else {}
         zeilen.append("| %s | %s | %s |" % (typ, _verzeichnis(typ, d),
                                             d.get("description") or ""))

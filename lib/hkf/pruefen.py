@@ -24,7 +24,7 @@ LINK = re.compile(r"\[\[([^\]|\\]+)(?:\\?\|([^\]]*))?\]\]")
 def ohne_code(text):
     """Was in Backticks steht, ist ein Beispiel und kein Verweis.
 
-    Die Grundausstattung zeigt in `proptypes/hkf-link.md` einen Wikilink als
+    Die Grundausstattung zeigt in `Proptypes/hkf-link.md` einen Wikilink als
     Muster her. Wer ihn aufzuloesen versuchte, faende ein Ziel, das es nicht
     gibt — und jede frisch angelegte Wissensbasis waere unkonform.
     """
@@ -90,9 +90,9 @@ class Bestand(object):
                 continue
             self.notizen[rel[:-3]] = e
             verz, name = rel.split("/", 1)
-            if verz == "typedefs":
+            if verz == "Typedefs":
                 self.typdefs[name[:-3]] = e
-            elif verz == "proptypes":
+            elif verz == "Proptypes":
                 self.proptypes[name[:-3]] = e
         mb = os.path.join(self.hkb, self.media_basis) if self.media_basis else self.hkb
         for art in ARTVERZEICHNIS.values():
@@ -181,7 +181,7 @@ def _wurzeldatei(b, befunde):
         befunde.append(Befund("hkb.md", "`name` fehlt (Anhang A.1)."))
     if not os.path.isdir(b.basis):
         befunde.append(Befund("hkb.md", "`base` zeigt auf kein Verzeichnis."))
-    for verz in ("typedefs", "proptypes", "bundles"):
+    for verz in ("Typedefs", "Proptypes", "Bundles"):
         if not os.path.isdir(os.path.join(b.basis, verz)):
             befunde.append(Befund("hkb.md",
                                   "%s/ fehlt im Basispfad (§7.2)." % verz))
@@ -193,15 +193,15 @@ def _typen(b, befunde):
     verz = b.verzeichnisse()
     for d, namen in sorted(verz.items()):
         if len(namen) > 1:
-            befunde.append(Befund("typedefs/", "Das Verzeichnis %s beanspruchen "
+            befunde.append(Befund("Typedefs/", "Das Verzeichnis %s beanspruchen "
                                   "%s (§6.3)." % (d, " und ".join(sorted(namen)))))
         if d.startswith("/") or d.endswith("/") or ".." in d.split("/"):
-            befunde.append(Befund("typedefs/%s.md" % namen[0],
+            befunde.append(Befund("Typedefs/%s.md" % namen[0],
                                   "`dir` ist kein wohlgeformter relativer Pfad: %r" % d))
     for a in sorted(verz):
         for c in sorted(verz):
             if a != c and c.startswith(a + "/"):
-                befunde.append(Befund("typedefs/", "Die Typverzeichnisse %s und %s "
+                befunde.append(Befund("Typedefs/", "Die Typverzeichnisse %s und %s "
                                       "liegen ineinander (§6.3)." % (a, c)))
     for rel, e in sorted(b.notizen.items()):
         typ = e["typ"]
@@ -248,7 +248,7 @@ def _vorlaeufige(b, befunde):
 def _proptypes(b, befunde):
     if b.art == "hkb":
         for name in sorted(STANDARD_PROPTYPES - set(b.proptypes)):
-            befunde.append(Befund("proptypes/", "Der Standard-Property-Typ `%s` "
+            befunde.append(Befund("Proptypes/", "Der Standard-Property-Typ `%s` "
                                                 "fehlt (§3.5.1)." % name))
     else:
         for name in sorted(STANDARD_PROPTYPES & set(b.proptypes)):
@@ -320,14 +320,14 @@ def _verweise(b, befunde):
             if alias is None:
                 befunde.append(Befund(e["rel"], "[[%s]] trägt keinen Alias (§3.6)."
                                       % ziel, HINWEIS))
-        if b.art != "hkb" or rel.split("/", 1)[0] == "bundles":
+        if b.art != "hkb" or rel.split("/", 1)[0] == "Bundles":
             continue
         for l in e["daten"].get("bundles") or []:
             m = re.match(r"^\[\[([^\]|]+)", str(l))
             if not m:
                 continue
             art, rest = b.aufloesen(m.group(1))
-            if art != "notiz" or not rest.startswith("bundles/"):
+            if art != "notiz" or not rest.startswith("Bundles/"):
                 befunde.append(Befund(e["rel"], "`bundles` nennt %s — dort liegt "
                                       "keine Bundle-Notiz (§5.2)." % m.group(1)))
 
@@ -419,7 +419,7 @@ def _bundle_notizen(b, befunde):
     if b.art != "hkb":
         return
     for rel, e in sorted(b.notizen.items()):
-        if not rel.startswith("bundles/") or e["typ"] != "bundle":
+        if not rel.startswith("Bundles/") or e["typ"] != "bundle":
             continue
         name = rel.split("/", 1)[1]
         kennung = str(e["daten"].get("id") or "")
@@ -507,7 +507,7 @@ def _verwaist(b, befunde):
         if art == "notiz":
             zeigt_auf.add(rest)
     for rel, e in sorted(b.notizen.items()):
-        if rel in zeigt_auf or e["typ"] in KERN_TYPEN or rel.startswith("proptypes/"):
+        if rel in zeigt_auf or e["typ"] in KERN_TYPEN or rel.startswith("Proptypes/"):
             continue
         befunde.append(Befund(e["rel"], "Auf diese Notiz zeigt kein Verweis; sie ist "
                               "über die Wissensbasis nicht erreichbar (§6.3).", HINWEIS))
@@ -580,7 +580,7 @@ def _proptype_daten(b, name):
         return e["daten"]
     if name not in STANDARD_PROPTYPES:
         return None
-    p = os.path.join(TEMPLATES, "hkb", "proptypes", name + ".md")
+    p = os.path.join(TEMPLATES, "hkb", "Proptypes", name + ".md")
     if not os.path.isfile(p):
         return None
     return frontmatter.lesen(p)[0]

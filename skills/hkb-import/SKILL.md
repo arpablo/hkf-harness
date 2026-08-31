@@ -56,9 +56,9 @@ zweiten Anlauf. `--force` hilft hier nicht und ist auch nicht dafür gedacht.
 
 ### Identität — eine Notiz-ID gibt es schon (§6.1 Schritt 5)
 
-> `persons/john-smith gibt es schon, und nichts verankert die beiden aneinander.`
+> `Persons/john-smith gibt es schon, und nichts verankert die beiden aneinander.`
 
-Der Pfad beweist nichts: `persons/john-smith` heißt in zwei Lieferungen
+Der Pfad beweist nichts: `Persons/john-smith` heißt in zwei Lieferungen
 leicht gleich und meint zwei Menschen. Vergleiche beide Notizen — Titel,
 Body, Properties, Zeitangaben.
 
@@ -85,7 +85,7 @@ Begründung.
 
 ## Das Urteil aufschreiben
 
-In `<base>/bundles/<id>.md`, Abschnitt `# Entscheidungen`, **vor** den
+In `<base>/Bundles/<id>.md`, Abschnitt `# Entscheidungen`, **vor** den
 Importnachweisen (§5.1). Gibt es die Notiz noch nicht — beim ersten Import
 mit offener Frage —, legst du sie mit `type`, `id`, `description` und diesem
 Abschnitt an, sonst nichts.
@@ -96,7 +96,7 @@ Abschnitt an, sonst nichts.
 | Gegenstand | Urteil | Von | Beurteilt | Grund |
 |---|---|---|---|---|
 | Typ `person` | verschieden | claude-opus-5 | Ein Datensatz der Personalverwaltung. | unserer meint einen Menschen, nicht seinen Personalsatz |
-| Notiz [[persons/john-smith\|John Smith]] | dieselbe | armin | John Smith | gleiche Lebensdaten, gleicher Beruf |
+| Notiz [[Persons/john-smith\|John Smith]] | dieselbe | armin | John Smith | gleiche Lebensdaten, gleicher Beruf |
 ```
 
 - **Gegenstand** ist `` Typ `<name>` `` oder `Notiz ` und ein qualifizierter
