@@ -24,6 +24,26 @@ def probe(name, bedingung, hinweis=""):
         fehler.append(name + ((" — " + hinweis) if hinweis else ""))
 
 
+def _kaputt(ziel):
+    """Baut in eine frische Ablage ein, was --fix wieder gerade zieht."""
+    import re as _re
+    p = os.path.join(ziel, "hkb.md")
+    t = io.open(p, encoding="utf-8").read()
+    io.open(p, "w", encoding="utf-8").write(
+        _re.sub(r"^\| bundle \|.*\n", "", t, flags=_re.M))
+    os.remove(os.path.join(ziel, "proptypes", "hkf-phone.md"))
+    os.makedirs(os.path.join(ziel, "dinge"), exist_ok=True)
+    io.open(os.path.join(ziel, "typedefs", "ding.md"), "w", encoding="utf-8").write(
+        "---\ntype: typedef\ntitle: Ding\ndescription: Ein Ding.\ndir: dinge\n"
+        "created: 2026-01-01\nmodified: 2026-01-01T00:00:00\n---\n")
+    io.open(os.path.join(ziel, "dinge", "zwei.md"), "w", encoding="utf-8").write(
+        "---\ntype: ding\ntitle: Das Zweite\ncreated: 2026-01-01\n"
+        "modified: 2026-01-01T00:00:00\n---\n\nEin Ding.\n")
+    io.open(os.path.join(ziel, "dinge", "eins.md"), "w", encoding="utf-8").write(
+        "---\ntype: ding\ntitle: Das Erste\nstatus:\n---\n\n"
+        "Es zeigt auf [[zwei]].\n")
+
+
 def hkf_venv():
     return os.environ.get("HKF_VENV") or os.path.join(
         os.path.expanduser("~"), ".cache", "hkf-harness", "venv")
@@ -104,6 +124,37 @@ def main():
         probe("nennt das falsche Datum", "created" in r.stdout, r.stdout)
         probe("nennt den unmaskierten Strich", "Tabellenzelle" in r.stdout, r.stdout)
 
+
+        print("hk-lint --fix")
+        # frisch anfangen: der Block davor hat absichtlich kaputt gemacht,
+        # was --fix nicht reparieren darf
+        shutil.rmtree(ziel)
+        lauf(os.path.join(BIN, "hk-init"), ziel, "--name", "Probe")
+        _kaputt(ziel)
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        probe("findet die eingebauten Fehler",
+              "Typtabelle nennt" in r.stdout and "hkf-phone` fehlt" in r.stdout
+              and "lässt sich nicht auflösen" in r.stdout, r.stdout)
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel, "--fix")
+        probe("legt den fehlenden Standard-Property-Typ an",
+              os.path.exists(os.path.join(ziel, "proptypes", "hkf-phone.md")))
+        probe("erzeugt die Typtabelle neu",
+              "| ding | dinge |" in io.open(os.path.join(ziel, "hkb.md"),
+                                            encoding="utf-8").read())
+        eins = io.open(os.path.join(ziel, "dinge", "eins.md"), encoding="utf-8").read()
+        probe("qualifiziert den verzeichnislosen Verweis",
+              "[[dinge/zwei|Das Zweite]]" in eins and "[[zwei]]" not in eins, eins)
+        probe("ergaenzt created und modified",
+              "created:" in eins and "modified:" in eins, eins)
+        probe("setzt modified_by auf hk-lint", "modified_by: hk-lint" in eins, eins)
+        probe("entfernt die leere Property", "status:" not in eins, eins)
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        probe("danach ist die Ablage sauber", r.returncode == 0, r.stdout)
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel, "--strict")
+        probe("--strict fasst je Typ zusammen",
+              "ding: menge" not in r.stdout, r.stdout)
+        shutil.rmtree(ziel)
+        lauf(os.path.join(BIN, "hk-init"), ziel, "--name", "Probe")
 
         print("hk-import")
         bundle = os.path.join(ziel, "..", "probe-bundle")

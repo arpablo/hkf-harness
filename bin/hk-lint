@@ -2,33 +2,52 @@
 # -*- coding: utf-8 -*-
 """hk-lint — prueft eine Wissensbasis gegen HKF Core (§6.3).
 
-    hk-lint [pfad] [--strict]
+    hk-lint [pfad] [--fix] [--strict]
 
 Ohne Pfad gilt $HKB_PATH, sonst ~/hkb.
 
-Umgesetzt sind bisher zwei der Pruefungen aus §6.3: das Frontmatter gegen
-das Schema aus Anhang B.4 und die Grammatik der Wikilinks und Typangaben
-aus Anhang B. Was noch fehlt, nennt --help.
+    --fix      die elf Handgriffe aus §6.3 ausfuehren und danach erneut pruefen
+    --strict   zusaetzlich undeklarierte Properties melden, je Typ zusammengefasst
+
+Gemeldet wird in drei Gruppen: das Frontmatter gegen das Schema aus Anhang
+B.4, die Grammatik der Wikilinks und Typangaben aus Anhang B, und was sich
+erst aus dem Zusammenhang ergibt — Typ gegen Verzeichnis, Verweise, die
+abgeleiteten Tabellen, `# Siehe auch`, die Nachweise der Bundle-Notizen.
+
+`fehler` heisst: Die Ablage ist nicht konform (§7.2). `hinweis` heisst: Es
+faellt auf, macht sie aber nicht ungueltig.
 """
 import os, sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
-from hkf import CORE, ablage, fassung, frontmatter, grammatik, schema  # noqa: E402
+from hkf import (CORE, ablage, fassung, frontmatter, grammatik,   # noqa: E402
+                 korrigieren, pruefen as pruefmodul, schema)
 
-FEHLT = """Noch nicht umgesetzt (§6.3): aufloesbare Verweise, Typverzeichnis
-gegen `type`, Property-Tabellen der Typdefinitionen, `# Siehe auch` nach §5.6,
-Importnachweise nach §5.1, die abgeleiteten Tabellen in `hkb.md`, und --fix."""
+FEHLT = """Noch nicht umgesetzt (§6.3): die Property-Tabellen der Typdefinitionen
+gegen die Werte der Notizen — Pflichtangaben, `pattern`, `values`, `min`, `max`,
+Zieltyp bei `hkf-link` und Medienart bei `hkf-file`. Ebenso `hk-lint` auf einem
+Bundle statt auf einer Wissensbasis."""
 
 
 def main(argv):
     if "--help" in argv or "-h" in argv:
         print(__doc__.strip()); print(); print(FEHLT); return 0
     strict = "--strict" in argv
+    fix = "--fix" in argv
     args = [a for a in argv if not a.startswith("-")]
     try:
         hkb = ablage.finde(args[0] if args else None)
     except ablage.KeineAblage as e:
         sys.stderr.write(str(e) + "\n"); return 2
+
+    print("%s%s" % (hkb, " — mit --fix" if fix else ""))
+    if fix:
+        getan = korrigieren.korrigieren(hkb)
+        print()
+        print("Korrigiert" if getan else "Nichts zu korrigieren")
+        for g in getan:
+            print("  ·", g)
+        print()
 
     wurzel = schema.laden()
     fm_befunde, gr_befunde = [], []
@@ -37,7 +56,6 @@ def main(argv):
         fm_befunde.append("hkb.md: %s. Der Harness prüft gegen Regeln, die "
                           "diese Ablage nicht meint." % fassung.satz(ihre))
     geprueft = 0
-
     for p in ablage.dateien(hkb):
         rel = os.path.relpath(p, hkb)
         try:
@@ -55,15 +73,28 @@ def main(argv):
             fm_befunde.append("%s: %s" % (rel, b))
         grammatik.pruefe_datei(p, gr_befunde, name=rel)
 
-    print("%s — %d Dateien geprüft" % (hkb, geprueft))
+    bestand, struktur = pruefmodul.pruefen(hkb)
+    fehler = [b for b in struktur if b.grad == pruefmodul.FEHLER]
+    hinweise = [b for b in struktur if b.grad == pruefmodul.HINWEIS]
+
+    print("%d Dateien geprüft" % geprueft)
     for titel, befunde in (("Frontmatter (Anhang B.4)", fm_befunde),
-                           ("Grammatik (Anhang B)", gr_befunde)):
+                           ("Grammatik (Anhang B)", gr_befunde),
+                           ("Struktur (§6.3)", [str(b) for b in fehler])):
         print("  %-26s %d Befunde" % (titel, len(befunde)))
         for b in befunde:
             print("    -", b)
+    print("  %-26s %d" % ("Hinweise", len(hinweise)))
+    for b in hinweise:
+        print("    ·", b)
+
     if strict:
-        print("  --strict ist noch ohne Wirkung.")
-    return 1 if fm_befunde or gr_befunde else 0
+        zeilen = pruefmodul.undeklariert(bestand)
+        print("  %-26s %d" % ("Undeklarierte Properties", len(zeilen)))
+        for z in zeilen:
+            print("    ·", z)
+
+    return 1 if fm_befunde or gr_befunde or fehler else 0
 
 
 if __name__ == "__main__":

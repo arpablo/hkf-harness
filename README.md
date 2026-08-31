@@ -41,11 +41,33 @@ Gebraucht werden Python 3 und PyYAML (`pip3 install pyyaml`).
 | | | |
 |---|---|---|
 | `hk-init <ziel>` | legt eine Wissensbasis an: Grundausstattung, Obsidian-Konfiguration, README, `.gitignore`, `git init` und ein erster Commit | **läuft** |
-| `hk-lint [pfad]` | prüft Frontmatter gegen das Schema aus Anhang B.4 und die Grammatik der Wikilinks und Typangaben aus Anhang B | **teilweise** |
+| `hk-lint [--fix] [--strict]` | prüft die Ablage (§6.3): Frontmatter gegen Anhang B.4, Grammatik gegen Anhang B, dazu die strukturellen Prüfungen; `--fix` führt die elf erlaubten Handgriffe aus | **läuft** |
 | `hk-import <bundle>` | übernimmt eine Lieferung (§6.1): Typen abgleichen, Notizen und Mediendateien einsortieren, Verweise umschreiben, verknüpfen, Bundle-Notiz und Typtabelle fortschreiben | **läuft** |
 | `hk-export <id> <ziel>` | schreibt eine Lieferung heraus (§6.2): Notizen, Typdefinitionen und Mediendateien der Lieferung in den typbezogenen Baum, Verweise ohne Ablagepfad | **läuft** |
 
-`hk-lint --help` nennt, welche Prüfungen aus §6.3 noch fehlen.
+`hk-lint --help` nennt, welche Prüfungen aus §6.3 noch fehlen. Gemeldet wird
+in drei Gruppen und getrennt nach Schweregrad: `fehler` heißt, die Ablage ist
+nicht konform (§7.2); `hinweis` heißt, es fällt auf, macht sie aber nicht
+ungültig. Der Rückgabewert ist 1 nur bei Fehlern.
+
+`--fix` darf ausschließlich die elf Handgriffe aus §6.3 — Typtabelle neu
+erzeugen, fehlende Standard-Property-Typen anlegen, einen verzeichnislosen
+Wikilink qualifizieren (nur bei genau einem Ziel), einen fehlenden Alias aus
+dem `title` ergänzen, den Trenner ` / ` ausschreiben, ein `datetime` ohne
+Uhrzeit auf den Tagesbeginn bringen, `created` und `modified` ergänzen,
+`# Siehe auch` ordnen und ans Ende stellen, `related` daraus ergänzen, leere
+Properties entfernen. Danach wird erneut geprüft.
+
+**Was `--fix` nicht tut**, und beides steht so in §6.3: Es ergänzt keinen
+Eintrag unter `# Siehe auch` und entfernt keinen — Verknüpfen ist Sache des
+Imports (§6.1 Schritt 9), Entfernen Sache eines Menschen (§5.6). Und es legt
+keine vorläufige Typdefinition an und entfernt keine: Dazwischen liegt eine
+Entscheidung über Bedeutung, und die trifft kein Linter (§5.4).
+
+`--strict` meldet zusätzlich undeklarierte Properties, je Typ und Name
+zusammengefasst — `maschine: designed_year in 2 von 2 Notizen`. Wenige Notizen
+sind meist ein Versehen; fast alle bedeuten, die Property gehört in die
+Property-Tabelle des Typs. Welcher Fall vorliegt, entscheidet ein Mensch.
 
 `hk-import --check` führt den Lauf bis zu dem Punkt aus, an dem geschrieben
 würde, und berichtet in drei Abschnitten: was geschieht, was zu entscheiden
@@ -94,7 +116,8 @@ nicht.
 
 ```
 spec/        die Fassung, die dieser Harness umsetzt
-lib/hkf/     ablage, frontmatter, schema, grammatik, vorlage, fassung
+lib/hkf/     ablage, frontmatter, schema, grammatik, pruefen, korrigieren,
+             importieren, exportieren, notiz, vorlage, fassung
 bin/         hk-init, hk-lint, hk-import, hk-export
 py           das Python des Harness — baut die venv und startet sie
 tools/       spec.py — hält die Kopie unter spec/ auf Stand
@@ -199,8 +222,9 @@ Kopien zu führen. Sie findet den Harness über `HKF_HARNESS`, sonst nebenan.
 
 - **Vorschläge aus unbelegten Properties** (§6.1 Schritt 9, dritte
   Beobachtung).
-- **`hk-lint --fix`** und die Prüfungen aus §6.3, die noch fehlen.
+- **Die Property-Tabellen gegen die Werte der Notizen** — Pflichtangaben,
+  `pattern`, `values`, `min`, `max`, Zieltyp bei `hkf-link`, Medienart bei
+  `hkf-file` (§6.3).
+- **`hk-lint` auf einem Bundle** statt auf einer Wissensbasis (§6.3).
 - **`HKF_BUNDLE_PATH`** — Vorgabeverzeichnis für Lieferungen; festlegen, wenn
-  `hk-export` steht.
-- **`hk-lint --fix`** — die abgeleiteten Tabellen in `hkb.md` und die
-  `AGENTS.md` neu erzeugen.
+  eine Lieferung öfter am selben Ort landet.
