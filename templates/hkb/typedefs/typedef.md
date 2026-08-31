@@ -3,7 +3,7 @@ type: typedef
 title: Typdefinition
 description: Registriert einen Typ und legt sein Verzeichnis fest.
 created: 2026-08-27
-modified: 2026-08-28T13:51:33
+modified: 2026-08-31T13:43:53
 modified_by: claude-opus-5
 ---
 
@@ -13,16 +13,17 @@ modified_by: claude-opus-5
 |---|---|---|---|
 | description | text | ja | Einzeiliger Zweck; erscheint in der Typtabelle der Wurzeldatei |
 | dir | text | nein | Verzeichnis der Instanzen; Vorgabe ist der Typname mit angehängtem `s` |
-| provisional | checkbox | nein | Beim Import angelegt, weil niemand den Typ definiert hat |
+| provisional | checkbox | nein | Beim Import angelegt, weil niemand den Typ definiert hat (§5.4) |
 
 # Konventionen
 
-Der Dateiname ist der Typname. Der Body trägt die Property-Tabelle und die
-Konventionen des Typs. `dir` ist ein relativer Pfad ohne führenden und
-abschließenden `/` und ohne `..`; er darf nicht unter `media_base` liegen.
+Der Dateiname ist der Typname (§3.7). Der Body trägt die Property-Tabelle und
+die Konventionen des Typs. `dir` ist ein relativer Pfad zum Basispfad, mit
+`/` als Trennzeichen und beliebig vielen Abschnitten, ohne führenden und
+abschließenden `/` und ohne `.`- oder `..`-Abschnitte; er darf nicht unter
+`media_base` liegen.
 
-`provisional: true` kennzeichnet eine Typdefinition, die beim Import entstanden
-ist, weil weder das Bundle noch die Wissensbasis den Typ definiert hat. Sie
-trägt kein `dir`, keinen Abschnitt `# Properties` und kein `bundles`, und sie
-wird nicht ausgeliefert. Sobald die richtige Typdefinition nachkommt, ersetzt
-sie diese.
+`provisional` steht nur an einer Typdefinition, nur mit dem Wert `true` und
+nur in einer HKB — ein Bundle enthält keine vorläufige Typdefinition (§7.1).
+Eine solche Notiz trägt kein `dir`, keinen Abschnitt `# Properties` und kein
+`bundles`.

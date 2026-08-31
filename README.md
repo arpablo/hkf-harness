@@ -127,7 +127,8 @@ lib/hkf/     ablage, frontmatter, schema, grammatik, pruefen, korrigieren,
              importieren, exportieren, notiz, vorlage, fassung
 bin/         hk-init, hk-lint, hk-import, hk-export
 py           das Python des Harness — baut die venv und startet sie
-tools/       spec.py — hält die Kopie unter spec/ auf Stand
+tools/       spec.py hält die Kopie unter spec/ auf Stand,
+             grundausstattung.py die Vorlage gegen Anhang A und §3.5.1
 templates/   AGENTS.md und die Grundausstattung, aus der hk-init schöpft
 skills/      die KI-Schicht — noch leer, siehe skills/README.md
 test/        Rauchprobe: python3 test/smoke.py
@@ -210,6 +211,22 @@ Bestehendes ungültig zu machen — was Core 1.0 schrieb, versteht ein Harness
 1.2. Umgekehrt gilt es nicht, und §8 sagt, was dann geschieht: Die Dateien
 sind lesbar, übernommen wird nichts. `hk-import` weist eine solche Lieferung
 ab, `hk-lint` meldet eine Ablage, die neuer ist als er selbst.
+
+## Die Grundausstattung gegen die Spezifikation
+
+Die Kern-Typen stehen zweimal: als Markdown-Block in Anhang A und als
+ausgelieferte Datei unter `templates/hkb/typedefs/`. Die dreizehn
+Standard-Property-Typen ebenso — dort als Tabelle in §3.5.1.
+
+```
+python3 tools/grundausstattung.py
+```
+
+Das Gegenstück für HKF Base ist `tools/check-base.py` im Spec-Repository. Für
+Core fehlte es, und genau deshalb konnte `bundle` die Property `version` als
+Pflicht führen, obwohl §4.1 eine Lieferung ohne Fassung ausdrücklich zulässt.
+Gefunden hat das erst die Prüfung der Property-Tabellen gegen die Werte — an
+einer Bundle-Notiz, die in Ordnung war. Die Rauchprobe ruft es jetzt mit auf.
 
 ## Woher `templates/hkb` kommt
 

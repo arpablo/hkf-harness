@@ -285,6 +285,9 @@ def main():
               r.stdout.strip() == sys.executable, r.stdout)
 
         print("Fassung")
+        r = lauf(sys.executable, os.path.join(WURZEL, "tools", "grundausstattung.py"))
+        probe("Grundausstattung entspricht Anhang A und §3.5.1",
+              r.returncode == 0, r.stdout + r.stderr)
         r = lauf(sys.executable, os.path.join(WURZEL, "tools", "spec.py"))
         probe("spec.py meldet keinen Rueckstand",
               r.returncode == 0, r.stdout + r.stderr)

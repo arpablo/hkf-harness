@@ -1,0 +1,135 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""Prueft, dass die Grundausstattung und HKF Core dasselbe sagen.
+
+Die Kern-Typen stehen zweimal: als eingebetteter Markdown-Block in Anhang A
+der Spezifikation und als ausgelieferte Datei unter templates/hkb/. Die
+dreizehn Standard-Property-Typen ebenso — dort als Tabelle in §3.5.1. Die
+Spezifikation ist die normative Fassung.
+
+Das Gegenstueck fuer HKF Base ist `tools/check-base.py` im Spec-Repository.
+Fuer Core fehlte es, und genau deshalb konnte `bundle` monatelang `version`
+als Pflicht fuehren, obwohl A.5 sie freistellt.
+
+    python3 tools/grundausstattung.py [vorlagenverzeichnis]
+"""
+import difflib, io, os, re, sys
+
+WURZEL = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(WURZEL, "lib"))
+import hkf                                                    # noqa: E402,F401
+import yaml                                                   # noqa: E402
+from hkf import CORE, frontmatter                             # noqa: E402
+
+BLOCK = re.compile(r"^## A\.\d+ `(\w+)`\n\n```markdown\n(.*?)\n```", re.S | re.M)
+ZEITEN = re.compile(r"^(created|modified|modified_by):.*\n", re.M)
+EINSCHRAENKUNG = re.compile(r"`([a-z]+): ([^`]+)`")
+
+
+def spec_text():
+    return io.open(os.path.join(WURZEL, "spec", "HKF-Core-V%s.md" % CORE),
+                   encoding="utf-8").read()
+
+
+def kern_typen(spec, vorlage, melde):
+    bloecke = BLOCK.findall(spec)
+    if len(bloecke) != 3:
+        melde("Anhang A enthält %d Kern-Typen, erwartet 3" % len(bloecke), True)
+        return
+    for typ, block in bloecke:
+        p = os.path.join(vorlage, "typedefs", typ + ".md")
+        if not os.path.exists(p):
+            melde("%-10s fehlt in der Vorlage" % typ, True)
+            continue
+        a = block.strip().splitlines()
+        b = ZEITEN.sub("", io.open(p, encoding="utf-8").read()).strip().splitlines()
+        if a == b:
+            melde("%-10s ok" % typ, False)
+            continue
+        melde("%-10s WEICHT AB (- Spezifikation, + Vorlage)" % typ, True)
+        for l in difflib.unified_diff(a, b, lineterm="", n=0):
+            if l[:2] not in ("--", "++"):
+                melde("    " + l, False)
+
+
+def standard_proptypes(spec, vorlage, melde):
+    teil = spec.split("### 3.5.1 Standard-Property-Typen", 1)[-1]
+    teil = teil.split("### 3.5.2", 1)[0]
+    erwartet = {}
+    for zeile in teil.splitlines():
+        m = re.match(r"^\| `(hkf-[a-z-]+)` \| `(\w+)` \| (.*?) \|$", zeile)
+        if not m:
+            continue
+        name, form, rest = m.groups()
+        soll = {"form": form}
+        for schluessel, wert in EINSCHRAENKUNG.findall(rest):
+            try:
+                soll[schluessel] = yaml.safe_load(wert)
+            except yaml.YAMLError:
+                soll[schluessel] = wert
+        erwartet[name] = soll
+    if len(erwartet) != 13:
+        melde("§3.5.1 nennt %d Property-Typen, erwartet 13" % len(erwartet), True)
+
+    verz = os.path.join(vorlage, "proptypes")
+    vorhanden = set(f[:-3] for f in os.listdir(verz) if f.endswith(".md"))
+    for name in sorted(erwartet):
+        if name not in vorhanden:
+            melde("%-18s fehlt in der Vorlage" % name, True)
+            continue
+        daten, _ = frontmatter.lesen(os.path.join(verz, name + ".md"))
+        abweichung = []
+        for schluessel, soll in sorted(erwartet[name].items()):
+            ist = daten.get(schluessel)
+            if ist != soll:
+                abweichung.append("%s: %r statt %r" % (schluessel, ist, soll))
+        for schluessel in ("pattern", "values", "min", "max"):
+            if schluessel in daten and schluessel not in erwartet[name]:
+                abweichung.append("%s: %r, §3.5.1 nennt keins"
+                                  % (schluessel, daten[schluessel]))
+        if abweichung:
+            melde("%-18s WEICHT AB" % name, True)
+            for a in abweichung:
+                melde("    " + a, False)
+        else:
+            melde("%-18s ok" % name, False)
+    for name in sorted(vorhanden - set(erwartet)):
+        melde("%-18s liegt in der Vorlage, §3.5.1 nennt ihn nicht" % name, True)
+
+
+def main(argv):
+    if "--help" in argv or "-h" in argv:
+        print(__doc__.strip())
+        return 0
+    args = [a for a in argv if not a.startswith("-")]
+    vorlage = args[0] if args else os.path.join(WURZEL, "templates", "hkb")
+    if not os.path.isdir(os.path.join(vorlage, "typedefs")):
+        sys.stderr.write("Keine Vorlage unter %s\n" % os.path.abspath(vorlage))
+        return 2
+
+    schlecht = [0]
+
+    def melde(text, fehler):
+        if fehler:
+            schlecht[0] += 1
+        print(("  " if text.startswith("    ") else "  ") + text)
+
+    spec = spec_text()
+    print("Vorlage: %s" % vorlage)
+    print("Spezifikation: HKF Core %s" % CORE)
+    print()
+    print("Kern-Typen (Anhang A)")
+    kern_typen(spec, vorlage, melde)
+    print()
+    print("Standard-Property-Typen (§3.5.1)")
+    standard_proptypes(spec, vorlage, melde)
+    print()
+    if schlecht[0]:
+        print("%d Abweichungen. Die Spezifikation gilt." % schlecht[0])
+        return 1
+    print("Die Grundausstattung entspricht der Spezifikation.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
