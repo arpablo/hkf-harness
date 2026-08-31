@@ -17,6 +17,10 @@ Wissensbasis liegt etwas, was hierher gehört. Zwei Proben:
 - **Nimm die Wissensbasis weg.** Der Harness bleibt ein Werkzeugkasten, der
   jede andere HKB bedient.
 
+
+Was ein Harness ist und wo die Grenze zur Wissensbasis verläuft, steht in
+[`HKF-Harness-V1.0.md`](HKF-Harness-V1.0.md). Diese Datei sagt, wie man ihn
+benutzt; jene sagt, was er ist.
 ## Die Ablage wird nicht geraten
 
 Kein Werkzeug hier kennt einen festen Pfad. Es nimmt, was im Aufruf steht,

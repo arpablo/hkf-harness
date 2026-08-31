@@ -91,8 +91,12 @@ def main(argv):
             zustand = "gleich"
         print("  %-30s %s" % (name, zustand))
 
+    # Nur was aussieht wie eine Auslieferung des Spec-Repositorys zaehlt als
+    # verwaist. Alles andere unter spec/ hat jemand mit Absicht dorthin
+    # gelegt, und --update ist kein Grund, es wegzuraeumen.
+    gehoert_uns = re.compile(r"^(HKF-(Core|Base)-V\d+\.\d+\.md|.*\.schema\.json)$")
     verwaist = [f for f in sorted(os.listdir(ZIEL))
-                if f not in [n for n, _ in liste]]
+                if gehoert_uns.match(f) and f not in [n for n, _ in liste]]
     for f in verwaist:
         print("  %-30s nicht mehr in der Quelle" % f)
     print()
