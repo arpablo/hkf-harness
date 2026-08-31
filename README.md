@@ -145,6 +145,14 @@ python3 tools/spec.py            berichtet, ob die Kopie noch stimmt
 python3 tools/spec.py --update   holt den Stand des Spec-Repositorys
 ```
 
+Der Kopf des Berichts nennt beides, woran ein Harness hängt — die Fassung, die
+er umsetzt, und den Interpreter, unter dem er läuft:
+
+```
+Quelle:  …/HenniHKF-Spec (Core 1.0)
+Harness: Core 1.0, Python 3.12.13 aus ~/.cache/hkf-harness/venv
+```
+
 Das Skript findet die Quelle über `HKF_SPEC`, sonst neben diesem Repository;
 ohne Quelle endet es mit 0 und sagt es, damit ein Klon sich nicht daran stört.
 Kommt eine neue Fassung, nennt es sie und fordert, `CORE` nachzuziehen. Die

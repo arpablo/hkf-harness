@@ -187,6 +187,10 @@ def main():
         r = lauf(sys.executable, os.path.join(WURZEL, "tools", "spec.py"))
         probe("spec.py meldet keinen Rueckstand",
               r.returncode == 0, r.stdout + r.stderr)
+        soll = io.open(os.path.join(WURZEL, ".python-version"),
+                       encoding="utf-8").read().strip()
+        probe("spec.py sagt, unter welchem Python der Harness steht",
+              ("Python %s aus %s" % (soll, hkf_venv())) in r.stdout, r.stdout)
 
         print("hk-export")
         r = lauf(os.path.join(BIN, "hk-export"))

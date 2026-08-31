@@ -19,6 +19,15 @@ import io, os, re, shutil, sys
 WURZEL = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ZIEL = os.path.join(WURZEL, "spec")
 
+# Unter dem Python des Harness laufen. `hkf` wird allein dafuer geholt: Der
+# Import startet den Prozess unter der venv neu, wenn er nicht schon darunter
+# laeuft. Das Paket selbst braucht dieses Skript nicht — welche Fassung der
+# Harness umsetzt, liest `unsere()` aus der Datei. Es vergleicht Dateien, also
+# soll es auch hier die Datei lesen und nicht ein Modul, das laengst geladen
+# sein koennte.
+sys.path.insert(0, os.path.join(WURZEL, "lib"))
+import hkf                                                 # noqa: E402,F401
+
 
 def quelle():
     if os.environ.get("HKF_SPEC"):
@@ -77,7 +86,9 @@ def main(argv):
     liste = dateien(q)
     neu_fassung = kernfassung(n for n, _ in liste)
     print("Quelle:  %s (Core %s)" % (q, neu_fassung))
-    print("Harness: Core %s" % unsere())
+    print("Harness: Core %s, Python %s aus %s"
+          % (unsere(), sys.version.split()[0], os.path.dirname(
+              os.path.dirname(sys.executable))))
     print()
 
     abweichend, fehlend = [], []
