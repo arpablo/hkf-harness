@@ -140,10 +140,15 @@ aber ein Modell öffnet keinen Vault allein. Es kommt mit einem Harness, und
 der bringt die Spezifikation mit. Wer ohne Harness kommt, findet den Einstieg
 im Format selbst: `hkb.md` trägt `spec` mit der URL.
 
-Wer für **seine** Wissensbasis etwas aufschreiben will, legt eine `AGENTS.md`
-von Hand an. Sie gehört dann ihm, nicht dem Werkzeug, und wird versioniert wie
-jede andere Datei — kein Werkzeug überschreibt sie, keine `.gitignore` hält
-sie zurück.
+Was für **diese** Wissensbasis gilt, gehört seitdem nicht in eine Datei
+daneben, sondern hinein. HKF Base führt dafür den Typ `hint`: Jede Festlegung
+ist eine eigene Notiz unter `hints/`, mit `applies_to` auf die Typdefinition,
+für die sie gilt. Sie wird geprüft, verlinkt und mit der Ablage versioniert —
+alles, was eine erzeugte und ignorierte `AGENTS.md` nie war.
+
+Wer trotzdem eine Datei daneben legen will, legt sie von Hand an. Sie gehört
+dann ihm, nicht dem Werkzeug: Kein Werkzeug überschreibt sie, keine
+`.gitignore` hält sie zurück.
 
 Aus demselben Grund ist **§7.2 Punkt 9 entfallen**. Dort hing die Konformität
 einer HKB daran, dass `hk-import`, `hk-export` und `hk-lint` „verfügbar sind"

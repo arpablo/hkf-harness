@@ -31,9 +31,9 @@ hk-lint /pfad/zur/ablage     # eine andere
 ```
 
 Bevor du etwas tust: `hkb.md` lesen — dort stehen `name`, `base`,
-`media_base`, `timezone` und die Typtabelle. Und eine `AGENTS.md` daneben,
-falls jemand eine angelegt hat: Kein Werkzeug erzeugt sie, wo sie liegt, hat
-ein Mensch sie für **diese** Wissensbasis geschrieben.
+`media_base`, `timezone` und die Typtabelle. Führt die Ablage den Typ `hint`,
+lies auch `hints/`: Dort steht, was **diese** Wissensbasis für sich festgelegt
+hat, und das geht den sieben Regeln vor, wo es sie berührt.
 
 ## Die vier Werkzeuge
 

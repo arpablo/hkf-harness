@@ -173,9 +173,12 @@ steht in `hkb.md`, wo sie hingehört. Eine erzeugte Kopie daneben veraltete für
 sich und sagte nichts, was nicht schon dastand. Eine `CLAUDE.md` entsteht
 ebenfalls nicht; sie nannte ein Produkt.
 
-Wer für seine Wissensbasis eigene Hinweise aufschreiben will, legt eine
-`AGENTS.md` selbst an. Sie ist dann seine, wird versioniert und von keinem
-Werkzeug überschrieben.
+Die Hinweise, die einmal in ihrem letzten Abschnitt standen, haben einen
+besseren Ort bekommen: HKF Base führt den Typ `hint`. Jede Festlegung, wie
+diese Wissensbasis geführt wird, ist dort eine Notiz unter `hints/` — geprüft,
+verlinkt, versioniert, und mit `applies_to` an der Typdefinition, für die sie
+gilt. Wer daneben trotzdem eine `AGENTS.md` will, legt sie von Hand an; kein
+Werkzeug fasst sie an.
 
 Core führte dafür einmal einen Abschnitt „Einstieg für Werkzeuge"; er ist
 gestrichen. Den ersten Satz sagt der Harness, nicht die Ablage.
