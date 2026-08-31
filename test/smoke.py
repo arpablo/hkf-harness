@@ -24,6 +24,11 @@ def probe(name, bedingung, hinweis=""):
         fehler.append(name + ((" — " + hinweis) if hinweis else ""))
 
 
+def hkf_venv():
+    return os.environ.get("HKF_VENV") or os.path.join(
+        os.path.expanduser("~"), ".cache", "hkf-harness", "venv")
+
+
 def _abbild(wurzel):
     """Was unter wurzel liegt, samt Inhalt — ohne .git."""
     aus = {}
@@ -155,6 +160,28 @@ def main():
         probe("weist eine unbekannte Fassung ab (§8)",
               r.returncode == 1 and "§8" in r.stdout, r.stdout)
         probe("und schreibt auch dann nichts", _abbild(ziel) == vorher)
+
+        print("Eigenes Python")
+        zeig = os.path.join(os.path.dirname(bundle), "zeig.py")
+        io.open(zeig, "w", encoding="utf-8").write(
+            "import os, sys\n"
+            "sys.path.insert(0, %r)\n"
+            "import hkf\n"
+            "import yaml\n"
+            "print(sys.executable)\n"
+            "print(sys.version.split()[0], yaml.__version__)\n"
+            % os.path.join(WURZEL, "lib"))
+        r = lauf(sys.executable, zeig)
+        zeilen = r.stdout.strip().splitlines()
+        soll = io.open(os.path.join(WURZEL, ".python-version"),
+                       encoding="utf-8").read().strip()
+        probe("ein Skript laeuft unter der venv des Harness",
+              zeilen and zeilen[0].startswith(hkf_venv()), r.stdout + r.stderr)
+        probe("und zwar unter Python %s" % soll,
+              len(zeilen) > 1 and zeilen[1].startswith(soll), r.stdout + r.stderr)
+        r = lauf(sys.executable, "-c", "import sys; print(sys.executable)")
+        probe("python -c wird nicht umgeleitet",
+              r.stdout.strip() == sys.executable, r.stdout)
 
         print("Fassung")
         r = lauf(sys.executable, os.path.join(WURZEL, "tools", "spec.py"))

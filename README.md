@@ -81,6 +81,7 @@ nicht.
 spec/        die Fassung, die dieser Harness umsetzt
 lib/hkf/     ablage, frontmatter, schema, grammatik, vorlage, fassung
 bin/         hk-init, hk-lint, hk-import, hk-export
+py           das Python des Harness — baut die venv und startet sie
 tools/       spec.py — hält die Kopie unter spec/ auf Stand
 templates/   AGENTS.md und die Grundausstattung, aus der hk-init schöpft
 skills/      die KI-Schicht — noch leer, siehe skills/README.md
@@ -106,6 +107,32 @@ mehr — sie nannte ein Produkt.
 
 Core führte dafür einmal einen Abschnitt „Einstieg für Werkzeuge"; er ist
 gestrichen. Den ersten Satz sagt der Harness, nicht die Ablage.
+
+## Der Harness bringt sein eigenes Python mit
+
+Auf einer Maschine liegen leicht zwei Interpreter nebeneinander — hier
+`/opt/homebrew/bin/python3` und `/usr/bin/python3`, mit zwei PyYAML-Fassungen.
+Welcher zuerst im PATH steht, ist Zufall und darf nicht entscheiden, was eine
+Prüfung findet. Der Harness baut sich darum eine eigene Umgebung:
+
+```
+./bootstrap-python.sh     baut die venv, wenn sie fehlt oder veraltet ist
+./py bin/hk-lint          dasselbe wie bin/hk-lint, nur ausdrücklich
+./py -c "import yaml; …"  ein Einzeiler in derselben Umgebung
+```
+
+Festgenagelt ist beides: die Interpreterfassung in
+[`.python-version`](.python-version), die eine Abhängigkeit in
+[`requirements.txt`](requirements.txt). Gebaut wird mit `uv`, gelagert unter
+`~/.cache/hkf-harness/venv` — nicht im Repository, damit ein Klon nichts
+mitschleppt. `HKF_VENV` verlegt den Ort.
+
+**Die `bin/hk-*` brauchen den Shim nicht.** Beim Import von `hkf` startet sich
+der Prozess unter dem Python des Harness neu, wenn er nicht schon darunter
+läuft; `hk-lint` bleibt `hk-lint`. Fehlt die venv, läuft alles wie zuvor
+weiter — dann sagt der Frontmatter-Leser, wenn PyYAML fehlt, und nennt den
+Bootstrap. Ein `python -c` wird nicht umgeleitet: Dort steht in `argv[0]` kein
+Skript, und ein Neustart verlöre den Code.
 
 ## Welche Fassung gilt
 

@@ -1,0 +1,3 @@
+# Die einzige Fremdabhaengigkeit des Harness: der Frontmatter-Leser
+# (lib/hkf/frontmatter.py). Alles andere ist Standardbibliothek.
+PyYAML==6.0.3

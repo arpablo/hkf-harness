@@ -40,6 +40,7 @@ hkf-harness/
   spec/                 die Fassung von HKF Core und Base, die er umsetzt
   bin/                  hk-init, hk-lint, hk-import, hk-export
   lib/hkf/              Ablage, Frontmatter, Schema, Grammatik, Vorlage, Fassung
+  py                    das Python des Harness
   tools/                spec.py — hält die Kopie unter spec/ auf Stand
   templates/            AGENTS.md und die Grundausstattung für hk-init
   skills/               die KI-Schicht, ruft bin/ auf
@@ -51,6 +52,15 @@ Harness setzt genau eine Fassung um; welche, muss aus seiner Auslieferung
 hervorgehen und nicht aus dem Zustand eines fremden Repositorys. Die Kopie
 trägt die Nummer, gegen die `hk-lint` prüft, und `tools/spec.py` hält sie
 gleich mit dem Spec-Repository.
+
+**Der Harness bringt sein eigenes Python mit.** Er nimmt nicht, was im PATH
+steht: Zwei Interpreter mit zwei Fassungen derselben Bibliothek liegen auf
+einer Maschine schnell nebeneinander, und dann hinge das Ergebnis einer
+Prüfung daran, welcher zuerst gefunden wurde. Interpreterfassung und
+Abhängigkeiten sind festgenagelt, die Umgebung liegt außerhalb des
+Repositoriums, und die Werkzeuge finden sie von selbst. Das ist dieselbe
+Trennung wie bei `HKB_PATH`, nur nach unten: Was der Harness zum Laufen
+braucht, gehört ihm und nicht der Maschine.
 
 **Dieses Dokument liegt nicht unter `spec/`.** Dort steht allein, was aus
 `hkf-spec` kommt; `tools/spec.py --update` räumt dort auf, was die Quelle

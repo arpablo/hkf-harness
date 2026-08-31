@@ -9,7 +9,9 @@ import datetime, io, re, sys
 try:
     import yaml
 except ImportError:                                    # pragma: no cover
-    sys.exit("PyYAML wird gebraucht: pip3 install pyyaml")
+    sys.exit("PyYAML fehlt in %s.\n"
+             "Einmal ./bootstrap-python.sh aufrufen — der Harness bringt "
+             "sein eigenes Python mit." % sys.executable)
 
 FM = re.compile(r"\A---\n(.*?)\n---\n?(.*)\Z", re.S)
 
