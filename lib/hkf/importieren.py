@@ -812,7 +812,7 @@ def _bundle_notiz(plan, zeitpunkt, tag, vorher):
         felder = ["type: bundle", "id: %s" % plan.bundle["id"]]
         for k in ("title", "description", "source", "version"):
             if plan.bundle.get(k) is not None:
-                felder.append("%s: %s" % (k, plan.bundle[k]))
+                felder.append("%s: %s" % (k, notiz.skalar(plan.bundle[k])))
         if plan.bundle.get("required_bundles"):
             felder.append("required_bundles:")
             felder += ["  - %s" % e for e in plan.bundle["required_bundles"]]
@@ -820,7 +820,7 @@ def _bundle_notiz(plan, zeitpunkt, tag, vorher):
         kopf = notiz.setze_skalar(kopf, "created", tag)
     for k in ("title", "description", "source", "version"):
         if plan.bundle.get(k) is not None:
-            kopf = notiz.setze_skalar(kopf, k, plan.bundle[k])
+            kopf = notiz.setze_skalar(kopf, k, notiz.skalar(plan.bundle[k]))
     neue_fassung = _neue_fassung(plan, alt_body)
     if neue_fassung or alt_kopf is None:
         kopf = notiz.setze_skalar(kopf, "imported", zeitpunkt)

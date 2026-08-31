@@ -1,15 +1,103 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""hk-export — ein Bundle aus der Wissensbasis herausschreiben (§6.2).
+"""hk-export — ein Bundle aus der Wissensbasis herausschreiben (Core §6.2).
 
-    hk-export <bundle-id> <zielpfad>
+    hk-export <bundle-id> <zielpfad> [--media-base <name>] [--force] [hkb-pfad]
 
-Noch nicht umgesetzt. Der Export ist die Umkehrung des Imports: Ablagepfad aus
-jedem Verweis herausrechnen, `bundles`, `imported` und die Nachweise draussen
-lassen, Mediendateien nach ihrer Endung mitnehmen (§4.3).
+Ohne `hkb-pfad` gilt $HKB_PATH, sonst ~/hkb.
+
+    --media-base   Verzeichnis für die Mediendateien der Lieferung (Vorgabe: media)
+    --force        in ein nicht leeres Zielverzeichnis schreiben
+
+Geschrieben wird der typbezogene Baum: `typedefs/`, `proptypes/`, je ein
+Verzeichnis pro Typ und `media/<art>/`. Ein Bundle dürfte beliebig aufgebaut
+sein (§4) — streng im Schreiben, großzügig im Lesen.
+
+Nicht mitgeschrieben werden `bundles` und `rejected_links` (§4.2), die
+Importnachweise und der Entscheidungsnachweis (§5.1) und jede vorläufige
+Typdefinition (§5.4). Verweise, die aus der Lieferung hinauszeigen, bleiben
+stehen und werden gemeldet: Das Bundle ist dann in seinen Typen, aber nicht in
+allen Verweisen geschlossen.
 """
-import sys
+import os, sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
+from hkf import ablage, exportieren                            # noqa: E402
+
+
+def bericht(plan, geschrieben):
+    print()
+    print("Was geschehen ist" if geschrieben else "Was geschähe")
+    inhalt = [n for n in plan.notizen if not n.get("mit")]
+    print("  %d Notizen" % len(inhalt))
+    if plan.typdefs:
+        print("  %d Typdefinitionen: %s"
+              % (len(plan.typdefs), ", ".join(t.split("/")[-1] for t in plan.typdefs)))
+    if plan.proptypes:
+        print("  %d Property-Typen: %s"
+              % (len(plan.proptypes), ", ".join(t.split("/")[-1] for t in plan.proptypes)))
+    if plan.medien:
+        print("  %d Mediendateien" % len(plan.medien))
+
+    konflikte = [b for b in plan.befunde if b[0] == "konflikt"]
+    if konflikte:
+        print()
+        print("Was zu entscheiden ist")
+        for _, text, _tun in konflikte:
+            print("  " + text.replace("\n", "\n  "))
+
+    tun = [("%s %s" % (b[1], b[2])) if b[0] == "hinweis" else b[2]
+           for b in plan.befunde if b[2]]
+    hinweise = [b[1] for b in plan.befunde if b[0] == "hinweis" and not b[2]]
+    if tun or hinweise:
+        print()
+        print("Was zu tun ist")
+        for t in tun:
+            print("  → " + t.replace("\n", "\n    "))
+        for h in hinweise:
+            print("  · " + h)
+    print()
+    print("Geschrieben nach %s." % plan.ziel if geschrieben
+          else "Nichts wurde geschrieben.")
+
+
+def main(argv):
+    if "--help" in argv or "-h" in argv or not argv:
+        print(__doc__.strip())
+        return 0
+    media_base = "media"
+    if "--media-base" in argv:
+        i = argv.index("--media-base")
+        if i + 1 >= len(argv):
+            sys.stderr.write("--media-base braucht einen Namen.\n")
+            return 2
+        media_base = argv[i + 1]
+        argv = argv[:i] + argv[i + 2:]
+    force = "--force" in argv
+    args = [a for a in argv if not a.startswith("-")]
+    if len(args) < 2:
+        sys.stderr.write("Aufruf: hk-export <bundle-id> <zielpfad> [hkb-pfad]\n")
+        return 2
+    bundle_id, ziel = args[0], os.path.abspath(os.path.expanduser(args[1]))
+    try:
+        hkb = ablage.finde(args[2] if len(args) > 2 else None)
+    except ablage.KeineAblage as e:
+        sys.stderr.write(str(e) + "\n")
+        return 2
+    if os.path.exists(ziel) and os.listdir(ziel) and not force:
+        sys.stderr.write("Zielverzeichnis existiert und ist nicht leer: %s\n"
+                         "--force schreibt trotzdem hinein.\n" % ziel)
+        return 2
+
+    print("hk-export %s → %s" % (bundle_id, ziel))
+    plan = exportieren.planen(hkb, bundle_id, ziel, media_base)
+    if plan.abgebrochen:
+        sys.stderr.write(plan.abgebrochen + "\n")
+        return 1
+    exportieren.ausfuehren(plan)
+    bericht(plan, True)
+    return 1 if [b for b in plan.befunde if b[0] == "konflikt"] else 0
+
 
 if __name__ == "__main__":
-    sys.stderr.write(__doc__.strip() + "\n")
-    sys.exit(3)
+    sys.exit(main(sys.argv[1:]))

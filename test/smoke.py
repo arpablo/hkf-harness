@@ -146,6 +146,7 @@ def main():
         probe("weist bei offener Bedeutungsprüfung ab",
               r.returncode == 1 and "abgewiesen" in r.stdout, r.stdout)
         probe("und schreibt dabei nichts", _abbild(ziel) == vorher)
+        io.open(p, "w", encoding="utf-8").write(t)          # wieder herstellen
 
         # §8 — eine Lieferung aus einer spaeteren Fassung wird gelesen,
         # aber nicht uebernommen
@@ -193,9 +194,49 @@ def main():
               ("Python %s aus %s" % (soll, hkf_venv())) in r.stdout, r.stdout)
 
         print("hk-export")
-        r = lauf(os.path.join(BIN, "hk-export"))
-        probe("hk-export sagt, dass es fehlt",
-              r.returncode == 3 and "Noch nicht umgesetzt" in r.stderr)
+        aus = os.path.join(os.path.dirname(bundle), "wieder-raus")
+        shutil.rmtree(aus, ignore_errors=True)
+        r = lauf(os.path.join(BIN, "hk-export"), "probe", aus, ziel)
+        probe("schreibt heraus", r.returncode == 0, r.stdout + r.stderr)
+        for f in ("hbundle.md", "typedefs/ding.md", "dinge/eins.md",
+                  "dinge/zwei.md", "media/images/bilder/bild.png"):
+            probe("legt %s an" % f, os.path.exists(os.path.join(aus, f)))
+        hb = io.open(os.path.join(aus, "hbundle.md"), encoding="utf-8").read()
+        probe("hbundle traegt base und media_base",
+              'base: ""' in hb and "media_base: media" in hb, hb)
+        probe("und eine frische Typtabelle", "| ding | dinge |" in hb, hb)
+        probe("ohne Importnachweis", "# Import" not in hb, hb)
+        eins_aus = io.open(os.path.join(aus, "dinge", "eins.md"),
+                           encoding="utf-8").read()
+        probe("streift bundles ab (§4.2)", "bundles:" not in eins_aus, eins_aus)
+        probe("behaelt die Zeitangaben", "modified:" in eins_aus, eins_aus)
+        probe("behaelt den Verweis innerhalb der Lieferung",
+              "# Siehe auch" in eins_aus and "[[dinge/zwei|" in eins_aus, eins_aus)
+        probe("verweist auf die Mediendatei ohne Ablagepfad",
+              "[[media/images/bilder/bild.png|" in eins_aus, eins_aus)
+
+        # Der Rundlauf: wieder einlesen ergibt dieselben Notizen
+        zurueck = os.path.join(os.path.dirname(bundle), "kreis")
+        shutil.rmtree(zurueck, ignore_errors=True)
+        lauf(os.path.join(BIN, "hk-init"), zurueck, "--name", "Probe")
+        lauf(os.path.join(BIN, "hk-import"), aus, zurueck)
+        # Verglichen wird das gelesene Frontmatter, nicht seine Zeilenfolge:
+        # `bundles` wandert ans Ende, weil der Export es abstreift und der
+        # Import es wieder anhaengt. Das ist dieselbe Notiz.
+        sys.path.insert(0, os.path.join(WURZEL, "lib"))
+        from hkf import frontmatter as fm
+        fluechtig = ("created", "modified", "modified_by")
+        unterschiede = []
+        for rel in ("dinge/eins.md", "dinge/zwei.md", "typedefs/ding.md"):
+            a, ab = fm.lesen(os.path.join(ziel, rel))
+            b, bb = fm.lesen(os.path.join(zurueck, rel))
+            fuer = lambda d: {k: v for k, v in d.items() if k not in fluechtig}
+            if fuer(a) != fuer(b) or ab.strip() != bb.strip():
+                unterschiede.append(rel)
+        probe("Bundle → HKB → Bundle → HKB gibt dieselben Notizen",
+              not unterschiede, ", ".join(unterschiede))
+        probe("und schickt keinen Kern-Typ mit (§7.1)",
+              not os.path.exists(os.path.join(aus, "typedefs", "typedef.md")))
     finally:
         shutil.rmtree(ziel, ignore_errors=True)
 

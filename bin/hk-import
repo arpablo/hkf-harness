@@ -56,7 +56,11 @@ def bericht(plan, geschrieben):
         for b in konflikte + entscheidungen:
             print("  " + b.text.replace("\n", "\n  "))
 
-    tun = [b.tun for b in plan.befunde if b.tun]
+    # Ein Hinweis steht nirgends sonst; seine Zeile traegt darum Befund und
+    # Handlung, wie das Beispiel in §6.1. Bei einem Konflikt steht der Befund
+    # schon oben, dann genuegt die Handlung.
+    tun = [("%s %s" % (b.text, b.tun)) if b.art == "hinweis" else b.tun
+           for b in plan.befunde if b.tun]
     hinweise = [b for b in plan.hinweise() if not b.tun]
     if tun or hinweise:
         print()

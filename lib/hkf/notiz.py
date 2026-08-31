@@ -75,3 +75,21 @@ def abschnitt(body, ueberschrift):
 def ohne_abschnitt(body, ueberschrift):
     return re.sub(r"^# %s\n.*?(?=^# |\Z)" % re.escape(ueberschrift), "",
                   body, flags=re.M | re.S)
+
+
+def skalar(wert):
+    """Ein Wert so, dass YAML ihn wieder als denselben Text liest.
+
+    `version: 1.0` ist eine Zahl, `version: "1.0"` ist Text — und §4.1 meint
+    Text. Wer eine Fassung ohne Anfuehrungszeichen schreibt, macht aus 1.10
+    spaeter 1.1.
+    """
+    text = str(wert)
+    try:
+        import yaml
+        gleich = yaml.safe_load(text) == text
+    except Exception:                                  # pragma: no cover
+        gleich = False
+    if gleich or "\n" in text:
+        return text
+    return '"%s"' % text.replace('\\', '\\\\').replace('"', '\\"')

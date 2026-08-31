@@ -43,15 +43,30 @@ Gebraucht werden Python 3 und PyYAML (`pip3 install pyyaml`).
 | `hk-init <ziel>` | legt eine Wissensbasis an: Grundausstattung, Obsidian-Konfiguration, README, `.gitignore`, `git init` und ein erster Commit | **läuft** |
 | `hk-lint [pfad]` | prüft Frontmatter gegen das Schema aus Anhang B.4 und die Grammatik der Wikilinks und Typangaben aus Anhang B | **teilweise** |
 | `hk-import <bundle>` | übernimmt eine Lieferung (§6.1): Typen abgleichen, Notizen und Mediendateien einsortieren, Verweise umschreiben, verknüpfen, Bundle-Notiz und Typtabelle fortschreiben | **läuft** |
-| `hk-export <id> <ziel>` | schreibt eine Lieferung heraus (§6.2) | Platzhalter |
+| `hk-export <id> <ziel>` | schreibt eine Lieferung heraus (§6.2): Notizen, Typdefinitionen und Mediendateien der Lieferung in den typbezogenen Baum, Verweise ohne Ablagepfad | **läuft** |
 
-`hk-lint --help` nennt, welche Prüfungen aus §6.3 noch fehlen. `hk-export`
-sagt beim Aufruf, was es tun soll, und endet mit 3.
+`hk-lint --help` nennt, welche Prüfungen aus §6.3 noch fehlen.
 
 `hk-import --check` führt den Lauf bis zu dem Punkt aus, an dem geschrieben
 würde, und berichtet in drei Abschnitten: was geschieht, was zu entscheiden
 ist, was zu tun ist. `--force` entscheidet, welche von zwei Fassungen gilt —
 nie, ob zwei Dinge dasselbe meinen.
+
+## Der Rundlauf
+
+Ein Bundle, das importiert und wieder exportiert wird, kommt bis auf zwei
+Stellen zurück, wie es kam. Beide sind gewollt:
+
+- **Verweise, die der Import erkannt hat, bleiben.** Nennen sich zwei Notizen
+  derselben Lieferung gegenseitig, steht das danach unter `# Siehe auch` und
+  geht mit hinaus. Was in den Bestand zeigt, fällt weg — es gilt nur hier
+  (§6.2 Schritt 7).
+- **Mediendateien folgen den Verweisen.** Der Import nimmt jede Datei der
+  Lieferung mit, der Export nur die, auf die eine Notiz zeigt (§6.2 Schritt 4).
+  Was zurückbleibt, meldet `hk-export`, damit es nicht still verschwindet.
+
+Die abgeleitete Typtabelle in `hbundle.md` wird alphabetisch geschrieben; §3.1
+legt keine Reihenfolge fest.
 
 ## Was der Import nicht entscheidet
 
@@ -182,11 +197,9 @@ Kopien zu führen. Sie findet den Harness über `HKF_HARNESS`, sonst nebenan.
 
 ## Offen
 
-- **`hk-export`** — die Umkehrung: Ablagepfad aus jedem Verweis
-  herausrechnen, `bundles`, `imported` und die Nachweise draußen lassen,
-  Mediendateien nach ihrer Endung mitnehmen (§4.3, §6.2).
 - **Vorschläge aus unbelegten Properties** (§6.1 Schritt 9, dritte
   Beobachtung).
+- **`hk-lint --fix`** und die Prüfungen aus §6.3, die noch fehlen.
 - **`HKF_BUNDLE_PATH`** — Vorgabeverzeichnis für Lieferungen; festlegen, wenn
   `hk-export` steht.
 - **`hk-lint --fix`** — die abgeleiteten Tabellen in `hkb.md` und die
