@@ -23,6 +23,7 @@ from hkf import CONFIG, frontmatter                           # noqa: E402
 
 BLOCK = re.compile(r"^## 3\.\d+ `(\w+)`\n\n```markdown\n(.*?)\n```", re.S | re.M)
 TYPEN, PROPTYPES = 20, 16
+KONFIG = "90-System"   # Core §3.1, Vorgabe fuer config_base
 ZEITEN = re.compile(r"^(created|modified|modified_by):.*\n", re.M)
 EINSCHRAENKUNG = re.compile(r"`([a-z]+): ([^`]+)`")
 
@@ -38,7 +39,7 @@ def kern_typen(spec, vorlage, melde):
         melde("§3 enthält %d Typdefinitionen, erwartet %d" % (len(bloecke), TYPEN), True)
         return
     for typ, block in bloecke:
-        p = os.path.join(vorlage, "Typedefs", typ + ".md")
+        p = os.path.join(vorlage, KONFIG, "Typedefs", typ + ".md")
         if not os.path.exists(p):
             melde("%-10s fehlt in der Vorlage" % typ, True)
             continue
@@ -74,7 +75,7 @@ def standard_proptypes(spec, vorlage, melde):
     if len(erwartet) != PROPTYPES:
         melde("§2 nennt %d Property-Typen, erwartet %d" % (len(erwartet), PROPTYPES), True)
 
-    verz = os.path.join(vorlage, "Proptypes")
+    verz = os.path.join(vorlage, KONFIG, "Proptypes")
     vorhanden = set(f[:-3] for f in os.listdir(verz) if f.endswith(".md"))
     for name in sorted(erwartet):
         if name not in vorhanden:
@@ -106,7 +107,7 @@ def main(argv):
         return 0
     args = [a for a in argv if not a.startswith("-")]
     vorlage = args[0] if args else os.path.join(WURZEL, "templates", "hkb")
-    if not os.path.isdir(os.path.join(vorlage, "Typedefs")):
+    if not os.path.isdir(os.path.join(vorlage, KONFIG, "Typedefs")):
         sys.stderr.write("Keine Vorlage unter %s\n" % os.path.abspath(vorlage))
         return 2
 

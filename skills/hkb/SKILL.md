@@ -30,8 +30,8 @@ hk-lint                      # die Ablage aus $HKB_PATH
 hk-lint /pfad/zur/ablage     # eine andere
 ```
 
-Bevor du etwas tust: `hkb.md` lesen — dort stehen `name`, `base`,
-`media_base`, `timezone` und die Typtabelle. Führt die Ablage den Typ `hint`,
+Bevor du etwas tust: `hkb.md` lesen — dort stehen `name`, die vier
+Bereiche, `timezone` und die Typtabelle. Führt die Ablage den Typ `hint`,
 lies auch `Hints/`: Dort steht, was **diese** Wissensbasis für sich festgelegt
 hat, und das geht den sieben Regeln vor, wo es sie berührt.
 
@@ -61,7 +61,8 @@ Sie stehen hier und nirgends sonst — du brauchst sie ständig:
    Datum mit Uhrzeit.
 5. **Wenn du änderst, schreib es hin.** `modified` auf jetzt in **UTC**,
    `modified_by` auf deinen Modellnamen.
-6. **`Typedefs/` und `Proptypes/` sind tabu**, außer du legst ausdrücklich
+6. **`Typedefs/` und `Proptypes/` sind tabu** — sie liegen unter
+   `config_base` —, außer du legst ausdrücklich
    einen neuen Typ an (dafür gibt es `hkb-typ`).
 7. **`# Siehe auch` wird ergänzt, nicht gekürzt.** Entfernen ist Sache eines
    Menschen; was weg soll, kommt in `rejected_links`.

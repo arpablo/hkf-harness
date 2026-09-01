@@ -12,6 +12,12 @@ from . import frontmatter
 
 VORGABE = "~/hkb"
 
+# Die vier Bereiche einer Ablage (§3.1) mit ihren Vorgaben. Die Zahlenpraefixe
+# ordnen sie in der Anzeige jedes Dateibrowsers.
+BEREICHE = ("wiki_base", "source_base", "media_base", "config_base")
+VORGABEN = {"wiki_base": "40-Wiki", "source_base": "50-Sources",
+            "media_base": "80-Media", "config_base": "90-System"}
+
 
 class KeineAblage(Exception):
     pass
@@ -57,10 +63,24 @@ def finde_ablage(arg=None):
                       % (pfad, herkunft(arg)))
 
 
-def basis(pfad):
-    """Basispfad der Typverzeichnisse (§3.1), absolut."""
+def bereiche(pfad):
+    """{name: relativer Pfad} der vier Bereiche (§3.1).
+
+    Fehlt einer, gilt die Vorgabe. Ein ausdruecklich leerer Wert bleibt leer —
+    dann faellt der Bereich mit der Wurzel zusammen, was erlaubt, aber nicht
+    die Vorgabe ist.
+    """
     daten, _ = frontmatter.lesen(os.path.join(pfad, "hkb.md"))
-    return os.path.join(pfad, str(daten.get("base") or "").strip("/"))
+    aus = {}
+    for k in BEREICHE:
+        wert = daten.get(k, VORGABEN[k])
+        aus[k] = str("" if wert is None else wert).strip("/")
+    return aus
+
+
+def basis(pfad):
+    """Bereich des Inhalts (§3.2), absolut. Frueher `base`."""
+    return os.path.join(pfad, bereiche(pfad)["wiki_base"])
 
 
 def ablagepfad(pfad):

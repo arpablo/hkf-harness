@@ -225,7 +225,7 @@ angehängtem `s`" (Core §3.7); ein Werkzeug kennt den Ablageort damit, ohne die
 Typdefinition zu lesen.
 
 **Vier Typen tragen `is_source: true`** — `book`, `article`, `clipping` und
-`webpage`. Ihre Verzeichnisse liegen nicht unter `base`, sondern unter
+`webpage`. Ihre Verzeichnisse liegen nicht unter `wiki_base`, sondern unter
 `source_base`, also nach Vorgabe in `Sources/Books`, `Sources/Articles`,
 `Sources/Clippings` und `Sources/Webpages` (Core §3.2.2). Die Spalte oben
 nennt das `dir`, nicht den vollen Pfad.
@@ -284,7 +284,7 @@ description: Registriert einen Typ und legt sein Verzeichnis fest.
 | description | text | ja | — | Einzeiliger Zweck; erscheint in der Typtabelle der Wurzeldatei |
 | dir | text | nein | — | Verzeichnis der Instanzen; Vorgabe ist der groß geschriebene Typname mit angehängtem `s` (Core §3.7) |
 | provisional | checkbox | nein | false | Beim Import angelegt, weil niemand den Typ definiert hat (Core §5.4) |
-| is_source | checkbox | nein | false | Die Instanzen dieses Typs sind Quellen; ihr Verzeichnis liegt unter `source_base` statt unter `base` (Core §3.2.2) |
+| is_source | checkbox | nein | false | Die Instanzen dieses Typs sind Quellen; ihr Verzeichnis liegt unter `source_base` statt unter `wiki_base` (Core §3.2.2) |
 
 # Konventionen
 
@@ -309,7 +309,7 @@ gilt, könnte sie nicht auseinanderhalten.
 `is_source` verschiebt allein den Ort und sonst nichts: Ein Quelltyp bestimmt
 sein Verzeichnis über `dir` wie jeder andere, und die Vorgabe gilt
 unverändert; nur hängt das Verzeichnis dann unter `source_base` statt unter
-`base`. Die Angabe steht an der Typdefinition und nicht als Liste in der
+`wiki_base`. Die Angabe steht an der Typdefinition und nicht als Liste in der
 Wurzeldatei, weil dort schon alles andere über den Typ steht — und weil eine
 Ablage, die einen eigenen Quellentyp anlegt, sonst zwei Stellen ändern
 müsste.

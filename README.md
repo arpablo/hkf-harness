@@ -291,8 +291,9 @@ einer Bundle-Notiz, die in Ordnung war. Die Rauchprobe ruft es jetzt mit auf.
 ## Woher `templates/hkb` kommt
 
 Die Grundausstattung wird nicht hier gepflegt, sondern aus der
-Beispiel-Wissensbasis der Werkbank abgeleitet — alle Notizen in `Typedefs/`
-und `Proptypes/`, die keine `bundles`-Property tragen (§5.3):
+Beispiel-Wissensbasis der Werkbank abgeleitet — alle Notizen in
+`90-System/Typedefs/` und `90-System/Proptypes/`, die keine
+`bundles`-Property tragen (§5.3):
 
 ```
 cd ../HenniHKF-Lab

@@ -13,7 +13,7 @@ Linter.
 """
 import datetime, io, os, re, shutil
 
-from . import TEMPLATES, frontmatter, notiz
+from . import TEMPLATES, ablage, frontmatter, notiz
 from .importieren import STANDARD_PROPTYPES, _property_tabelle, _verzeichnis
 from .pruefen import Bestand, ohne_code
 
@@ -28,7 +28,7 @@ def _typtabelle(b, getan):
     zeilen = ["# Typen", "", "| Typ | Verzeichnis | Zweck |", "|---|---|---|"]
     for name in sorted(b.typdefs):
         d = b.typdefs[name]["daten"]
-        zeilen.append("| %s | %s | %s |" % (name, _verzeichnis(name, d, b.quellbasis),
+        zeilen.append("| %s | %s | %s |" % (name, b.ort(name, d),
                                             d.get("description") or ""))
     neu = "\n".join(zeilen) + "\n"
     if (notiz.abschnitt(b.wurzel_body, "Typen") or "").strip() == \
@@ -43,8 +43,9 @@ def _typtabelle(b, getan):
 
 
 def _standard_proptypes(b, getan):
-    quelle = os.path.join(TEMPLATES, "hkb", "Proptypes")
-    ziel = os.path.join(b.basis, "Proptypes")
+    quelle = os.path.join(TEMPLATES, "hkb",
+                          ablage.VORGABEN["config_base"], "Proptypes")
+    ziel = os.path.join(b.konfig, "Proptypes")
     for name in sorted(STANDARD_PROPTYPES - set(b.proptypes)):
         vorlage = os.path.join(quelle, name + ".md")
         if not os.path.isfile(vorlage):

@@ -10,6 +10,8 @@ zutreffen, sonst mit 1 und einer Zeile pro Fehlschlag.
 import io, os, re, shutil, subprocess, sys, tempfile
 
 WURZEL = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+# Die vier Bereiche (Core §3.1)
+WIKI, QUELLEN, MEDIEN, KONFIG = "40-Wiki", "50-Sources", "80-Media", "90-System"
 BIN = os.path.join(WURZEL, "bin")
 fehler = []
 
@@ -47,8 +49,8 @@ def _lieferung_kaputt(bundle):
 
 def _tabellenfehler(ziel):
     """Eine Typdefinition, die gegen §3.7.1 verstoesst, und Notizen dazu."""
-    os.makedirs(os.path.join(ziel, "dinge"), exist_ok=True)
-    io.open(os.path.join(ziel, "Typedefs", "ding.md"), "w", encoding="utf-8").write(
+    os.makedirs(os.path.join(ziel, WIKI, "dinge"), exist_ok=True)
+    io.open(os.path.join(ziel, KONFIG, "Typedefs", "ding.md"), "w", encoding="utf-8").write(
         "---\ntype: typedef\ntitle: Ding\ndescription: Ein Ding.\ndir: dinge\n"
         "created: 2026-01-01\nmodified: 2026-01-01T00:00:00\n---\n\n"
         "# Properties\n\n| Property | Typ | Pflicht | Beschreibung |\n"
@@ -60,7 +62,7 @@ def _tabellenfehler(ziel):
         "| krumm | hkf-krumm | nein | Gibt es nicht |\n"
         "| falsch | hkf-url:person | nein | Zusatz am falschen Typ |\n"
         "| gemischt | text / number | nein | Zwei Wertformen |\n")
-    io.open(os.path.join(ziel, "Typedefs", "wurf.md"), "w", encoding="utf-8").write(
+    io.open(os.path.join(ziel, KONFIG, "Typedefs", "wurf.md"), "w", encoding="utf-8").write(
         "---\ntype: typedef\ntitle: Wurf\ndescription: Vorgaben, gute und schlechte.\n"
         "created: 2026-01-01\nmodified: 2026-01-01T00:00:00\n---\n\n"
         "# Properties\n\n| Property | Typ | Pflicht | Vorgabe | Beschreibung |\n"
@@ -68,12 +70,12 @@ def _tabellenfehler(ziel):
         "| offen | checkbox | nein | false | So geht eine Vorgabe |\n"
         "| zaehlt | number | nein | viele | Vorgabe ist keine Zahl |\n"
         "| noetig | text | ja | irgendwas | Pflicht und Vorgabe zugleich |\n")
-    io.open(os.path.join(ziel, "dinge", "eins.md"), "w", encoding="utf-8").write(
+    io.open(os.path.join(ziel, WIKI, "dinge", "eins.md"), "w", encoding="utf-8").write(
         "---\ntype: ding\ntitle: Das Erste\ncreated: 2026-01-01\n"
         "modified: 2026-01-01T00:00:00\nnetz: kein-url\n"
-        "kiste: \"[[dinge/zwei|Das Zweite]]\"\n"
-        "bild: \"[[dinge/zwei|Das Zweite]]\"\n---\n\nEins.\n")
-    io.open(os.path.join(ziel, "dinge", "zwei.md"), "w", encoding="utf-8").write(
+        "kiste: \"[[" + WIKI + "/dinge/zwei|Das Zweite]]\"\n"
+        "bild: \"[[" + WIKI + "/dinge/zwei|Das Zweite]]\"\n---\n\nEins.\n")
+    io.open(os.path.join(ziel, WIKI, "dinge", "zwei.md"), "w", encoding="utf-8").write(
         "---\ntype: ding\ntitle: Das Zweite\nmenge: 2\ncreated: 2026-01-01\n"
         "modified: 2026-01-01T00:00:00\n---\n\nZwei.\n")
 
@@ -85,15 +87,15 @@ def _kaputt(ziel):
     t = io.open(p, encoding="utf-8").read()
     io.open(p, "w", encoding="utf-8").write(
         _re.sub(r"^\| bundle \|.*\n", "", t, flags=_re.M))
-    os.remove(os.path.join(ziel, "Proptypes", "hkf-phone.md"))
-    os.makedirs(os.path.join(ziel, "dinge"), exist_ok=True)
-    io.open(os.path.join(ziel, "Typedefs", "ding.md"), "w", encoding="utf-8").write(
+    os.remove(os.path.join(ziel, KONFIG, "Proptypes", "hkf-phone.md"))
+    os.makedirs(os.path.join(ziel, WIKI, "dinge"), exist_ok=True)
+    io.open(os.path.join(ziel, KONFIG, "Typedefs", "ding.md"), "w", encoding="utf-8").write(
         "---\ntype: typedef\ntitle: Ding\ndescription: Ein Ding.\ndir: dinge\n"
         "created: 2026-01-01\nmodified: 2026-01-01T00:00:00\n---\n")
-    io.open(os.path.join(ziel, "dinge", "zwei.md"), "w", encoding="utf-8").write(
+    io.open(os.path.join(ziel, WIKI, "dinge", "zwei.md"), "w", encoding="utf-8").write(
         "---\ntype: ding\ntitle: Das Zweite\ncreated: 2026-01-01\n"
         "modified: 2026-01-01T00:00:00\n---\n\nEin Ding.\n")
-    io.open(os.path.join(ziel, "dinge", "eins.md"), "w", encoding="utf-8").write(
+    io.open(os.path.join(ziel, WIKI, "dinge", "eins.md"), "w", encoding="utf-8").write(
         "---\ntype: ding\ntitle: Das Erste\nstatus:\n---\n\n"
         "Es zeigt auf [[zwei]].\n")
 
@@ -155,14 +157,23 @@ def main():
         probe("36 Notizen", "36 Notizen" in r.stdout, r.stdout.strip())
         wurzel = io.open(os.path.join(ziel, "hkb.md"), encoding="utf-8").read()
         probe("Wurzeldatei traegt den Namen", "name: Probe" in wurzel)
-        probe("und den Quellenbereich (§3.2.2)", "source_base: Sources" in wurzel, wurzel)
+        probe("und die vier Bereiche (§3.1)",
+              all(('%s: "%s"' % (k, v)) in wurzel for k, v in
+                  (("wiki_base", "40-Wiki"), ("source_base", "50-Sources"),
+                   ("media_base", "80-Media"), ("config_base", "90-System"))),
+              wurzel)
         probe("die vier Quellenverzeichnisse stehen bereit",
-              all(os.path.isdir(os.path.join(ziel, "Sources", d))
+              all(os.path.isdir(os.path.join(ziel, "50-Sources", d))
                   for d in ("Books", "Articles", "Clippings", "Webpages")))
-        probe("und kein Quellenverzeichnis liegt daneben",
-              not os.path.isdir(os.path.join(ziel, "Books")))
+        probe("Typedefs und Proptypes liegen unter config_base",
+              os.path.isdir(os.path.join(ziel, "90-System", "Typedefs"))
+              and os.path.isdir(os.path.join(ziel, "90-System", "Proptypes")))
+        probe("und kein Typverzeichnis liegt in der Wurzel",
+              not os.path.isdir(os.path.join(ziel, "Typedefs"))
+              and not os.path.isdir(os.path.join(ziel, "Books")))
         probe("die Typtabelle nennt den vollen Ort (§3.1)",
-              "| book | Sources/Books |" in wurzel, wurzel)
+              "| book | 50-Sources/Books |" in wurzel
+              and "| typedef | 90-System/Typedefs |" in wurzel, wurzel)
         probe("Git-Repository mit einem Commit",
               lauf("git", "-C", ziel, "log", "--oneline").stdout.count("\n") == 1)
         probe("legt keine AGENTS.md an",
@@ -183,7 +194,7 @@ def main():
               lauf(os.path.join(BIN, "hk-lint"), tempfile.gettempdir()).returncode == 2)
 
         # eine Notiz mit falschem Frontmatter und kaputtem Wikilink
-        io.open(os.path.join(ziel, "Typedefs", "kaputt.md"), "w", encoding="utf-8").write(
+        io.open(os.path.join(ziel, KONFIG, "Typedefs", "kaputt.md"), "w", encoding="utf-8").write(
             "---\ntype: typedef\ntitle: \ncreated: gestern\n---\n\n"
             "Siehe [[persons/ada|Ada]] in einer Tabelle:\n\n"
             "| a | b |\n|---|---|\n| [[persons/ada|Ada]] | x |\n")
@@ -206,13 +217,13 @@ def main():
               and "lässt sich nicht auflösen" in r.stdout, r.stdout)
         r = lauf(os.path.join(BIN, "hk-lint"), ziel, "--fix")
         probe("legt den fehlenden Standard-Property-Typ an",
-              os.path.exists(os.path.join(ziel, "Proptypes", "hkf-phone.md")))
+              os.path.exists(os.path.join(ziel, KONFIG, "Proptypes", "hkf-phone.md")))
         probe("erzeugt die Typtabelle neu",
-              "| ding | dinge |" in io.open(os.path.join(ziel, "hkb.md"),
-                                            encoding="utf-8").read())
-        eins = io.open(os.path.join(ziel, "dinge", "eins.md"), encoding="utf-8").read()
+              "| ding | 40-Wiki/dinge |" in io.open(os.path.join(ziel, "hkb.md"),
+                                                    encoding="utf-8").read())
+        eins = io.open(os.path.join(ziel, WIKI, "dinge", "eins.md"), encoding="utf-8").read()
         probe("qualifiziert den verzeichnislosen Verweis",
-              "[[dinge/zwei|Das Zweite]]" in eins and "[[zwei]]" not in eins, eins)
+              "[[40-Wiki/dinge/zwei|Das Zweite]]" in eins and "[[zwei]]" not in eins, eins)
         probe("ergaenzt created und modified",
               "created:" in eins and "modified:" in eins, eins)
         probe("setzt modified_by auf hk-lint", "modified_by: hk-lint" in eins, eins)
@@ -262,32 +273,33 @@ def main():
         r = lauf(os.path.join(BIN, "hk-import"), "--check", bundle, ziel)
         probe("--check meldet die drei neuen Notizen",
               "3 neu" in r.stdout and "Nichts wurde geschrieben" in r.stdout, r.stdout)
-        probe("--check schreibt nichts", not os.path.exists(os.path.join(ziel, "dinge")))
+        probe("--check schreibt nichts", not os.path.exists(os.path.join(ziel, WIKI, "dinge")))
 
         r = lauf(os.path.join(BIN, "hk-import"), bundle, ziel)
         probe("übernimmt die Lieferung", r.returncode == 0, r.stdout + r.stderr)
-        for f in ("Typedefs/ding.md", "dinge/eins.md", "dinge/zwei.md",
-                  "Bundles/probe.md", "Media/Images/bilder/bild.png"):
+        for f in (KONFIG + "/Typedefs/ding.md", WIKI + "/dinge/eins.md",
+                  WIKI + "/dinge/zwei.md", WIKI + "/Bundles/probe.md",
+                  MEDIEN + "/Images/bilder/bild.png"):
             probe("legt %s an" % f, os.path.exists(os.path.join(ziel, f)))
-        eins = io.open(os.path.join(ziel, "dinge", "eins.md"), encoding="utf-8").read()
+        eins = io.open(os.path.join(ziel, WIKI, "dinge", "eins.md"), encoding="utf-8").read()
         probe("trägt die Zugehörigkeit ein", "Bundles/probe|Probe" in eins, eins)
         probe("schreibt den Verweis, den der Body hergibt",
               "# Siehe auch" in eins and "dinge/zwei|Das Zweite" in eins, eins)
         probe("führt ihn auch in related", "related:" in eins, eins)
-        zwei = io.open(os.path.join(ziel, "dinge", "zwei.md"), encoding="utf-8").read()
+        zwei = io.open(os.path.join(ziel, WIKI, "dinge", "zwei.md"), encoding="utf-8").read()
         probe("und keinen Gegeneintrag (§5.6)", "# Siehe auch" not in zwei, zwei)
         probe("schreibt den Wikilink auf den Pfad der HKB um",
-              "[[Media/Images/bilder/bild.png|" in eins, eins)
+              "[[80-Media/Images/bilder/bild.png|" in eins, eins)
         probe("Typtabelle in hkb.md ergänzt",
-              "| ding | dinge |" in io.open(os.path.join(ziel, "hkb.md"),
-                                            encoding="utf-8").read())
+              "| ding | 40-Wiki/dinge |" in io.open(os.path.join(ziel, "hkb.md"),
+                                                    encoding="utf-8").read())
 
         vorher = _abbild(ziel)
         lauf(os.path.join(BIN, "hk-import"), bundle, ziel)
         probe("ein zweiter Lauf ändert nichts", _abbild(ziel) == vorher)
 
         # Bedeutungspruefung: derselbe Name, andere Beschreibung
-        p = os.path.join(ziel, "Typedefs", "ding.md")
+        p = os.path.join(ziel, KONFIG, "Typedefs", "ding.md")
         t = io.open(p, encoding="utf-8").read()
         io.open(p, "w", encoding="utf-8").write(
             t.replace("description: Ein Ding.", "description: Ein Datensatz."))
@@ -408,8 +420,8 @@ def main():
                   "dinge/zwei.md", "Media/Images/bilder/bild.png"):
             probe("legt %s an" % f, os.path.exists(os.path.join(aus, f)))
         hb = io.open(os.path.join(aus, "hbundle.md"), encoding="utf-8").read()
-        probe("hbundle traegt base und media_base",
-              'base: ""' in hb and "media_base: Media" in hb, hb)
+        probe("hbundle traegt keine Bereiche (A.1)",
+              "base:" not in hb and "config_base" not in hb, hb)
         probe("und eine frische Typtabelle", "| ding | dinge |" in hb, hb)
         probe("ohne Importnachweis", "# Import" not in hb, hb)
         eins_aus = io.open(os.path.join(aus, "dinge", "eins.md"),
@@ -434,8 +446,9 @@ def main():
         fluechtig = ("created", "modified", "modified_by")
         unterschiede = []
         for rel in ("dinge/eins.md", "dinge/zwei.md", "Typedefs/ding.md"):
-            a, ab = fm.lesen(os.path.join(ziel, rel))
-            b, bb = fm.lesen(os.path.join(zurueck, rel))
+            wo = KONFIG if rel.startswith("Typedefs/") else WIKI
+            a, ab = fm.lesen(os.path.join(ziel, wo, rel))
+            b, bb = fm.lesen(os.path.join(zurueck, wo, rel))
             fuer = lambda d: {k: v for k, v in d.items() if k not in fluechtig}
             if fuer(a) != fuer(b) or ab.strip() != bb.strip():
                 unterschiede.append(rel)
@@ -448,7 +461,7 @@ def main():
         # §6.1 Schritt 5 verlangt danach *beide* Bundles. Und was nur in der
         # Wissensbasis steht — `rejected_links`, eine von Hand geschriebene
         # Zeile unter `# Siehe auch` — ueberlebt das Aktualisieren (§5.6).
-        p = os.path.join(ziel, "dinge", "eins.md")
+        p = os.path.join(ziel, WIKI, "dinge", "eins.md")
         vorher_text = io.open(p, encoding="utf-8").read()
         io.open(p, "w", encoding="utf-8").write(
             vorher_text
@@ -503,7 +516,7 @@ def main():
         r = lauf(os.path.join(BIN, "hk-import"), q_b, ziel)
         probe("die Lieferung wird übernommen", r.returncode == 0, r.stdout + r.stderr)
         probe("die Quellennotiz landet unter source_base (§4.3)",
-              os.path.exists(os.path.join(ziel, "Sources", "Books", "economy.md")))
+              os.path.exists(os.path.join(ziel, QUELLEN, "Books", "economy.md")))
         probe("und nicht neben den übrigen Typverzeichnissen",
               not os.path.exists(os.path.join(ziel, "Books", "economy.md")))
         probe("`authors` nimmt einen blossen Namen (§2.1)",
@@ -542,9 +555,9 @@ def main():
         r = lauf(os.path.join(BIN, "hk-import"), "--check", e_b, ziel)
         probe("--check meldet den Zustand `ergänzt`", "1 ergänzt" in r.stdout, r.stdout)
         r = lauf(os.path.join(BIN, "hk-import"), e_b, ziel)
-        eins = io.open(os.path.join(ziel, "dinge", "eins.md"), encoding="utf-8").read()
+        eins = io.open(os.path.join(ziel, WIKI, "dinge", "eins.md"), encoding="utf-8").read()
         probe("keine eigene Notiz entsteht",
-              not os.path.exists(os.path.join(ziel, "dinge", "nachtrag.md")))
+              not os.path.exists(os.path.join(ziel, WIKI, "dinge", "nachtrag.md")))
         probe("der Body ist angehängt",
               "Ein Satz, der angehängt gehört." in eins, eins)
         probe("und steht vor `# Siehe auch`",
@@ -558,14 +571,14 @@ def main():
               "menge" in r.stdout and "menge: 7" not in eins, r.stdout)
         probe("die Ablage bleibt konform",
               lauf(os.path.join(BIN, "hk-lint"), ziel).returncode == 0)
-        io.open(os.path.join(ziel, "dinge", "drei-extends.md"), "w",
+        io.open(os.path.join(ziel, WIKI, "dinge", "drei-extends.md"), "w",
                 encoding="utf-8").write(
             "---\ntype: ding\ntitle: X\nextends: dinge/eins\n"
             "created: 2026-01-01\nmodified: 2026-01-01T00:00:00\n---\n\nX.\n")
         r = lauf(os.path.join(BIN, "hk-lint"), ziel)
         probe("`extends` in einer Wissensbasis ist ein Befund (§7.2)",
               "extends" in r.stdout and r.returncode == 1, r.stdout)
-        os.remove(os.path.join(ziel, "dinge", "drei-extends.md"))
+        os.remove(os.path.join(ziel, WIKI, "dinge", "drei-extends.md"))
         shutil.rmtree(e_b, ignore_errors=True)
 
         print("hk-ingest")
@@ -658,7 +671,7 @@ def main():
         probe("--hkb importiert die Lieferung gleich mit",
               "1 neu" in r.stdout and "Übernommen" in r.stdout, r.stdout)
         probe("die Quellennotiz landet unter source_base",
-              os.path.isfile(os.path.join(ziel, "Sources", "Webpages",
+              os.path.isfile(os.path.join(ziel, QUELLEN, "Webpages",
                                           "eine-zitierte-seite.md")))
         probe("und die Ablage bleibt konform",
               lauf(os.path.join(BIN, "hk-lint"), ziel).returncode == 0)
@@ -707,36 +720,36 @@ def main():
         shutil.rmtree(k, ignore_errors=True)
 
         print("hk-lint: der Quellenbereich ist reserviert")
-        fremd = os.path.join(ziel, "Sources", "Fremd")
+        fremd = os.path.join(ziel, QUELLEN, "Fremd")
         os.makedirs(fremd, exist_ok=True)
         r = lauf(os.path.join(BIN, "hk-lint"), ziel)
         probe("ein fremdes Verzeichnis unter source_base ist ein Befund (§3.2.2)",
               "Sources/Fremd" in r.stdout and r.returncode == 1, r.stdout)
         os.rmdir(fremd)
-        p = os.path.join(ziel, "Typedefs", "zettel.md")
+        p = os.path.join(ziel, KONFIG, "Typedefs", "zettel.md")
         io.open(p, "w", encoding="utf-8").write(
             "---\ntype: typedef\ntitle: Zettel\ndescription: Ein Zettel.\n"
-            "dir: Sources/Zettel\ncreated: 2026-01-01\n"
+            "dir: 50-Sources/Zettel\ncreated: 2026-01-01\n"
             "modified: 2026-01-01T00:00:00\n---\n\n# Properties\n\n"
             "| Property | Typ | Pflicht | Vorgabe | Beschreibung |\n"
             "|---|---|---|---|---|\n| menge | number | nein | — | Wie viele |\n")
         r = lauf(os.path.join(BIN, "hk-lint"), ziel)
-        probe("ein Typ ohne `source: true` darf nicht dorthin (§3.2.2)",
+        probe("ein Typ ohne `is_source: true` darf nicht dorthin (§3.2.2)",
               "kein `is_source: true`" in r.stdout, r.stdout)
         os.remove(p)
 
         print("hk-lint: Unterverzeichnis eines Typverzeichnisses")
         # §3.2 erlaubt sie ausdruecklich, §3.7.1 loest den Typ ueber ein
         # segmentweises Praefix auf — nicht ueber Gleichheit.
-        os.makedirs(os.path.join(ziel, "dinge", "kiste"), exist_ok=True)
-        io.open(os.path.join(ziel, "dinge", "kiste", "drei.md"), "w",
+        os.makedirs(os.path.join(ziel, WIKI, "dinge", "kiste"), exist_ok=True)
+        io.open(os.path.join(ziel, WIKI, "dinge", "kiste", "drei.md"), "w",
                 encoding="utf-8").write(
             "---\ntype: ding\ntitle: Das Dritte\ncreated: 2026-01-01\n"
             "modified: 2026-01-01T00:00:00\n---\n\nLiegt eine Ebene tiefer.\n")
         r = lauf(os.path.join(BIN, "hk-lint"), ziel)
         probe("eine Notiz darin liegt nicht am falschen Ort (§3.2)",
               "gehört nach dinge/" not in r.stdout, r.stdout)
-        shutil.rmtree(os.path.join(ziel, "dinge", "kiste"))
+        shutil.rmtree(os.path.join(ziel, WIKI, "dinge", "kiste"))
     finally:
         shutil.rmtree(ziel, ignore_errors=True)
 

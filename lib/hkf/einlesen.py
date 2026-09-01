@@ -19,7 +19,7 @@ Eine Regel entscheidet, was kopiert wird:
 """
 import hashlib, io, os, re, shutil, unicodedata
 
-from . import TEMPLATES, frontmatter, notiz
+from . import TEMPLATES, ablage, frontmatter, notiz
 from .importieren import _property_tabelle
 
 VORGABE_INBOX = "~/hkf-inbox"
@@ -228,7 +228,8 @@ def _entlinken(wert):
 
 def _erlaubt(typ):
     """Was die Typdefinition der Grundausstattung zusichert, plus A.2."""
-    p = os.path.join(TEMPLATES, "hkb", "Typedefs", typ + ".md")
+    p = os.path.join(TEMPLATES, "hkb", ablage.VORGABEN["config_base"],
+                     "Typedefs", typ + ".md")
     if not os.path.isfile(p):
         return None
     return set(_property_tabelle(frontmatter.lesen(p)[1])) | set(ALLGEMEIN) \

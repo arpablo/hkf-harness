@@ -21,8 +21,8 @@ dort nie aus dem Abschnitt kam — eine Adresse, ein von Hand gesetzter Verweis
 import io, os, re, shutil
 
 from . import CORE, ablage, frontmatter, notiz
-from .importieren import (ARTVERZEICHNIS, QUELLBASIS, STANDARD_PROPTYPES,
-                          grundtypen, medienart, _property_tabelle,
+from .importieren import (ARTVERZEICHNIS, STANDARD_PROPTYPES, grundtypen,
+                          medienart, _bereich, _property_tabelle,
                           _verzeichnis)
 
 WERKZEUG = "hk-export"
@@ -36,9 +36,11 @@ class Plan(object):
         self.basis = ablage.basis(hkb)
         self.ablagepfad = ablage.ablagepfad(hkb)
         daten, _ = frontmatter.lesen(os.path.join(hkb, "hkb.md"))
-        self.hkb_media = str(daten.get("media_base") or "").strip("/")
-        self.hkb_base = str(daten.get("base") or "").strip("/")
-        self.quellbasis = str(daten.get("source_base", QUELLBASIS) or "").strip("/")
+        self.bereiche = ablage.bereiche(hkb)
+        self.hkb_media = self.bereiche["media_base"]
+        self.hkb_base = self.bereiche["wiki_base"]
+        self.quellbasis = self.bereiche["source_base"]
+        self.konfig = os.path.join(hkb, self.bereiche["config_base"])
         self.media_base = media_base.strip("/")
         self.bundle = {}
         self.bundle_body = ""
@@ -52,9 +54,14 @@ class Plan(object):
     def melde(self, art, text, tun=None):
         self.befunde.append((art, text, tun))
 
-    def praefix_notizen(self):
-        teile = [t for t in (self.ablagepfad, self.hkb_base) if t]
+    def praefix_notizen(self, bereich="wiki_base"):
+        teile = [t for t in (self.ablagepfad, self.bereiche[bereich]) if t]
         return "/".join(teile)
+
+    def praefixe(self):
+        """Alle Praefixe, unter denen eine Notiz liegen kann (§3.1)."""
+        return [p for p in (self.praefix_notizen(k) for k in
+                            ("wiki_base", "source_base", "config_base")) if p]
 
     def praefix_medien(self):
         teile = [t for t in (self.ablagepfad, self.hkb_media) if t]
@@ -81,7 +88,7 @@ def _gelieferte_typen(plan, vorausgesetzt):
     if not vorausgesetzt:
         return aus
     for verz in ("Typedefs", "Proptypes"):
-        d = os.path.join(plan.basis, verz)
+        d = os.path.join(plan.konfig, verz)
         if not os.path.isdir(d):
             continue
         for f in sorted(os.listdir(d)):
@@ -117,28 +124,22 @@ def planen(hkb, bundle_id, ziel, media_base="Media"):
     # (§4.3): Er wird beim Sammeln abgestreift, sonst truege das Bundle den
     # `source_base` des Absenders. Wo `base` nicht leer ist, liegt er neben
     # den Typverzeichnissen und wird eigens durchlaufen.
-    quellen = os.path.join(plan.hkb, plan.quellbasis) if plan.quellbasis else None
-    wurzeln = [plan.basis]
-    if quellen and os.path.isdir(quellen) and \
-       not os.path.abspath(quellen).startswith(
-           os.path.abspath(plan.basis).rstrip("/") + os.sep):
-        wurzeln.append(quellen)
-    for p in [x for w in wurzeln for x in ablage.dateien(w)]:
-        rel = os.path.relpath(p, plan.basis).replace(os.sep, "/")
-        if rel.startswith("../") and quellen:
-            rel = os.path.relpath(p, quellen).replace(os.sep, "/")
-        elif plan.quellbasis and rel.startswith(plan.quellbasis + "/"):
-            rel = rel[len(plan.quellbasis) + 1:]
-        if "/" not in rel:
-            continue
-        daten, body = frontmatter.lesen(p)
-        if "type" not in daten or not _mitglied(daten, bundle_id):
-            continue
-        if rel.startswith("Bundles/"):
-            continue
-        kopf = notiz.teilen(io.open(p, encoding="utf-8").read())[0]
-        plan.notizen.append({"quelle": p, "rel": rel, "kopf": kopf,
-                             "body": body, "typ": str(daten["type"])})
+    wurzeln = []
+    for k in ("wiki_base", "source_base", "config_base"):
+        w = os.path.join(plan.hkb, plan.bereiche[k])
+        if os.path.isdir(w) and w not in wurzeln:
+            wurzeln.append(w)
+    for w in wurzeln:
+        for p in ablage.dateien(w):
+            rel = os.path.relpath(p, w).replace(os.sep, "/")
+            if "/" not in rel or rel.startswith("Bundles/"):
+                continue
+            daten, body = frontmatter.lesen(p)
+            if "type" not in daten or not _mitglied(daten, bundle_id):
+                continue
+            kopf = notiz.teilen(io.open(p, encoding="utf-8").read())[0]
+            plan.notizen.append({"quelle": p, "rel": rel, "kopf": kopf,
+                                 "body": body, "typ": str(daten["type"])})
     if not plan.notizen:
         plan.melde("hinweis", "Keine Notiz trägt dieses Bundle in `bundles`.",
                    "Prüfen, ob die `id` stimmt.")
@@ -153,7 +154,7 @@ def planen(hkb, bundle_id, ziel, media_base="Media"):
             # nicht mitbringen — jede konforme HKB fuehrt es ohnehin.
             continue
         rel = "Typedefs/%s" % typ
-        p = os.path.join(plan.basis, rel + ".md")
+        p = os.path.join(plan.konfig, rel + ".md")
         if not os.path.isfile(p):
             plan.melde("konflikt", "Der Typ %s hat keine Typdefinition." % typ,
                        "Die Ablage mit hk-lint prüfen.")
@@ -177,7 +178,7 @@ def planen(hkb, bundle_id, ziel, media_base="Media"):
         rel = "Proptypes/%s" % name
         if name in STANDARD_PROPTYPES or rel in von_anderen:
             continue
-        if not os.path.isfile(os.path.join(plan.basis, rel + ".md")):
+        if not os.path.isfile(os.path.join(plan.konfig, rel + ".md")):
             continue
         if rel + ".md" not in schon:
             plan.proptypes.append(rel)
@@ -189,7 +190,7 @@ def planen(hkb, bundle_id, ziel, media_base="Media"):
     for n in plan.notizen:
         n["kopf"], n["body"] = _umschreiben(plan, n, drin)
     for rel in plan.typdefs + plan.proptypes:
-        p = os.path.join(plan.basis, rel + ".md")
+        p = os.path.join(plan.konfig, rel + ".md")
         kopf, body = notiz.teilen(io.open(p, encoding="utf-8").read())
         e = {"rel": rel + ".md", "kopf": kopf, "body": body, "quelle": p}
         e["kopf"], e["body"] = _umschreiben(plan, e, drin)
@@ -243,7 +244,7 @@ def _medienziel(plan, ziel):
 
 def _umschreiben(plan, e, drin):
     """Praefix entfernen, Mediendateien einsammeln, `# Siehe auch` filtern."""
-    pre_n, pre_m = plan.praefix_notizen(), plan.praefix_medien()
+    pre_m = plan.praefix_medien()
     entfernt = []
 
     def ziel_neu(ziel):
@@ -256,11 +257,16 @@ def _umschreiben(plan, e, drin):
                 plan.medien.append({"quelle": quelle, "rel": neu,
                                     "art": medienart(neu)})
             return neu, True
-        neu = ziel[len(pre_n) + 1:] if pre_n and ziel.startswith(pre_n + "/") else ziel
-        # Der Quellenbereich bleibt zu Hause (§4.3); die Notiz liegt in der
-        # Lieferung unter ihrem blossen `dir`.
-        if plan.quellbasis and neu.startswith(plan.quellbasis + "/"):
-            neu = neu[len(plan.quellbasis) + 1:]
+        # Jeder Bereich bleibt zu Hause (§4.3): In der Lieferung liegt die
+        # Notiz unter ihrem blossen Typverzeichnis.
+        neu = ziel
+        for pre in plan.praefixe():
+            if neu.startswith(pre + "/"):
+                neu = neu[len(pre) + 1:]
+                break
+        else:
+            if plan.ablagepfad and neu.startswith(plan.ablagepfad + "/"):
+                neu = neu[len(plan.ablagepfad) + 1:]
         return neu, neu in drin
 
     def ersetzen(m):
@@ -301,9 +307,10 @@ def _umschreiben(plan, e, drin):
 
 
 def _hbundle(plan):
+    # Keine Bereiche: In einer Lieferung sind sie ohne Wirkung (A.1, §4.3),
+    # und was niemand liest, gehoert nicht hinein.
     felder = ["hkf: \"%s\"" % (plan.bundle.get("hkf") or CORE),
-              "type: bundle", "id: %s" % plan.bundle_id,
-              "base: \"\"", "media_base: %s" % plan.media_base]
+              "type: bundle", "id: %s" % plan.bundle_id]
     if plan.bundle.get("required_bundles"):
         felder.append("required_bundles:")
         felder += ["  - %s" % e for e in plan.bundle["required_bundles"]]
@@ -324,10 +331,10 @@ def _hbundle(plan):
             typen.add(os.path.basename(n["rel"])[:-3])
     zeilen = ["# Typen", "", "| Typ | Verzeichnis | Zweck |", "|---|---|---|"]
     for typ in sorted(typen):
-        p = os.path.join(plan.basis, "Typedefs", typ + ".md")
+        p = os.path.join(plan.konfig, "Typedefs", typ + ".md")
         d = frontmatter.lesen(p)[0] if os.path.isfile(p) else {}
-        # Eine Lieferung hat keinen Quellenbereich (§4.3): das blosse `dir`.
-        zeilen.append("| %s | %s | %s |" % (typ, _verzeichnis(typ, d, ""),
+        # Eine Lieferung kennt keine Bereiche (§4.3): das blosse `dir`.
+        zeilen.append("| %s | %s | %s |" % (typ, _verzeichnis(typ, d),
                                             d.get("description") or ""))
     return kopf, (body + "\n\n" if body else "") + "\n".join(zeilen) + "\n"
 

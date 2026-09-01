@@ -45,7 +45,8 @@ def grundtypen():
     ganze Inventar. Ein Bundle liefert keinen davon (§7.1), und keiner fehlt
     einer aufnehmenden Wissensbasis.
     """
-    verz = os.path.join(TEMPLATES, "hkb", "Typedefs")
+    verz = os.path.join(TEMPLATES, "hkb",
+                        ablage.VORGABEN["config_base"], "Typedefs")
     if not os.path.isdir(verz):
         return set(KERN_TYPEN)
     return set(f[:-3] for f in os.listdir(verz) if f.endswith(".md"))
@@ -84,8 +85,10 @@ class Plan(object):
         self.basis = ablage.basis(hkb)
         self.ablagepfad = ablage.ablagepfad(hkb)
         daten, _ = frontmatter.lesen(os.path.join(hkb, "hkb.md"))
-        self.media_basis = str(daten.get("media_base") or "").strip("/")
-        self.quellbasis = str(daten.get("source_base", QUELLBASIS) or "").strip("/")
+        self.bereiche = ablage.bereiche(hkb)
+        self.media_basis = self.bereiche["media_base"]
+        self.quellbasis = self.bereiche["source_base"]
+        self.konfig = os.path.join(hkb, self.bereiche["config_base"])
         self.bundle = {}
         self.bundle_body = ""
         self.notizen = []          # dicts: quelle ziel typ zustand kopf body titel
@@ -103,10 +106,41 @@ class Plan(object):
         self.abgewiesen = grund
         self.melde("konflikt", grund, tun)
 
+    def ort(self, name, daten):
+        """`<bereich>/<verzeichnis>` — wo die Notizen des Typs wirklich liegen."""
+        b = self.bereiche[_bereich(name, daten)]
+        d = _verzeichnis(name, daten)
+        return "%s/%s" % (b, d) if b else d
+
+    def notizpfad(self, rel):
+        """Absoluter Pfad zu einer Notiz-ID (§3.2). `rel` traegt `.md`."""
+        verz = rel.split("/", 1)[0]
+        return os.path.join(self.hkb, self.bereich_von(verz), rel)
+
+    def bereich_von(self, verz):
+        """Der Bereich, unter dem dieses Typverzeichnis liegt.
+
+        Ein Medienpfad traegt seinen Bereich schon (§4.3 rechnet ihn beim
+        Uebernehmen ein); davor gehoert nichts weiter als der Ablagepfad.
+        """
+        if self.media_basis and verz == self.media_basis:
+            return ""
+        if verz in ("Typedefs", "Proptypes"):
+            return self.bereiche["config_base"]
+        for name, tv in self.typen.items():
+            if tv.get("dir") == verz:
+                return self.bereiche[tv.get("bereich", "wiki_base")]
+        return self.bereiche["wiki_base"]
+
+    def praefix(self, rel):
+        """Ablagepfad und Bereich vor einer Notiz-ID (§3.6)."""
+        verz = rel.split("/", 1)[0]
+        return "/".join(x for x in (self.ablagepfad, self.bereich_von(verz)) if x)
+
     def link(self, rel, alias):
-        """Qualifizierter Wikilink nach §3.6 — mit Ablagepfad, ohne `.md`."""
-        ziel = "%s/%s" % (self.ablagepfad, rel) if self.ablagepfad else rel
-        return "[[%s|%s]]" % (ziel, alias)
+        """Qualifizierter Wikilink nach §3.6 — mit Praefix, ohne `.md`."""
+        pre = self.praefix(rel)
+        return "[[%s|%s]]" % ("%s/%s" % (pre, rel) if pre else rel, alias)
 
     def konflikte(self):
         return [b for b in self.befunde if b.art == "konflikt"]
@@ -270,7 +304,7 @@ def _zusicherung(body):
 
 def _vorhandene_typen(plan):
     """{name: (daten, body)} aus <base>/Typedefs/."""
-    verz = os.path.join(plan.basis, "Typedefs")
+    verz = os.path.join(plan.konfig, "Typedefs")
     aus = {}
     if os.path.isdir(verz):
         for f in sorted(os.listdir(verz)):
@@ -280,16 +314,23 @@ def _vorhandene_typen(plan):
     return aus
 
 
-def _verzeichnis(name, daten, quellbasis=QUELLBASIS):
-    """Wo die Notizen dieses Typs liegen (§3.2, §3.2.2).
+def _verzeichnis(name, daten):
+    """Das Typverzeichnis (§3.7) — ohne Bereich.
 
-    Ein Quelltyp haengt unter `source_base`, jeder andere unter `base`. Die
-    Vorgabe fuer `dir` bleibt in beiden Faellen dieselbe (§3.7).
+    Die Notiz-ID ist `<verzeichnis>/<dateiname>` und traegt den Bereich
+    nicht (§3.2 Regel 4): Typverzeichnisse sind eindeutig, also ist die ID es
+    auch, und ein Umzug des Bereichs laesst sie unberuehrt.
     """
-    d = str(daten.get("dir") or (name[:1].upper() + name[1:] + "s"))
-    if daten.get("is_source") is True and quellbasis:
-        return "%s/%s" % (str(quellbasis).strip("/"), d)
-    return d
+    return str(daten.get("dir") or (name[:1].upper() + name[1:] + "s"))
+
+
+def _bereich(name, daten):
+    """Unter welchem Bereich der Typ liegt (§3.2)."""
+    if name in ("typedef", "proptype"):
+        return "config_base"
+    if daten.get("is_source") is True:
+        return "source_base"
+    return "wiki_base"
 
 
 def _typen_abgleichen(plan, kandidaten, vorliegende_bundles, fehlende_bundles,
@@ -300,8 +341,7 @@ def _typen_abgleichen(plan, kandidaten, vorliegende_bundles, fehlende_bundles,
             geliefert[os.path.basename(rel)[:-3]] = (daten, body)
 
     vorhanden = _vorhandene_typen(plan)
-    belegt = {_verzeichnis(n, d, plan.quellbasis): n
-              for n, (d, _) in vorhanden.items()}
+    belegt = {_verzeichnis(n, d): n for n, (d, _) in vorhanden.items()}
 
     benutzt = set(geliefert)
     for p, rel, daten, kopf, body in kandidaten:
@@ -311,7 +351,7 @@ def _typen_abgleichen(plan, kandidaten, vorliegende_bundles, fehlende_bundles,
         gel = geliefert.get(name)
         if name not in vorhanden:
             # ── neu, aus der Lieferung oder vorlaeufig (§5.4)
-            verz = _verzeichnis(name, gel[0], plan.quellbasis) if gel else name + "s"
+            verz = _verzeichnis(name, gel[0]) if gel else name + "s"
             if verz in belegt and belegt[verz] != name:
                 plan.abweisen(
                     "Verzeichnis %s gehoert schon dem Typ %s; %s kann dort nicht "
@@ -320,11 +360,12 @@ def _typen_abgleichen(plan, kandidaten, vorliegende_bundles, fehlende_bundles,
                 continue
             belegt[verz] = name
             plan.typen[name] = {"dir": verz, "zustand": "neu" if gel else "vorläufig",
-                                "geliefert": gel}
+                                "geliefert": gel,
+                                "bereich": _bereich(name, gel[0] if gel else {})}
             continue
 
         vd, vb = vorhanden[name]
-        verz = _verzeichnis(name, vd, plan.quellbasis)
+        verz = _verzeichnis(name, vd)
         vorlaeufig = bool(vd.get("provisional"))
 
         # ── Zusicherung (§5.5)
@@ -384,7 +425,7 @@ def _typen_abgleichen(plan, kandidaten, vorliegende_bundles, fehlende_bundles,
         # ── Schritt 3: zusammenfuehren
         zustand = "unverändert"
         if gel:
-            gverz = _verzeichnis(name, gel[0], plan.quellbasis)
+            gverz = _verzeichnis(name, gel[0])
             if vorlaeufig:
                 zustand = "abgelöst"
                 if gverz != verz:
@@ -418,11 +459,12 @@ def _typen_abgleichen(plan, kandidaten, vorliegende_bundles, fehlende_bundles,
                     plan.melde("hinweis",
                                "description von %s weicht ab; die der Wissensbasis "
                                "bleibt (§6.1 Schritt 3)." % name)
-        plan.typen[name] = {"dir": verz, "zustand": zustand, "geliefert": gel}
+        plan.typen[name] = {"dir": verz, "zustand": zustand, "geliefert": gel,
+                            "bereich": _bereich(name, gel[0] if gel else vd)}
 
 
 def _proptypes_abgleichen(plan, kandidaten):
-    verz = os.path.join(plan.basis, "Proptypes")
+    verz = os.path.join(plan.konfig, "Proptypes")
     for p, rel, daten, kopf, body in kandidaten:
         if daten.get("type") != "proptype":
             continue
@@ -475,7 +517,7 @@ def _wikidata_properties(plan, typ):
     if eintrag.get("geliefert"):
         tabelle = _property_tabelle(eintrag["geliefert"][1])
     if not tabelle:
-        p = os.path.join(plan.basis, "Typedefs", typ + ".md")
+        p = os.path.join(plan.konfig, "Typedefs", typ + ".md")
         if os.path.exists(p):
             tabelle = _property_tabelle(frontmatter.lesen(p)[1])
     return [k for k, (t, _) in tabelle.items() if t.split(" / ")[0] == "hkf-wikidata"]
@@ -507,7 +549,7 @@ def _notizen_planen(plan, kandidaten, bundle_id, entscheidungen, force):
         e = {"quelle": p, "rel": rel, "ziel_rel": ziel_rel, "typ": typ,
              "daten": daten, "kopf": kopf, "body": body, "titel": titel,
              "zustand": "neu", "dieselbe": False}
-        ziel = os.path.join(plan.basis, ziel_rel)
+        ziel = plan.notizpfad(ziel_rel)
         if os.path.exists(ziel):
             _identitaet(plan, e, ziel, bundle_id, entscheidungen, force)
         plan.notizen.append(e)
@@ -537,7 +579,8 @@ def _identitaet(plan, e, ziel, bundle_id, entscheidungen, force):
         e["dieselbe"] = True
         e["zustand"] = "aktualisiert"
         return
-    voll = ("%s/%s" % (plan.ablagepfad, id_link)) if plan.ablagepfad else id_link
+    pre = plan.praefix(id_link)
+    voll = ("%s/%s" % (pre, id_link)) if pre else id_link
 
     dieselbe = None
     if any(re.search(r"\[\[[^\]]*Bundles/%s\|" % re.escape(bundle_id), l)
@@ -665,7 +708,7 @@ def _umschreiben(plan, text, karte, namen, woher):
         elif "/" not in ziel and len(namen.get(ziel, [])) > 1:
             plan.melde("hinweis", "%s: [[%s]] ist mehrdeutig und bleibt stehen." % (woher, ziel))
             return roh
-        elif os.path.isfile(os.path.join(plan.basis, ziel + ".md")) or \
+        elif os.path.isfile(plan.notizpfad(ziel + ".md")) or \
                 os.path.isfile(os.path.join(plan.hkb, ziel)):
             # §7.1 Punkt 6: Eine Notiz mit `extends` verweist auf den Bestand
             # der aufnehmenden Wissensbasis. Das Ziel wurde nicht uebernommen,
@@ -676,30 +719,44 @@ def _umschreiben(plan, text, karte, namen, woher):
                        "%s: [[%s]] zeigt auf nichts, was übernommen wurde, und bleibt "
                        "stehen." % (woher, ziel))
             return roh
-        if plan.ablagepfad:
-            neu = "%s/%s" % (plan.ablagepfad, neu)
+        pre = plan.praefix(neu)
+        if pre:
+            neu = "%s/%s" % (pre, neu)
         return roh.replace("[[" + ziel, "[[" + neu, 1)
     return re.sub(r"\[\[([^\]|\\]+)", lambda m: ersetzen(m), text)
 
 
 # ── Schritt 9: Verknuepfen (§5.6) ───────────────────────────────────────
 
+def _notizbereiche(plan):
+    """Die drei Bereiche, unter denen Notizen liegen (§3.2), absolut."""
+    aus = []
+    for k in ("wiki_base", "source_base", "config_base"):
+        p = os.path.join(plan.hkb, plan.bereiche[k])
+        if os.path.isdir(p) and p not in aus:
+            aus.append(p)
+    return aus
+
+
 def _bestand(plan):
     """Alle Notizen, wie sie nach dem Import dastuenden."""
     aus = {}
-    for p in ablage.dateien(plan.basis):
-        rel = os.path.relpath(p, plan.basis).replace(os.sep, "/")
-        if "/" not in rel:
-            continue
-        daten, body = frontmatter.lesen(p)
-        if "type" not in daten:
-            continue
-        aus[rel[:-3]] = {"typ": str(daten.get("type") or ""),
-                         "titel": str(daten.get("title") or rel.rsplit("/", 1)[-1][:-3]),
-                         "aliase": [str(a) for a in (daten.get("aliases") or [])],
-                         "body": body, "kopf": notiz.teilen(io.open(p, encoding="utf-8").read())[0],
-                         "abgelehnt": [str(x) for x in (daten.get("rejected_links") or [])],
-                         "datei": p, "neu": False}
+    for wurzel in _notizbereiche(plan):
+        for p in ablage.dateien(wurzel):
+            rel = os.path.relpath(p, wurzel).replace(os.sep, "/")
+            if "/" not in rel:
+                continue
+            daten, body = frontmatter.lesen(p)
+            if "type" not in daten:
+                continue
+            kopf = notiz.teilen(io.open(p, encoding="utf-8").read())[0]
+            aus[rel[:-3]] = {
+                "typ": str(daten.get("type") or ""),
+                "titel": str(daten.get("title") or rel.rsplit("/", 1)[-1][:-3]),
+                "aliase": [str(a) for a in (daten.get("aliases") or [])],
+                "body": body, "kopf": kopf,
+                "abgelehnt": [str(x) for x in (daten.get("rejected_links") or [])],
+                "datei": p, "neu": False}
     for n in plan.notizen:
         if n["zustand"] in ("abgelehnt", "übersprungen"):
             continue
@@ -709,7 +766,7 @@ def _bestand(plan):
             "aliase": [str(a) for a in (n["daten"].get("aliases") or [])],
             "body": n["body"], "kopf": n["kopf"],
             "abgelehnt": [str(x) for x in (n["daten"].get("rejected_links") or [])],
-            "datei": os.path.join(plan.basis, n["ziel_rel"]), "neu": True}
+            "datei": plan.notizpfad(n["ziel_rel"]), "neu": True}
     return aus
 
 
@@ -803,7 +860,8 @@ def _eintragen(plan, bestand, von, nach, grund):
     """Einen Eintrag in `# Siehe auch` von `von` auf `nach` vormerken."""
     link_nach = plan.link(nach, bestand[nach]["titel"])
     link_von = plan.link(von, bestand[von]["titel"])
-    ziel_kurz = "[[%s|" % (("%s/%s" % (plan.ablagepfad, nach)) if plan.ablagepfad else nach)
+    pre = plan.praefix(nach)
+    ziel_kurz = "[[%s|" % (("%s/%s" % (pre, nach)) if pre else nach)
     if any(ziel_kurz in x or nach in x for x in bestand[von]["abgelehnt"]):
         return
     if any(ziel_kurz in x or von in x for x in bestand[nach]["abgelehnt"]):
@@ -1004,8 +1062,9 @@ def _vorlaeufige_typdefinition(plan, name, tag, zeitpunkt):
 
 def _umziehen(plan, typ, von, nach):
     """§3.2 Regel 5 — die Notizen ziehen mit, die Verweise auch."""
-    alt = os.path.join(plan.basis, von)
-    neu = os.path.join(plan.basis, nach)
+    wo = os.path.join(plan.hkb, plan.bereich_von(von))
+    alt = os.path.join(wo, von)
+    neu = os.path.join(os.path.join(plan.hkb, plan.bereich_von(nach)), nach)
     if not os.path.isdir(alt):
         return
     os.makedirs(neu, exist_ok=True)
@@ -1019,8 +1078,9 @@ def _umziehen(plan, typ, von, nach):
         os.rmdir(alt)
     if not umbenannt:
         return
-    pre = (plan.ablagepfad + "/") if plan.ablagepfad else ""
-    for p in ablage.dateien(plan.basis):
+    pre = plan.praefix(nach)
+    pre = (pre + "/") if pre else ""
+    for p in [x for w in _notizbereiche(plan) for x in ablage.dateien(w)]:
         text = io.open(p, encoding="utf-8").read()
         neu_text = text
         for a, b in umbenannt.items():
@@ -1034,13 +1094,13 @@ def _typtabelle(plan):
     hkbmd = os.path.join(plan.hkb, "hkb.md")
     kopf, body = notiz.teilen(io.open(hkbmd, encoding="utf-8").read())
     zeilen = ["# Typen", "", "| Typ | Verzeichnis | Zweck |", "|---|---|---|"]
-    verz = os.path.join(plan.basis, "Typedefs")
+    verz = os.path.join(plan.konfig, "Typedefs")
     for f in sorted(os.listdir(verz)):
         if not f.endswith(".md"):
             continue
         daten, _ = frontmatter.lesen(os.path.join(verz, f))
         name = f[:-3]
-        zeilen.append("| %s | %s | %s |" % (name, _verzeichnis(name, daten, plan.quellbasis),
+        zeilen.append("| %s | %s | %s |" % (name, plan.ort(name, daten),
                                             daten.get("description") or ""))
     body = notiz.ohne_abschnitt(body, "Typen").rstrip("\n")
     io.open(hkbmd, "w", encoding="utf-8").write(
@@ -1057,9 +1117,9 @@ def ausfuehren(plan):
 
     # Umzuege zuerst, damit die Notizen danach am richtigen Ort landen
     for name, t in plan.typen.items():
-        p = os.path.join(plan.basis, "Typedefs", name + ".md")
+        p = os.path.join(plan.konfig, "Typedefs", name + ".md")
         if t["zustand"] == "abgelöst" and os.path.exists(p):
-            alt = _verzeichnis(name, frontmatter.lesen(p)[0], plan.quellbasis)
+            alt = _verzeichnis(name, frontmatter.lesen(p)[0])
             if alt != t["dir"]:
                 _umziehen(plan, name, alt, t["dir"])
 
@@ -1067,7 +1127,7 @@ def ausfuehren(plan):
     for name, t in plan.typen.items():
         if t["zustand"] != "vorläufig":
             continue
-        p = os.path.join(plan.basis, "Typedefs", name + ".md")
+        p = os.path.join(plan.konfig, "Typedefs", name + ".md")
         if not os.path.exists(p):
             os.makedirs(os.path.dirname(p), exist_ok=True)
             io.open(p, "w", encoding="utf-8").write(
@@ -1077,7 +1137,7 @@ def ausfuehren(plan):
     for n in plan.notizen:
         if n["zustand"] not in ("neu", "aktualisiert", "ergänzt"):
             continue
-        ziel = os.path.join(plan.basis, n["ziel_rel"])
+        ziel = plan.notizpfad(n["ziel_rel"])
         os.makedirs(os.path.dirname(ziel), exist_ok=True)
         kopf, body = n["kopf"], n["body"]
         t = plan.typen.get(n["typ"], {})

@@ -32,6 +32,29 @@ Der Satz, aus dem alles Übrige folgt:
 
 Was eine der beiden Proben nicht besteht, liegt am falschen Ort.
 
+## Die vier Bereiche einer Ablage
+
+Seit Core §3.1 gliedert sich eine Wissensbasis in vier Bereiche, jeder mit
+eigenem Basispfad in der Wurzeldatei:
+
+```text
+40-Wiki/      der Inhalt — Persons, Terms, Concepts, Bundles …
+50-Sources/   die Quellen — Books, Articles, Clippings, Webpages
+80-Media/     Images, Videos, Audios, Documents
+90-System/    Typedefs, Proptypes
+```
+
+Wer den Vault öffnet, sieht in `40-Wiki/` die Sachen und nicht das Gerüst. Die
+Zahlenpräfixe ordnen die vier in jedem Dateibrowser; die Namen sind Vorgaben
+und lassen sich in `hkb.md` ändern.
+
+**Die Notiz-ID trägt den Bereich nicht.** Sie ist `<typverzeichnis>/<name>` —
+`Persons/ada-lovelace`, `Books/economy-1832`, `Typedefs/person` — und bleibt
+darum stehen, wenn ein Bereich umzieht.
+
+**Eine Lieferung kennt keine Bereiche.** Dort liegt eine Notiz, wo sie will;
+wohin sie kommt, entscheidet erst der Import (Core §4.3).
+
 ## 1. Was im Harness liegt
 
 ```

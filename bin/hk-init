@@ -30,7 +30,7 @@ sonst nichts — keinen Inhalt, keine Bundles, kein Vokabular.
 2. **Vokabular dazuladen** — das Bundle `hkf-base` bringt neun Typen für
    Person, Körperschaft, Ort, Ereignis, Quelle, Begriff, Thema, Notiz und
    Spezifikation mit. Freiwillig; wer andere Gegenstände verwaltet, legt
-   eigene Typdefinitionen in `Typedefs/` an.
+   eigene Typdefinitionen in `90-System/Typedefs/` an.
 3. **Schreiben.** Der Pfad bestimmt den Typ, das Frontmatter bleibt flach,
    Verweise sind qualifizierte Wikilinks.
 
@@ -39,8 +39,8 @@ sonst nichts — keinen Inhalt, keine Bundles, kein Vokabular.
 | Pfad | Inhalt |
 |---|---|
 | `hkb.md` | Wurzeldatei: Formatversion, Name, Pfade, Typtabelle |
-| `Typedefs/` | die drei Kern-Typen `typedef`, `proptype`, `bundle` |
-| `Proptypes/` | die vierzehn Standard-Property-Typen |
+| `90-System/Typedefs/` | die zwanzig Typdefinitionen |
+| `90-System/Proptypes/` | die sechzehn Standard-Property-Typen |
 | `Bundles/` | je eine Notiz pro importiertem Bundle — noch leer |
 | `media/` | `images`, `videos`, `audios`, `documents` — noch leer |
 

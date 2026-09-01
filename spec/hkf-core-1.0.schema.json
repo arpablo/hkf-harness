@@ -243,26 +243,32 @@
         "$ref": "#/$defs/property-name"
       },
       "properties": {
+        "config_base": {
+          "type": "string"
+        },
         "hkf": {
           "type": "string",
           "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        "media_base": {
+          "type": "string"
         },
         "name": {
           "type": "string",
           "minLength": 1
         },
-        "base": {
+        "source_base": {
           "type": "string"
         },
-        "media_base": {
-          "type": "string"
+        "spec": {
+          "$ref": "#/$defs/hkf-link-or-url"
         },
         "timezone": {
           "type": "string",
           "minLength": 1
         },
-        "spec": {
-          "$ref": "#/$defs/hkf-link-or-url"
+        "wiki_base": {
+          "type": "string"
         }
       },
       "additionalProperties": {

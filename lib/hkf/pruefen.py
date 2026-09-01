@@ -14,10 +14,9 @@ import io, os, re
 import yaml
 
 from . import TEMPLATES, ablage, frontmatter, notiz
-from .importieren import (ARTVERZEICHNIS, KERN_TYPEN, OHNE, QUELLBASIS,
-                          STANDARD_PROPTYPES,
-                          grundtypen, _property_tabelle, _tabelle_voll,
-                          _verzeichnis)
+from .importieren import (ARTVERZEICHNIS, KERN_TYPEN, OHNE,
+                          STANDARD_PROPTYPES, grundtypen, _bereich,
+                          _property_tabelle, _tabelle_voll, _verzeichnis)
 
 FEHLER, HINWEIS = "fehler", "hinweis"
 LINK = re.compile(r"\[\[([^\]|\\]+)(?:\\?\|([^\]]*))?\]\]")
@@ -68,14 +67,17 @@ class Bestand(object):
         self.notizen, self.typdefs, self.proptypes = {}, {}, {}
         self.medien = set()
         if art == "hkb":
-            self.basis = ablage.basis(hkb)
+            self.bereiche = ablage.bereiche(hkb)
+            self.basis = os.path.join(hkb, self.bereiche["wiki_base"])
+            self.konfig = os.path.join(hkb, self.bereiche["config_base"])
             self.ablagepfad = ablage.ablagepfad(hkb)
-            self.media_basis = str(self.wurzel.get("media_base") or "").strip("/")
-            self.quellbasis = str(self.wurzel.get("source_base", QUELLBASIS) or "").strip("/")
-            self.base = str(self.wurzel.get("base") or "").strip("/")
+            self.media_basis = self.bereiche["media_base"]
+            self.quellbasis = self.bereiche["source_base"]
+            self.base = self.bereiche["wiki_base"]
             self._hkb_lesen()
         else:
-            self.basis, self.ablagepfad = hkb, ""
+            self.basis, self.konfig, self.ablagepfad = hkb, hkb, ""
+            self.bereiche = dict((k, "") for k in ablage.BEREICHE)
             self.media_basis, self.base, self.quellbasis = "", "", ""
             self._bundle_lesen()
         self.nach_namen = {}
@@ -95,20 +97,36 @@ class Bestand(object):
         return {"pfad": p, "rel": rel, "daten": daten, "body": body,
                 "kopf": kopf, "typ": str(daten.get("type") or "")}
 
+    def ort(self, name, daten):
+        """`<bereich>/<verzeichnis>` — wo die Notizen des Typs wirklich liegen."""
+        bp = self.bereiche[_bereich(name, daten)]
+        d = _verzeichnis(name, daten)
+        return "%s/%s" % (bp, d) if bp else d
+
+    def notizbereiche(self):
+        """Die Bereiche, unter denen Notizen liegen (§3.2), absolut."""
+        aus = []
+        for k in ("wiki_base", "source_base", "config_base"):
+            p = os.path.join(self.hkb, self.bereiche[k])
+            if os.path.isdir(p) and p not in aus:
+                aus.append(p)
+        return aus
+
     def _hkb_lesen(self):
-        for p in ablage.dateien(self.basis):
-            rel = os.path.relpath(p, self.basis).replace(os.sep, "/")
-            if "/" not in rel:
-                continue
-            e = self._eintrag(p, rel)
-            if not e["typ"]:
-                continue
-            self.notizen[rel[:-3]] = e
-            verz, name = rel.split("/", 1)
-            if verz == "Typedefs":
-                self.typdefs[name[:-3]] = e
-            elif verz == "Proptypes":
-                self.proptypes[name[:-3]] = e
+        for wurzel in self.notizbereiche():
+            for p in ablage.dateien(wurzel):
+                rel = os.path.relpath(p, wurzel).replace(os.sep, "/")
+                if "/" not in rel:
+                    continue
+                e = self._eintrag(p, rel)
+                if not e["typ"]:
+                    continue
+                self.notizen[rel[:-3]] = e
+                verz, name = rel.split("/", 1)
+                if verz == "Typedefs":
+                    self.typdefs[name[:-3]] = e
+                elif verz == "Proptypes":
+                    self.proptypes[name[:-3]] = e
         mb = os.path.join(self.hkb, self.media_basis) if self.media_basis else self.hkb
         for art in ARTVERZEICHNIS.values():
             for r, _dirs, fs in os.walk(os.path.join(mb, art)):
@@ -141,14 +159,24 @@ class Bestand(object):
                 elif e["typ"] == "proptype":
                     self.proptypes[f[:-3]] = e
 
-    def praefix(self):
-        return "/".join(t for t in (self.ablagepfad, self.base) if t)
+    def praefix(self, bereich="wiki_base"):
+        return "/".join(t for t in (self.ablagepfad,
+                                    self.bereiche.get(bereich, "")) if t)
+
+    def praefixe(self):
+        """Alle Praefixe, unter denen eine Notiz liegen kann (§3.1).
+
+        Der laengste zuerst: Ein leerer Bereich faellt mit der Wurzel zusammen
+        und traefe sonst zu, bevor der eigentliche geprueft ist.
+        """
+        aus = [self.praefix(k) for k in
+               ("wiki_base", "source_base", "config_base")]
+        return sorted(set(aus), key=len, reverse=True)
 
     def verzeichnisse(self):
         aus = {}
         for name, e in self.typdefs.items():
-            aus.setdefault(_verzeichnis(name, e["daten"], self.quellbasis),
-                           []).append(name)
+            aus.setdefault(_verzeichnis(name, e["daten"]), []).append(name)
         return aus
 
     def aufloesen(self, ziel, aus_wurzeldatei=False):
@@ -168,16 +196,24 @@ class Bestand(object):
                 if len(treffer) > 1:
                     return ("mehrdeutig", ziel)
             return (None, ziel)
-        pre = self.praefix() if not aus_wurzeldatei else self.base
-        if pre and ziel.startswith(pre + "/"):
-            rest = ziel[len(pre) + 1:]
-        elif pre:
+        # §3.7.1 Schritt 3: den Bereich abziehen, gleich welchen — sie
+        # schliessen einander aus (§3.1).
+        vorne = ([self.bereiche.get(k, "") for k in
+                  ("wiki_base", "source_base", "config_base")]
+                 if aus_wurzeldatei else self.praefixe())
+        vorne = sorted(set(vorne), key=len, reverse=True)
+        rest = None
+        for pre in vorne:
+            if pre and ziel.startswith(pre + "/"):
+                rest = ziel[len(pre) + 1:]
+                break
+        if rest is None:
             mpre = "/".join(t for t in (self.ablagepfad, self.media_basis) if t)
             if mpre and ziel.startswith(mpre + "/"):
                 return ("medium", ziel[len(self.ablagepfad) + 1:]
                         if self.ablagepfad else ziel)
-            return (None, ziel)
-        else:
+            if any(vorne):
+                return (None, ziel)
             rest = ziel
         if rest in self.notizen:
             return ("notiz", rest)
@@ -198,7 +234,8 @@ def _wurzeldatei(b, befunde):
     if not os.path.isdir(b.basis):
         befunde.append(Befund("hkb.md", "`base` zeigt auf kein Verzeichnis."))
     for verz in ("Typedefs", "Proptypes", "Bundles"):
-        if not os.path.isdir(os.path.join(b.basis, verz)):
+        wo = b.konfig if verz in ("Typedefs", "Proptypes") else b.basis
+        if not os.path.isdir(os.path.join(wo, verz)):
             befunde.append(Befund("hkb.md",
                                   "%s/ fehlt im Basispfad (§7.2)." % verz))
 
@@ -225,7 +262,7 @@ def _typen(b, befunde):
             befunde.append(Befund(e["rel"], "Der Typ `%s` hat keine Typdefinition "
                                             "(§3.7)." % typ))
             continue
-        soll = _verzeichnis(typ, b.typdefs[typ]["daten"], b.quellbasis)
+        soll = _verzeichnis(typ, b.typdefs[typ]["daten"])
         ist = rel.rsplit("/", 1)[0]
         # Segmentweises Praefix, nicht Gleichheit: §3.2 erlaubt
         # Unterverzeichnisse innerhalb eines Typverzeichnisses, und §3.7.1
@@ -248,7 +285,7 @@ def _vorlaeufige(b, befunde):
             befunde.append(Befund(e["rel"], "Ein Bundle enthält keine vorläufige "
                                             "Typdefinition (§7.1)."))
             continue
-        d = _verzeichnis(name, e["daten"], b.quellbasis)
+        d = _verzeichnis(name, e["daten"])
         anzahl = sum(1 for r, n in b.notizen.items() if n["typ"] == name)
         befunde.append(Befund(e["rel"], "Der Typ `%s` ist vorläufig; %d Notizen "
                               "liegen in %s/ (§5.4)." % (name, anzahl, d), HINWEIS))
@@ -381,7 +418,7 @@ def _typtabelle(b, befunde):
         if len(s) < 3 or s[0] in ("Typ", "") or set(s[0]) <= set("- "):
             continue
         ist[s[0]] = (s[1], s[2])
-    soll = {n: (_verzeichnis(n, e["daten"], b.quellbasis),
+    soll = {n: (b.ort(n, e["daten"]),
                 str(e["daten"].get("description") or ""))
             for n, e in b.typdefs.items()}
     for name in sorted(set(soll) - set(ist)):
@@ -566,7 +603,9 @@ def undeklariert(b):
             # Eine Lieferung liefert keinen Typ der Grundausstattung mit
             # (§7.1 Punkt 2). Ohne die Vorlage zu befragen hielte die Pruefung
             # jede Property einer solchen Notiz fuer undeklariert.
-            p = os.path.join(TEMPLATES, "hkb", "Typedefs", typ + ".md")
+            p = os.path.join(TEMPLATES, "hkb",
+                             ablage.VORGABEN["config_base"], "Typedefs",
+                             typ + ".md")
             if os.path.isfile(p):
                 tabelle = frontmatter.lesen(p)[1]
         erlaubt = set(_property_tabelle(tabelle)) | allgemein
@@ -624,7 +663,8 @@ def _proptype_daten(b, name):
         return e["daten"]
     if name not in STANDARD_PROPTYPES:
         return None
-    p = os.path.join(TEMPLATES, "hkb", "Proptypes", name + ".md")
+    p = os.path.join(TEMPLATES, "hkb", ablage.VORGABEN["config_base"],
+                     "Proptypes", name + ".md")
     if not os.path.isfile(p):
         return None
     return frontmatter.lesen(p)[0]
@@ -832,11 +872,9 @@ def _quellenverzeichnisse(b, befunde):
     qb = os.path.join(b.hkb, b.quellbasis)
     if not os.path.isdir(qb):
         return
-    erlaubt = set()
-    for name, e in b.typdefs.items():
-        d = _verzeichnis(name, e["daten"], b.quellbasis)
-        if d.startswith(b.quellbasis + "/"):
-            erlaubt.add(d[len(b.quellbasis) + 1:].split("/", 1)[0])
+    erlaubt = set(_verzeichnis(n, e["daten"]).split("/", 1)[0]
+                  for n, e in b.typdefs.items()
+                  if _bereich(n, e["daten"]) == "source_base")
     for f in sorted(os.listdir(qb)):
         if f.startswith("."):
             continue
@@ -849,10 +887,11 @@ def _quellenverzeichnisse(b, befunde):
             befunde.append(Befund("%s/%s" % (b.quellbasis, f),
                                   "liegt unmittelbar unter `source_base` und in "
                                   "keinem Typverzeichnis (§3.2.2)."))
-    # Ein Typ, der nicht `source: true` traegt, darf dort nicht hin.
+    # Ein Typ, der nicht `is_source: true` traegt, darf dort nicht hin.
     for name, e in sorted(b.typdefs.items()):
         d = str(e["daten"].get("dir") or "")
-        if d and (d == b.quellbasis or d.startswith(b.quellbasis + "/")) and \
+        if d and b.quellbasis and \
+                (d == b.quellbasis or d.startswith(b.quellbasis + "/")) and \
                 e["daten"].get("is_source") is not True:
             befunde.append(Befund(e["rel"], "`dir` liegt unter `source_base`, der "
                                             "Typ trägt aber kein `is_source: true` "
