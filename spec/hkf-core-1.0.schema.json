@@ -191,9 +191,6 @@
             "datetime"
           ]
         },
-        "is_source": {
-          "const": true
-        },
         "modified": {
           "$ref": "#/$defs/datetime"
         },

@@ -154,7 +154,7 @@ def main():
         print("hk-init")
         r = lauf(os.path.join(BIN, "hk-init"), ziel, "--name", "Probe")
         probe("legt an", r.returncode == 0, r.stderr.strip())
-        probe("36 Notizen", "36 Notizen" in r.stdout, r.stdout.strip())
+        probe("34 Notizen", "34 Notizen" in r.stdout, r.stdout.strip())
         wurzel = io.open(os.path.join(ziel, "hkb.md"), encoding="utf-8").read()
         probe("Wurzeldatei traegt den Namen", "name: Probe" in wurzel)
         probe("und die vier Bereiche (§3.1)",
@@ -162,9 +162,14 @@ def main():
                   (("wiki_base", "40-Wiki"), ("source_base", "50-Sources"),
                    ("media_base", "80-Media"), ("config_base", "90-System"))),
               wurzel)
-        probe("die vier Quellenverzeichnisse stehen bereit",
-              all(os.path.isdir(os.path.join(ziel, "50-Sources", d))
-                  for d in ("Books", "Articles", "Clippings", "Webpages")))
+        probe("der Quellenbereich steht bereit und ist leer (§3.2.2)",
+              os.path.isdir(os.path.join(ziel, "50-Sources"))
+              and not [d for d in os.listdir(os.path.join(ziel, "50-Sources"))
+                       if not d.startswith(".")])
+        probe("und `Clippings` ist das fünfte Medienverzeichnis (§3.2.1)",
+              all(os.path.isdir(os.path.join(ziel, "80-Media", d))
+                  for d in ("Images", "Videos", "Audios", "Documents",
+                            "Clippings")))
         probe("Typedefs und Proptypes liegen unter config_base",
               os.path.isdir(os.path.join(ziel, "90-System", "Typedefs"))
               and os.path.isdir(os.path.join(ziel, "90-System", "Proptypes")))
@@ -172,7 +177,7 @@ def main():
               not os.path.isdir(os.path.join(ziel, "Typedefs"))
               and not os.path.isdir(os.path.join(ziel, "Books")))
         probe("die Typtabelle nennt den vollen Ort (§3.1)",
-              "| book | 50-Sources/Books |" in wurzel
+              "| source | 50-Sources |" in wurzel
               and "| typedef | 90-System/Typedefs |" in wurzel, wurzel)
         probe("Git-Repository mit einem Commit",
               lauf("git", "-C", ziel, "log", "--oneline").stdout.count("\n") == 1)
@@ -504,21 +509,22 @@ def main():
         # Notiz unter dem blossen `dir`, die Wissensbasis unter source_base.
         q_b = os.path.abspath(os.path.join(ziel, "..", "probe-quelle"))
         shutil.rmtree(q_b, ignore_errors=True)
-        os.makedirs(os.path.join(q_b, "Books"))
+        os.makedirs(os.path.join(q_b, "Sources"))
         io.open(os.path.join(q_b, "hbundle.md"), "w", encoding="utf-8").write(
             "---\nhkf: \"1.0\"\ntype: bundle\nid: quelle\ntitle: Quelle\n"
             "description: Ein Buch.\nversion: \"1\"\n---\n\nEine Quelle.\n")
-        io.open(os.path.join(q_b, "Books", "economy.md"), "w", encoding="utf-8").write(
-            "---\ntype: book\ntitle: On the Economy of Machinery\n"
-            "authors:\n  - Charles Babbage\nyear: 1832\nplace: London\n"
+        io.open(os.path.join(q_b, "Sources", "economy.md"), "w",
+                encoding="utf-8").write(
+            "---\ntype: source\nkind: book\ntitle: On the Economy of Machinery\n"
+            "authors:\n  - Charles Babbage\npublished_year: 1832\n"
             "created: 2026-01-01\nmodified: 2026-01-01T00:00:00\n---\n\n"
             "Über Fabrikarbeit.\n")
         r = lauf(os.path.join(BIN, "hk-import"), q_b, ziel)
         probe("die Lieferung wird übernommen", r.returncode == 0, r.stdout + r.stderr)
         probe("die Quellennotiz landet unter source_base (§4.3)",
-              os.path.exists(os.path.join(ziel, QUELLEN, "Books", "economy.md")))
-        probe("und nicht neben den übrigen Typverzeichnissen",
-              not os.path.exists(os.path.join(ziel, "Books", "economy.md")))
+              os.path.exists(os.path.join(ziel, QUELLEN, "economy.md")))
+        probe("und ohne Typverzeichnis darunter (§3.2.2)",
+              not os.path.isdir(os.path.join(ziel, QUELLEN, "Sources")))
         probe("`authors` nimmt einen blossen Namen (§2.1)",
               lauf(os.path.join(BIN, "hk-lint"), ziel).returncode == 0
               or "authors" not in lauf(os.path.join(BIN, "hk-lint"), ziel).stdout)
@@ -526,9 +532,9 @@ def main():
         shutil.rmtree(raus, ignore_errors=True)
         r = lauf(os.path.join(BIN, "hk-export"), "quelle", raus, ziel)
         probe("der Export streift den Quellenbereich ab (§4.3)",
-              os.path.exists(os.path.join(raus, "Books", "economy.md"))
-              and not os.path.exists(os.path.join(raus, "Sources", "Books",
-                                                  "economy.md")), r.stdout)
+              os.path.exists(os.path.join(raus, "Sources", "economy.md"))
+              and not os.path.exists(os.path.join(raus, QUELLEN, "economy.md")),
+              r.stdout)
         probe("die Lieferung ist für sich sauber",
               lauf(os.path.join(BIN, "hk-lint"), raus).returncode == 0)
         shutil.rmtree(q_b, ignore_errors=True)
@@ -594,17 +600,19 @@ def main():
             "description: Ein Überblick.\nseltsam:\n  tief: ja\n---\n\n"
             "Der erfasste Text der Seite.\n")
         io.open(os.path.join(inbox, "buch.md"), "w", encoding="utf-8").write(
-            "---\ntype: book\ntitle: On the Economy of Machinery\n"
+            "---\ntype: source\nkind: book\n"
+            "title: On the Economy of Machinery\n"
             "url: https://example.org/verlag/economy\n"
-            "file: https://nas.example.org/economy.pdf\nyear: 1832\n---\n")
+            "file: https://nas.example.org/economy.pdf\n"
+            "published_year: 1832\n---\n")
         io.open(os.path.join(inbox, "scan.pdf"), "wb").write(b"%PDF-1.4\n%%EOF\n")
 
         r = lauf(os.path.join(BIN, "hk-ingest"), env=umg)
         probe("ohne Argumente zeigt es die Inbox",
               "3 Stück" in r.stdout and "Es wurde nichts geschrieben" in r.stdout,
               r.stdout)
-        probe("und nennt den fehlenden Typ der PDF",
-              "scan.pdf" in r.stdout and "--typ" in r.stdout, r.stdout)
+        probe("und lässt die Werkart der PDF offen",
+              "scan.pdf" in r.stdout and "Werkart offen" in r.stdout, r.stdout)
         probe("dabei entsteht keine Lieferung",
               set(os.listdir(inbox)) == {"artikel.md", "buch.md", "scan.pdf"})
 
@@ -613,73 +621,85 @@ def main():
         r = lauf(os.path.join(BIN, "hk-ingest"), "--alles", "--bundle", lief,
                  "--id", "probe-ingest", env=umg)
         probe("--alles liest die .md-Stücke ein", r.returncode == 0, r.stdout)
-        clip = os.path.join(lief, "Clippings", "die-maschine-von-turin.md")
+        clip = os.path.join(lief, "Sources", "die-maschine-von-turin.md")
         probe("ein Clipping wird zur Quellennotiz", os.path.isfile(clip))
         c = io.open(clip, encoding="utf-8").read() if os.path.isfile(clip) else ""
         probe("das Clipper-Frontmatter ist abgebildet",
-              "type: clipping" in c and "url: https://example.org/turin" in c
-              and "- Jean Rossi" in c and "year: 2024" in c
-              and "container: Computing History Review" in c, c)
-        probe("der erfasste Text steht im Body",
-              "Der erfasste Text der Seite." in c, c)
-        probe("und unter einer eigenen Überschrift, damit die "
-              "Zusammenfassung darüber passt",
-              c.split("---\n", 2)[-1].lstrip().startswith("# Erfasster Text"),
-              c)
+              "type: source" in c and "kind: web" in c
+              and "url: https://example.org/turin" in c
+              and "- Jean Rossi" in c and "published_year: 2024" in c, c)
+        roh = os.path.join(lief, "Media", "Clippings",
+                           "die-maschine-von-turin.md")
+        probe("der erfasste Text wird kopiert, statt in den Body zu wandern",
+              os.path.isfile(roh)
+              and "Der erfasste Text der Seite."
+              in io.open(roh, encoding="utf-8").read()
+              and "Der erfasste Text der Seite." not in c, c)
+        probe("und `file` zeigt darauf",
+              "file: \"[[Media/Clippings/die-maschine-von-turin.md" in c, c)
         probe("`checksum` ist gesetzt", "checksum: sha256:" in c, c)
         hb = io.open(os.path.join(lief, "hbundle.md"), encoding="utf-8").read()
         probe("die Typtabelle nennt keinen Typ der Grundausstattung (§3.8)",
-              "# Typen" in hb and "| clipping |" not in hb
-              and "| book |" not in hb, hb)
+              "# Typen" in hb and "| source |" not in hb, hb)
         probe("Unabbildbares wird verworfen und gemeldet",
               "seltsam" not in c and "seltsam" in r.stdout, r.stdout)
-        probe("und nichts landet unter Media/",
-              not os.path.isdir(os.path.join(lief, "Media")))
-        buch = os.path.join(lief, "Books", "on-the-economy-of-machinery.md")
-        probe("ein .md, das nur auf ein Original zeigt, kopiert nichts",
+        buch = os.path.join(lief, "Sources", "on-the-economy-of-machinery.md")
+        probe("ein .md mit `type: source` wird die Notiz und kopiert nichts",
               os.path.isfile(buch)
               and "file: https://nas.example.org/economy.pdf"
-              in io.open(buch, encoding="utf-8").read())
+              in io.open(buch, encoding="utf-8").read()
+              and not os.path.isfile(os.path.join(
+                  lief, "Media", "Clippings",
+                  "on-the-economy-of-machinery.md")))
         probe("fehlende Zitationsangaben werden gemeldet, nicht geraten",
               "authors" in r.stdout and "Was noch fehlt" in r.stdout, r.stdout)
-        probe("die PDF bleibt ohne --typ liegen",
-              os.path.isfile(os.path.join(inbox, "scan.pdf")), r.stdout)
+        probe("eine nackte Datei wird eingelesen, die Werkart bleibt offen",
+              os.path.isfile(os.path.join(lief, "Sources", "scan.md"))
+              and "die Werkart (`kind`) steht nicht fest" in r.stdout, r.stdout)
         probe("die eingelesenen Stücke sind verschoben, nicht gelöscht",
               os.path.isfile(os.path.join(inbox, "erledigt", "probe-ingest",
                                           "artikel.md")))
         probe("die Lieferung ist konform",
               lauf(os.path.join(BIN, "hk-lint"), lief).returncode == 0)
 
-        r = lauf(os.path.join(BIN, "hk-ingest"), "scan.pdf", "--typ", "book",
-                 "--bundle", lief, "--id", "probe-ingest", env=umg)
-        probe("mit --typ landet die PDF unter Media/Documents/",
+        probe("die PDF landet unter Media/Documents/",
               os.path.isfile(os.path.join(lief, "Media", "Documents", "scan.pdf")),
               r.stdout)
-        probe("und die Quellennotiz daneben",
-              os.path.isfile(os.path.join(lief, "Books", "scan.md")))
+        # Dasselbe Stueck noch einmal, diesmal mit genannter Werkart.
+        io.open(os.path.join(inbox, "scan2.pdf"), "wb").write(
+            b"%PDF-1.4\n% zweiter\n%%EOF\n")
+        r = lauf(os.path.join(BIN, "hk-ingest"), "scan2.pdf", "--kind", "book",
+                 "--bundle", lief, "--id", "probe-ingest", env=umg)
+        s2 = os.path.join(lief, "Sources", "scan2.md")
+        probe("mit --kind steht die Werkart in der Notiz",
+              os.path.isfile(s2)
+              and "kind: book" in io.open(s2, encoding="utf-8").read(),
+              r.stdout)
+        probe("und die Lücke wird dann nicht mehr gemeldet",
+              "die Werkart (`kind`) steht nicht fest" not in r.stdout, r.stdout)
 
         l2 = os.path.abspath(os.path.join(ziel, "..", "probe-lieferung-2"))
         shutil.rmtree(l2, ignore_errors=True)
-        r = lauf(os.path.join(BIN, "hk-ingest"), "--bundle", l2, "--typ", "book",
+        r = lauf(os.path.join(BIN, "hk-ingest"), "--bundle", l2, "--kind", "book",
                  "--title", "On the Economy of Machinery",
-                 "--authors", "Charles Babbage", "--year", "1832",
+                 "--authors", "Charles Babbage", "--published-year", "1832",
                  "--ausfertigung", "https://nas.example.org/economy.pdf",
                  "--id", "haendisch", env=umg)
         probe("händisch mit --ausfertigung kopiert nichts",
               not os.path.isdir(os.path.join(l2, "Media")), r.stdout)
         probe("und schreibt dieselbe Quellennotiz",
-              os.path.isfile(os.path.join(l2, "Books",
+              os.path.isfile(os.path.join(l2, "Sources",
                                           "on-the-economy-of-machinery.md")))
         # Ein Codepfad, zwei Eingaenge: der direkte Ingest ist der
         # Bundle-Ingest mit sofortigem Import.
         io.open(os.path.join(inbox, "seite.md"), "w", encoding="utf-8").write(
-            "---\ntype: webpage\ntitle: Eine zitierte Seite\n"
+            "---\ntype: source\nkind: web\ntitle: Eine zitierte Seite\n"
             "url: https://example.org/seite\n---\n\nEine Zusammenfassung.\n")
         r = lauf(os.path.join(BIN, "hk-ingest"), "--alles", "--hkb", ziel, env=umg)
         probe("--hkb importiert die Lieferung gleich mit",
               "1 neu" in r.stdout and "Übernommen" in r.stdout, r.stdout)
         probe("die Quellennotiz landet unter source_base",
-              os.path.isfile(os.path.join(ziel, QUELLEN, "Webpages",
+              os.path.isfile(os.path.join(ziel, QUELLEN,
                                           "eine-zitierte-seite.md")))
         probe("und die Ablage bleibt konform",
               lauf(os.path.join(BIN, "hk-lint"), ziel).returncode == 0)
@@ -695,7 +715,7 @@ def main():
         print("hk-ingest: was der erste Praxiseinsatz zutage brachte")
         k = os.path.abspath(os.path.join(ziel, "..", "probe-kolon"))
         shutil.rmtree(k, ignore_errors=True)
-        r = lauf(os.path.join(BIN, "hk-ingest"), "--bundle", k, "--typ", "webpage",
+        r = lauf(os.path.join(BIN, "hk-ingest"), "--bundle", k, "--kind", "web",
                  "--title", "Ein Titel: mit Doppelpunkt",
                  "--url", "https://example.org/x", "--id", "kolon", env=umg)
         probe("ein Titel mit Doppelpunkt bleibt gültiges YAML (B.4)",
@@ -709,7 +729,7 @@ def main():
         # halten, nur weil die Typdefinition nicht beiliegt.
         r = lauf(os.path.join(BIN, "hk-lint"), "--strict", k)
         probe("Grundausstattungs-Properties gelten nicht als undeklariert",
-              "webpage: url" not in r.stdout, r.stdout)
+              "source: url" not in r.stdout, r.stdout)
 
         # Unlesbares Frontmatter ist ein Befund, kein Stapelabzug.
         p = os.path.join(k, "hbundle.md")
@@ -728,12 +748,6 @@ def main():
         shutil.rmtree(k, ignore_errors=True)
 
         print("hk-lint: der Quellenbereich ist reserviert")
-        fremd = os.path.join(ziel, QUELLEN, "Fremd")
-        os.makedirs(fremd, exist_ok=True)
-        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
-        probe("ein fremdes Verzeichnis unter source_base ist ein Befund (§3.2.2)",
-              "Sources/Fremd" in r.stdout and r.returncode == 1, r.stdout)
-        os.rmdir(fremd)
         p = os.path.join(ziel, KONFIG, "Typedefs", "zettel.md")
         io.open(p, "w", encoding="utf-8").write(
             "---\ntype: typedef\ntitle: Zettel\ndescription: Ein Zettel.\n"
@@ -742,9 +756,44 @@ def main():
             "| Property | Typ | Pflicht | Vorgabe | Beschreibung |\n"
             "|---|---|---|---|---|\n| menge | number | nein | — | Wie viele |\n")
         r = lauf(os.path.join(BIN, "hk-lint"), ziel)
-        probe("ein Typ ohne `is_source: true` darf nicht dorthin (§3.2.2)",
-              "kein `is_source: true`" in r.stdout, r.stdout)
+        probe("kein `dir` darf unter source_base liegen (§3.2.2)",
+              "`dir` liegt unter `source_base`" in r.stdout, r.stdout)
         os.remove(p)
+
+        print("Clippings sind Dateien, keine Notizen")
+        cl = os.path.join(ziel, MEDIEN, "Clippings", "roh.md")
+        os.makedirs(os.path.dirname(cl), exist_ok=True)
+        # Ohne `type` und mit einer Ueberschrift, die keine Notiz haette —
+        # geprueft wird sie nicht, weil sie unter `media_base` liegt (§3.2.1).
+        io.open(cl, "w", encoding="utf-8").write(
+            "---\nseltsam:\n  tief: ja\n---\n\n# Der Rohtext\n\n"
+            "[[Zeigt/Ins/Leere]]\n")
+        r = lauf(os.path.join(BIN, "hk-lint"), "--strict", ziel)
+        probe("eine `.md` unter media_base wird nicht geprüft (§3.2.1)",
+              r.returncode == 0 and "roh.md" not in r.stdout, r.stdout)
+        q = os.path.join(ziel, QUELLEN, "mit-clipping.md")
+        io.open(q, "w", encoding="utf-8").write(
+            "---\ntype: source\nkind: web\ntitle: Mit Clipping\n"
+            'file: "[[%s/Clippings/roh.md|roh.md]]"\n'
+            "created: 2026-01-01\nmodified: 2026-01-01T00:00:00\n---\n\n"
+            "Eine Zusammenfassung.\n" % MEDIEN)
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        probe("`hkf-file` nimmt ein Clipping trotz `.md` (Config §2.1)",
+              r.returncode == 0, r.stdout)
+        io.open(q, "w", encoding="utf-8").write(
+            "---\ntype: source\nkind: web\ntitle: Mit Clipping\n"
+            'file: "[[%s/Documents/roh.md|roh.md]]"\n'
+            "created: 2026-01-01\nmodified: 2026-01-01T00:00:00\n---\n\n"
+            "Eine Zusammenfassung.\n" % MEDIEN)
+        os.makedirs(os.path.join(ziel, MEDIEN, "Documents"), exist_ok=True)
+        io.open(os.path.join(ziel, MEDIEN, "Documents", "roh.md"), "w",
+                encoding="utf-8").write("Kein Clipping.\n")
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        probe("unter Documents/ bleibt `.md` ein Befund",
+              "Dateiendung" in r.stdout, r.stdout)
+        os.remove(q)
+        os.remove(os.path.join(ziel, MEDIEN, "Documents", "roh.md"))
+        os.remove(cl)
 
         print("hk-lint: Unterverzeichnis eines Typverzeichnisses")
         # §3.2 erlaubt sie ausdruecklich, §3.7.1 loest den Typ ueber ein

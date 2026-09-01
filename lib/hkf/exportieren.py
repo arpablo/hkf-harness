@@ -21,6 +21,8 @@ dort nie aus dem Abschnitt kam — eine Adresse, ein von Hand gesetzter Verweis
 import io, os, re, shutil
 
 from . import CORE, ablage, frontmatter, notiz
+QUELLVERZEICHNIS = "Sources"   # wo eine Quellennotiz in der Lieferung liegt
+
 from .importieren import (ARTVERZEICHNIS, STANDARD_PROPTYPES, grundtypen,
                           medienart, _bereich, _property_tabelle,
                           _verzeichnis)
@@ -124,20 +126,29 @@ def planen(hkb, bundle_id, ziel, media_base="Media"):
     # (§4.3): Er wird beim Sammeln abgestreift, sonst truege das Bundle den
     # `source_base` des Absenders. Wo `base` nicht leer ist, liegt er neben
     # den Typverzeichnissen und wird eigens durchlaufen.
-    wurzeln = []
+    wurzeln, gesehen = [], set()
     for k in ("wiki_base", "source_base", "config_base"):
         w = os.path.join(plan.hkb, plan.bereiche[k])
-        if os.path.isdir(w) and w not in wurzeln:
-            wurzeln.append(w)
-    for w in wurzeln:
+        if os.path.isdir(w) and w not in gesehen:
+            gesehen.add(w)
+            wurzeln.append((k, w))
+    for k, w in wurzeln:
         for p in ablage.dateien(w):
             rel = os.path.relpath(p, w).replace(os.sep, "/")
-            if "/" not in rel or rel.startswith("Bundles/"):
+            # Ohne Typverzeichnis liegt nur die Quellennotiz (§3.2.2).
+            if ("/" not in rel and k != "source_base") \
+                    or rel.startswith("Bundles/"):
                 continue
             daten, body = frontmatter.lesen(p)
             if "type" not in daten or not _mitglied(daten, bundle_id):
                 continue
             kopf = notiz.teilen(io.open(p, encoding="utf-8").read())[0]
+            if "/" not in rel:
+                # Die Quellennotiz liegt in der HKB ohne Typverzeichnis
+                # (§3.2.2). In der Lieferung bekommt sie eines — sonst laege
+                # sie neben `hbundle.md` und saehe nach Beiwerk aus. Wohin sie
+                # beim Import kommt, entscheidet ohnehin ihr Typ (§4.3).
+                rel = "%s/%s" % (QUELLVERZEICHNIS, rel)
             plan.notizen.append({"quelle": p, "rel": rel, "kopf": kopf,
                                  "body": body, "typ": str(daten["type"])})
     if not plan.notizen:

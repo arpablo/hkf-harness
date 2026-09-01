@@ -22,7 +22,7 @@ import yaml                                                   # noqa: E402
 from hkf import CONFIG, frontmatter                           # noqa: E402
 
 BLOCK = re.compile(r"^## 3\.\d+ `(\w+)`\n\n```markdown\n(.*?)\n```", re.S | re.M)
-TYPEN, PROPTYPES = 20, 16
+TYPEN, PROPTYPES = 17, 17
 KONFIG = "90-System"   # Core §3.1, Vorgabe fuer config_base
 ZEITEN = re.compile(r"^(created|modified|modified_by):.*\n", re.M)
 EINSCHRAENKUNG = re.compile(r"`([a-z]+): ([^`]+)`")

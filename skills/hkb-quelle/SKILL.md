@@ -49,13 +49,16 @@ hk-ingest
 hk-ingest --alles --bundle <ziel>
 ```
 
-Eine `.md` sagt ihren Typ selbst; eine nackte Datei nicht. Dann verlangt das
-Werkzeug `--typ` und nennt die vier: `book`, `article`, `clipping`, `webpage`.
-**Rate ihn nicht** — frag lieber zurück. Für eine Quelle, die gar nicht in der
-Inbox liegt, nimm den händischen Weg:
+Jede Quelle wird eine `source`; offen ist nur ihre **Werkart**. Eine
+Web-Clipper-`.md` sagt sie selbst (`web`), eine nackte Datei nicht — dann
+bleibt `kind` leer und wird als Lücke gemeldet. **Rate sie nicht**; Wilma
+liest die Quelle und sagt sie. Zur Wahl stehen `article`, `book`, `paper`,
+`podcast`, `transcript`, `video` und `web`.
+
+Für eine Quelle, die gar nicht in der Inbox liegt, nimm den händischen Weg:
 
 ```bash
-hk-ingest --bundle <ziel> --typ book --title T --url U \
+hk-ingest --bundle <ziel> --kind book --title T --url U \
           --ausfertigung https://nas.example.org/buch.pdf
 ```
 
@@ -83,9 +86,11 @@ Sache ist teurer als eine Ergänzung.
 Abschnitt `## Zitationsangaben`, die Zusammenfassung nach ihrem Abschnitt
 `## Aufbau`. Was sie unter `## Lücken und Widersprüche` gefunden hat, gehört
 in einen eigenen Abschnitt hinter die Zusammenfassung — es steht nicht in der
-Quelle und darf nicht so aussehen, als stünde es dort. Bei einem `clipping`
-heißt das: **vor** dem erfassten Text. Dahinter fände es niemand mehr, aus
-demselben Grund, aus dem die Zusammenfassung oben steht.
+Quelle und darf nicht so aussehen, als stünde es dort.
+
+**Der erfasste Text gehört nicht in die Notiz.** Ein Clipping liegt als Datei
+unter `<media_base>/Clippings/`, und `file` zeigt darauf; die Notiz trägt die
+Zusammenfassung. `hk-ingest` legt beides an.
 
 **⑥ Eintragen — dann die Notizen, die daraus entstehen.** Geh Wilmas
 `## Notiz-Kandidaten` **einzeln** durch und entscheide je Kandidat: eigene

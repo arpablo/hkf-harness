@@ -5,47 +5,44 @@
     hk-ingest                                    zeigt, was in der Inbox liegt
     hk-ingest <stück> --bundle <ziel>            ein Stück aus der Inbox
     hk-ingest --alles --bundle <ziel>            die ganze Inbox
-    hk-ingest --bundle <ziel> --typ book --title T [weitere Angaben]
+    hk-ingest --bundle <ziel> --kind book --title T [weitere Angaben]
 
     --hkb [<pfad>]   die Lieferung anschließend importieren
-    --typ            book, article, clipping oder webpage
+    --kind           die Werkart: article book paper podcast transcript video web
     --datei D        Datei mitnehmen und nach Media/Documents/ kopieren
     --ausfertigung A Adresse einer Ausfertigung; es wird nichts kopiert
     --inbox P        die Inbox; sonst $HKF_INBOX, sonst ~/hkf-inbox
     --id             Kennung der Lieferung (Vorgabe: aus dem ersten Stück)
 
-Weitere Angaben, alle optional: --title --subtitle --authors --editors
---container --publisher --place --year --edition --volume --pages --isbn
---doi --lang --url.
+Weitere Angaben, alle optional: --title --authors --published
+--published-year --lang --url.
 
-Was das Werkzeug tut: den Typ feststellen, die Ausfertigung ablegen oder
-verzeichnen, `sha256` bilden, die Quellennotiz schreiben, die Lücken melden.
-Was es nicht tut: abrufen, extrahieren, zusammenfassen. Das ist Sache eines
-Sprachmodells, das die Quelle liest (Harness §2).
+Was das Werkzeug tut: die Ausfertigung ablegen oder verzeichnen, `sha256`
+bilden, die Quellennotiz schreiben, die Lücken melden. Was es nicht tut:
+abrufen, extrahieren, zusammenfassen. Das ist Sache eines Sprachmodells, das
+die Quelle liest (Harness §2).
 
 Eine Regel entscheidet über das Kopieren:
 
-    Eine `.md` wird nie kopiert — sie *ist* die Notiz.
-    Alles andere wird kopiert.
+    Eine `.md` mit `type: source` ist die Notiz und wird nicht kopiert.
+    Alles andere wird kopiert — eine `.md` als Clipping, sonst als Dokument.
 
-Geraten wird nichts. Eine nackte Datei sagt ihren Typ nicht; dann verlangt das
-Werkzeug `--typ` und nennt die vier.
+Geraten wird nichts. Eine nackte Datei sagt ihre Werkart nicht; dann bleibt
+`kind` leer und wird als Lücke gemeldet.
 """
 import datetime, os, subprocess, sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
 from hkf import ablage, einlesen                              # noqa: E402
 
-ANGABEN = ("title", "subtitle", "authors", "editors", "container", "publisher",
-           "place", "year", "edition", "volume", "pages", "isbn", "doi",
-           "lang", "url")
-LISTEN = ("authors", "editors")
+ANGABEN = ("title", "authors", "published", "published_year", "lang", "url")
+LISTEN = ("authors",)
 
 
 def wert(name, roh):
     if name in LISTEN:
         return [t.strip() for t in roh.split(",") if t.strip()]
-    if name == "year":
+    if name == "published_year":
         try:
             return int(roh)
         except ValueError:
@@ -59,7 +56,7 @@ def argumente(argv):
     while i < len(argv):
         a = argv[i]
         if a.startswith("--"):
-            name = a[2:]
+            name = a[2:].replace("-", "_")
             folgt = argv[i + 1] if i + 1 < len(argv) else None
             if folgt is not None and not folgt.startswith("--"):
                 werte[name] = folgt
@@ -80,10 +77,10 @@ def zeigen(inbox):
         print("  leer")
         return 0
     for p in stuecke:
-        typ, grund = einlesen.typ_erkennen(p)
+        art, grund = einlesen.art_erkennen(p)
         print("  %-34s %s"
               % (os.path.basename(p),
-                 typ if typ else "Typ fehlt — %s, nenne ihn mit --typ" % grund))
+                 art if art else "Werkart offen — %s" % grund))
     print()
     print("%d Stück. Es wurde nichts geschrieben." % len(stuecke))
     return 0
@@ -186,17 +183,17 @@ def main(argv):
         quellbasis = str(wurzel.get("source_base", "Sources") or "").strip("/")
 
     plan = einlesen.Plan(ziel, hkb=hkb, quellbasis=quellbasis)
-    typ = werte.get("typ") if isinstance(werte.get("typ"), str) else None
+    art = werte.get("kind") if isinstance(werte.get("kind"), str) else None
     if quellen:
         for q in quellen:
-            einlesen.stueck(plan, q, typ=typ, angaben=angaben, heute=heute,
+            einlesen.stueck(plan, q, art=art, angaben=angaben, heute=heute,
                             zeitpunkt=jetzt)
             if plan.abgebrochen and werte.get("alles"):
                 plan.melde("hinweis", plan.abgebrochen.split("\n")[0],
-                           "Mit --typ einlesen.")
+                           "Mit --kind einlesen.")
                 plan.abgebrochen = None
     else:
-        einlesen.stueck(plan, None, typ=typ, angaben=angaben, heute=heute,
+        einlesen.stueck(plan, None, art=art, angaben=angaben, heute=heute,
                         zeitpunkt=jetzt)
 
     bundle_id = werte.get("id") if isinstance(werte.get("id"), str) else None

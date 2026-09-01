@@ -101,28 +101,32 @@ class Bestand(object):
         """`<bereich>/<verzeichnis>` — wo die Notizen des Typs wirklich liegen."""
         bp = self.bereiche[_bereich(name, daten)]
         d = _verzeichnis(name, daten)
-        return "%s/%s" % (bp, d) if bp else d
+        return "/".join(x for x in (bp, d) if x)
 
     def notizbereiche(self):
-        """Die Bereiche, unter denen Notizen liegen (§3.2), absolut."""
-        aus = []
+        """[(name, pfad)] der Bereiche, unter denen Notizen liegen (§3.2)."""
+        aus, gesehen = [], set()
         for k in ("wiki_base", "source_base", "config_base"):
             p = os.path.join(self.hkb, self.bereiche[k])
-            if os.path.isdir(p) and p not in aus:
-                aus.append(p)
+            if os.path.isdir(p) and p not in gesehen:
+                gesehen.add(p)
+                aus.append((k, p))
         return aus
 
     def _hkb_lesen(self):
-        for wurzel in self.notizbereiche():
+        for schluessel, wurzel in self.notizbereiche():
             for p in ablage.dateien(wurzel):
                 rel = os.path.relpath(p, wurzel).replace(os.sep, "/")
-                if "/" not in rel:
+                # Eine Notiz liegt in ihrem Typverzeichnis — ausser der
+                # Quellennotiz: `source` fuehrt keines (§3.2.2).
+                if "/" not in rel and schluessel != "source_base":
                     continue
                 e = self._eintrag(p, rel)
+                e["bereich"] = schluessel
                 if not e["typ"]:
                     continue
                 self.notizen[rel[:-3]] = e
-                verz, name = rel.split("/", 1)
+                verz, _, name = rel.partition("/")
                 if verz == "Typedefs":
                     self.typdefs[name[:-3]] = e
                 elif verz == "Proptypes":
@@ -145,7 +149,9 @@ class Bestand(object):
                     continue
                 p = os.path.join(r, f)
                 rel = os.path.relpath(p, self.hkb).replace(os.sep, "/")
-                if not f.endswith(".md"):
+                if not f.endswith(".md") or "Clippings" in rel.split("/")[:-1]:
+                    # §4.3: `Clippings/` ist reserviert — eine `.md` darin ist
+                    # eine Mediendatei und keine Notiz.
                     self.medien.add(rel)
                     continue
                 if rel == "hbundle.md":
@@ -262,8 +268,16 @@ def _typen(b, befunde):
             befunde.append(Befund(e["rel"], "Der Typ `%s` hat keine Typdefinition "
                                             "(§3.7)." % typ))
             continue
+        soll_bereich = _bereich(typ, b.typdefs[typ]["daten"])
+        if e.get("bereich") and e["bereich"] != soll_bereich:
+            befunde.append(Befund(e["rel"], "liegt unter `%s`, der Typ `%s` "
+                                  "gehört unter `%s` (§3.2)."
+                                  % (e["bereich"], typ, soll_bereich)))
+            continue
         soll = _verzeichnis(typ, b.typdefs[typ]["daten"])
-        ist = rel.rsplit("/", 1)[0]
+        if not soll:
+            continue          # `source` liegt unmittelbar unter seinem Bereich
+        ist = rel.rpartition("/")[0]
         # Segmentweises Praefix, nicht Gleichheit: §3.2 erlaubt
         # Unterverzeichnisse innerhalb eines Typverzeichnisses, und §3.7.1
         # loest den Typ ueber genau dieses Praefix auf.
@@ -733,11 +747,13 @@ def _link_passt(b, wert, args, medien):
         if rest not in b.medien:
             return False, "zeigt auf keine vorhandene Datei"
         name = rest.rsplit("/", 1)[-1]
-        if "." not in name or name.endswith(".md"):
-            return False, "trägt keine brauchbare Dateiendung (§6.3)"
         teile = rest.split("/")
         verz = teile[1] if b.media_basis else teile[0]
         ist = {v: k for k, v in ARTVERZEICHNIS.items()}.get(verz)
+        # `.md` traegt nur ein Clipping: Es ist eine erfasste Seite und liegt
+        # als Markdown vor, ist aber eine Datei und keine Notiz (Config §2.1).
+        if "." not in name or (name.endswith(".md") and ist != "clipping"):
+            return False, "trägt keine brauchbare Dateiendung (§6.3)"
         if args and ist not in args:
             return False, "ist ein %s, verlangt ist %s" % (ist, " oder ".join(args))
         return True, ""
@@ -866,36 +882,16 @@ def _medienverzeichnisse(b, befunde):
 
 
 def _quellenverzeichnisse(b, befunde):
-    """Unter source_base liegen nur Verzeichnisse von Quelltypen (§3.2.2)."""
+    """Unter source_base liegen die Quellennotizen, kein `dir` (§3.2.2)."""
     if b.art != "hkb" or not b.quellbasis:
         return
-    qb = os.path.join(b.hkb, b.quellbasis)
-    if not os.path.isdir(qb):
-        return
-    erlaubt = set(_verzeichnis(n, e["daten"]).split("/", 1)[0]
-                  for n, e in b.typdefs.items()
-                  if _bereich(n, e["daten"]) == "source_base")
-    for f in sorted(os.listdir(qb)):
-        if f.startswith("."):
-            continue
-        p = os.path.join(qb, f)
-        if os.path.isdir(p) and f not in erlaubt:
-            befunde.append(Befund("%s/%s" % (b.quellbasis, f),
-                                  "liegt unter `source_base`; dort liegen nur "
-                                  "die Verzeichnisse von Quelltypen (§3.2.2)."))
-        elif os.path.isfile(p) and f.endswith(".md"):
-            befunde.append(Befund("%s/%s" % (b.quellbasis, f),
-                                  "liegt unmittelbar unter `source_base` und in "
-                                  "keinem Typverzeichnis (§3.2.2)."))
-    # Ein Typ, der nicht `is_source: true` traegt, darf dort nicht hin.
     for name, e in sorted(b.typdefs.items()):
         d = str(e["daten"].get("dir") or "")
-        if d and b.quellbasis and \
-                (d == b.quellbasis or d.startswith(b.quellbasis + "/")) and \
-                e["daten"].get("is_source") is not True:
-            befunde.append(Befund(e["rel"], "`dir` liegt unter `source_base`, der "
-                                            "Typ trägt aber kein `is_source: true` "
-                                            "(§3.2.2)."))
+        if d and (d == b.quellbasis or d.startswith(b.quellbasis + "/")):
+            befunde.append(Befund(e["rel"], "`dir` liegt unter `source_base`; "
+                                            "dort liegen die Quellennotizen, "
+                                            "und `source` führt kein "
+                                            "Verzeichnis (§3.2.2)."))
 
 
 PRUEFUNGEN = PRUEFUNGEN + (_typangaben, _werte, _vorgaben,

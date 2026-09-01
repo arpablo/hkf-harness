@@ -1,14 +1,14 @@
 ---
 type: specification
 title: HKF Config V1.0 — Typen und Property-Typen
-description: Zwanzig Typdefinitionen und sechzehn Property-Typen an einem Ort: die Grundausstattung jeder Wissensbasis und das Vokabular, das als Bundle dazukommt.
+description: Siebzehn Typdefinitionen und siebzehn Property-Typen an einem Ort: die Grundausstattung jeder Wissensbasis und das Vokabular, das als Bundle dazukommt.
 status: draft
 ---
 
 # HKF Config V1.0
 
 Dieses Dokument enthält alles, was HKF konkret festlegt: **jede Typdefinition
-und jeden Property-Typ** — zwanzig und sechzehn. HKF Core beschreibt daneben nur noch, wie eine
+und jeden Property-Typ** — siebzehn und siebzehn. HKF Core beschreibt daneben nur noch, wie eine
 Ablage funktioniert — Verzeichnisse, Wertformen, Verweise, Typdefinitionen als
 Bauform, das Bundle-Format, die drei Methoden — und verweist für jede einzelne
 Definition hierher.
@@ -50,7 +50,7 @@ Typ daneben (Core §3.7).
 # 2. Property-Typen
 
 Was ein Property-Typ ist und wie er wirkt, steht in Core §3.5. Hier stehen
-die, die es gibt: vierzehn, die jede Ablage kennt, und zwei, die nur mit den
+die, die es gibt: vierzehn, die jede Ablage kennt, und drei, die nur mit den
 Typen aus §3 Sinn ergeben.
 
 ## 2.1 Die vierzehn Standard-Property-Typen
@@ -105,8 +105,11 @@ weil sie bei einer Mediendatei zum Namen gehört:
 portrait: "[[Media/Images/personen/portraet-ada.png|portraet-ada.png]]"
 ```
 
-- Das Ziel MUSS in einem der vier Medienverzeichnisse aus Core §3.2.1 liegen und
-  eine Dateiendung tragen, die nicht `.md` ist.
+- Das Ziel MUSS in einem der fünf Medienverzeichnisse aus Core §3.2.1 liegen.
+- Die Dateiendung ist **nicht** `.md` — außer bei der Art `clipping`. Ein
+  Clipping ist eine erfasste Webseite und liegt als Markdown vor; es ist
+  trotzdem eine Datei und keine Notiz, und `hkf-file:clipping` ist der einzige
+  Weg, darauf zu zeigen.
 - In Properties steht der Link ohne `!`. Einbettungen wie `![[…]]` sind
   gewöhnliches Markdown und nur im Body erlaubt.
 - `hkf-file` darf mit einer **Medienart** eingeschränkt werden:
@@ -164,18 +167,28 @@ Alternative und würde von der zweiten stillschweigend als Text angenommen. Die
 Zieltypprüfung wäre wirkungslos. `hkf-link-or-text` entscheidet stattdessen an
 der Form des Wertes, welche Alternative gilt, und prüft dann nur diese.
 
-## 2.2 Die beiden Aufzählungen
+## 2.2 Die drei Aufzählungen
 
-Zwei Property-Typen zählen Werte auf, statt eine Form einzuschränken. Sie
-stehen für sich, weil sie ohne die Typen `person` und `organisation` nichts zu
-tun hätten.
+Drei Property-Typen zählen Werte auf, statt eine Form einzuschränken. Sie
+stehen für sich, weil sie ohne die Typen `person`, `organisation` und `source`
+nichts zu tun hätten.
 
 | Property-Typ | Wertform | Einschränkung |
 |---|---|---|
 | `hkf-person-category` | `text` | `values: [artist, athlete, author, cleric, engineer, entrepreneur, jurist, musician, physician, politician, ruler, scholar, scientist, soldier]` |
 | `hkf-organisation-category` | `text` | `values: [association, authority, company, foundation, institute, ngo, party, religious, school, union, university]` |
+| `hkf-source-kind` | `text` | `values: [article, book, paper, podcast, transcript, video, web]` |
 
-Beide werden als **Listenform** verwendet (Core §3.5.2), also als
+`hkf-source-kind` sagt, **welcher Art** ein Werk ist, und ersetzt damit die
+Typunterscheidung, die HKF bis dahin über vier Quelltypen führte (§3.8). Ein
+Wert ist genug: Ein Werk ist ein Buch oder ein Video, nicht beides. Die sieben
+sind grob und decken ab, was tatsächlich vorkommt; wer eine Dissertation, einen
+Bericht oder einen Vortrag ablegt, nimmt `paper`, `web` oder `transcript`. Eine
+Wissensbasis, der das nicht reicht, legt einen eigenen Property-Typ an — sie
+darf `hkf-source-kind` nicht umdefinieren, wohl aber eine eigene Property
+danebenstellen.
+
+Die ersten beiden werden als **Listenform** verwendet (Core §3.5.2), also als
 `hkf-person-category-list` und `hkf-organisation-category-list`. Eine Person
 ist selten nur eines: Wer regiert hat, hat oft auch geschrieben und gedient.
 Ebenso ist eine Landesuniversität zugleich `university` und `authority`. Ein
@@ -183,18 +196,18 @@ einwertiges Feld erzwänge eine Wahl, die die Sache nicht hergibt.
 
 Die Werte beschreiben die **Rolle**, nicht den Beruf und nicht den Rang. Sie
 sind bewusst grob: Feinere Unterscheidungen gehören in den Body oder in eigene
-Property-Typen der jeweiligen Wissensbasis. Eine spätere Fassung von HKF Config
-darf Werte ergänzen; entfernen darf sie keine, weil das vorhandene Notizen
-ungültig machte.
+Property-Typen der jeweiligen Wissensbasis. Das gilt für alle drei
+Aufzählungen: Eine spätere Fassung von HKF Config darf Werte ergänzen;
+entfernen darf sie keine, weil das vorhandene Notizen ungültig machte.
 
 ---
 
 # 3. Typdefinitionen
 
-Zwanzig Typen. Die ersten drei sind die **Kern-Typen** — ohne sie ließe sich
-keine Ablage beschreiben. Die siebzehn danach sind das **Vokabular**: Gegenstände,
-die in nahezu jeder Wissensbasis vorkommen, die vier Arten von Quellen, und die
-wenigen, mit denen eine Wissensbasis über sich selbst spricht.
+Siebzehn Typen. Die ersten drei sind die **Kern-Typen** — ohne sie ließe sich
+keine Ablage beschreiben. Die vierzehn danach sind das **Vokabular**: Gegenstände,
+die in nahezu jeder Wissensbasis vorkommen, die Quellen, auf die sie sich
+beruft, und die wenigen, mit denen sie über sich selbst spricht.
 
 | Typ | Verzeichnis | Zweck |
 |---|---|---|
@@ -207,10 +220,7 @@ wenigen, mit denen eine Wissensbasis über sich selbst spricht.
 | `city` | `Cities` | Eine Stadt. |
 | `country` | `Countries` | Ein Staat. |
 | `event` | `Events` | Ein Geschehen zu einer bestimmten Zeit. |
-| `book` | `Books` | Ein Werk für sich: Monographie, Sammelband, Bericht. |
-| `article` | `Articles` | Ein Beitrag in einem größeren Werk: Zeitschrift, Zeitung, Sammelband. |
-| `clipping` | `Clippings` | Eine erfasste Webseite; ihr Text steht im Body der Notiz. |
-| `webpage` | `Webpages` | Eine zitierte Webseite; ihr Text bleibt draußen. |
+| `source` | — | Ein Werk, auf das sich die Wissensbasis beruft. |
 | `term` | `Terms` | Ein definierter Begriff. |
 | `concept` | `Concepts` | Eine Sache und der Stand des Wissens über sie. |
 | `comparison` | `Comparisons` | Eine Gegenüberstellung mehrerer Gegenstände entlang benannter Dimensionen. |
@@ -219,30 +229,14 @@ wenigen, mit denen eine Wissensbasis über sich selbst spricht.
 | `specification` | `Specifications` | Ein normatives Dokument, an das sich die Wissensbasis hält. |
 | `hint` | `Hints` | Eine Festlegung, wie diese Wissensbasis geführt wird. |
 
-**Zwei Typen tragen ein `dir`, die anderen achtzehn nicht.** Deren
+**Zwei Typen tragen ein `dir`, die anderen fünfzehn nicht.** Deren
 Verzeichnisse ergeben sich aus der Vorgabe „Typname groß geschrieben, mit
 angehängtem `s`" (Core §3.7); ein Werkzeug kennt den Ablageort damit, ohne die
 Typdefinition zu lesen.
 
-**Vier Typen tragen `is_source: true`** — `book`, `article`, `clipping` und
-`webpage`. Ihre Verzeichnisse liegen nicht unter `wiki_base`, sondern unter
-`source_base`, also nach Vorgabe in `Sources/Books`, `Sources/Articles`,
-`Sources/Clippings` und `Sources/Webpages` (Core §3.2.2). Die Spalte oben
-nennt das `dir`, nicht den vollen Pfad.
-
-**Warum vier Typen und nicht ein `source` mit einer Werkart-Property.** Ein
-Buch, ein Zeitschriftenaufsatz und eine Webseite wollen Verschiedenes: Das
-Buch hat Verlag, Auflage und ISBN, der Aufsatz ein aufnehmendes Werk und
-Seiten, die Webseite ein Abrufdatum. In einem Typ zusammengelegt stünden an
-jeder Quellennotiz zwei Dutzend Properties, von denen die meisten immer leer
-blieben — und keine Property-Tabelle könnte noch sagen, welche zu einer
-vollständigen Zitation gehören. Der Typ trägt die Werkart besser als ein Feld
-darin.
-
-`clipping` gegen `webpage` ist die Unterscheidung zwischen **erfasst** und
-**zitiert**. Ein Clipping bringt den Text der Seite mit und hält ihn im Body;
-eine Webpage nennt nur die Adresse. Damit braucht HKF keine eigene
-Rohtextschicht neben den Notizen — ein Clipping ist sie.
+**`source` hat gar kein Verzeichnis.** Als einziger Typ liegt er unmittelbar
+unter seinem Bereich, also nach Vorgabe in `50-Sources/` (Core §3.2.2). Die
+Spalte oben lässt seine Zelle darum leer.
 
 Die Vorgabe ist mechanisch und kein Sprachgefühl — bei `city` und `country`
 ergäbe sie `Citys` und `Countrys`. Beide schreiben darum ein `dir` und heißen
@@ -284,35 +278,26 @@ description: Registriert einen Typ und legt sein Verzeichnis fest.
 | description | text | ja | — | Einzeiliger Zweck; erscheint in der Typtabelle der Wurzeldatei |
 | dir | text | nein | — | Verzeichnis der Instanzen; Vorgabe ist der groß geschriebene Typname mit angehängtem `s` (Core §3.7) |
 | provisional | checkbox | nein | false | Beim Import angelegt, weil niemand den Typ definiert hat (Core §5.4) |
-| is_source | checkbox | nein | false | Die Instanzen dieses Typs sind Quellen; ihr Verzeichnis liegt unter `source_base` statt unter `wiki_base` (Core §3.2.2) |
 
 # Konventionen
 
 Der Dateiname ist der Typname (Core §3.7). Der Body trägt die Property-Tabelle und
 die Konventionen des Typs. `dir` ist ein relativer Pfad zum Basispfad, mit
 `/` als Trennzeichen und beliebig vielen Abschnitten, ohne führenden und
-abschließenden `/` und ohne `.`- oder `..`-Abschnitte; er darf nicht unter
-`media_base` liegen und, wenn der Typ nicht `is_source: true` trägt, auch nicht
-unter `source_base` (Core §3.2.2).
+abschließenden `/` und ohne `.`- oder `..`-Abschnitte; er darf weder unter
+`media_base` noch unter `source_base` liegen (Core §3.2.1 und §3.2.2). Der Typ
+`source` trägt kein `dir`: Er liegt unmittelbar unter seinem Bereich.
 
 `provisional` steht nur an einer Typdefinition, nur mit dem Wert `true` und
 nur in einer HKB — ein Bundle enthält keine vorläufige Typdefinition (Core §7.1).
 Eine solche Notiz trägt kein `dir`, keinen Abschnitt `# Properties` und kein
 `bundles`.
 
-**Warum `is_source` und nicht `source`.** Der kürzere Name ist vergeben: `source`
-ist die Property, mit der eine Bundle-Notiz sagt, woher die Lieferung stammt
-(§3.3). Zwei Bedeutungen unter einem Namen wären genau die Namensdrift, gegen
-die dieselbe Ablage anderswo lintet — und ein Schema, das über alle Notizen
-gilt, könnte sie nicht auseinanderhalten.
-
-`is_source` verschiebt allein den Ort und sonst nichts: Ein Quelltyp bestimmt
-sein Verzeichnis über `dir` wie jeder andere, und die Vorgabe gilt
-unverändert; nur hängt das Verzeichnis dann unter `source_base` statt unter
-`wiki_base`. Die Angabe steht an der Typdefinition und nicht als Liste in der
-Wurzeldatei, weil dort schon alles andere über den Typ steht — und weil eine
-Ablage, die einen eigenen Quellentyp anlegt, sonst zwei Stellen ändern
-müsste.
+**Welcher Bereich gilt, sagt der Typname und nicht eine Property.** `typedef`
+und `proptype` liegen unter `config_base`, `source` unter `source_base`, jeder
+andere unter `wiki_base` (Core §3.2). Eine Property dafür — HKF führte kurz ein
+`is_source` — lohnt sich erst, wenn eine Ablage mehrere Quelltypen hätte; sie
+hat einen, und die Werkart trägt `kind` (§3.8).
 ```
 
 ## 3.2 `proptype`
@@ -505,44 +490,52 @@ Eine Veranstaltung trägt entweder `starts_at` oder `date`, nicht beides.
 Zeiten gelten in der `timezone` der Ablage (Core §3.4).
 ```
 
-## 3.8 `book`
+## 3.8 `source`
 
 ```markdown
 ---
 type: typedef
-title: Buch
-description: 'Ein Werk für sich: Monographie, Sammelband, Bericht.'
-is_source: true
+title: Quelle
+description: Ein Werk, auf das sich die Wissensbasis beruft.
 ---
 
 # Properties
 
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
+| kind | hkf-source-kind | nein | — | Werkart: Buch, Aufsatz, Video, Webseite und die übrigen |
 | authors | hkf-link-or-text-list:person | nein | — | Urheber: als Verweis auf eine Personennotiz oder als Name, wie das Werk ihn nennt |
-| subtitle | text | nein | — | Untertitel, wenn er zur Zitation gehört |
-| editors | hkf-link-or-text-list:person | nein | — | Herausgeber, wenn sie von den Urhebern abweichen |
-| publisher | hkf-link-or-text:organisation | nein | — | Verlag: als Verweis oder als Name |
-| place | text | nein | — | Erscheinungsort |
-| year | hkf-year | nein | — | Erscheinungsjahr |
-| edition | text | nein | — | Auflage, etwa `2., überarbeitete Auflage` |
-| volume | text | nein | — | Band; Text, weil auch `12A` vorkommt |
-| pages | text | nein | — | Seitenzahl oder Umfang |
-| isbn | text | nein | — | ISBN |
-| doi | hkf-url | nein | — | DOI, vollständig als `https://doi.org/…` |
+| published | date | nein | — | Erscheinungsdatum |
+| published_year | hkf-year | nein | — | Erscheinungsjahr, wenn kein vollständiges Datum bekannt ist |
 | lang | hkf-lang | nein | — | Sprache des Werks |
 | url | hkf-url | nein | — | Fundstelle des Werks: wo es veröffentlicht ist |
-| file | hkf-file:document / hkf-url | nein | — | Ausfertigung des Werks: als Datei in der Ablage oder als Adresse, etwa auf einem Dateiserver |
+| file | hkf-file:document,clipping / hkf-url | nein | — | Ausfertigung des Werks: als Datei in der Ablage oder als Adresse, etwa auf einem Dateiserver |
 | accessed | date | nein | — | Datum des Abrufs |
-| checksum | text | nein | — | `sha256:<hex>` über den erfassten Text; sagt beim nächsten Einlesen, ob sich die Quelle geändert hat |
+| checksum | text | nein | — | `sha256:<hex>` über die Ausfertigung; sagt beim nächsten Einlesen, ob sich die Quelle geändert hat |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Werks in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
 
 # Konventionen
 
-Ein Buch steht für sich: Es hat einen Verlag, oft eine ISBN, und es ist nicht
-Teil eines größeren Werks. Ein Beitrag darin — ein Kapitel in einem
-Sammelband — ist ein `article` mit diesem Buch als `container`.
+Eine Quellennotiz beschreibt das Werk, auf das sich die Wissensbasis beruft,
+und fasst zusammen, **was es sagt** — gegliedert nach seinem eigenen Aufbau,
+je Kapitel oder Hauptabschnitt eine Überschrift. Was man daraus **für die
+eigene Sache schließt**, gehört nicht hierher, sondern in eine `note` oder ein
+`concept`, das per `sources` auf die Quelle verweist.
+
+**Die Werkart ist eine Property und kein Typ.** Ein Buch, ein Aufsatz, ein
+Video und eine Webseite unterscheiden sich in dem, was über sie zu wissen ist,
+kaum: Wer es gemacht hat, wann es erschien, wo es liegt. Was sie unterscheidet
+— Verlag, Auflage, Seitenzahl —, ist Zitationsapparat und steht dort, wo er
+gebraucht wird: im Body oder in einer Property, die eine Wissensbasis selbst
+anlegt. Als vier Typen kostete die Unterscheidung vier Verzeichnisse und
+zwanzig Properties, von denen die meisten immer leer blieben — und eine
+Quelle, deren Art keiner der vier entspricht, hätte gar keinen Ort gehabt.
+`kind` kennt sieben Werte (§2.2), und eine spätere Fassung darf ergänzen.
+
+**Die Quellennotiz liegt direkt unter `source_base`**, ohne Typverzeichnis
+(Core §3.2.2). Bei einem einzigen Quelltyp wäre es reine Verdopplung, und die
+Notiz-ID ist damit der bloße Dateiname.
 
 `url` und `file` bezeichnen Verschiedenes und stehen darum als zwei
 Properties da, nicht als Alternative (Core §3.7.2): `url` ist, **wo das Werk
@@ -552,179 +545,27 @@ der Ablage oder als Adresse, etwa auf einem Dateiserver im eigenen Netz. Ein
 Original muss also nicht in die Ablage kopiert werden, um verzeichnet zu sein.
 Beide dürfen nebeneinander stehen.
 
-Eine Quellennotiz beschreibt das zitierte Werk und fasst zusammen, **was es
-sagt** — gegliedert nach seinem eigenen Aufbau, je Kapitel oder Hauptabschnitt
-eine Überschrift. Was man daraus **für die eigene Sache schließt**, gehört
-nicht hierher, sondern in eine `note` oder ein `concept`, das per `sources`
-auf die Quelle verweist.
+**Ist `file` ein Clipping, steht der erfasste Text dort und nicht im Body.**
+Ein Clipping ist eine Mediendatei unter `<media_base>/Clippings/` (Core
+§3.2.1) — Rohmaterial, das niemand pflegt und das darum auch niemand prüft.
+Die Notiz daneben trägt die Zusammenfassung. Das ist der ganze Unterschied
+zwischen einer erfassten und einer bloß zitierten Seite, und er verlangt
+keinen eigenen Typ: Die Datei ist da oder sie ist es nicht.
+
+`checksum` sagt beim nächsten Einlesen, ob sich die Quelle geändert hat. Eine
+Webseite ändert sich still, und ohne die Prüfsumme fiele das erst auf, wenn
+die Zusammenfassung schon nicht mehr stimmt.
+
+`published` und `published_year` schließen einander aus, wie `born` und
+`born_year` bei einer Person (§3.4). Ein Buch von 1989 hat einen Tag, der
+niemanden interessiert, ein Beitrag vom 28. Juli 2026 hat einen, der zählt.
+Eine Angabe zu erzwingen, die die Quelle nicht hergibt, brächte nur falsche
+Genauigkeit — und beide in eine Property zu legen ginge nicht: Alternativen
+müssen dieselbe Wertform haben (§3.7.2).
+
 ```
 
-## 3.9 `article`
-
-```markdown
----
-type: typedef
-title: Aufsatz
-description: 'Ein Beitrag in einem größeren Werk: Zeitschrift, Zeitung, Sammelband.'
-is_source: true
----
-
-# Properties
-
-| Property | Typ | Pflicht | Vorgabe | Beschreibung |
-|---|---|---|---|---|
-| authors | hkf-link-or-text-list:person | nein | — | Urheber: als Verweis auf eine Personennotiz oder als Name, wie der Beitrag ihn nennt |
-| subtitle | text | nein | — | Untertitel, wenn er zur Zitation gehört |
-| editors | hkf-link-or-text-list:person | nein | — | Herausgeber des aufnehmenden Werks |
-| container | text | nein | — | Das aufnehmende Werk: Zeitschrift, Zeitung, Sammelband |
-| publisher | hkf-link-or-text:organisation | nein | — | Verlag: als Verweis oder als Name |
-| place | text | nein | — | Erscheinungsort |
-| year | hkf-year | nein | — | Erscheinungsjahr |
-| volume | text | nein | — | Band oder Jahrgang; Text, weil auch `12A` vorkommt |
-| pages | text | nein | — | Seitenbereich, etwa `34–56` |
-| doi | hkf-url | nein | — | DOI, vollständig als `https://doi.org/…` |
-| lang | hkf-lang | nein | — | Sprache des Werks |
-| url | hkf-url | nein | — | Fundstelle des Werks: wo es veröffentlicht ist |
-| file | hkf-file:document / hkf-url | nein | — | Ausfertigung des Werks: als Datei in der Ablage oder als Adresse, etwa auf einem Dateiserver |
-| accessed | date | nein | — | Datum des Abrufs |
-| checksum | text | nein | — | `sha256:<hex>` über den erfassten Text; sagt beim nächsten Einlesen, ob sich die Quelle geändert hat |
-| wikidata_id | hkf-wikidata | nein | — | Kennung des Werks in Wikidata |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
-
-# Konventionen
-
-Ein Aufsatz ist ein Beitrag und kein Werk für sich; `container` nennt, worin
-er steht. Ohne diese Angabe lässt er sich nicht zitieren, sie ist aber
-trotzdem nicht Pflicht: Eine Quelle wird oft eingelesen, bevor alle Angaben
-beisammen sind, und eine Pflicht machte die Notiz bis dahin unschreibbar.
-
-`url` und `file` bezeichnen Verschiedenes und stehen darum als zwei
-Properties da, nicht als Alternative (Core §3.7.2): `url` ist, **wo das Werk
-veröffentlicht ist** — die Verlagsseite, die DOI-Adresse —, und damit
-zitierfähig. `file` ist, **wo die eigene Ausfertigung liegt**: als Datei in
-der Ablage oder als Adresse, etwa auf einem Dateiserver im eigenen Netz. Ein
-Original muss also nicht in die Ablage kopiert werden, um verzeichnet zu sein.
-Beide dürfen nebeneinander stehen.
-
-Eine Quellennotiz beschreibt das zitierte Werk und fasst zusammen, **was es
-sagt** — gegliedert nach seinem eigenen Aufbau, je Kapitel oder Hauptabschnitt
-eine Überschrift. Was man daraus **für die eigene Sache schließt**, gehört
-nicht hierher, sondern in eine `note` oder ein `concept`, das per `sources`
-auf die Quelle verweist.
-```
-
-## 3.10 `clipping`
-
-```markdown
----
-type: typedef
-title: Erfasste Webseite
-description: Eine erfasste Webseite; ihr Text steht im Body der Notiz.
-is_source: true
----
-
-# Properties
-
-| Property | Typ | Pflicht | Vorgabe | Beschreibung |
-|---|---|---|---|---|
-| authors | hkf-link-or-text-list:person | nein | — | Urheber: als Verweis auf eine Personennotiz oder als Name, wie die Seite ihn nennt |
-| container | text | nein | — | Name der Website, auf der die Seite erschien |
-| year | hkf-year | nein | — | Jahr der Veröffentlichung |
-| lang | hkf-lang | nein | — | Sprache des Werks |
-| url | hkf-url | nein | — | Fundstelle des Werks: wo es veröffentlicht ist |
-| file | hkf-file:document / hkf-url | nein | — | Ausfertigung des Werks: als Datei in der Ablage oder als Adresse, etwa auf einem Dateiserver |
-| accessed | date | nein | — | Datum des Abrufs |
-| checksum | text | nein | — | `sha256:<hex>` über den erfassten Text; sagt beim nächsten Einlesen, ob sich die Quelle geändert hat |
-| wikidata_id | hkf-wikidata | nein | — | Kennung des Werks in Wikidata |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
-
-# Konventionen
-
-Der Body trägt zuerst die **Zusammenfassung**, darunter den **erfassten Text
-der Seite**, so wie er abgerufen wurde. Die Reihenfolge ist nicht gleichgültig:
-Ein Clipping bringt leicht tausend Zeilen mit, und was ein Leser zuerst
-braucht, ist die Zusammenfassung — sie unter den Rohtext zu setzen macht sie
-unauffindbar.
-
-Der erfasste Text steht unter einer eigenen Überschrift, damit er sich vom
-Geschriebenen trennen lässt und nicht so aussieht, als wäre er es.
-
-Dass er überhaupt da ist, ist der Unterschied zu `webpage`, und er ist der
-ganze Unterschied: Die Property-Tabellen der beiden sind gleich, aber ein
-Clipping hat den Text, eine Webpage nur die Adresse. Wer wissen will, was
-tatsächlich im Haus ist, sieht in `Clippings/` nach.
-
-Damit braucht HKF keine eigene Rohtextschicht neben den Notizen: Ein Clipping
-**ist** sie. `checksum` sagt beim nächsten Einlesen, ob sich die Seite seither
-geändert hat — eine Webseite ändert sich still.
-
-`url` und `file` bezeichnen Verschiedenes und stehen darum als zwei
-Properties da, nicht als Alternative (Core §3.7.2): `url` ist, **wo das Werk
-veröffentlicht ist** — die Verlagsseite, die DOI-Adresse —, und damit
-zitierfähig. `file` ist, **wo die eigene Ausfertigung liegt**: als Datei in
-der Ablage oder als Adresse, etwa auf einem Dateiserver im eigenen Netz. Ein
-Original muss also nicht in die Ablage kopiert werden, um verzeichnet zu sein.
-Beide dürfen nebeneinander stehen.
-
-Eine Quellennotiz beschreibt das zitierte Werk und fasst zusammen, **was es
-sagt** — gegliedert nach seinem eigenen Aufbau, je Kapitel oder Hauptabschnitt
-eine Überschrift. Was man daraus **für die eigene Sache schließt**, gehört
-nicht hierher, sondern in eine `note` oder ein `concept`, das per `sources`
-auf die Quelle verweist.
-```
-
-## 3.11 `webpage`
-
-```markdown
----
-type: typedef
-title: Webseite
-description: Eine zitierte Webseite; ihr Text bleibt draußen.
-is_source: true
----
-
-# Properties
-
-| Property | Typ | Pflicht | Vorgabe | Beschreibung |
-|---|---|---|---|---|
-| authors | hkf-link-or-text-list:person | nein | — | Urheber: als Verweis auf eine Personennotiz oder als Name, wie die Seite ihn nennt |
-| container | text | nein | — | Name der Website, auf der die Seite erschien |
-| year | hkf-year | nein | — | Jahr der Veröffentlichung |
-| lang | hkf-lang | nein | — | Sprache des Werks |
-| url | hkf-url | nein | — | Fundstelle des Werks: wo es veröffentlicht ist |
-| file | hkf-file:document / hkf-url | nein | — | Ausfertigung des Werks: als Datei in der Ablage oder als Adresse, etwa auf einem Dateiserver |
-| accessed | date | nein | — | Datum des Abrufs |
-| checksum | text | nein | — | `sha256:<hex>` über den erfassten Text; sagt beim nächsten Einlesen, ob sich die Quelle geändert hat |
-| wikidata_id | hkf-wikidata | nein | — | Kennung des Werks in Wikidata |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
-
-# Konventionen
-
-Eine Webseite wird zitiert, nicht erfasst: Der Body trägt die
-Zusammenfassung, nicht den Text der Seite. Wer den Text behalten will, legt
-ein `clipping` an.
-
-`accessed` wiegt hier schwerer als bei jedem anderen Quelltyp. Eine Webseite
-hat kein Erscheinungsjahr, auf das man sich verlassen könnte, und sie kann
-morgen anders lauten; das Abrufdatum ist oft das einzige, was die Zitation
-festhält.
-
-`url` und `file` bezeichnen Verschiedenes und stehen darum als zwei
-Properties da, nicht als Alternative (Core §3.7.2): `url` ist, **wo das Werk
-veröffentlicht ist** — die Verlagsseite, die DOI-Adresse —, und damit
-zitierfähig. `file` ist, **wo die eigene Ausfertigung liegt**: als Datei in
-der Ablage oder als Adresse, etwa auf einem Dateiserver im eigenen Netz. Ein
-Original muss also nicht in die Ablage kopiert werden, um verzeichnet zu sein.
-Beide dürfen nebeneinander stehen.
-
-Eine Quellennotiz beschreibt das zitierte Werk und fasst zusammen, **was es
-sagt** — gegliedert nach seinem eigenen Aufbau, je Kapitel oder Hauptabschnitt
-eine Überschrift. Was man daraus **für die eigene Sache schließt**, gehört
-nicht hierher, sondern in eine `note` oder ein `concept`, das per `sources`
-auf die Quelle verweist.
-```
-
-## 3.12 `term`
+## 3.9 `term`
 
 ```markdown
 ---
@@ -760,7 +601,7 @@ Wird die Notiz länger, gehört, was über die Definition hinausgeht, in ein
 `concept`.
 ```
 
-## 3.13 `concept`
+## 3.10 `concept`
 
 ```markdown
 ---
@@ -793,7 +634,7 @@ Hat eine Konzeptnotiz keine eigenen Aussagen, sondern nur Verweise, ist sie
 ein `topic`.
 ```
 
-## 3.14 `comparison`
+## 3.11 `comparison`
 
 ```markdown
 ---
@@ -822,7 +663,7 @@ vergleichen lässt — zwei Konzepte ebenso wie zwei Körperschaften. Was nur
 einen der Gegenstände betrifft, gehört in dessen eigene Notiz.
 ```
 
-## 3.15 `topic`
+## 3.12 `topic`
 
 ```markdown
 ---
@@ -845,7 +686,7 @@ eine Einstiegsseite mit Verweisen; Inhalte, die anderswo hingehören, stehen
 nicht hier.
 ```
 
-## 3.16 `note`
+## 3.13 `note`
 
 ```markdown
 ---
@@ -871,7 +712,7 @@ Quelle, ein Protokoll, ein Gedanke. Überlebt ihr Gegenstand den Anlass, gehört
 er in ein `concept`, und die Notiz verweist per `about` dorthin.
 ```
 
-## 3.17 `specification`
+## 3.14 `specification`
 
 ```markdown
 ---
@@ -907,7 +748,7 @@ Welche Spezifikation für die Wissensbasis selbst gilt, sagt `spec` in ihrer
 Wurzeldatei (Core A.1).
 ```
 
-## 3.18 `hint`
+## 3.15 `hint`
 
 ```markdown
 ---
@@ -944,7 +785,7 @@ noch aufheben.
 jede Notiz dieses Typs. Ohne `applies_to` gilt er für die ganze Wissensbasis.
 ```
 
-## 3.19 `city`
+## 3.16 `city`
 
 ```markdown
 ---
@@ -982,7 +823,7 @@ zwei Gegenstände.
 `latitude` und `longitude` werden nur gemeinsam gesetzt.
 ```
 
-## 3.20 `country`
+## 3.17 `country`
 
 ```markdown
 ---

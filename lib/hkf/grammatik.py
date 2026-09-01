@@ -22,7 +22,7 @@ ROH      = re.compile(r"!?\[\[[^\n]*?\]\]")
 
 # ── B.3 Typangaben ──────────────────────────────────────────────────────
 WERTFORM = r"text|list|number|checkbox|date|datetime"
-MEDIENART = r"image|video|audio|document"
+MEDIENART = r"image|video|audio|document|clipping"
 TYPANGABE = re.compile(
     r"\A(?:"
     + r"(?:" + WERTFORM + r")"

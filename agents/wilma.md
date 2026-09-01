@@ -81,7 +81,7 @@ Quelle: <Titel>, <Verfasser>, <Jahr>
 Tranche: <Abgrenzung, oder „vollständig">
 
 ## Zitationsangaben
-Typ: <book | article | clipping | webpage>
+Werkart: <article | book | paper | podcast | transcript | video | web>
 <je Zeile eine Angabe; was fehlt, steht als „nicht gefunden">
 
 ## Aufbau

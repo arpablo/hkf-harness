@@ -154,7 +154,7 @@ optional — fehlt er, gilt die Vorgabe:
 |---|---|---|
 | `wiki_base` | `40-Wiki` | die Typverzeichnisse des Inhalts (§3.2) |
 | `source_base` | `50-Sources` | die Verzeichnisse der Quelltypen (§3.2.2) |
-| `media_base` | `80-Media` | die vier Medienverzeichnisse (§3.2.1) |
+| `media_base` | `80-Media` | die fünf Medienverzeichnisse (§3.2.1) |
 | `config_base` | `90-System` | `Typedefs` und `Proptypes` (§3.2.3) |
 
 **Warum vier und nicht einer.** Die drei außerhalb von `wiki_base` tragen
@@ -227,14 +227,14 @@ gehört:
 
 ```text
 <wiki_base>/<verzeichnis des typs>/<dateiname>.md     der Inhalt
-<source_base>/<verzeichnis des typs>/<dateiname>.md   die Quellen (§3.2.2)
+<source_base>/<dateiname>.md                          die Quellen (§3.2.2)
 <config_base>/<verzeichnis des typs>/<dateiname>.md   Typedefs, Proptypes (§3.2.3)
 ```
 
-Welcher Bereich gilt, sagt die Typdefinition: `typedef` und `proptype` liegen
-unter `config_base`, ein Typ mit `is_source: true` unter `source_base`, jeder
-andere unter `wiki_base`. Unterverzeichnisse innerhalb eines Typverzeichnisses
-sind erlaubt.
+Welcher Bereich gilt, sagt der **Typname**: `typedef` und `proptype` liegen
+unter `config_base`, `source` unter `source_base`, jeder andere unter
+`wiki_base`. Unterverzeichnisse innerhalb eines Typverzeichnisses sind
+erlaubt.
 
 `Typedefs` und `Proptypes` existieren **immer**, unter `config_base`; `Bundles`
 ebenfalls, unter `wiki_base`. Dort liegen die Typdefinitionen, die
@@ -278,9 +278,10 @@ Erkennung unabhängig davon, ob jemand eine Notiz `hbundle` nennt.
    vorkommen.
 4. Die **Notiz-ID** ist der Pfad ab dem Bereich, unter dem die Notiz liegt,
    ohne `.md` — also `<verzeichnis des typs>/<dateiname>`, etwa
-   `Persons/ada-lovelace`, `Books/babbage-economy-1832` oder
-   `Typedefs/person`. Welcher Bereich abgezogen wird, ist gleichgültig: Weil
-   Typverzeichnisse nach Regel 2 eindeutig sind, ist die ID es auch. Sie ist
+   `Persons/ada-lovelace` oder `Typedefs/person`. Führt ein Typ kein
+   Verzeichnis, ist sie der bloße Dateiname: `babbage-economy-1832` für eine
+   Quellennotiz (§3.2.2). Welcher Bereich abgezogen wird, ist gleichgültig:
+   Weil Typverzeichnisse nach Regel 2 eindeutig sind, ist die ID es auch. Sie ist
    die Identität der Notiz **innerhalb einer Ablage**. Über zwei Ablagen hinweg sagt sie nichts: Zwei Bundles dürfen
    beide `Persons/john-smith` liefern und dabei zwei verschiedene Menschen
    meinen. Was der Import damit macht, steht in §6.1 Schritt 5.
@@ -289,18 +290,20 @@ Erkennung unabhängig davon, ob jemand eine Notiz `hbundle` nennt.
 
 ### 3.2.1 Medienverzeichnisse
 
-Mediendateien sind keine Notizen: Bilder, Videos, Tonaufnahmen und Dokumente.
+Mediendateien sind keine Notizen: Bilder, Videos, Tonaufnahmen, Dokumente und
+erfasste Webseiten.
 **Auch dieser Abschnitt gilt für eine HKB**; in einem Bundle liegt eine
 Mediendatei, wo sie will, und ihre Art ergibt sich aus der Endung (§4.3).
 
 Sie liegen nicht in den Typverzeichnissen, sondern unter `media_base` in genau
-vier Verzeichnissen:
+fünf Verzeichnissen:
 
 ```text
 <media_base>/Images/
 <media_base>/Videos/
 <media_base>/Audios/
 <media_base>/Documents/
+<media_base>/Clippings/
 ```
 
 | Verzeichnis | Medienart | Inhalt |
@@ -309,13 +312,22 @@ vier Verzeichnissen:
 | `Videos` | `video` | Bewegtbild |
 | `Audios` | `audio` | Tonaufnahmen |
 | `Documents` | `document` | PDFs und andere Dokumente |
+| `Clippings` | `clipping` | erfasste Webseiten, als Markdown |
 
-- Diese vier Namen sind unter `media_base` reserviert. Unmittelbar unter
+**Was unter `media_base` liegt, ist eine Datei und keine Notiz — auch eine
+`.md`.** Sie wird nicht gelesen, nicht auf Frontmatter geprüft und nicht auf
+Verweise. Das betrifft allein die Clippings; die übrigen vier Arten tragen
+ohnehin keine Markdown-Dateien. Ein Clipping ist Rohmaterial: der Text einer
+Seite, so wie er abgerufen wurde. Wer ihn pflegt, macht ihn zu etwas anderem,
+und die Prüfsumme, die daneben in der Quellennotiz steht, wäre hinfällig. Was
+über die Seite zu sagen ist, sagt die Quellennotiz (HKF Config §3.8).
+
+- Diese fünf Namen sind unter `media_base` reserviert. Unmittelbar unter
   `media_base` darf **kein** anderes Verzeichnis liegen.
 - Innerhalb der vier Verzeichnisse ist jede Unterstruktur erlaubt, etwa
   `Images/personen/portraets/`.
 - Ein Verzeichnis wird angelegt, sobald Medien seiner Art vorkommen.
-- Kein Typverzeichnis darf unter `media_base` liegen und keines der vier
+- Kein Typverzeichnis darf unter `media_base` liegen und keines der fünf
   Medienverzeichnisse darf als `dir` einer Typdefinition beansprucht werden.
 - Die Medienart ergibt sich allein aus dem Verzeichnis, nicht aus der
   Dateiendung.
@@ -331,29 +343,32 @@ Einlesen weiter. Darum liegt sie nicht zwischen den übrigen Notizen, sondern
 mit ihresgleichen unter `source_base`:
 
 ```text
-<source_base>/<verzeichnis des typs>/<dateiname>.md
+<source_base>/<dateiname>.md
 ```
 
-**Welcher Typ ein Quelltyp ist, sagt seine Typdefinition.** Sie trägt
-`is_source: true` (HKF Config §3.1). Die Angabe verschiebt allein den Ort und
-sonst nichts: Das Verzeichnis bestimmt ein Quelltyp über `dir` wie jeder
-andere, und die Vorgabe aus §3.7 gilt unverändert — `book` liegt also in
-`<source_base>/Books/`.
+**Der Typ `source` ist der einzige ohne Typverzeichnis.** Er liegt unmittelbar
+unter seinem Bereich, und seine Notiz-ID ist damit der bloße Dateiname
+(Regel 4). Ein Verzeichnis wäre reine Verdopplung: `source_base` trägt genau
+diesen einen Typ, und `50-Sources/Sources/` sagt nichts, was `50-Sources/`
+nicht schon sagt.
+
+Ein Quelltyp ist darum auch nichts, was eine Ablage selbst anlegt. Was ein
+Werk voneinander unterscheidet — Buch, Aufsatz, Video, Webseite —, trägt die
+Property `kind` (HKF Config §3.8).
 
 - Vorgabe für `source_base` ist `50-Sources` (A.1).
-- Unmittelbar unter `source_base` liegen **nur** Verzeichnisse von Quelltypen.
-- Kein Verzeichnis eines anderen Typs darf unter `source_base` liegen, und
-  `source_base` selbst darf von keiner Typdefinition als `dir` beansprucht
-  werden.
-- Innerhalb eines Quellenverzeichnisses ist jede Unterstruktur erlaubt, wie
-  bei jedem Typverzeichnis.
+- Unmittelbar unter `source_base` liegen die **Quellennotizen**, kein
+  Typverzeichnis.
+- `source_base` selbst darf von keiner Typdefinition als `dir` beansprucht
+  werden, und kein `dir` darf darunter liegen.
+- Unterverzeichnisse sind erlaubt, wie bei jedem Typverzeichnis; die Notiz-ID
+  trägt sie dann mit.
 
-Warum nicht einfach ein mehrteiliges `dir`, also `dir: 50-Sources/Books`? Weil
-der Ort dann in jeder betroffenen Typdefinition stünde statt einmal in der
-Wurzeldatei, und weil eine Ablage ihn so nicht verlegen könnte, ohne jede
-davon anzufassen. Die Notiz-ID bliebe außerdem am Ort kleben: So heißt sie
-`Books/economy-1832` und nicht `50-Sources/Books/economy-1832`, und ein Umzug
-des Bereichs ändert sie nicht.
+Warum überhaupt ein eigener Bereich und nicht `dir: 50-Sources` am Typ? Weil
+der Ort dann in der Typdefinition stünde statt in der Wurzeldatei, und weil
+eine Ablage ihn so nicht verlegen könnte, ohne sie anzufassen. Die Notiz-ID
+bliebe außerdem am Ort kleben: So heißt sie `economy-1832` und nicht
+`50-Sources/economy-1832`, und ein Umzug des Bereichs ändert sie nicht.
 
 ### 3.2.3 Konfigurationsverzeichnisse
 
@@ -817,19 +832,19 @@ Für einen Wert wird der Reihe nach ermittelt:
    bleibt die Notiz-ID. Welcher Bereich zutrifft, muss nicht bekannt sein —
    sie schließen einander aus (§3.1).
 4. **Mediendatei erkennen.** Liegt `ziel` unter `<media_base>/Images/`,
-   `/Videos/`, `/Audios/` oder `/Documents/`, ist es eine Mediendatei und
-   keine Notiz. Die Medienart ergibt sich aus dem Verzeichnis. Ist eine
+   `/Videos/`, `/Audios/`, `/Documents/` oder `/Clippings/`, ist es eine
+   Mediendatei und keine Notiz. Die Medienart ergibt sich aus dem Verzeichnis. Ist eine
    Medienart gefordert, MUSS sie eine der genannten sein. Zulässig ist das
    nur für `hkf-file`; für `hkf-link` ist es ein Fehler. Die Prüfung endet
    hier. Für `hkf-file` endet sie umgekehrt hier auch dann, wenn das Ziel
    **keine** Mediendatei ist — dann als Fehler.
 5. **Typverzeichnis suchen.** Gesucht wird die Typdefinition, deren
-   Verzeichnis ein **segmentweises Präfix** der Notiz-ID ist. Das Verzeichnis
-   ist `<source_base>/<dir>`, wenn die Typdefinition `is_source: true` trägt,
-   sonst `<dir>` (§3.2.2). Der Vergleich läuft über ganze
-   Pfadsegmente: `Persons` ist ein Präfix von `Persons/historisch/ada`,
-   aber nicht von `Persons-archiv/ada`. Nach §3.2 trifft höchstens eine
-   Typdefinition zu.
+   Verzeichnis ein **segmentweises Präfix** der Notiz-ID ist. Der Vergleich
+   läuft über ganze Pfadsegmente: `Persons` ist ein Präfix von
+   `Persons/historisch/ada`, aber nicht von `Persons-archiv/ada`. Nach §3.2
+   trifft höchstens eine Typdefinition zu. Trifft keine zu, war das Ziel eine
+   Quellennotiz: Sie liegt ohne Typverzeichnis unter `source_base` (§3.2.2),
+   und in Schritt 3 wurde genau dieses Präfix abgezogen.
 6. **Tatsächlichen Typ bestimmen.** Er ist der Typname der gefundenen
    Typdefinition.
 7. **Vergleichen.** Ist ein Zieltyp angegeben, MUSS der tatsächliche Typ
@@ -1160,17 +1175,25 @@ Jede andere `.md`-Datei wird **übergangen** — kommentarlos, nicht als Befund.
 Sie ist kein Fehler, sondern Beiwerk der Lieferung. Genau das erlaubt einem
 Bundle, ein README zu haben, ohne dass es als Notiz in der Wissensbasis landet.
 
+**Ein Verzeichnis `Clippings/` ist davon ausgenommen.** Eine `.md` darin ist
+ein Clipping — der erfasste Text einer Webseite — und wird als Mediendatei
+übernommen, nicht übergangen. Die Ausnahme ist nötig, weil die Medienart einer
+`.md` nicht aus der Endung folgen kann; hier sagt sie das Verzeichnis. In der
+aufnehmenden Wissensbasis landet sie unter `<media_base>/Clippings/` und wird
+dort nicht mehr geprüft (§3.2.1).
+
 `hbundle.md` ist ausgenommen: Sie trägt `type: bundle`, ist aber keine Notiz
 (§3.1), sondern die Wurzeldatei. Eine weitere Datei mit `type: bundle` gehört
 nicht in ein Bundle (§4.1).
 
 **Wohin die Notiz kommt.** Nicht dorthin, wo sie in der Lieferung lag, sondern
 nach `<bereich>/<dir des Typs>/<dateiname>` in der aufnehmenden
-Wissensbasis. Der Bereich folgt aus dem Typ (§3.2): `config_base` für
-`typedef` und `proptype`, `source_base` bei `is_source: true`, sonst
-`wiki_base`. Das `dir` steht in deren Typdefinition; kennt
-sie den Typ nicht, entsteht eine vorläufige und es gilt die Vorgabe aus §3.7
-(§5.4). Der Dateiname bleibt.
+Wissensbasis. Der Bereich folgt aus dem Typnamen (§3.2): `config_base` für
+`typedef` und `proptype`, `source_base` für `source`, sonst `wiki_base`. Das
+`dir` steht in deren Typdefinition; kennt sie den Typ nicht, entsteht eine
+vorläufige und es gilt die Vorgabe aus §3.7 (§5.4). Führt der Typ kein
+Verzeichnis — `source` führt keines —, entfällt das mittlere Segment und die
+Notiz kommt nach `<bereich>/<dateiname>`. Der Dateiname bleibt.
 
 Damit hängt der Ort einer Quellennotiz allein an der aufnehmenden
 Wissensbasis. Eine Lieferung muss von `source_base` nichts wissen, und
@@ -2390,9 +2413,9 @@ nicht als Befund.
    und keine weitere Ablage darunter liegt,
 2. `Typedefs` und `Proptypes` unter `config_base` und `Bundles` unter
    `wiki_base` existieren, soweit sie nicht leer wären, unter `media_base` nur
-   die vier Medienverzeichnisse aus §3.2.1 liegen, unter `source_base` nur
-   Verzeichnisse von Quelltypen (§3.2.2) und unter `config_base` nur
-   `Typedefs` und `Proptypes` (§3.2.3),
+   die fünf Medienverzeichnisse aus §3.2.1 liegen, unter `source_base` kein
+   Typverzeichnis (§3.2.2) und unter `config_base` nur `Typedefs` und
+   `Proptypes` (§3.2.3),
 3. die Grundausstattung aus §3.8 vorhanden ist — jede Typdefinition und jeder
    Property-Typ aus HKF Config,
 4. jeder davon der dortigen Fassung entspricht,
@@ -2452,7 +2475,7 @@ diese Properties:
 | `hkf` | text | Pflicht | optional | Formatversion, in dieser Fassung `"1.0"` |
 | `name` | text | Pflicht | — | Anzeigename der HKB |
 | `wiki_base` | text | optional | ohne Wirkung | Bereich des Inhalts (§3.2); Vorgabe `40-Wiki` |
-| `source_base` | text | optional | ohne Wirkung | Bereich der Quellen (§3.2.2); Vorgabe `50-Sources` |
+| `source_base` | text | optional | ohne Wirkung | Bereich der Quellennotizen (§3.2.2); Vorgabe `50-Sources` |
 | `media_base` | text | optional | ohne Wirkung | Bereich der Medien (§3.2.1); Vorgabe `80-Media` |
 | `config_base` | text | optional | ohne Wirkung | Bereich von `Typedefs` und `Proptypes` (§3.2.3); Vorgabe `90-System` |
 | `timezone` | text | optional | optional | IANA-Zonenname für Ortszeiten (§3.4) |
@@ -2643,7 +2666,7 @@ proptyp-angabe = proptyp-name [ "-list" ]
 
 zieltypen     = typname *( "," typname )
 medienarten   = medienart *( "," medienart )
-medienart     = "image" / "video" / "audio" / "document"
+medienart     = "image" / "video" / "audio" / "document" / "clipping"
 
 typname       = kebab
 proptyp-name  = kebab

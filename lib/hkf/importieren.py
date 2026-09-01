@@ -29,7 +29,8 @@ _ARTEN = [("image", "png jpg jpeg gif webp svg avif bmp tif tiff heic"),
 ENDUNGEN = {e: art for art, liste in _ARTEN for e in liste.split()}
 QUELLBASIS = "Sources"        # Vorgabe fuer source_base (§3.1)
 ARTVERZEICHNIS = {"image": "Images", "video": "Videos",
-                  "audio": "Audios", "document": "Documents"}
+                  "audio": "Audios", "document": "Documents",
+                  "clipping": "Clippings"}
 
 # §3.5.1 — ein Bundle darf sie nicht umdefinieren (§6.1 Schritt 3)
 # §3.8 — die Kern-Typen der Grundausstattung. Jede konforme HKB fuehrt sie
@@ -57,9 +58,18 @@ STANDARD_PROPTYPES = {
     "hkf-phone", "hkf-url", "hkf-wikidata", "hkf-year"}
 
 
-def medienart(name):
-    """Aus der Endung, im Zweifel `document` (§4.3)."""
-    return ENDUNGEN.get(name.rsplit(".", 1)[-1].lower(), "document")
+def medienart(rel):
+    """Aus dem Verzeichnis, sonst aus der Endung, im Zweifel `document` (§4.3).
+
+    Bei einem Clipping kann die Endung nichts sagen: Es ist Markdown wie eine
+    Notiz. Darum entscheidet hier das Verzeichnis — `Clippings/` ist in einer
+    Lieferung dafuer reserviert (§4.3), und in einer HKB ist es das fuenfte
+    Medienverzeichnis (§3.2.1).
+    """
+    teile = rel.replace(os.sep, "/").split("/")
+    if "Clippings" in teile[:-1]:
+        return "clipping"
+    return ENDUNGEN.get(rel.rsplit(".", 1)[-1].lower(), "document")
 
 
 def jetzt():
@@ -110,21 +120,27 @@ class Plan(object):
         """`<bereich>/<verzeichnis>` — wo die Notizen des Typs wirklich liegen."""
         b = self.bereiche[_bereich(name, daten)]
         d = _verzeichnis(name, daten)
-        return "%s/%s" % (b, d) if b else d
+        return "/".join(x for x in (b, d) if x)
 
     def notizpfad(self, rel):
         """Absoluter Pfad zu einer Notiz-ID (§3.2). `rel` traegt `.md`."""
-        verz = rel.split("/", 1)[0]
-        return os.path.join(self.hkb, self.bereich_von(verz), rel)
+        return os.path.join(self.hkb, self.bereich_von(rel), rel)
 
-    def bereich_von(self, verz):
-        """Der Bereich, unter dem dieses Typverzeichnis liegt.
+    def bereich_von(self, rel):
+        """Der Bereich, unter dem diese Notiz-ID liegt.
 
         Ein Medienpfad traegt seinen Bereich schon (§4.3 rechnet ihn beim
         Uebernehmen ein); davor gehoert nichts weiter als der Ablagepfad.
+
+        Traegt die ID gar kein Verzeichnis, ist sie eine Quellennotiz: Der Typ
+        `source` ist der einzige ohne (§3.2.2), und §3.7.1 Schritt 5 loest
+        genau so auf.
         """
+        verz = rel.split("/", 1)[0]
         if self.media_basis and verz == self.media_basis:
             return ""
+        if "/" not in rel:
+            return self.bereiche["source_base"]
         if verz in ("Typedefs", "Proptypes"):
             return self.bereiche["config_base"]
         for name, tv in self.typen.items():
@@ -134,8 +150,7 @@ class Plan(object):
 
     def praefix(self, rel):
         """Ablagepfad und Bereich vor einer Notiz-ID (§3.6)."""
-        verz = rel.split("/", 1)[0]
-        return "/".join(x for x in (self.ablagepfad, self.bereich_von(verz)) if x)
+        return "/".join(x for x in (self.ablagepfad, self.bereich_von(rel)) if x)
 
     def link(self, rel, alias):
         """Qualifizierter Wikilink nach §3.6 — mit Praefix, ohne `.md`."""
@@ -171,7 +186,9 @@ def _sammeln(quelle):
                 continue
             p = os.path.join(r, f)
             rel = os.path.relpath(p, quelle).replace(os.sep, "/")
-            if not f.endswith(".md"):
+            if not f.endswith(".md") or "Clippings" in rel.split("/")[:-1]:
+                # §4.3: `Clippings/` ist reserviert — eine `.md` darin ist eine
+                # Mediendatei und keine Notiz.
                 medien.append((p, rel))
                 continue
             if rel == "hbundle.md":
@@ -314,21 +331,27 @@ def _vorhandene_typen(plan):
     return aus
 
 
-def _verzeichnis(name, daten):
-    """Das Typverzeichnis (§3.7) — ohne Bereich.
+def _verzeichnis(name, daten=None):
+    """Das Typverzeichnis (§3.7) — ohne Bereich, leer bei `source`.
 
     Die Notiz-ID ist `<verzeichnis>/<dateiname>` und traegt den Bereich
     nicht (§3.2 Regel 4): Typverzeichnisse sind eindeutig, also ist die ID es
     auch, und ein Umzug des Bereichs laesst sie unberuehrt.
+
+    `source` fuehrt als einziger Typ keines. Er liegt unmittelbar unter
+    `source_base` (§3.2.2), und seine Notiz-ID ist der blosse Dateiname.
     """
+    if name == "source":
+        return ""
+    daten = daten or {}
     return str(daten.get("dir") or (name[:1].upper() + name[1:] + "s"))
 
 
-def _bereich(name, daten):
-    """Unter welchem Bereich der Typ liegt (§3.2)."""
+def _bereich(name, daten=None):
+    """Unter welchem Bereich der Typ liegt (§3.2) — am Typnamen erkennbar."""
     if name in ("typedef", "proptype"):
         return "config_base"
-    if daten.get("is_source") is True:
+    if name == "source":
         return "source_base"
     return "wiki_base"
 
@@ -531,7 +554,9 @@ def _notizen_planen(plan, kandidaten, bundle_id, entscheidungen, force):
             continue                                  # Typ abgewiesen
         dirn = plan.typen[typ]["dir"]
         dateiname = os.path.basename(rel)
-        ziel_rel = "%s/%s" % (dirn, dateiname)
+        # Fuehrt der Typ kein Verzeichnis, entfaellt das mittlere Segment
+        # (§4.3) — `source` ist der Fall.
+        ziel_rel = "/".join(x for x in (dirn, dateiname) if x)
         # §6.1 Schritt 4/5: `extends` nennt die Notiz, die fortgeschrieben
         # wird — sie steht in der aufnehmenden Wissensbasis, nicht hier.
         erweitert = str(daten.get("extends") or "").strip()
@@ -730,22 +755,24 @@ def _umschreiben(plan, text, karte, namen, woher):
 # ── Schritt 9: Verknuepfen (§5.6) ───────────────────────────────────────
 
 def _notizbereiche(plan):
-    """Die drei Bereiche, unter denen Notizen liegen (§3.2), absolut."""
-    aus = []
+    """[(name, pfad)] der Bereiche, unter denen Notizen liegen (§3.2)."""
+    aus, gesehen = [], set()
     for k in ("wiki_base", "source_base", "config_base"):
         p = os.path.join(plan.hkb, plan.bereiche[k])
-        if os.path.isdir(p) and p not in aus:
-            aus.append(p)
+        if os.path.isdir(p) and p not in gesehen:
+            gesehen.add(p)
+            aus.append((k, p))
     return aus
 
 
 def _bestand(plan):
     """Alle Notizen, wie sie nach dem Import dastuenden."""
     aus = {}
-    for wurzel in _notizbereiche(plan):
+    for schluessel, wurzel in _notizbereiche(plan):
         for p in ablage.dateien(wurzel):
             rel = os.path.relpath(p, wurzel).replace(os.sep, "/")
-            if "/" not in rel:
+            # Ohne Verzeichnis liegt nur die Quellennotiz (§3.2.2).
+            if "/" not in rel and schluessel != "source_base":
                 continue
             daten, body = frontmatter.lesen(p)
             if "type" not in daten:

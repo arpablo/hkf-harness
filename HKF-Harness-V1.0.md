@@ -39,7 +39,7 @@ eigenem Basispfad in der Wurzeldatei:
 
 ```text
 40-Wiki/      der Inhalt — Persons, Terms, Concepts, Bundles …
-50-Sources/   die Quellen — Books, Articles, Clippings, Webpages
+50-Sources/   die Quellennotizen, ohne Typverzeichnis darunter
 80-Media/     Images, Videos, Audios, Documents
 90-System/    Typedefs, Proptypes
 ```
@@ -49,7 +49,7 @@ Zahlenpräfixe ordnen die vier in jedem Dateibrowser; die Namen sind Vorgaben
 und lassen sich in `hkb.md` ändern.
 
 **Die Notiz-ID trägt den Bereich nicht.** Sie ist `<typverzeichnis>/<name>` —
-`Persons/ada-lovelace`, `Books/economy-1832`, `Typedefs/person` — und bleibt
+`Persons/ada-lovelace`, `economy-1832`, `Typedefs/person` — und bleibt
 darum stehen, wenn ein Bereich umzieht.
 
 **Eine Lieferung kennt keine Bereiche.** Dort liegt eine Notiz, wo sie will;
