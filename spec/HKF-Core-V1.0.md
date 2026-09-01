@@ -563,9 +563,10 @@ Dateiname ist Nachname-Vorname in kebab-case.
 
 - `dir` ist der Ablageort der Instanzen als **Pfad relativ zum Basispfad**.
   Optional; Vorgabe ist der Typname mit **großem Anfangsbuchstaben** und
-  angehängtem `s`: aus `person` wird `Persons`. Die Kern-Typen und das
-  Vokabular aus HKF Config kommen damit aus; nur ein Typ, der abweichend
-  abgelegt werden soll, schreibt ihn.
+  angehängtem `s`: aus `person` wird `Persons`. Fast alle Typen aus HKF Config
+  kommen damit aus; nur ein Typ, der abweichend abgelegt werden soll, schreibt
+  ihn — dort sind das `city` und `country`, weil die Regel `Citys` und
+  `Countrys` ergäbe.
 
   Die Regel ist mechanisch und kein Sprachgefühl: erster Buchstabe groß, Rest
   unverändert, `s` angehängt. `werkstoff` wird zu `Werkstoffs`, `hkf-link` zu

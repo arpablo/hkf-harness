@@ -2,8 +2,9 @@
 type: typedef
 title: Staat
 description: Ein Staat.
+dir: Countries
 created: 2026-08-31
-modified: 2026-08-31T18:06:05
+modified: 2026-09-01T09:40:00
 modified_by: claude-opus-5
 ---
 

@@ -52,10 +52,12 @@ Was der Typ meint und was er nicht meint.
 
 - **`description` ist Pflicht und einzeilig** — sie erscheint in der
   Typtabelle der Wurzeldatei.
-- **`dir` ist freigestellt.** Ohne es gilt der Typname mit angehängtem `s`.
-  Die Regel ist mechanisch, kein Sprachgefühl: `werkstoff` wird zu
-  `werkstoffs`. Wer das nicht will, setzt `dir` — und dann so, dass es kein
-  anderer Typ beansprucht und nicht unter `media_base` liegt.
+- **`dir` ist freigestellt.** Ohne es gilt der groß geschriebene Typname mit
+  angehängtem `s`. Die Regel ist mechanisch, kein Sprachgefühl: `werkstoff`
+  wird zu `Werkstoffs`, und in HKF Config schreiben `city` und `country` genau
+  deshalb ein `dir` — `Citys` und `Countrys` wollte niemand lesen. Wer
+  abweicht, setzt `dir` so, dass es kein anderer Typ beansprucht und nicht
+  unter `media_base` liegt.
 - **Eine Vorgabe steht nur dort, wo Abwesenheit wirklich diesen Wert
   bedeutet.** `genormt` ohne Angabe heißt: nicht genormt — das stimmt. Eine
   Sprache ohne Angabe heißt dagegen „unbekannt", nicht „deutsch"; dort bleibt

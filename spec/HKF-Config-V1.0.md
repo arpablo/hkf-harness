@@ -178,8 +178,8 @@ Wissensbasis über sich selbst spricht.
 | `person` | `Persons` | Ein Mensch. |
 | `organisation` | `Organisations` | Eine Körperschaft: Unternehmen, Institut, Verein, Behörde. |
 | `place` | `Places` | Ein geographischer Ort. |
-| `city` | `Citys` | Eine Stadt. |
-| `country` | `Countrys` | Ein Staat. |
+| `city` | `Cities` | Eine Stadt. |
+| `country` | `Countries` | Ein Staat. |
 | `event` | `Events` | Ein Geschehen zu einer bestimmten Zeit. |
 | `source` | `Sources` | Eine zitierbare Quelle: Buch, Aufsatz, Webseite, Vortrag. |
 | `term` | `Terms` | Ein definierter Begriff. |
@@ -190,11 +190,20 @@ Wissensbasis über sich selbst spricht.
 | `specification` | `Specifications` | Ein normatives Dokument, an das sich die Wissensbasis hält. |
 | `hint` | `Hints` | Eine Festlegung, wie diese Wissensbasis geführt wird. |
 
-**Kein Typ dieses Dokuments trägt ein `dir`.** Ihre Verzeichnisse ergeben sich
-ausnahmslos aus der Vorgabe „Typname groß geschrieben, mit angehängtem `s`"
-(Core §3.7). Ein Werkzeug kennt den Ablageort damit, ohne die Typdefinition zu
-lesen. Nicht zu verwechseln mit der Property `dir`, die `typedef` in §3.1
-zusichert: Die trägt eine *andere* Typdefinition, wenn sie abweichen will.
+**Zwei Typen tragen ein `dir`, die anderen fünfzehn nicht.** Deren
+Verzeichnisse ergeben sich aus der Vorgabe „Typname groß geschrieben, mit
+angehängtem `s`" (Core §3.7); ein Werkzeug kennt den Ablageort damit, ohne die
+Typdefinition zu lesen.
+
+Die Vorgabe ist mechanisch und kein Sprachgefühl — bei `city` und `country`
+ergäbe sie `Citys` und `Countrys`. Beide schreiben darum ein `dir` und heißen
+`Cities` und `Countries`. Der Preis ist genau der, gegen den die Vorgaberegel
+sonst schützt: Wer diese beiden Verzeichnisse sucht, muss die Typdefinition
+lesen. Für zwei Namen, die jeder Leser sonst für einen Fehler hielte, ist er
+tragbar.
+
+Nicht zu verwechseln mit der Property `dir`, die `typedef` in §3.1 zusichert:
+Die trägt eine *andere* Typdefinition, wenn sie abweichen will.
 
 **Sieben Properties sind Pflicht**, alle übrigen optional: `description` in
 `typedef`, `form` in `proptype`, `id` und `description` in `bundle`, `version`
@@ -698,6 +707,7 @@ jede Notiz dieses Typs. Ohne `applies_to` gilt er für die ganze Wissensbasis.
 type: typedef
 title: Stadt
 description: Eine Stadt.
+dir: Cities
 ---
 
 # Properties
@@ -735,6 +745,7 @@ zwei Gegenstände.
 type: typedef
 title: Staat
 description: Ein Staat.
+dir: Countries
 ---
 
 # Properties
@@ -774,7 +785,8 @@ Eine Wissensbasis führt HKF Config konform, wenn
 2. jede Typdefinition aus §3 und jeder Property-Typ aus §2 vorhanden ist und
    der dortigen Fassung entspricht — Verzeichnis, Property-Namen und deren
    Typangaben,
-3. kein Typ dieses Dokuments ein `dir` trägt, und
+3. allein `city` und `country` ein `dir` tragen, und zwar `Cities`
+   beziehungsweise `Countries`, und
 4. die `values` der beiden Aufzählungen aus §2.2 nicht gekürzt wurden.
 
 Vorhanden heißt: als Notiz in `Typedefs/` beziehungsweise `Proptypes/`. Ob
