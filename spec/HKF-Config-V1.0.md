@@ -224,7 +224,7 @@ Verzeichnisse ergeben sich aus der Vorgabe „Typname groß geschrieben, mit
 angehängtem `s`" (Core §3.7); ein Werkzeug kennt den Ablageort damit, ohne die
 Typdefinition zu lesen.
 
-**Vier Typen tragen `source: true`** — `book`, `article`, `clipping` und
+**Vier Typen tragen `is_source: true`** — `book`, `article`, `clipping` und
 `webpage`. Ihre Verzeichnisse liegen nicht unter `base`, sondern unter
 `source_base`, also nach Vorgabe in `Sources/Books`, `Sources/Articles`,
 `Sources/Clippings` und `Sources/Webpages` (Core §3.2.2). Die Spalte oben
@@ -284,7 +284,7 @@ description: Registriert einen Typ und legt sein Verzeichnis fest.
 | description | text | ja | — | Einzeiliger Zweck; erscheint in der Typtabelle der Wurzeldatei |
 | dir | text | nein | — | Verzeichnis der Instanzen; Vorgabe ist der groß geschriebene Typname mit angehängtem `s` (Core §3.7) |
 | provisional | checkbox | nein | false | Beim Import angelegt, weil niemand den Typ definiert hat (Core §5.4) |
-| source | checkbox | nein | false | Die Instanzen dieses Typs sind Quellen; ihr Verzeichnis liegt unter `source_base` statt unter `base` (Core §3.2.2) |
+| is_source | checkbox | nein | false | Die Instanzen dieses Typs sind Quellen; ihr Verzeichnis liegt unter `source_base` statt unter `base` (Core §3.2.2) |
 
 # Konventionen
 
@@ -292,7 +292,7 @@ Der Dateiname ist der Typname (Core §3.7). Der Body trägt die Property-Tabelle
 die Konventionen des Typs. `dir` ist ein relativer Pfad zum Basispfad, mit
 `/` als Trennzeichen und beliebig vielen Abschnitten, ohne führenden und
 abschließenden `/` und ohne `.`- oder `..`-Abschnitte; er darf nicht unter
-`media_base` liegen und, wenn der Typ nicht `source: true` trägt, auch nicht
+`media_base` liegen und, wenn der Typ nicht `is_source: true` trägt, auch nicht
 unter `source_base` (Core §3.2.2).
 
 `provisional` steht nur an einer Typdefinition, nur mit dem Wert `true` und
@@ -300,7 +300,13 @@ nur in einer HKB — ein Bundle enthält keine vorläufige Typdefinition (Core �
 Eine solche Notiz trägt kein `dir`, keinen Abschnitt `# Properties` und kein
 `bundles`.
 
-`source` verschiebt allein den Ort und sonst nichts: Ein Quelltyp bestimmt
+**Warum `is_source` und nicht `source`.** Der kürzere Name ist vergeben: `source`
+ist die Property, mit der eine Bundle-Notiz sagt, woher die Lieferung stammt
+(§3.3). Zwei Bedeutungen unter einem Namen wären genau die Namensdrift, gegen
+die dieselbe Ablage anderswo lintet — und ein Schema, das über alle Notizen
+gilt, könnte sie nicht auseinanderhalten.
+
+`is_source` verschiebt allein den Ort und sonst nichts: Ein Quelltyp bestimmt
 sein Verzeichnis über `dir` wie jeder andere, und die Vorgabe gilt
 unverändert; nur hängt das Verzeichnis dann unter `source_base` statt unter
 `base`. Die Angabe steht an der Typdefinition und nicht als Liste in der
@@ -506,7 +512,7 @@ Zeiten gelten in der `timezone` der Ablage (Core §3.4).
 type: typedef
 title: Buch
 description: 'Ein Werk für sich: Monographie, Sammelband, Bericht.'
-source: true
+is_source: true
 ---
 
 # Properties
@@ -560,7 +566,7 @@ auf die Quelle verweist.
 type: typedef
 title: Aufsatz
 description: 'Ein Beitrag in einem größeren Werk: Zeitschrift, Zeitung, Sammelband.'
-source: true
+is_source: true
 ---
 
 # Properties
@@ -614,7 +620,7 @@ auf die Quelle verweist.
 type: typedef
 title: Erfasste Webseite
 description: Eine erfasste Webseite; ihr Text steht im Body der Notiz.
-source: true
+is_source: true
 ---
 
 # Properties
@@ -634,11 +640,19 @@ source: true
 
 # Konventionen
 
-Der Body trägt den **erfassten Text der Seite**, so wie er abgerufen wurde,
-und darunter die Zusammenfassung. Das ist der Unterschied zu `webpage`, und er
-ist der ganze Unterschied: Die Property-Tabellen der beiden sind bis auf
-nichts gleich, aber ein Clipping hat den Text, eine Webpage nur die Adresse.
-Wer wissen will, was tatsächlich im Haus ist, sieht in `Clippings/` nach.
+Der Body trägt zuerst die **Zusammenfassung**, darunter den **erfassten Text
+der Seite**, so wie er abgerufen wurde. Die Reihenfolge ist nicht gleichgültig:
+Ein Clipping bringt leicht tausend Zeilen mit, und was ein Leser zuerst
+braucht, ist die Zusammenfassung — sie unter den Rohtext zu setzen macht sie
+unauffindbar.
+
+Der erfasste Text steht unter einer eigenen Überschrift, damit er sich vom
+Geschriebenen trennen lässt und nicht so aussieht, als wäre er es.
+
+Dass er überhaupt da ist, ist der Unterschied zu `webpage`, und er ist der
+ganze Unterschied: Die Property-Tabellen der beiden sind gleich, aber ein
+Clipping hat den Text, eine Webpage nur die Adresse. Wer wissen will, was
+tatsächlich im Haus ist, sieht in `Clippings/` nach.
 
 Damit braucht HKF keine eigene Rohtextschicht neben den Notizen: Ein Clipping
 **ist** sie. `checksum` sagt beim nächsten Einlesen, ob sich die Seite seither
@@ -666,7 +680,7 @@ auf die Quelle verweist.
 type: typedef
 title: Webseite
 description: Eine zitierte Webseite; ihr Text bleibt draußen.
-source: true
+is_source: true
 ---
 
 # Properties
@@ -725,7 +739,6 @@ description: Ein definierter Begriff.
 |---|---|---|---|---|
 | lang | hkf-lang | ja | — | Sprache des Begriffs |
 | broader | hkf-link:term | nein | — | Übergeordneter Begriff |
-| sources | hkf-link-list | nein | — | Belege der Definition; Verweise auf Notizen eines Quelltyps (Core §3.2.2) |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
 
@@ -762,7 +775,6 @@ description: Eine Sache und der Stand des Wissens über sie.
 |---|---|---|---|---|
 | terms | hkf-link-list:term | nein | — | Die Begriffe, unter denen die Wissensbasis die Sache führt |
 | broader | hkf-link:concept | nein | — | Übergeordnetes Konzept |
-| sources | hkf-link-list | nein | — | Quellen, aus denen der Stand des Wissens stammt; Verweise auf Notizen eines Quelltyps (Core §3.2.2) |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
 
@@ -795,7 +807,6 @@ description: Eine Gegenüberstellung mehrerer Gegenstände entlang benannter Dim
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
 | compares | hkf-link-list | ja | — | Die verglichenen Gegenstände, mindestens zwei |
-| sources | hkf-link-list | nein | — | Quellen des Vergleichs; Verweise auf Notizen eines Quelltyps (Core §3.2.2) |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
 
 # Konventionen
@@ -848,7 +859,6 @@ description: Eine Notiz ohne spezifischeren Typ.
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
 | about | hkf-link-list | nein | — | Worauf sich die Notiz bezieht |
-| sources | hkf-link-list | nein | — | Verwendete Quellen; Verweise auf Notizen eines Quelltyps (Core §3.2.2) |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
 
 # Konventionen

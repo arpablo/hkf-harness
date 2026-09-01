@@ -13,7 +13,6 @@ modified_by: claude-opus-5
 |---|---|---|---|---|
 | terms | hkf-link-list:term | nein | — | Die Begriffe, unter denen die Wissensbasis die Sache führt |
 | broader | hkf-link:concept | nein | — | Übergeordnetes Konzept |
-| sources | hkf-link-list | nein | — | Quellen, aus denen der Stand des Wissens stammt; Verweise auf Notizen eines Quelltyps (Core §3.2.2) |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
 

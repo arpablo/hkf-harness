@@ -55,8 +55,16 @@ class Bestand(object):
         self.hkb = hkb
         self.art = art
         wurzeldatei = "hkb.md" if art == "hkb" else "hbundle.md"
-        self.wurzel, self.wurzel_body = frontmatter.lesen(
-            os.path.join(hkb, wurzeldatei))
+        # Unlesbares Frontmatter ist ein Befund, kein Abbruch. Es wird hier
+        # gesammelt und in `_unlesbar` gemeldet; die Datei zaehlt dann als
+        # leer, damit die uebrigen Pruefungen weiterlaufen (Anhang B.4).
+        self.unlesbar = []
+        try:
+            self.wurzel, self.wurzel_body = frontmatter.lesen(
+                os.path.join(hkb, wurzeldatei))
+        except frontmatter.Unlesbar as e:
+            self.unlesbar.append((wurzeldatei, e.grund))
+            self.wurzel, self.wurzel_body = {}, ""
         self.notizen, self.typdefs, self.proptypes = {}, {}, {}
         self.medien = set()
         if art == "hkb":
@@ -78,7 +86,11 @@ class Bestand(object):
             self.medien_namen.setdefault(rel.rsplit("/", 1)[-1], []).append(rel)
 
     def _eintrag(self, p, rel):
-        daten, body = frontmatter.lesen(p)
+        try:
+            daten, body = frontmatter.lesen(p)
+        except frontmatter.Unlesbar as e:
+            self.unlesbar.append((rel, e.grund))
+            daten, body = {}, ""
         kopf = notiz.teilen(io.open(p, encoding="utf-8").read())[0]
         return {"pfad": p, "rel": rel, "daten": daten, "body": body,
                 "kopf": kopf, "typ": str(daten.get("type") or "")}
@@ -542,15 +554,22 @@ def undeklariert(b):
     """--strict: je Typ und Property-Name, mit der Zahl der Notizen (§6.3)."""
     allgemein = {"type", "title", "description", "tags", "aliases", "cssclasses",
                  "status", "created", "modified", "modified_by", "bundles",
-                 "related", "rejected_links", "extends"}
+                 "related", "rejected_links", "extends", "sources"}
     je_typ, gesamt = {}, {}
     for rel, e in sorted(b.notizen.items()):
         typ = e["typ"]
         gesamt[typ] = gesamt.get(typ, 0) + 1
         if typ in KERN_TYPEN:
             continue
-        erlaubt = set(_property_tabelle(
-            b.typdefs.get(typ, {}).get("body", ""))) | allgemein
+        tabelle = b.typdefs.get(typ, {}).get("body", "")
+        if not tabelle and typ in grundtypen():
+            # Eine Lieferung liefert keinen Typ der Grundausstattung mit
+            # (§7.1 Punkt 2). Ohne die Vorlage zu befragen hielte die Pruefung
+            # jede Property einer solchen Notiz fuer undeklariert.
+            p = os.path.join(TEMPLATES, "hkb", "Typedefs", typ + ".md")
+            if os.path.isfile(p):
+                tabelle = frontmatter.lesen(p)[1]
+        erlaubt = set(_property_tabelle(tabelle)) | allgemein
         for k in e["daten"]:
             if k not in erlaubt:
                 je_typ.setdefault((typ, k), []).append(e["rel"])
@@ -834,14 +853,14 @@ def _quellenverzeichnisse(b, befunde):
     for name, e in sorted(b.typdefs.items()):
         d = str(e["daten"].get("dir") or "")
         if d and (d == b.quellbasis or d.startswith(b.quellbasis + "/")) and \
-                e["daten"].get("source") is not True:
+                e["daten"].get("is_source") is not True:
             befunde.append(Befund(e["rel"], "`dir` liegt unter `source_base`, der "
-                                            "Typ trägt aber kein `source: true` "
+                                            "Typ trägt aber kein `is_source: true` "
                                             "(§3.2.2)."))
 
 
-PRUEFUNGEN = PRUEFUNGEN + (_typangaben, _werte, _vorgaben, _medienverzeichnisse,
-                           _quellenverzeichnisse)
+PRUEFUNGEN = PRUEFUNGEN + (_typangaben, _werte, _vorgaben,
+                           _medienverzeichnisse, _quellenverzeichnisse)
 
 
 # ── Was nur für ein Bundle gilt (§4, §7.1) ──────────────────────────────

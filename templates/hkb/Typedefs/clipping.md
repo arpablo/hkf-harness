@@ -2,7 +2,7 @@
 type: typedef
 title: Erfasste Webseite
 description: Eine erfasste Webseite; ihr Text steht im Body der Notiz.
-source: true
+is_source: true
 created: 2026-09-01
 modified: 2026-09-01T10:00:00
 modified_by: claude-opus-5
@@ -25,11 +25,19 @@ modified_by: claude-opus-5
 
 # Konventionen
 
-Der Body trägt den **erfassten Text der Seite**, so wie er abgerufen wurde,
-und darunter die Zusammenfassung. Das ist der Unterschied zu `webpage`, und er
-ist der ganze Unterschied: Die Property-Tabellen der beiden sind bis auf
-nichts gleich, aber ein Clipping hat den Text, eine Webpage nur die Adresse.
-Wer wissen will, was tatsächlich im Haus ist, sieht in `Clippings/` nach.
+Der Body trägt zuerst die **Zusammenfassung**, darunter den **erfassten Text
+der Seite**, so wie er abgerufen wurde. Die Reihenfolge ist nicht gleichgültig:
+Ein Clipping bringt leicht tausend Zeilen mit, und was ein Leser zuerst
+braucht, ist die Zusammenfassung — sie unter den Rohtext zu setzen macht sie
+unauffindbar.
+
+Der erfasste Text steht unter einer eigenen Überschrift, damit er sich vom
+Geschriebenen trennen lässt und nicht so aussieht, als wäre er es.
+
+Dass er überhaupt da ist, ist der Unterschied zu `webpage`, und er ist der
+ganze Unterschied: Die Property-Tabellen der beiden sind gleich, aber ein
+Clipping hat den Text, eine Webpage nur die Adresse. Wer wissen will, was
+tatsächlich im Haus ist, sieht in `Clippings/` nach.
 
 Damit braucht HKF keine eigene Rohtextschicht neben den Notizen: Ein Clipping
 **ist** sie. `checksum` sagt beim nächsten Einlesen, ob sich die Seite seither

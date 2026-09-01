@@ -19,7 +19,8 @@ Eine Regel entscheidet, was kopiert wird:
 """
 import hashlib, io, os, re, shutil, unicodedata
 
-from . import frontmatter, notiz
+from . import TEMPLATES, frontmatter, notiz
+from .importieren import _property_tabelle
 
 VORGABE_INBOX = "~/hkf-inbox"
 ERLEDIGT = "erledigt"
@@ -35,6 +36,11 @@ CLIPPER = {"title": "title", "source": "url", "author": "authors",
            "description": "description", "tags": "tags"}
 
 MEDIEN = ("Media", "Documents")
+
+# In jeder Notiz erlaubt (Core A.2) — sie brauchen keinen Tabelleneintrag.
+ALLGEMEIN = ("type", "title", "description", "tags", "aliases", "cssclasses",
+             "status", "created", "modified", "modified_by", "extends",
+             "sources")
 
 
 class KeineInbox(Exception):
@@ -81,6 +87,17 @@ def stuecke(inbox):
 
 # ── Was ein Stueck ist ──────────────────────────────────────────────────
 
+def sieht_wie_clipping_aus(daten):
+    """Das Frontmatter des Obsidian Web Clipper, an seiner Form erkannt.
+
+    Nicht am `type`: Ein Vault, aus dem die Datei kommt, traegt dort seine
+    eigene Bezeichnung ein — `[[Clipping]]` etwa —, und die ist kein HKF-Typ.
+    Die Form ist verlaesslicher als die Selbstauskunft.
+    """
+    return bool(daten.get("source")) and bool(
+        daten.get("author") or daten.get("published"))
+
+
 def typ_erkennen(pfad):
     """(typ, grund). Fuer eine `.md` steht er im Frontmatter, sonst nirgends.
 
@@ -92,10 +109,13 @@ def typ_erkennen(pfad):
             os.path.splitext(pfad)[1].lstrip(".").upper() or "Datei")
     daten, _ = frontmatter.lesen(pfad)
     typ = str(daten.get("type") or "").strip()
-    if typ:
+    if typ in QUELLTYPEN:
         return typ, "steht im Frontmatter"
-    if daten.get("source") or daten.get("published") or "author" in daten:
-        return "clipping", "sieht nach einem Web-Clipping aus"
+    if sieht_wie_clipping_aus(daten):
+        return "clipping", ("sieht nach einem Web-Clipping aus"
+                            + (", `type` sagt %s" % typ if typ else ""))
+    if typ:
+        return None, "`type: %s` ist kein Quelltyp" % typ
     return None, "das Frontmatter nennt keinen `type`"
 
 
@@ -191,6 +211,56 @@ def _pflichtlücken(plan, typ, daten):
     return fehlt
 
 
+def _entlinken(wert):
+    """`[[A|B]]` → `B`, `[[A]]` → `A` ohne Pfad. Sonst unveraendert.
+
+    Ein Wikilink aus einem fremden Vault zeigt dorthin und loest hier nirgends
+    auf (§3.6). Als Text ist er richtig — dafuer nimmt `hkf-link-or-text`
+    beides (Config §2.1).
+    """
+    s = str(wert).strip()
+    if not (s.startswith("[[") and s.endswith("]]")):
+        return wert
+    innen = s[2:-2]
+    return (innen.split("|", 1)[1] if "|" in innen
+            else innen.rsplit("/", 1)[-1]).strip()
+
+
+def _erlaubt(typ):
+    """Was die Typdefinition der Grundausstattung zusichert, plus A.2."""
+    p = os.path.join(TEMPLATES, "hkb", "Typedefs", typ + ".md")
+    if not os.path.isfile(p):
+        return None
+    return set(_property_tabelle(frontmatter.lesen(p)[1])) | set(ALLGEMEIN) \
+        | set(("related",))
+
+
+def _gefiltert(plan, daten, typ, quelle):
+    """Fremdes Frontmatter auf das beschraenken, was der Typ zusichert.
+
+    Eine `.md` aus einem anderen Vault bringt dessen Vokabular mit. Es
+    ungefiltert zu uebernehmen hiesse, eine fremde Ordnung einzuschleppen —
+    und `hk-lint --strict` faende sie spaeter als undeklarierte Properties
+    wieder. Was nicht passt, wird verworfen und gemeldet, wie beim Clipping.
+    """
+    erlaubt = _erlaubt(typ)
+    if erlaubt is None:
+        return dict(daten)
+    aus, verworfen = {}, []
+    for key, wert in sorted(daten.items()):
+        if key in erlaubt:
+            aus[key] = wert
+        else:
+            verworfen.append(key)
+    if verworfen:
+        plan.melde("hinweis",
+                   "%s: %s gehört nicht zu `%s` und wurde verworfen."
+                   % (os.path.basename(quelle), ", ".join("`%s`" % k
+                                                          for k in verworfen), typ),
+                   "Von Hand nachtragen, was davon zählt.")
+    return aus
+
+
 def _clipping_abbilden(plan, daten, quelle):
     """Das Frontmatter des Web Clipper auf `clipping` abbilden.
 
@@ -217,8 +287,14 @@ def _clipping_abbilden(plan, daten, quelle):
             wert = int(m.group(0)) if m else None
         elif ziel == "accessed" and wert:
             wert = str(wert)[:10]
-        elif ziel == "authors" and wert:
-            wert = wert if isinstance(wert, list) else [str(wert)]
+        elif ziel in ("authors", "editors") and wert:
+            roh = wert if isinstance(wert, list) else [wert]
+            wert = [_entlinken(w) for w in roh]
+            if [str(w) for w in roh] != [str(w) for w in wert]:
+                plan.melde("hinweis",
+                           "%s: `%s` stand als Wikilink in einen fremden Vault "
+                           "und wurde zu Text." % (os.path.basename(quelle), key),
+                           "Auf eine Personennotiz umstellen, wenn es sie gibt.")
         if isinstance(wert, (dict,)) or (isinstance(wert, list)
                                          and any(isinstance(x, (dict, list))
                                                  for x in wert)):
@@ -263,12 +339,15 @@ def stueck(plan, quelle, typ=None, angaben=None, kopieren=True, heute=None,
         # Eine `.md` wird nie kopiert — sie *ist* die Notiz.
         roh_daten, roh_body = frontmatter.lesen(quelle)
         erkannt = str(roh_daten.get("type") or "").strip()
-        if erkannt == "clipping" or (not erkannt and not typ):
+        if erkannt not in QUELLTYPEN and sieht_wie_clipping_aus(roh_daten):
+            daten = _clipping_abbilden(plan, roh_daten, quelle)
+            typ = typ or "clipping"
+        elif erkannt == "clipping" or (not erkannt and not typ):
             daten = _clipping_abbilden(plan, roh_daten, quelle)
             typ = typ or "clipping"
         else:
-            daten = dict(roh_daten)
             typ = typ or erkannt
+            daten = _gefiltert(plan, roh_daten, typ, quelle)
         body = roh_body.strip("\n")
     if not typ:
         plan.abgebrochen = (
@@ -337,9 +416,12 @@ def hbundle(plan, bundle_id, beschreibung, version, titel=None):
     if not titel:
         titel = (plan.notizen[0]["titel"] if len(plan.notizen) == 1
                  else "%d Quellen" % len(plan.notizen))
+    # Jeder Wert durch `skalar`: Ein Titel mit Doppelpunkt waere sonst
+    # kein YAML mehr, und genau die tragen Aufsaetze staendig.
     kopf = ("hkf: \"1.0\"\ntype: bundle\nid: %s\ntitle: %s\n"
             "description: %s\nversion: %s"
-            % (bundle_id, titel, beschreibung, notiz.skalar(version)))
+            % (bundle_id, notiz.skalar(titel), notiz.skalar(beschreibung),
+               notiz.skalar(version)))
     zeilen = ["# Typen", "", "| Typ | Verzeichnis | Zweck |", "|---|---|---|"]
     zwecke = {"book": "Ein Werk für sich: Monographie, Sammelband, Bericht.",
               "article": "Ein Beitrag in einem größeren Werk: Zeitschrift, "

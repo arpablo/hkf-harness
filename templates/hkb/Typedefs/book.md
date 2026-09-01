@@ -2,7 +2,7 @@
 type: typedef
 title: Buch
 description: 'Ein Werk für sich: Monographie, Sammelband, Bericht.'
-source: true
+is_source: true
 created: 2026-09-01
 modified: 2026-09-01T10:00:00
 modified_by: claude-opus-5

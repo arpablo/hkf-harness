@@ -175,7 +175,7 @@ an ihrem Verzeichnis (§4.3).
 denselben Regeln. Anders als bei `media_base` ist die Vorgabe **nicht** leer,
 sondern `Sources`: Ein leerer Wert legte die Quellenverzeichnisse neben die
 übrigen Typverzeichnisse und höbe damit genau die Trennung auf, für die es die
-Property gibt. Wer keine Trennung will, vergibt kein `source: true`. In einem
+Property gibt. Wer keine Trennung will, vergibt kein `is_source: true`. In einem
 Bundle bleibt auch `source_base` ohne Wirkung (§4.3).
 
 Ihr Body enthält den Abschnitt `# Typen`:
@@ -322,7 +322,7 @@ mit ihresgleichen unter `source_base`:
 ```
 
 **Welcher Typ ein Quelltyp ist, sagt seine Typdefinition.** Sie trägt
-`source: true` (HKF Config §3.1). Die Angabe verschiebt allein den Ort und
+`is_source: true` (HKF Config §3.1). Die Angabe verschiebt allein den Ort und
 sonst nichts: Das Verzeichnis bestimmt ein Quelltyp über `dir` wie jeder
 andere, und die Vorgabe aus §3.7 gilt unverändert — `book` liegt also in
 `<source_base>/Books/`.
@@ -784,7 +784,7 @@ Für einen Wert wird der Reihe nach ermittelt:
    **keine** Mediendatei ist — dann als Fehler.
 5. **Typverzeichnis suchen.** Gesucht wird die Typdefinition, deren
    Verzeichnis ein **segmentweises Präfix** der Notiz-ID ist. Das Verzeichnis
-   ist `<source_base>/<dir>`, wenn die Typdefinition `source: true` trägt,
+   ist `<source_base>/<dir>`, wenn die Typdefinition `is_source: true` trägt,
    sonst `<dir>` (§3.2.2). Der Vergleich läuft über ganze
    Pfadsegmente: `Persons` ist ein Präfix von `Persons/historisch/ada`,
    aber nicht von `Persons-archiv/ada`. Nach §3.2 trifft höchstens eine
@@ -1126,7 +1126,7 @@ nicht in ein Bundle (§4.1).
 **Wohin die Notiz kommt.** Nicht dorthin, wo sie in der Lieferung lag, sondern
 nach `<base>/<dir des Typs>/<dateiname>` in der aufnehmenden Wissensbasis —
 und nach `<source_base>/<dir des Typs>/<dateiname>`, wenn deren Typdefinition
-`source: true` trägt (§3.2.2). Das `dir` steht in deren Typdefinition; kennt
+`is_source: true` trägt (§3.2.2). Das `dir` steht in deren Typdefinition; kennt
 sie den Typ nicht, entsteht eine vorläufige und es gilt die Vorgabe aus §3.7
 (§5.4). Der Dateiname bleibt.
 
@@ -2456,6 +2456,7 @@ brauchen keinen Eintrag in einer Property-Tabelle.
 | `modified` | datetime | nein | — | Zeitpunkt der letzten Änderung, in **UTC** (§3.4) |
 | `modified_by` | text | nein | — | Wer zuletzt geändert hat |
 | `bundles` | hkf-link-list:bundle | nein | — | Zugehörigkeit; nur in einer HKB (§5.2) |
+| `sources` | hkf-link-list | nein | — | Woher der Inhalt stammt: Verweise auf Notizen eines Quelltyps (§3.2.2) |
 | `related` | hkf-link-or-url-list | nein | — | Verwandtes: Verweise in die eigene Ablage oder Adressen im Netz (§5.6) |
 | `rejected_links` | hkf-link-list | nein | — | Ziele, die nicht selbsttätig verlinkt werden; nur in einer HKB (§5.6) |
 | `extends` | text | nein | — | Notiz-ID, die diese Notiz ergänzt statt sie zu ersetzen; nur in einer Lieferung (§6.1) |
@@ -2479,6 +2480,18 @@ Bearbeiter, sondern eine Selbstauskunft der Maschinen: Er sagt verlässlich,
 In einem Bundle sind alle drei freigestellt (§4). In einer HKB werden sie
 geführt: Fehlt eines beim Import oder beim Anlegen, wird es gesetzt (§6.1);
 `hk-lint` meldet ein fehlendes als Hinweis und `--fix` ergänzt es.
+
+### `sources` steht bei jedem Typ
+
+Woher eine Notiz ihren Inhalt hat, ist keine Eigenschaft ihres Typs. Ein
+Begriff kann aus einer Quelle stammen, ein Mensch, ein Ort, ein Ereignis
+ebenso — und eine Notiz, die es nicht sagen darf, verliert genau die Angabe,
+an der sich später prüfen ließe, ob sie noch stimmt.
+
+Die Property stand zunächst in vier Typdefinitionen und fehlte in dreizehn.
+Das war eine Verkürzung: Sie gehört zu jeder Notiz, wie `related` und
+`modified_by` auch. Ein Typ, der sie **fordert**, darf sie nach dem Absatz
+unten weiterhin in seiner Tabelle führen.
 
 Die Property-Tabelle eines Typs darf eine dieser Properties **verschärfen**,
 also als Pflicht führen — so verlangt `bundle` eine `description`

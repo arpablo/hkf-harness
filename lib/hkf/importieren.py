@@ -287,7 +287,7 @@ def _verzeichnis(name, daten, quellbasis=QUELLBASIS):
     Vorgabe fuer `dir` bleibt in beiden Faellen dieselbe (§3.7).
     """
     d = str(daten.get("dir") or (name[:1].upper() + name[1:] + "s"))
-    if daten.get("source") is True and quellbasis:
+    if daten.get("is_source") is True and quellbasis:
         return "%s/%s" % (str(quellbasis).strip("/"), d)
     return d
 

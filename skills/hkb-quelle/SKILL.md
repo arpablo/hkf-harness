@@ -7,11 +7,27 @@ description: "Aus einer Quelle eine Lieferung machen — Quellennotiz mit Zitati
 
 Zuerst [[hkb]] lesen. Du bekommst eine Quelle — eine Adresse, eine Datei, ein
 Stück aus der Inbox — und lieferst eine fertige Lieferung: die Quellennotiz
-mit ihren Zitationsangaben und einer Zusammenfassung, die Notizen, die aus ihr
-entstehen, `hbundle.md`, und `hk-lint` sagt grün.
+mit ihren Zitationsangaben und einer Zusammenfassung, **die Notizen, die aus
+ihr entstehen**, `hbundle.md`, und `hk-lint` sagt grün.
 
 Mit `--hkb` geht dieselbe Lieferung anschließend in die Ablage. Das ist der
 einzige Unterschied zwischen den beiden Fällen.
+
+## Wozu das Ganze
+
+> „A single source can trigger updates across 5-15 wiki pages. This is normal
+> and desired — it's the compounding effect."
+
+**Eine Lieferung mit nur einer Quellennotiz ist in aller Regel eine
+unfertige Lieferung.** Die Quellennotiz sagt, was gelesen wurde; sie ist der
+Beleg, nicht das Ergebnis. Das Ergebnis sind die Begriffe, Konzepte, Personen
+und Vergleiche, die daraus in den Bestand wachsen — und die Verweise, mit
+denen sie am Bestand hängen. Wer nur zusammenfasst, hat die Quelle abgelegt,
+nicht eingelesen.
+
+Diese Notizen gehören **in die Lieferung**. Dafür braucht es keine
+Wissensbasis: Ein Bundle trägt Notizen jedes Typs, und wohin sie kommen,
+entscheidet erst der Import (§4.3).
 
 ## Die Reihenfolge steht fest
 
@@ -62,11 +78,39 @@ schreiben.
 und `Persons/` nach den Notiz-Kandidaten. Eine zweite Notiz über dieselbe
 Sache ist teurer als eine Ergänzung.
 
-**⑤ Eintragen.** In die Quellennotiz die Zitationsangaben und die
-Zusammenfassung; daneben, was aus ihr entsteht.
+**⑤ Eintragen — zuerst die Quellennotiz.** Die Zitationsangaben aus Wilmas
+Abschnitt `## Zitationsangaben`, die Zusammenfassung nach ihrem Abschnitt
+`## Aufbau`. Was sie unter `## Lücken und Widersprüche` gefunden hat, gehört
+in einen eigenen Abschnitt am Ende — es steht nicht in der Quelle und darf
+nicht so aussehen, als stünde es dort.
 
-**⑥ Berichten.** `hk-lint <ziel>` muss grün sein. Dann sag, was in der
-Lieferung liegt und welche Lücken offen blieben.
+**⑥ Eintragen — dann die Notizen, die daraus entstehen.** Geh Wilmas
+`## Notiz-Kandidaten` **einzeln** durch und entscheide je Kandidat: eigene
+Notiz, Abschnitt in einer anderen Notiz, oder nichts. Die Schwelle steht
+unten. Für jeden, der eine Notiz wird:
+
+- Typ wählen (`concept`, `term`, `person`, `comparison`, `note` …) und die
+  Property-Tabelle des Typs lesen, bevor du ein Feld setzt.
+- `sources` auf die Quellennotiz setzen — das ist die Verbindung, an der der
+  Bestand später hängt.
+- Untereinander verlinken, wo der Body es hergibt; einen Verweis unter
+  `# Siehe auch` auch in `related` führen (§5.6).
+- Der Inhalt kommt **allein aus dem Destillat**. Was Wilma nicht belegt hat,
+  steht nicht drin.
+
+**⑦ Berichten.** `hk-lint <ziel>` und `hk-lint --strict <ziel>` müssen grün
+sein. Dann sag:
+
+- was in der Lieferung liegt, nach Typ,
+- **welche Kandidaten du verworfen hast und warum** — nicht die Zahl, die
+  Gruppen,
+- welche Zitationsangaben offen blieben.
+
+**Liefert der Lauf nur die Quellennotiz**, ist das ein Ergebnis, das begründet
+werden muss, kein Ergebnis, das einfach eintritt. Sag dann ausdrücklich, nach
+welcher Schwelle du gegangen bist und warum kein Kandidat sie erreicht hat.
+Fehlt eine Ablage, ist das **kein** Grund: Die Notizen gehören in die
+Lieferung.
 
 ## Die Zusammenfassung folgt dem Aufbau der Quelle
 
@@ -116,11 +160,27 @@ Das schreibt dieser Skill **nicht** fest. Es gehört in die Ablage, als `hint`
 mit `applies_to` (Harness §7). Lies ihn, bevor du entscheidest.
 
 Gibt es keinen, sag, wonach du gehst, und schlag vor, einen anzulegen. Ein
-brauchbarer Anfang: eine eigene Notiz, wenn ein Gegenstand in zwei Quellen
-vorkommt oder in einer zentral ist — für eine beiläufige Erwähnung keine.
+brauchbarer Anfang: **eine eigene Notiz, wenn ein Gegenstand in zwei Quellen
+vorkommt oder in dieser einen zentral ist** — für eine beiläufige Erwähnung
+keine.
+
+Drei Fälle, in denen ein Kandidat trotzdem keine Notiz wird:
+
+| Fall | Wohin statt dessen |
+|---|---|
+| Er ist ein **Bestandteil** eines größeren Gegenstands der Quelle | ein Abschnitt in dessen Notiz |
+| Er ist eine **Aufzählung** ohne eigenen Begriff dahinter — „zwölf Prüfungen", „dreizehn Kennzahlen" | bleibt in der Zusammenfassung der Quellennotiz |
+| Die Quelle nennt ihn nur **im Vorbeigehen** | gar nicht; höchstens ein Wikilink, wenn es die Notiz schon gibt |
+
+Eine `comparison` verlangt `compares` mit mindestens zwei Verweisen. Gibt die
+Quelle nur einen der verglichenen Gegenstände her, entsteht **keine** — sonst
+schriebest du eine Notiz über etwas, worüber die Quelle nichts sagt.
 
 ## Nicht tun
 
+- **Nicht bei der Quellennotiz aufhören.** Sie ist der Beleg, nicht das
+  Ergebnis. Wer die Kandidaten überspringt, hat abgelegt statt eingelesen —
+  und das Fehlen der Notizen zu *berichten* macht es nicht zum Ergebnis.
 - **Die Quelle nicht selbst lesen.** Dafür gibt es Wilma.
 - **Keine glatte Zusammenfassung.** Widerspricht die Quelle dem Bestand, steht
   danach **beides** da, mit Datum und Herkunft. Ein Modell, das aus

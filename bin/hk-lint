@@ -57,8 +57,11 @@ def main(argv):
 
     wurzel = schema.laden()
     fm_befunde, gr_befunde = [], []
-    ihre = frontmatter.lesen(os.path.join(
-        hkb, "hkb.md" if art == "hkb" else "hbundle.md"))[0].get("hkf")
+    try:
+        ihre = frontmatter.lesen(os.path.join(
+            hkb, "hkb.md" if art == "hkb" else "hbundle.md"))[0].get("hkf")
+    except frontmatter.Unlesbar:
+        ihre = None            # gemeldet wird das unten, einmal (Anhang B.4)
     if ihre is not None and not fassung.lesbar(ihre):
         fm_befunde.append("hkb.md: %s. Der Harness prüft gegen Regeln, die "
                           "diese Ablage nicht meint." % fassung.satz(ihre))
@@ -67,6 +70,9 @@ def main(argv):
         rel = os.path.relpath(p, hkb)
         try:
             daten, _ = frontmatter.lesen(p)
+        except frontmatter.Unlesbar as e:
+            fm_befunde.append("%s: Frontmatter ist kein YAML — %s" % (rel, e.grund))
+            continue
         except Exception as e:
             fm_befunde.append("%s: %s" % (rel, e))
             continue

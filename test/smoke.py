@@ -671,6 +671,41 @@ def main():
         for d in (inbox, lief, l2):
             shutil.rmtree(d, ignore_errors=True)
 
+        print("hk-ingest: was der erste Praxiseinsatz zutage brachte")
+        k = os.path.abspath(os.path.join(ziel, "..", "probe-kolon"))
+        shutil.rmtree(k, ignore_errors=True)
+        r = lauf(os.path.join(BIN, "hk-ingest"), "--bundle", k, "--typ", "webpage",
+                 "--title", "Ein Titel: mit Doppelpunkt",
+                 "--url", "https://example.org/x", "--id", "kolon", env=umg)
+        probe("ein Titel mit Doppelpunkt bleibt gültiges YAML (B.4)",
+              lauf(os.path.join(BIN, "hk-lint"), k).returncode == 0, r.stdout)
+        probe("und die Lieferung meldet auch --strict nichts",
+              lauf(os.path.join(BIN, "hk-lint"), "--strict", k).returncode == 0,
+              lauf(os.path.join(BIN, "hk-lint"), "--strict", k).stdout)
+
+        # Eine Lieferung liefert keinen Typ der Grundausstattung mit (§7.1
+        # Punkt 2); `--strict` darf ihre Properties nicht fuer undeklariert
+        # halten, nur weil die Typdefinition nicht beiliegt.
+        r = lauf(os.path.join(BIN, "hk-lint"), "--strict", k)
+        probe("Grundausstattungs-Properties gelten nicht als undeklariert",
+              "webpage: url" not in r.stdout, r.stdout)
+
+        # Unlesbares Frontmatter ist ein Befund, kein Stapelabzug.
+        p = os.path.join(k, "hbundle.md")
+        text = io.open(p, encoding="utf-8").read()
+        io.open(p, "w", encoding="utf-8").write(
+            text.replace('title: "Ein Titel: mit Doppelpunkt"',
+                         "title: Ein Titel: mit Doppelpunkt"))
+        r = lauf(os.path.join(BIN, "hk-lint"), k)
+        probe("unlesbares Frontmatter wird gemeldet, nicht geworfen",
+              r.returncode == 1 and "kein YAML" in r.stdout
+              and "Traceback" not in r.stderr, (r.stdout + r.stderr)[-400:])
+        probe("und der Befund nennt Datei und Stelle",
+              "hbundle.md" in r.stdout and "Zeile 5" in r.stdout, r.stdout)
+        probe("und steht genau einmal da",
+              r.stdout.count("kein YAML") == 1, r.stdout)
+        shutil.rmtree(k, ignore_errors=True)
+
         print("hk-lint: der Quellenbereich ist reserviert")
         fremd = os.path.join(ziel, "Sources", "Fremd")
         os.makedirs(fremd, exist_ok=True)
@@ -687,7 +722,7 @@ def main():
             "|---|---|---|---|---|\n| menge | number | nein | — | Wie viele |\n")
         r = lauf(os.path.join(BIN, "hk-lint"), ziel)
         probe("ein Typ ohne `source: true` darf nicht dorthin (§3.2.2)",
-              "kein `source: true`" in r.stdout, r.stdout)
+              "kein `is_source: true`" in r.stdout, r.stdout)
         os.remove(p)
 
         print("hk-lint: Unterverzeichnis eines Typverzeichnisses")
