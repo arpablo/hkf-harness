@@ -101,7 +101,7 @@ ein qualifizierter Wikilink nach Core §3.6, der aber die **Dateiendung behält*
 weil sie bei einer Mediendatei zum Namen gehört:
 
 ```yaml
-portrait: "[[media/images/personen/portraet-ada.png|portraet-ada.png]]"
+portrait: "[[media/Images/personen/portraet-ada.png|portraet-ada.png]]"
 ```
 
 - Das Ziel MUSS in einem der vier Medienverzeichnisse aus Core §3.2.1 liegen und

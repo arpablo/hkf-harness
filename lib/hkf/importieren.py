@@ -19,7 +19,7 @@ niemand beantworten kann.
 """
 import datetime, hashlib, io, os, re, shutil
 
-from . import CORE, ablage, fassung, frontmatter, notiz
+from . import CORE, TEMPLATES, ablage, fassung, frontmatter, notiz
 
 WERKZEUG = "hk-import"
 
@@ -27,14 +27,27 @@ _ARTEN = [("image", "png jpg jpeg gif webp svg avif bmp tif tiff heic"),
           ("video", "mp4 mov webm mkv avi m4v"),
           ("audio", "mp3 m4a wav flac ogg opus aac")]
 ENDUNGEN = {e: art for art, liste in _ARTEN for e in liste.split()}
-ARTVERZEICHNIS = {"image": "images", "video": "videos",
-                  "audio": "audios", "document": "documents"}
+ARTVERZEICHNIS = {"image": "Images", "video": "Videos",
+                  "audio": "Audios", "document": "Documents"}
 
 # §3.5.1 — ein Bundle darf sie nicht umdefinieren (§6.1 Schritt 3)
 # §3.8 — die Kern-Typen der Grundausstattung. Jede konforme HKB fuehrt sie
 # in derselben Fassung (§7.2), also stellt sich die Frage nach der Bedeutung
 # fuer sie nicht.
 KERN_TYPEN = {"typedef", "proptype", "bundle"}
+
+
+def grundtypen():
+    """Die Typen, die jede HKB ohnehin fuehrt (§3.8) — aus der Vorlage.
+
+    Seit HKF Config sind das nicht mehr nur die drei Kern-Typen, sondern das
+    ganze Inventar. Ein Bundle liefert keinen davon (§7.1), und keiner fehlt
+    einer aufnehmenden Wissensbasis.
+    """
+    verz = os.path.join(TEMPLATES, "hkb", "Typedefs")
+    if not os.path.isdir(verz):
+        return set(KERN_TYPEN)
+    return set(f[:-3] for f in os.listdir(verz) if f.endswith(".md"))
 
 STANDARD_PROPTYPES = {
     "hkf-country", "hkf-email", "hkf-file", "hkf-lang", "hkf-latitude",

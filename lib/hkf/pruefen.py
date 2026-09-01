@@ -15,7 +15,8 @@ import yaml
 
 from . import TEMPLATES, ablage, frontmatter, notiz
 from .importieren import (ARTVERZEICHNIS, KERN_TYPEN, OHNE, STANDARD_PROPTYPES,
-                          _property_tabelle, _tabelle_voll, _verzeichnis)
+                          grundtypen, _property_tabelle, _tabelle_voll,
+                          _verzeichnis)
 
 FEHLER, HINWEIS = "fehler", "hinweis"
 LINK = re.compile(r"\[\[([^\]|\\]+)(?:\\?\|([^\]]*))?\]\]")
@@ -770,7 +771,7 @@ def _medienverzeichnisse(b, befunde):
             grad = FEHLER if f in b.verzeichnisse() else HINWEIS
             befunde.append(Befund("%s/%s" % (b.media_basis, f),
                                   "liegt unter `media_base`; dort liegen nur "
-                                  "images, videos, audios und documents (§3.2.1).",
+                                  "Images, Videos, Audios und Documents (§3.2.1).",
                                   grad))
 
 
@@ -837,7 +838,7 @@ def _lieferung(b, befunde):
     # sofern nicht Grundausstattung oder aus einem vorausgesetzten Bundle
     vorausgesetzt = bool(b.wurzel.get("required_bundles"))
     fehlend = sorted({e["typ"] for e in b.notizen.values()} - set(b.typdefs)
-                     - KERN_TYPEN)
+                     - grundtypen())
     def melde_fehlend(mehrzahl, einzahl, namen):
         if not namen:
             return

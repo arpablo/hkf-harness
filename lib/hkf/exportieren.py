@@ -21,7 +21,7 @@ dort nie aus dem Abschnitt kam — eine Adresse, ein von Hand gesetzter Verweis
 import io, os, re, shutil
 
 from . import CORE, ablage, frontmatter, notiz
-from .importieren import (ARTVERZEICHNIS, KERN_TYPEN, STANDARD_PROPTYPES,
+from .importieren import (ARTVERZEICHNIS, STANDARD_PROPTYPES, grundtypen,
                           medienart, _property_tabelle, _verzeichnis)
 
 WERKZEUG = "hk-export"
@@ -131,7 +131,7 @@ def planen(hkb, bundle_id, ziel, media_base="media"):
     schon = {n["rel"] for n in plan.notizen}
     proptypes = set()
     for typ in typen:
-        if typ in KERN_TYPEN:
+        if typ in grundtypen():
             # §7.1: Was zur Grundausstattung gehoert (§3.8), muss ein Bundle
             # nicht mitbringen — jede konforme HKB fuehrt es ohnehin.
             continue
@@ -218,7 +218,7 @@ def _unverwiesene_medien(plan):
 
 
 def _medienziel(plan, ziel):
-    """`<ablagepfad>/<media_base>/images/x.png` → `media/images/x.png`."""
+    """`<ablagepfad>/<media_base>/Images/x.png` → `media/Images/x.png`."""
     pre = plan.praefix_medien()
     rest = ziel[len(pre) + 1:] if pre else ziel
     return "%s/%s" % (plan.media_base, rest) if plan.media_base else rest
@@ -295,9 +295,9 @@ def _hbundle(plan):
     body = notiz.ohne_abschnitt(body, "Entscheidungen")
     body = re.split(r"^# Import", body, 1, flags=re.M)[0].strip("\n")
     # Die Tabelle nennt, was die Lieferung an Typen ausmacht: die Typen ihrer
-    # Notizen und die Typdefinitionen, die sie mitbringt. Die Kern-Typen
-    # bleiben draussen — sie hat jede HKB (§3.8).
-    typen = {n["typ"] for n in plan.notizen} - KERN_TYPEN
+    # Notizen und die Typdefinitionen, die sie mitbringt. Die Grundausstattung
+    # bleibt draussen — sie hat jede HKB (§3.8).
+    typen = {n["typ"] for n in plan.notizen} - grundtypen()
     for n in plan.notizen:
         if n["rel"].startswith("Typedefs/"):
             typen.add(os.path.basename(n["rel"])[:-3])

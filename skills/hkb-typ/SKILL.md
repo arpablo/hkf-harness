@@ -77,7 +77,7 @@ Property-Typ aus `Proptypes/`, oder eine Listenform mit angehängtem `-list`.
 | `hkf-link:organisation` | ein Verweis auf eine `organisation` |
 | `hkf-link:person,organisation` | auf eine `person` **oder** eine `organisation` |
 | `hkf-link-list:person` | eine Liste; **jeder** Eintrag verweist auf eine `person` |
-| `hkf-file:image` | eine Datei unter `<media_base>/images/` |
+| `hkf-file:image` | eine Datei unter `<media_base>/Images/` |
 | `hkf-file:image / hkf-url` | eine Datei **oder** eine Adresse |
 
 - **`,` trennt Argumente eines Typs**, ohne Leerzeichen. **` / ` trennt ganze

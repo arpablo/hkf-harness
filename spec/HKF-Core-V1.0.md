@@ -54,10 +54,10 @@ hkb.md                            hbundle.md   ← einziger feststehender Ort
 <base>/Proptypes/<prop-typ>.md    beliebige Verzeichnisse:
 <base>/Bundles/<id>.md            eine .md-Datei mit `type` ist eine Notiz,
 <base>/<verzeichnis>/…            jede andere Datei eine Mediendatei nach
-<media_base>/images/…             ihrer Endung, alles Übrige wird übergangen
-<media_base>/videos/…
-<media_base>/audios/…
-<media_base>/documents/…
+<media_base>/Images/…             ihrer Endung, alles Übrige wird übergangen
+<media_base>/Videos/…
+<media_base>/Audios/…
+<media_base>/Documents/…
 ```
 
 Eine Wissensbasis ist typbezogen abgelegt; **ein Bundle ist es nicht.** Dort
@@ -266,23 +266,23 @@ Sie liegen nicht in den Typverzeichnissen, sondern unter `media_base` in genau
 vier Verzeichnissen:
 
 ```text
-<media_base>/images/
-<media_base>/videos/
-<media_base>/audios/
-<media_base>/documents/
+<media_base>/Images/
+<media_base>/Videos/
+<media_base>/Audios/
+<media_base>/Documents/
 ```
 
 | Verzeichnis | Medienart | Inhalt |
 |---|---|---|
-| `images` | `image` | Bilder, Grafiken |
-| `videos` | `video` | Bewegtbild |
-| `audios` | `audio` | Tonaufnahmen |
-| `documents` | `document` | PDFs und andere Dokumente |
+| `Images` | `image` | Bilder, Grafiken |
+| `Videos` | `video` | Bewegtbild |
+| `Audios` | `audio` | Tonaufnahmen |
+| `Documents` | `document` | PDFs und andere Dokumente |
 
 - Diese vier Namen sind unter `media_base` reserviert. Unmittelbar unter
   `media_base` darf **kein** anderes Verzeichnis liegen.
 - Innerhalb der vier Verzeichnisse ist jede Unterstruktur erlaubt, etwa
-  `images/personen/portraets/`.
+  `Images/personen/portraets/`.
 - Ein Verzeichnis wird angelegt, sobald Medien seiner Art vorkommen.
 - Kein Typverzeichnis darf unter `media_base` liegen und keines der vier
   Medienverzeichnisse darf als `dir` einer Typdefinition beansprucht werden.
@@ -499,7 +499,7 @@ participants:
   **nicht** konform, auch wenn Obsidian ihn auflösen könnte.
 - `.md`, `./` und `../` kommen im Ziel nicht vor. Mediendateien behalten
   dagegen **immer** ihre Dateiendung, weil sie dort zum Namen gehört:
-  `[[media/images/portraet-ada.png|portraet-ada.png]]`.
+  `[[media/Images/portraet-ada.png|portraet-ada.png]]`.
 - In einer HKB bilden Ablagepfad und `base` zusammen den **Präfix** jedes
   Verweises. Er ist genau der Pfad, unter dem Obsidian die Datei findet; damit
   bleibt ein Verweis klickbar, auch wenn die Wissensbasis nur ein
@@ -701,7 +701,7 @@ Ebenen:
 | `hkf-link:person,organisation` | ein Verweis auf eine Notiz vom Typ `person` **oder** `organisation` |
 | `hkf-link-list:person` | eine Liste; **jeder** Eintrag verweist auf eine `person` |
 | `hkf-file` | ein Verweis auf eine Mediendatei beliebiger Art |
-| `hkf-file:image` | ein Verweis auf eine Datei unter `<media_base>/images/` |
+| `hkf-file:image` | ein Verweis auf eine Datei unter `<media_base>/Images/` |
 | `hkf-file-list:image,video` | eine Liste aus Bildern und Videos |
 | `hkf-file:image / hkf-url` | eine Datei **oder** eine Adresse — Alternative, §3.7.2 |
 
@@ -724,8 +724,8 @@ Für einen Wert wird der Reihe nach ermittelt:
    wird nicht geraten.
 3. **Basispfad abziehen.** Beginnt `ziel` mit dem `base` der Ablage, wird
    dieses Präfix samt folgendem `/` entfernt. Übrig bleibt die Notiz-ID.
-4. **Mediendatei erkennen.** Liegt `ziel` unter `<media_base>/images/`,
-   `/videos/`, `/audios/` oder `/documents/`, ist es eine Mediendatei und
+4. **Mediendatei erkennen.** Liegt `ziel` unter `<media_base>/Images/`,
+   `/Videos/`, `/Audios/` oder `/Documents/`, ist es eine Mediendatei und
    keine Notiz. Die Medienart ergibt sich aus dem Verzeichnis. Ist eine
    Medienart gefordert, MUSS sie eine der genannten sein. Zulässig ist das
    nur für `hkf-file`; für `hkf-link` ist es ein Fehler. Die Prüfung endet
@@ -813,7 +813,7 @@ man die Grammatik dieser Spezifikation kennt. Wer nur die Tabelle liest, muss
 aus der Beschreibungsspalte erfahren, dass beides zulässig ist.
 
 ```yaml
-portrait: "[[media/images/portraet-ada.png|portraet-ada.png]]"   # erste Alternative
+portrait: "[[media/Images/portraet-ada.png|portraet-ada.png]]"   # erste Alternative
 portrait: https://example.org/ada.jpg                           # zweite Alternative
 ```
 
@@ -915,8 +915,8 @@ biografie-2026/                              rezeption/
   Typedefs/person.md                           README.md          ← übergangen
   Typedefs/organisation.md                     typen/person.md
   Proptypes/hkf-url.md                         leute/ada.md
-  media/images/portraet-ada.png                leute/babbage.md
-  media/documents/notes-1843.pdf               scans/portraet.png
+  media/Images/portraet-ada.png                leute/babbage.md
+  media/Documents/notes-1843.pdf               scans/portraet.png
   Persons/ada-lovelace.md                      scans/notizen.pdf
   Organisations/analytical-society.md
 ```
@@ -1101,9 +1101,9 @@ Der `restpfad` ist der Pfad in der Lieferung, von dem ein führendes `media/`
 und ein anschließendes Verzeichnis mit dem Namen der Medienart entfernt wurden:
 
 ```text
-media/images/personen/portraet.png   →  <media_base>/images/personen/portraet.png
-scans/portraet.png                  →  <media_base>/images/scans/portraet.png
-portraet.png                        →  <media_base>/images/portraet.png
+media/Images/personen/portraet.png   →  <media_base>/Images/personen/portraet.png
+scans/portraet.png                  →  <media_base>/Images/scans/portraet.png
+portraet.png                        →  <media_base>/Images/portraet.png
 ```
 
 Die erste Zeile ist der geordnete Baum aus §6.2: Er kommt unverändert an. Die
@@ -1165,7 +1165,7 @@ wissen/Typedefs/person.md
 wissen/Proptypes/hkf-url.md
 wissen/Bundles/biografie-2026.md
 wissen/Persons/ada-lovelace.md
-media/images/portraet-ada.png
+media/Images/portraet-ada.png
 ```
 
 `base` und `media_base` sind voneinander unabhängig. Die Medienverzeichnisse
@@ -1220,7 +1220,7 @@ Imports** enthielt. Je übernommener Fassung entsteht ein Abschnitt
 
 | Mediendatei | Medienart | Zustand |
 |---|---|---|
-| [[media/images/portraet-ada.png\|portraet-ada.png]] | image | neu |
+| [[media/Images/portraet-ada.png\|portraet-ada.png]] | image | neu |
 
 | Verweis | Gegenstelle | Grund |
 |---|---|---|
@@ -2093,8 +2093,8 @@ Bundle; die letzten vier Punkte gelten nur für eine HKB.
 - `modified` liegt nicht vor `created`,
 - in einer HKB trägt jede Notiz `created` und `modified` — fehlt eines, ist
   das ein Hinweis, kein Fehler,
-- unmittelbar unter `media_base` liegen nur `images`, `videos`, `audios` und
-  `documents`; kein Typverzeichnis liegt unter `media_base`,
+- unmittelbar unter `media_base` liegen nur `Images`, `Videos`, `Audios` und
+  `Documents`; kein Typverzeichnis liegt unter `media_base`,
 - jeder `hkf-file`-Wert zeigt auf eine vorhandene Datei in einem
   Medienverzeichnis, trägt eine Dateiendung, endet nicht auf `.md` und
   erfüllt die geforderte Medienart,
