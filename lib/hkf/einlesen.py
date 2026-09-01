@@ -20,7 +20,7 @@ Eine Regel entscheidet, was kopiert wird:
 import hashlib, io, os, re, shutil, unicodedata
 
 from . import TEMPLATES, ablage, frontmatter, notiz
-from .importieren import _property_tabelle
+from .importieren import _property_tabelle, grundtypen
 
 VORGABE_INBOX = "~/hkf-inbox"
 ERLEDIGT = "erledigt"
@@ -326,6 +326,7 @@ def _vorhandene(plan, rel):
 
 
 WERKZEUG = "hk-ingest"
+ROHTEXT = "# Erfasster Text"
 
 
 def stueck(plan, quelle, typ=None, angaben=None, kopieren=True, heute=None,
@@ -404,6 +405,14 @@ def stueck(plan, quelle, typ=None, angaben=None, kopieren=True, heute=None,
         daten["modified"] = zeitpunkt
         daten["modified_by"] = WERKZEUG
 
+    # Der erfasste Text bekommt eine eigene Ueberschrift. Die Konvention des
+    # Typs `clipping` verlangt sie: Die Zusammenfassung steht darueber, und
+    # ohne die Ueberschrift liesse sich das Geschriebene vom Erfassten nicht
+    # trennen. Erst nach der Pruefsumme — die geht ueber den Text, nicht
+    # ueber die Ueberschrift.
+    if typ == "clipping" and body.strip():
+        body = "%s\n\n%s" % (ROHTEXT, body)
+
     _pflichtlücken(plan, typ, daten)
     plan.notizen.append({"rel": rel, "kopf": _kopf_bauen(daten), "body": body,
                          "typ": typ, "titel": titel, "quelle": quelle})
@@ -423,16 +432,24 @@ def hbundle(plan, bundle_id, beschreibung, version, titel=None):
             "description: %s\nversion: %s"
             % (bundle_id, notiz.skalar(titel), notiz.skalar(beschreibung),
                notiz.skalar(version)))
+    # Die Tabelle nennt, was die Lieferung an Typen ausmacht — die
+    # Grundausstattung bleibt draussen, sie hat jede HKB ohnehin (§3.8).
+    # Die vier Quelltypen gehoeren dazu; die Tabelle bleibt darum in aller
+    # Regel leer, so wie bei jeder Lieferung, die nur Bekanntes liefert.
     zeilen = ["# Typen", "", "| Typ | Verzeichnis | Zweck |", "|---|---|---|"]
-    zwecke = {"book": "Ein Werk für sich: Monographie, Sammelband, Bericht.",
-              "article": "Ein Beitrag in einem größeren Werk: Zeitschrift, "
-                         "Zeitung, Sammelband.",
-              "clipping": "Eine erfasste Webseite; ihr Text steht im Body der "
-                          "Notiz.",
-              "webpage": "Eine zitierte Webseite; ihr Text bleibt draußen."}
-    for typ in sorted({n["typ"] for n in plan.notizen}):
-        zeilen.append("| %s | %s | %s |" % (typ, QUELLTYPEN[typ], zwecke[typ]))
+    bekannt = grundtypen()
+    for typ in sorted({n["typ"] for n in plan.notizen} - bekannt):
+        d = _typdefinition(typ)
+        zeilen.append("| %s | %s | %s |"
+                      % (typ, QUELLTYPEN[typ], d.get("description") or ""))
     return kopf, "\n".join(zeilen) + "\n"
+
+
+def _typdefinition(typ):
+    """Die Typdefinition aus der Vorlage, fuer den Zweck in der Typtabelle."""
+    p = os.path.join(TEMPLATES, "hkb", ablage.VORGABEN["config_base"],
+                     "Typedefs", typ + ".md")
+    return frontmatter.lesen(p)[0] if os.path.isfile(p) else {}
 
 
 def ausfuehren(plan, bundle_id, beschreibung, version, inbox=None):

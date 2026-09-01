@@ -723,7 +723,8 @@ def _umschreiben(plan, text, karte, namen, woher):
         if pre:
             neu = "%s/%s" % (pre, neu)
         return roh.replace("[[" + ziel, "[[" + neu, 1)
-    return re.sub(r"\[\[([^\]|\\]+)", lambda m: ersetzen(m), text)
+    return notiz.ausserhalb_code(
+        text, lambda s: re.sub(r"\[\[([^\]|\\]+)", ersetzen, s))
 
 
 # ── Schritt 9: Verknuepfen (§5.6) ───────────────────────────────────────

@@ -74,15 +74,18 @@ Destillat für eine Notiz nicht, starte sie erneut mit einer engeren Frage.
 entstehen soll — auf Grundlage des Destillats, nicht der Quelle. Erst danach
 schreiben.
 
-**④ Prüfen, was es schon gibt.** Durchsuche `Sources/`, `Concepts/`, `Terms/`
-und `Persons/` nach den Notiz-Kandidaten. Eine zweite Notiz über dieselbe
+**④ Prüfen, was es schon gibt.** Durchsuche die Typverzeichnisse der
+Wissensbasis nach den Notiz-Kandidaten — die Quellen, die Konzepte, die
+Begriffe, die Personen; wie sie heißen, sagt die Typtabelle in `hkb.md`. Eine zweite Notiz über dieselbe
 Sache ist teurer als eine Ergänzung.
 
 **⑤ Eintragen — zuerst die Quellennotiz.** Die Zitationsangaben aus Wilmas
 Abschnitt `## Zitationsangaben`, die Zusammenfassung nach ihrem Abschnitt
 `## Aufbau`. Was sie unter `## Lücken und Widersprüche` gefunden hat, gehört
-in einen eigenen Abschnitt am Ende — es steht nicht in der Quelle und darf
-nicht so aussehen, als stünde es dort.
+in einen eigenen Abschnitt hinter die Zusammenfassung — es steht nicht in der
+Quelle und darf nicht so aussehen, als stünde es dort. Bei einem `clipping`
+heißt das: **vor** dem erfassten Text. Dahinter fände es niemand mehr, aus
+demselben Grund, aus dem die Zusammenfassung oben steht.
 
 **⑥ Eintragen — dann die Notizen, die daraus entstehen.** Geh Wilmas
 `## Notiz-Kandidaten` **einzeln** durch und entscheide je Kandidat: eigene

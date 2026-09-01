@@ -301,8 +301,9 @@ def _umschreiben(plan, e, drin):
         bleiben = [r for r in rel if not any(r.startswith(x.replace("[[", "[["))
                                              or x[2:-1] in r for x in entfernt)]
         kopf = notiz.setze_liste(kopf, "related", bleiben)
-    kopf = re.sub(r"\[\[([^\]|\\]+)", ersetzen, kopf)
-    body = re.sub(r"\[\[([^\]|\\]+)", ersetzen, body)
+    umschreiben = lambda s: re.sub(r"\[\[([^\]|\\]+)", ersetzen, s)
+    kopf = notiz.ausserhalb_code(kopf, umschreiben)
+    body = notiz.ausserhalb_code(body, umschreiben)
     return kopf, body
 
 

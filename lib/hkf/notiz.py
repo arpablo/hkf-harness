@@ -12,6 +12,26 @@ import re
 TRENNER = re.compile(r"\A---\n(.*?)\n---\n?(.*)\Z", re.S)
 
 
+CODE = re.compile(r"```.*?```|~~~.*?~~~|`[^`\n]*`", re.S)
+
+
+def ausserhalb_code(text, fn):
+    """`fn` auf alles anwenden, was nicht in Backticks steht.
+
+    Was dort steht, ist ein Beispiel und kein Verweis. Eine Typdefinition
+    zeigt Wikilinks als Muster her, und ein Clipping bringt die fremden
+    Wikilinks der erfassten Seite mit — beide umzuschreiben verfaelschte sie.
+    `pruefen.ohne_code` haelt es beim Pruefen ebenso.
+    """
+    aus, stand = [], 0
+    for m in CODE.finditer(text):
+        aus.append(fn(text[stand:m.start()]))
+        aus.append(m.group(0))
+        stand = m.end()
+    aus.append(fn(text[stand:]))
+    return "".join(aus)
+
+
 def teilen(text):
     """(kopf, body). Ohne Frontmatter ist kopf None."""
     m = TRENNER.match(text)

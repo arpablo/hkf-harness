@@ -622,7 +622,15 @@ def main():
               and "container: Computing History Review" in c, c)
         probe("der erfasste Text steht im Body",
               "Der erfasste Text der Seite." in c, c)
+        probe("und unter einer eigenen Überschrift, damit die "
+              "Zusammenfassung darüber passt",
+              c.split("---\n", 2)[-1].lstrip().startswith("# Erfasster Text"),
+              c)
         probe("`checksum` ist gesetzt", "checksum: sha256:" in c, c)
+        hb = io.open(os.path.join(lief, "hbundle.md"), encoding="utf-8").read()
+        probe("die Typtabelle nennt keinen Typ der Grundausstattung (§3.8)",
+              "# Typen" in hb and "| clipping |" not in hb
+              and "| book |" not in hb, hb)
         probe("Unabbildbares wird verworfen und gemeldet",
               "seltsam" not in c and "seltsam" in r.stdout, r.stdout)
         probe("und nichts landet unter Media/",
@@ -750,6 +758,37 @@ def main():
         probe("eine Notiz darin liegt nicht am falschen Ort (§3.2)",
               "gehört nach dinge/" not in r.stdout, r.stdout)
         shutil.rmtree(os.path.join(ziel, WIKI, "dinge", "kiste"))
+
+        print("Verweise in Backticks sind Beispiele, keine Verweise")
+        # Ein Clipping bringt die Wikilinks der erfassten Seite mit, eine
+        # Typdefinition zeigt welche als Muster her. Beide umzuschreiben
+        # verfaelschte sie.
+        lief = os.path.abspath(os.path.join(ziel, "..", "code-lieferung"))
+        shutil.rmtree(lief, ignore_errors=True)
+        os.makedirs(os.path.join(lief, "Persons"))
+        io.open(os.path.join(lief, "hbundle.md"), "w", encoding="utf-8").write(
+            '---\nhkf: "1.0"\ntype: bundle\nid: code-probe\n'
+            "title: Code-Probe\ndescription: Eine Notiz mit einem Beispiel.\n"
+            'version: "1.0"\n---\n\nEine Notiz.\n\n# Typen\n\n'
+            "| Typ | Verzeichnis | Zweck |\n|---|---|---|\n")
+        io.open(os.path.join(lief, "Persons", "grace-hopper.md"), "w",
+                encoding="utf-8").write(
+            "---\ntype: person\ntitle: Grace Hopper\n"
+            "created: 2026-01-01\nmodified: 2026-01-01T00:00:00\n---\n\n"
+            "So schreibt man einen Verweis: `[[Persons/grace-hopper]]`.\n\n"
+            "```markdown\n[[Persons/grace-hopper]]\n```\n\n"
+            "Und so steht er im Text: [[Persons/grace-hopper|sie selbst]].\n")
+        r = lauf(os.path.join(BIN, "hk-import"), lief, ziel)
+        probe("der Import nimmt die Lieferung an", r.returncode == 0, r.stdout)
+        g = io.open(os.path.join(ziel, WIKI, "Persons", "grace-hopper.md"),
+                    encoding="utf-8").read()
+        probe("ein Verweis im Text bekommt seinen Ablagepfad (§6.1 Schritt 8)",
+              "[[%s/Persons/grace-hopper|sie selbst]]" % WIKI in g, g)
+        probe("einer in Backticks bleibt, wie er war",
+              "`[[Persons/grace-hopper]]`" in g, g)
+        probe("und einer im Codeblock ebenso",
+              "```markdown\n[[Persons/grace-hopper]]\n```" in g, g)
+        shutil.rmtree(lief, ignore_errors=True)
     finally:
         shutil.rmtree(ziel, ignore_errors=True)
 
