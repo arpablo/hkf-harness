@@ -38,12 +38,14 @@ Was eine der beiden Proben nicht besteht, liegt am falschen Ort.
 hkf-harness/
   HKF-Harness-V1.0.md   dieses Dokument
   spec/                 die Fassung von HKF Core und Config, die er umsetzt
-  bin/                  hk-init, hk-lint, hk-import, hk-export
-  lib/hkf/              Ablage, Frontmatter, Schema, Grammatik, Vorlage, Fassung
+  bin/                  hk-init, hk-lint, hk-import, hk-export, hk-ingest
+  lib/hkf/              Ablage, Frontmatter, Schema, Grammatik, Vorlage,
+                        Fassung, Einlesen
   py                    das Python des Harness
   tools/                spec.py — hält die Kopie unter spec/ auf Stand
   templates/            die Grundausstattung für hk-init
-  skills/               die KI-Schicht: hkb und fünf Operationen
+  skills/               die KI-Schicht: hkb und sechs Operationen
+  agents/               die Subagenten, die für einen Skill lesen
   test/                 die Rauchprobe
 ```
 
@@ -80,7 +82,16 @@ erreichbar ist, stimmt „geht auch ohne KI" nicht mehr. Dazu kommt die
 Verlässlichkeit: Ein Programm findet einen gebrochenen Wikilink immer, ein
 Modell meistens.
 
-Daraus folgt die Reihenfolge beim Bauen: erst `bin/`, dann `skills/`.
+**Ein Subagent ist Teil dieser Schicht und untersteht derselben Regel.** Er
+liest, wo ein Script nicht lesen kann — eine PDF, eine Webseite, ein Buch —,
+und gibt zurück, was er gefunden hat. Er legt keine Notiz an und ändert keine
+Datei; geschrieben wird in `bin/`. Sein Zweck ist der Kontext: Wer eine große
+Quelle im laufenden Gespräch liest, hat sie danach im Rücken, und die Notizen
+aus den letzten Kapiteln werden flacher als die aus den ersten. Ein Agent
+liest in seinem eigenen Kontext und gibt ein belegtes Destillat zurück.
+
+Daraus folgt die Reihenfolge beim Bauen: erst `bin/`, dann `agents/` und
+`skills/`.
 
 ## 3. Die Wissensbasis wird über eine Umgebungsvariable gefunden
 
@@ -105,6 +116,28 @@ HKB="${HKB_PATH:-$HOME/hkb}"
   irgendwann in ein fremdes Verzeichnis.
 - **Mehrere Wissensbasen sind der Normalfall.** Die Reihenfolge ist:
   Argument auf der Kommandozeile → `HKB_PATH` → Vorgabe.
+
+### Die Inbox nach derselben Ordnung
+
+Was eingelesen werden soll, wartet in einem Verzeichnis außerhalb der Ablage:
+Web-Clippings, Scans, `.md`-Dateien, die nur auf ein Original zeigen.
+`hk-ingest` findet es, statt es übergeben zu bekommen.
+
+| | |
+|---|---|
+| Variable | `HKF_INBOX` |
+| Vorgabe | `~/hkf-inbox`, wenn nicht gesetzt |
+| Reihenfolge | Argument (`--inbox`) → `HKF_INBOX` → Vorgabe |
+
+**Die Inbox liegt nie in der Ablage.** Was unter deren Wurzelverzeichnis
+liegt, gehört nach Core §3.2 dazu und würde von `hk-lint` geprüft; ein
+Verzeichnis mit rohen PDFs bestünde diese Prüfung nicht — und soll es auch
+nicht. Aus demselben Grund steht ihr Pfad nicht in `hkb.md`: Anhang A.1 zählt
+die Properties der Wurzeldatei abschließend auf, und ein Pfad dort gälte auf
+einer Maschine und bräche, sobald der Vault umzieht.
+
+**Nach dem Einlesen wird verschoben, nie gelöscht:**
+`<inbox>/erledigt/<bundle-id>/`.
 
 ## 4. Keine Werkzeugdatei liegt in der Wissensbasis
 
@@ -252,10 +285,14 @@ Core beschreibt das Format, nicht den Gebrauch.
 Sie gehört aber auch nicht in den Harness. Wann in **dieser** Wissensbasis
 etwas eine eigene Notiz wert ist, welche Quellen als belastbar gelten, wie
 weit zusammengefasst werden darf — das gehört zu dieser einen Wissensbasis und
-zieht mit ihr um. Der Vorschlag: **eine gewöhnliche Notiz in der Ablage**,
-Typ `specification` aus HKF Config. Sie ist dann Inhalt wie jeder andere —
-versioniert, verlinkbar, prüfbar — und sie besteht die erste Probe: Ein
-Mensch, der die Wissensbasis ohne KI führt, hat denselben Nutzen davon.
+zieht mit ihr um. Also **eine gewöhnliche Notiz in der Ablage**, vom Typ
+`hint` aus HKF Config. Sie ist dann Inhalt wie jeder andere — versioniert,
+verlinkbar, prüfbar — und sie besteht die erste Probe: Ein Mensch, der die
+Wissensbasis ohne KI führt, hat denselben Nutzen davon.
+
+Ursprünglich stand hier `specification`. Das war der falsche Typ: Eine
+Spezifikation kommt von außen und wird eingehalten, ein Hinweis wird selbst
+gefasst. Seit es `hint` gibt, ist er der genauere.
 
 Der Harness liest sie, wenn es sie gibt. Was er selbst mitbringt, ist die
 Politik, die für **jede** HKB gilt: der Ablauf eines Ingests, wann committet
@@ -269,5 +306,6 @@ deckt.
 
 - **Name und Ort des Repositorys** — `hkf-harness` neben `hkf-spec` und
   `hkf-base`, und was aus `HenniHKF-Lab` wird.
-- **`HKF_BUNDLE_PATH`** — Vorgabeverzeichnis für `hk-export` und `hk-import`;
-  festlegen, wenn `hk-export` steht.
+- **`HKF_BUNDLE_PATH`** — erledigt: Eine Lieferung bekommt ihren Pfad im
+  Aufruf. `HKF_INBOX` deckt den einen Fall ab, in dem ein Vorgabeverzeichnis
+  trägt — dort wartet etwas, das noch keinen Namen hat.

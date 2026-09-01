@@ -28,7 +28,7 @@ def _typtabelle(b, getan):
     zeilen = ["# Typen", "", "| Typ | Verzeichnis | Zweck |", "|---|---|---|"]
     for name in sorted(b.typdefs):
         d = b.typdefs[name]["daten"]
-        zeilen.append("| %s | %s | %s |" % (name, _verzeichnis(name, d),
+        zeilen.append("| %s | %s | %s |" % (name, _verzeichnis(name, d, b.quellbasis),
                                             d.get("description") or ""))
     neu = "\n".join(zeilen) + "\n"
     if (notiz.abschnitt(b.wurzel_body, "Typen") or "").strip() == \

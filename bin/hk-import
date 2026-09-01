@@ -29,8 +29,9 @@ def bericht(plan, geschrieben):
     print()
     print("Was geschieht" if not geschrieben else "Was geschehen ist")
     if plan.notizen:
-        teile = ["%d %s" % (z[k], k) for k in ("neu", "aktualisiert", "übersprungen",
-                                               "abgelehnt") if z.get(k)]
+        teile = ["%d %s" % (z[k], k) for k in ("neu", "aktualisiert", "ergänzt",
+                                               "übersprungen", "abgelehnt")
+                 if z.get(k)]
         print("  %d Notizen: %s" % (len(plan.notizen), ", ".join(teile)))
     medien = [m for m in plan.medien if m["zustand"] != "übersprungen"]
     if medien:
@@ -49,7 +50,9 @@ def bericht(plan, geschrieben):
         print("  nichts")
 
     entscheidungen = plan.zu_entscheiden()
-    konflikte = [b for b in plan.konflikte() if b.text != plan.abgewiesen or True]
+    # Der Grund einer Abweisung steht als Konflikt in `befunde` und nirgends
+    # sonst; er gehoert also hierher und wird nicht herausgefiltert.
+    konflikte = plan.konflikte()
     if entscheidungen or konflikte:
         print()
         print("Was zu entscheiden ist")

@@ -27,6 +27,7 @@ _ARTEN = [("image", "png jpg jpeg gif webp svg avif bmp tif tiff heic"),
           ("video", "mp4 mov webm mkv avi m4v"),
           ("audio", "mp3 m4a wav flac ogg opus aac")]
 ENDUNGEN = {e: art for art, liste in _ARTEN for e in liste.split()}
+QUELLBASIS = "Sources"        # Vorgabe fuer source_base (§3.1)
 ARTVERZEICHNIS = {"image": "Images", "video": "Videos",
                   "audio": "Audios", "document": "Documents"}
 
@@ -84,6 +85,7 @@ class Plan(object):
         self.ablagepfad = ablage.ablagepfad(hkb)
         daten, _ = frontmatter.lesen(os.path.join(hkb, "hkb.md"))
         self.media_basis = str(daten.get("media_base") or "").strip("/")
+        self.quellbasis = str(daten.get("source_base", QUELLBASIS) or "").strip("/")
         self.bundle = {}
         self.bundle_body = ""
         self.notizen = []          # dicts: quelle ziel typ zustand kopf body titel
@@ -116,7 +118,8 @@ class Plan(object):
         return [b for b in self.befunde if b.art == "hinweis"]
 
     def zaehlung(self):
-        z = {"neu": 0, "aktualisiert": 0, "übersprungen": 0, "abgelehnt": 0}
+        z = {"neu": 0, "aktualisiert": 0, "ergänzt": 0,
+             "übersprungen": 0, "abgelehnt": 0}
         for n in self.notizen:
             z[n["zustand"]] = z.get(n["zustand"], 0) + 1
         return z
@@ -277,8 +280,16 @@ def _vorhandene_typen(plan):
     return aus
 
 
-def _verzeichnis(name, daten):
-    return str(daten.get("dir") or (name[:1].upper() + name[1:] + "s"))
+def _verzeichnis(name, daten, quellbasis=QUELLBASIS):
+    """Wo die Notizen dieses Typs liegen (§3.2, §3.2.2).
+
+    Ein Quelltyp haengt unter `source_base`, jeder andere unter `base`. Die
+    Vorgabe fuer `dir` bleibt in beiden Faellen dieselbe (§3.7).
+    """
+    d = str(daten.get("dir") or (name[:1].upper() + name[1:] + "s"))
+    if daten.get("source") is True and quellbasis:
+        return "%s/%s" % (str(quellbasis).strip("/"), d)
+    return d
 
 
 def _typen_abgleichen(plan, kandidaten, vorliegende_bundles, fehlende_bundles,
@@ -289,7 +300,8 @@ def _typen_abgleichen(plan, kandidaten, vorliegende_bundles, fehlende_bundles,
             geliefert[os.path.basename(rel)[:-3]] = (daten, body)
 
     vorhanden = _vorhandene_typen(plan)
-    belegt = {_verzeichnis(n, d): n for n, (d, _) in vorhanden.items()}
+    belegt = {_verzeichnis(n, d, plan.quellbasis): n
+              for n, (d, _) in vorhanden.items()}
 
     benutzt = set(geliefert)
     for p, rel, daten, kopf, body in kandidaten:
@@ -299,7 +311,7 @@ def _typen_abgleichen(plan, kandidaten, vorliegende_bundles, fehlende_bundles,
         gel = geliefert.get(name)
         if name not in vorhanden:
             # ── neu, aus der Lieferung oder vorlaeufig (§5.4)
-            verz = _verzeichnis(name, gel[0]) if gel else name + "s"
+            verz = _verzeichnis(name, gel[0], plan.quellbasis) if gel else name + "s"
             if verz in belegt and belegt[verz] != name:
                 plan.abweisen(
                     "Verzeichnis %s gehoert schon dem Typ %s; %s kann dort nicht "
@@ -312,7 +324,7 @@ def _typen_abgleichen(plan, kandidaten, vorliegende_bundles, fehlende_bundles,
             continue
 
         vd, vb = vorhanden[name]
-        verz = _verzeichnis(name, vd)
+        verz = _verzeichnis(name, vd, plan.quellbasis)
         vorlaeufig = bool(vd.get("provisional"))
 
         # ── Zusicherung (§5.5)
@@ -372,7 +384,7 @@ def _typen_abgleichen(plan, kandidaten, vorliegende_bundles, fehlende_bundles,
         # ── Schritt 3: zusammenfuehren
         zustand = "unverändert"
         if gel:
-            gverz = _verzeichnis(name, gel[0])
+            gverz = _verzeichnis(name, gel[0], plan.quellbasis)
             if vorlaeufig:
                 zustand = "abgelöst"
                 if gverz != verz:
@@ -478,6 +490,11 @@ def _notizen_planen(plan, kandidaten, bundle_id, entscheidungen, force):
         dirn = plan.typen[typ]["dir"]
         dateiname = os.path.basename(rel)
         ziel_rel = "%s/%s" % (dirn, dateiname)
+        # §6.1 Schritt 4/5: `extends` nennt die Notiz, die fortgeschrieben
+        # wird — sie steht in der aufnehmenden Wissensbasis, nicht hier.
+        erweitert = str(daten.get("extends") or "").strip()
+        if erweitert:
+            ziel_rel = erweitert.rstrip("/") + ".md"
         if ziel_rel in vergeben:
             plan.abweisen(
                 "%s und %s ergäben dieselbe Notiz-ID %s (§4.3)."
@@ -500,6 +517,20 @@ def _identitaet(plan, e, ziel, bundle_id, entscheidungen, force):
     """Schritt 5 — erst ob dieselbe Notiz, dann welche Fassung gilt."""
     vd, vb = frontmatter.lesen(ziel)
     id_link = e["ziel_rel"][:-3]
+    if e["daten"].get("extends"):
+        # Die Lieferung behauptet keine neuere Fassung, sondern einen Zusatz.
+        # Ueber `modified` ist also nichts zu entscheiden — wohl aber ueber
+        # einen Skalar, den beide tragen und der auseinandergeht (§6.1).
+        e["dieselbe"] = True
+        e["zustand"] = "ergänzt"
+        alt_kopf = notiz.teilen(io.open(ziel, encoding="utf-8").read())[0] or ""
+        for key, hier, dort in _abweichende_skalare(alt_kopf, e["kopf"]):
+            plan.melde("entscheidung",
+                       "%s: `%s` steht hier auf %s, die Ergänzung sagt %s."
+                       % (id_link, key, hier, dort),
+                       "Entscheiden, welcher Wert gilt; der vorhandene bleibt "
+                       "bis dahin stehen (§6.1).")
+        return
     if vd.get("type") == "typedef" and vd.get("provisional"):
         # Abloesung (§5.4): die vorlaeufige Typdefinition sichert nichts zu,
         # also gibt es nichts zu vergleichen und nichts zu entscheiden.
@@ -634,6 +665,12 @@ def _umschreiben(plan, text, karte, namen, woher):
         elif "/" not in ziel and len(namen.get(ziel, [])) > 1:
             plan.melde("hinweis", "%s: [[%s]] ist mehrdeutig und bleibt stehen." % (woher, ziel))
             return roh
+        elif os.path.isfile(os.path.join(plan.basis, ziel + ".md")) or \
+                os.path.isfile(os.path.join(plan.hkb, ziel)):
+            # §7.1 Punkt 6: Eine Notiz mit `extends` verweist auf den Bestand
+            # der aufnehmenden Wissensbasis. Das Ziel wurde nicht uebernommen,
+            # es liegt aber da — dann fehlt allein der Ablagepfad (§3.6).
+            neu = ziel
         else:
             plan.melde("hinweis",
                        "%s: [[%s]] zeigt auf nichts, was übernommen wurde, und bleibt "
@@ -1003,7 +1040,7 @@ def _typtabelle(plan):
             continue
         daten, _ = frontmatter.lesen(os.path.join(verz, f))
         name = f[:-3]
-        zeilen.append("| %s | %s | %s |" % (name, _verzeichnis(name, daten),
+        zeilen.append("| %s | %s | %s |" % (name, _verzeichnis(name, daten, plan.quellbasis),
                                             daten.get("description") or ""))
     body = notiz.ohne_abschnitt(body, "Typen").rstrip("\n")
     io.open(hkbmd, "w", encoding="utf-8").write(
@@ -1022,7 +1059,7 @@ def ausfuehren(plan):
     for name, t in plan.typen.items():
         p = os.path.join(plan.basis, "Typedefs", name + ".md")
         if t["zustand"] == "abgelöst" and os.path.exists(p):
-            alt = _verzeichnis(name, frontmatter.lesen(p)[0])
+            alt = _verzeichnis(name, frontmatter.lesen(p)[0], plan.quellbasis)
             if alt != t["dir"]:
                 _umziehen(plan, name, alt, t["dir"])
 
@@ -1038,7 +1075,7 @@ def ausfuehren(plan):
 
     # 4. bis 6. die Notizen
     for n in plan.notizen:
-        if n["zustand"] not in ("neu", "aktualisiert"):
+        if n["zustand"] not in ("neu", "aktualisiert", "ergänzt"):
             continue
         ziel = os.path.join(plan.basis, n["ziel_rel"])
         os.makedirs(os.path.dirname(ziel), exist_ok=True)
@@ -1048,6 +1085,30 @@ def ausfuehren(plan):
             name = os.path.basename(n["ziel_rel"])[:-3]
             if plan.typen.get(name, {}).get("zustand") == "ergänzt":
                 body = _zusammenfuehren(ziel, body)
+        if n["zustand"] in ("aktualisiert", "ergänzt") and os.path.exists(ziel):
+            alt_kopf, alt_body = notiz.teilen(io.open(ziel, encoding="utf-8").read())
+            if alt_kopf is not None:
+                if n["zustand"] == "ergänzt":
+                    zusatz_body = body
+                    body = _anhaengen(alt_body, body)
+                    kopf = _kopf_vereinen(kopf, alt_kopf)   # die HKB gewinnt
+                    # Was die Ergaenzung unter `# Siehe auch` fuehrt, kommt
+                    # dazu — samt `related`, das §5.6 daran bindet.
+                    vorhanden = notiz.abschnitt(body, "Siehe auch") or ""
+                    for zeile in (notiz.abschnitt(zusatz_body, "Siehe auch")
+                                  or "").strip("\n").splitlines():
+                        m = re.match(r"^- (\[\[[^\]]+\]\])(?: — (.*))?$", zeile)
+                        if not m or m.group(1).split("|", 1)[0] in vorhanden:
+                            continue
+                        kopf, body = _siehe_auch_schreiben(
+                            body, kopf, m.group(1),
+                            m.group(2) or "aus einer Ergänzung")
+                    kopf = notiz.setze_skalar(kopf, "modified", zeitpunkt)
+                    kopf = notiz.setze_skalar(kopf, "modified_by", WERKZEUG)
+                else:
+                    kopf = _kopf_vereinen(alt_kopf, kopf)
+                    body = _siehe_auch_vereinen(alt_body, body)
+        kopf = notiz.entfernen(kopf, "extends")      # eine Anweisung, §4.2
         # Schritt 6
         links = notiz.lies_liste(kopf, "bundles")
         if bundle_link not in links:
@@ -1085,6 +1146,108 @@ def ausfuehren(plan):
     io.open(p, "w", encoding="utf-8").write(notiz.bauen(kopf, body))
     _typtabelle(plan)
     return plan
+
+
+def _bloecke(kopf):
+    """key -> Eintrag im Wortlaut, samt eingerueckter Folgezeilen."""
+    aus, key = {}, None
+    for zeile in kopf.split("\n"):
+        m = re.match(r"([A-Za-z_][A-Za-z0-9_-]*):", zeile)
+        if m:
+            key = m.group(1)
+            aus[key] = [zeile]
+        elif key is not None:
+            aus[key].append(zeile)
+    return dict((k, "\n".join(v).rstrip("\n")) for k, v in aus.items())
+
+
+def _abweichende_skalare(a_kopf, b_kopf):
+    """[(key, a, b)] fuer Skalare, die beide tragen und die auseinandergehen."""
+    aus = []
+    for key in _bloecke(a_kopf):
+        if key in ("modified", "modified_by", "created", "extends"):
+            continue
+        if not notiz.hat(b_kopf, key):
+            continue
+        if notiz.lies_liste(a_kopf, key) or notiz.lies_liste(b_kopf, key):
+            continue
+        a = _skalarzeile(a_kopf, key)
+        b = _skalarzeile(b_kopf, key)
+        if a != b:
+            aus.append((key, a, b))
+    return aus
+
+
+def _skalarzeile(kopf, key):
+    m = re.search(r"^%s:[ \t]*(.*)$" % re.escape(key), kopf, re.M)
+    return m.group(1).strip() if m else ""
+
+
+def _anhaengen(alt_body, neuer_body):
+    """Den gelieferten Body vor `# Siehe auch` anhaengen (§6.1 Schritt 5).
+
+    Angehaengt wird, nicht verschmolzen: Zwei Darstellungen derselben Sache zu
+    einer zu machen hiesse deuten, und das ist keine Sache eines Werkzeugs.
+    """
+    zusatz = notiz.ohne_abschnitt(neuer_body, "Siehe auch").strip("\n")
+    teil = notiz.abschnitt(alt_body, "Siehe auch")
+    if teil is None:
+        vorn, hinten = alt_body.rstrip("\n"), ""
+    else:
+        vorn = notiz.ohne_abschnitt(alt_body, "Siehe auch").rstrip("\n")
+        hinten = "\n\n# Siehe auch\n" + teil.rstrip("\n") + "\n"
+    if zusatz:
+        vorn = vorn + "\n\n" + zusatz
+    return vorn + hinten + ("\n" if not hinten else "")
+
+
+def _kopf_vereinen(nachrangig, vorrangig):
+    """Zwei Koepfe vereinen; bei einem Skalar gewinnt `vorrangig`.
+
+    Der Import schreibt sonst allein den Kopf der Lieferung und verloere
+    dabei den `bundles`-Eintrag einer frueheren Lieferung (§6.1 Schritt 5
+    verlangt danach *beide*), `rejected_links` und von Hand ergaenzte
+    Listeneintraege. §5.6: eine Maschine fuegt hinzu und entfernt nie.
+
+    Beim Aktualisieren ist die Lieferung vorrangig — das ist, was
+    `aktualisiert` heisst. Beim Ergaenzen die Wissensbasis (§6.1 Schritt 5).
+    """
+    kopf = vorrangig
+    for key, block in _bloecke(nachrangig).items():
+        alt = notiz.lies_liste(nachrangig, key)
+        neu = notiz.lies_liste(vorrangig, key)
+        da = notiz.hat(vorrangig, key)
+        if alt and (neu or not da):
+            fehlend = [w for w in alt if w not in neu]
+            if fehlend:
+                kopf = notiz.setze_liste(kopf, key, neu + fehlend)
+        elif not da:
+            kopf = kopf.rstrip("\n") + "\n" + block
+    return kopf
+
+
+def _siehe_auch_vereinen(alt_body, neu_body):
+    """Zeilen unter `# Siehe auch`, die nur in der Wissensbasis stehen, bleiben.
+
+    Der Abschnitt wird von Hand gepflegt und von Schritt 9 ergaenzt; beides
+    steht nicht in der Lieferung (§5.6). Verglichen wird das Ziel, nicht die
+    ganze Zeile — sonst stuende derselbe Verweis zweimal da, nur mit einem
+    anderen Grund.
+    """
+    alt = notiz.abschnitt(alt_body, "Siehe auch")
+    if alt is None:
+        return neu_body
+    neu = notiz.abschnitt(neu_body, "Siehe auch")
+    vorhanden = [z for z in (neu or "").strip("\n").splitlines() if z.startswith("- ")]
+    ziele = set(z.split("|", 1)[0] for z in vorhanden)
+    fehlend = [z for z in alt.strip("\n").splitlines()
+               if z.startswith("- ") and z.split("|", 1)[0] not in ziele]
+    if not fehlend:
+        return neu_body
+    alle = vorhanden + fehlend
+    alle.sort(key=lambda z: z.split("|", 1)[-1].split("]]")[0].lower())
+    return notiz.ohne_abschnitt(neu_body, "Siehe auch").rstrip("\n") + \
+        "\n\n# Siehe auch\n\n" + "\n".join(alle) + "\n"
 
 
 def _zusammenfuehren(ziel, neuer_body):

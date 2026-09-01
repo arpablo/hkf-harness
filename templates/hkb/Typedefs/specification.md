@@ -13,7 +13,7 @@ modified_by: claude-opus-5
 |---|---|---|---|---|
 | version | text | ja | — | Fassung, etwa `1.0` |
 | url | hkf-url | nein | — | Kanonische Adresse |
-| authority | hkf-link:organisation | nein | — | Herausgebende Stelle |
+| authority | hkf-link-or-text:organisation | nein | — | Herausgebende Stelle: als Verweis oder als Name |
 | supersedes | hkf-link:specification | nein | — | Abgelöste Fassung |
 | lang | hkf-lang | nein | — | Sprache des Dokuments |
 | file | hkf-file:document | nein | — | Beigelegter Volltext |

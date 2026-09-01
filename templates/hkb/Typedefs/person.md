@@ -18,7 +18,7 @@ modified_by: claude-opus-5
 | died_year | hkf-year | nein | — | Sterbejahr, wenn kein vollständiges Datum bekannt ist |
 | birthplace | hkf-link:place,city,country | nein | — | Geburtsort |
 | p_categories | hkf-person-category-list | nein | — | Rollen der Person |
-| affiliations | hkf-link-list:organisation | nein | — | Zugehörigkeiten |
+| affiliations | hkf-link-or-text-list:organisation | nein | — | Zugehörigkeiten: als Verweis auf eine Organisationsnotiz oder als Name |
 | homepage | hkf-url | nein | — | Persönliche Webseite |
 | email | hkf-email | nein | — | Kontaktadresse |
 | phone | hkf-phone | nein | — | Telefonnummer |

@@ -14,7 +14,8 @@ import io, os, re
 import yaml
 
 from . import TEMPLATES, ablage, frontmatter, notiz
-from .importieren import (ARTVERZEICHNIS, KERN_TYPEN, OHNE, STANDARD_PROPTYPES,
+from .importieren import (ARTVERZEICHNIS, KERN_TYPEN, OHNE, QUELLBASIS,
+                          STANDARD_PROPTYPES,
                           grundtypen, _property_tabelle, _tabelle_voll,
                           _verzeichnis)
 
@@ -62,11 +63,12 @@ class Bestand(object):
             self.basis = ablage.basis(hkb)
             self.ablagepfad = ablage.ablagepfad(hkb)
             self.media_basis = str(self.wurzel.get("media_base") or "").strip("/")
+            self.quellbasis = str(self.wurzel.get("source_base", QUELLBASIS) or "").strip("/")
             self.base = str(self.wurzel.get("base") or "").strip("/")
             self._hkb_lesen()
         else:
             self.basis, self.ablagepfad = hkb, ""
-            self.media_basis, self.base = "", ""
+            self.media_basis, self.base, self.quellbasis = "", "", ""
             self._bundle_lesen()
         self.nach_namen = {}
         for rel in self.notizen:
@@ -133,7 +135,8 @@ class Bestand(object):
     def verzeichnisse(self):
         aus = {}
         for name, e in self.typdefs.items():
-            aus.setdefault(_verzeichnis(name, e["daten"]), []).append(name)
+            aus.setdefault(_verzeichnis(name, e["daten"], self.quellbasis),
+                           []).append(name)
         return aus
 
     def aufloesen(self, ziel, aus_wurzeldatei=False):
@@ -210,9 +213,12 @@ def _typen(b, befunde):
             befunde.append(Befund(e["rel"], "Der Typ `%s` hat keine Typdefinition "
                                             "(§3.7)." % typ))
             continue
-        soll = _verzeichnis(typ, b.typdefs[typ]["daten"])
+        soll = _verzeichnis(typ, b.typdefs[typ]["daten"], b.quellbasis)
         ist = rel.rsplit("/", 1)[0]
-        if ist != soll:
+        # Segmentweises Praefix, nicht Gleichheit: §3.2 erlaubt
+        # Unterverzeichnisse innerhalb eines Typverzeichnisses, und §3.7.1
+        # loest den Typ ueber genau dieses Praefix auf.
+        if ist != soll and not ist.startswith(soll + "/"):
             befunde.append(Befund(e["rel"], "liegt in %s/, der Typ `%s` gehört "
                                   "nach %s/ (§3.2)." % (ist, typ, soll)))
 
@@ -230,7 +236,7 @@ def _vorlaeufige(b, befunde):
             befunde.append(Befund(e["rel"], "Ein Bundle enthält keine vorläufige "
                                             "Typdefinition (§7.1)."))
             continue
-        d = _verzeichnis(name, e["daten"])
+        d = _verzeichnis(name, e["daten"], b.quellbasis)
         anzahl = sum(1 for r, n in b.notizen.items() if n["typ"] == name)
         befunde.append(Befund(e["rel"], "Der Typ `%s` ist vorläufig; %d Notizen "
                               "liegen in %s/ (§5.4)." % (name, anzahl, d), HINWEIS))
@@ -301,17 +307,34 @@ def _leere_properties(b, befunde):
                                           "Wissensbasis die Lieferung einsortiert "
                                           "hat; in einem Bundle steht es nicht "
                                           "(§7.1)." % k))
+        elif "extends" in e["daten"]:
+            # Die Umkehrung: eine Anweisung an den Import, die er abgestreift
+            # haben muesste (§4.2, §7.2).
+            befunde.append(Befund(e["rel"], "`extends` weist einen Import an, "
+                                            "diese Notiz an eine andere anzuhängen; "
+                                            "in einer Wissensbasis steht es nicht "
+                                            "(§7.2)."))
 
 
 def _verweise(b, befunde):
     for rel, e in sorted(b.notizen.items()):
         text = notiz.bauen(e["kopf"], ohne_code(e["body"]))
+        # §7.1 Punkt 6: Eine Notiz mit `extends` schreibt den Bestand der
+        # aufnehmenden Wissensbasis fort; ihre Verweise loesen erst dort auf.
+        # Das ist die einzige Ausnahme von "auf Dateien der Lieferung", und
+        # sie wiegt genug, um sie zu benennen statt sie zu verschweigen.
+        erweitert = b.art == "bundle" and bool(e["daten"].get("extends"))
+        grad = HINWEIS if erweitert else FEHLER
         for m in LINK.finditer(text):
             ziel, alias = m.group(1), m.group(2)
             art, rest = b.aufloesen(ziel)
             if art == "mehrdeutig":
                 befunde.append(Befund(e["rel"], "[[%s]] ist mehrdeutig — mehrere "
                                       "Dateien heißen so (§3.6)." % ziel))
+            elif art is None and erweitert:
+                befunde.append(Befund(e["rel"], "[[%s]] löst in der Lieferung nicht "
+                                      "auf; die Notiz ergänzt eine bestehende, der "
+                                      "Verweis gilt dort (§7.1)." % ziel, grad))
             elif art is None:
                 befunde.append(Befund(e["rel"], "[[%s]] lässt sich nicht auflösen "
                                                 "(§3.6)." % ziel))
@@ -346,7 +369,8 @@ def _typtabelle(b, befunde):
         if len(s) < 3 or s[0] in ("Typ", "") or set(s[0]) <= set("- "):
             continue
         ist[s[0]] = (s[1], s[2])
-    soll = {n: (_verzeichnis(n, e["daten"]), str(e["daten"].get("description") or ""))
+    soll = {n: (_verzeichnis(n, e["daten"], b.quellbasis),
+                str(e["daten"].get("description") or ""))
             for n, e in b.typdefs.items()}
     for name in sorted(set(soll) - set(ist)):
         befunde.append(Befund("hkb.md", "Die Typtabelle nennt `%s` nicht (§3.1)."
@@ -518,7 +542,7 @@ def undeklariert(b):
     """--strict: je Typ und Property-Name, mit der Zahl der Notizen (§6.3)."""
     allgemein = {"type", "title", "description", "tags", "aliases", "cssclasses",
                  "status", "created", "modified", "modified_by", "bundles",
-                 "related", "rejected_links"}
+                 "related", "rejected_links", "extends"}
     je_typ, gesamt = {}, {}
     for rel, e in sorted(b.notizen.items()):
         typ = e["typ"]
@@ -542,7 +566,7 @@ PRUEFUNGEN = (_wurzeldatei, _typen, _vorlaeufige, _proptypes, _zeiten,
 # ── Die Property-Tabellen gegen die Werte (§3.7.1, §6.3) ────────────────
 
 WERTFORMEN = ("text", "list", "number", "checkbox", "date", "datetime")
-MIT_ZUSATZ = ("hkf-link", "hkf-file")
+MIT_ZUSATZ = ("hkf-link", "hkf-file", "hkf-link-or-text")
 DATUM = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 ZEITPUNKT = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$")
 
@@ -618,6 +642,12 @@ def _skalar_passt(b, wert, basis, args):
         return _link_passt(b, wert, args, medien=False)
     if basis == "hkf-file":
         return _link_passt(b, wert, args, medien=True)
+    if basis == "hkf-link-or-text":
+        # Nicht der Reihe nach durchprobiert, sondern an der Form entschieden:
+        # sonst schluckte die Text-Alternative jeden falschen Verweis (§2.1).
+        if str(wert).strip().startswith("[["):
+            return _link_passt(b, wert, args, medien=False)
+        return True, ""
     text = str(wert)
     muster = d.get("pattern")
     if muster and not re.search(str(muster), text):
@@ -676,9 +706,10 @@ def _typangaben(b, befunde):
                 formen.append(form)
                 if args and basis not in MIT_ZUSATZ:
                     befunde.append(Befund(e["rel"], "`%s`: Der `:`-Zusatz steht nur "
-                                          "an hkf-link und hkf-file (§3.7.1), nicht "
-                                          "an %r." % (prop, basis)))
-                if basis == "hkf-link":
+                                          "an hkf-link, hkf-file und "
+                                          "hkf-link-or-text (§3.7.1), nicht an %r."
+                                          % (prop, basis)))
+                if basis in ("hkf-link", "hkf-link-or-text"):
                     for ziel in args:
                         if ziel not in b.typdefs:
                             befunde.append(Befund(e["rel"], "`%s`: Der Zieltyp `%s` "
@@ -775,7 +806,42 @@ def _medienverzeichnisse(b, befunde):
                                   grad))
 
 
-PRUEFUNGEN = PRUEFUNGEN + (_typangaben, _werte, _vorgaben, _medienverzeichnisse)
+def _quellenverzeichnisse(b, befunde):
+    """Unter source_base liegen nur Verzeichnisse von Quelltypen (§3.2.2)."""
+    if b.art != "hkb" or not b.quellbasis:
+        return
+    qb = os.path.join(b.hkb, b.quellbasis)
+    if not os.path.isdir(qb):
+        return
+    erlaubt = set()
+    for name, e in b.typdefs.items():
+        d = _verzeichnis(name, e["daten"], b.quellbasis)
+        if d.startswith(b.quellbasis + "/"):
+            erlaubt.add(d[len(b.quellbasis) + 1:].split("/", 1)[0])
+    for f in sorted(os.listdir(qb)):
+        if f.startswith("."):
+            continue
+        p = os.path.join(qb, f)
+        if os.path.isdir(p) and f not in erlaubt:
+            befunde.append(Befund("%s/%s" % (b.quellbasis, f),
+                                  "liegt unter `source_base`; dort liegen nur "
+                                  "die Verzeichnisse von Quelltypen (§3.2.2)."))
+        elif os.path.isfile(p) and f.endswith(".md"):
+            befunde.append(Befund("%s/%s" % (b.quellbasis, f),
+                                  "liegt unmittelbar unter `source_base` und in "
+                                  "keinem Typverzeichnis (§3.2.2)."))
+    # Ein Typ, der nicht `source: true` traegt, darf dort nicht hin.
+    for name, e in sorted(b.typdefs.items()):
+        d = str(e["daten"].get("dir") or "")
+        if d and (d == b.quellbasis or d.startswith(b.quellbasis + "/")) and \
+                e["daten"].get("source") is not True:
+            befunde.append(Befund(e["rel"], "`dir` liegt unter `source_base`, der "
+                                            "Typ trägt aber kein `source: true` "
+                                            "(§3.2.2)."))
+
+
+PRUEFUNGEN = PRUEFUNGEN + (_typangaben, _werte, _vorgaben, _medienverzeichnisse,
+                           _quellenverzeichnisse)
 
 
 # ── Was nur für ein Bundle gilt (§4, §7.1) ──────────────────────────────

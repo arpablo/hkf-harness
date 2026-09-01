@@ -127,16 +127,20 @@ def _bundle_bauen(pfad):
             "Eine Lieferung für die Rauchprobe.\n")
     schreib("Typedefs/ding.md",
             "---\ntype: typedef\ntitle: Ding\ndescription: Ein Ding.\ndir: dinge\n"
-            "modified: 2026-01-01T00:00:00\n---\n\n# Properties\n\n"
+            "created: 2026-01-01\nmodified: 2026-01-01T00:00:00\n---\n\n"
+            "# Properties\n\n"
             "| Property | Typ | Pflicht | Vorgabe | Beschreibung |\n"
             "|---|---|---|---|---|\n"
-            "| menge | number | nein | — | Wie viele |\n")
+            "| menge | number | nein | — | Wie viele |\n"
+            "| wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands |\n")
     schreib("dinge/eins.md",
-            "---\ntype: ding\ntitle: Das Erste\nmodified: 2026-01-01T00:00:00\n---\n\n"
+            "---\ntype: ding\ntitle: Das Erste\nwikidata_id: Q1\nmenge: 3\n"
+            "created: 2026-01-01\nmodified: 2026-01-01T00:00:00\n---\n\n"
             "Es steht neben Das Zweite, ohne es zu verlinken.\n\n"
             "![[bilder/bild.png|bild.png]]\n")
     schreib("dinge/zwei.md",
-            "---\ntype: ding\ntitle: Das Zweite\nmodified: 2026-01-01T00:00:00\n---\n\n"
+            "---\ntype: ding\ntitle: Das Zweite\ncreated: 2026-01-01\n"
+            "modified: 2026-01-01T00:00:00\n---\n\n"
             "Ein Ding für sich.\n")
     io.open(os.path.join(pfad, "bilder", "bild.png"), "wb").write(b"\x89PNG\r\n")
 
@@ -148,9 +152,17 @@ def main():
         print("hk-init")
         r = lauf(os.path.join(BIN, "hk-init"), ziel, "--name", "Probe")
         probe("legt an", r.returncode == 0, r.stderr.strip())
-        probe("32 Notizen", "32 Notizen" in r.stdout, r.stdout.strip())
-        probe("Wurzeldatei traegt den Namen",
-              "name: Probe" in io.open(os.path.join(ziel, "hkb.md"), encoding="utf-8").read())
+        probe("36 Notizen", "36 Notizen" in r.stdout, r.stdout.strip())
+        wurzel = io.open(os.path.join(ziel, "hkb.md"), encoding="utf-8").read()
+        probe("Wurzeldatei traegt den Namen", "name: Probe" in wurzel)
+        probe("und den Quellenbereich (§3.2.2)", "source_base: Sources" in wurzel, wurzel)
+        probe("die vier Quellenverzeichnisse stehen bereit",
+              all(os.path.isdir(os.path.join(ziel, "Sources", d))
+                  for d in ("Books", "Articles", "Clippings", "Webpages")))
+        probe("und kein Quellenverzeichnis liegt daneben",
+              not os.path.isdir(os.path.join(ziel, "Books")))
+        probe("die Typtabelle nennt den vollen Ort (§3.1)",
+              "| book | Sources/Books |" in wurzel, wurzel)
         probe("Git-Repository mit einem Commit",
               lauf("git", "-C", ziel, "log", "--oneline").stdout.count("\n") == 1)
         probe("legt keine AGENTS.md an",
@@ -431,6 +443,265 @@ def main():
               not unterschiede, ", ".join(unterschiede))
         probe("und schickt keinen Kern-Typ mit (§7.1)",
               not os.path.exists(os.path.join(aus, "Typedefs", "typedef.md")))
+
+        print("hk-import: eine zweite Lieferung derselben Notiz")
+        # §6.1 Schritt 5 verlangt danach *beide* Bundles. Und was nur in der
+        # Wissensbasis steht — `rejected_links`, eine von Hand geschriebene
+        # Zeile unter `# Siehe auch` — ueberlebt das Aktualisieren (§5.6).
+        p = os.path.join(ziel, "dinge", "eins.md")
+        vorher_text = io.open(p, encoding="utf-8").read()
+        io.open(p, "w", encoding="utf-8").write(
+            vorher_text
+            .replace("related:\n", "rejected_links:\n  - \"[[Typedefs/ding|Ding]]\"\n"
+                     "related:\n  - \"[[Bundles/probe|Probe]]\"\n", 1)
+            .rstrip("\n") + "\n- [[Bundles/probe|Probe]] — von Hand eingetragen\n")
+        zwei_b = os.path.abspath(os.path.join(ziel, "..", "probe-bundle-2"))
+        _bundle_bauen(zwei_b)
+        for rel in ("dinge/zwei.md", "bilder/bild.png"):
+            os.remove(os.path.join(zwei_b, rel))
+        q = os.path.join(zwei_b, "hbundle.md")
+        text = io.open(q, encoding="utf-8").read()
+        io.open(q, "w", encoding="utf-8").write(
+            text.replace("id: probe", "id: probe2")
+                .replace("title: Probe", "title: Probe 2"))
+        q = os.path.join(zwei_b, "dinge", "eins.md")
+        text = io.open(q, encoding="utf-8").read()
+        io.open(q, "w", encoding="utf-8").write(
+            text.replace("2026-01-01T00:00:00", "2026-06-01T00:00:00").rstrip("\n")
+            + "\n\nEin Satz aus der zweiten Lieferung.\n")
+        r = lauf(os.path.join(BIN, "hk-import"), zwei_b, ziel)
+        eins = io.open(p, encoding="utf-8").read()
+        probe("wird als dieselbe Notiz erkannt und aktualisiert",
+              "1 aktualisiert" in r.stdout, r.stdout)
+        probe("danach stehen beide Bundles darin (§6.1 Schritt 5)",
+              "Bundles/probe|Probe]]" in eins and "Bundles/probe2|Probe 2" in eins, eins)
+        probe("rejected_links überlebt den Import (§5.6)",
+              "rejected_links:" in eins, eins)
+        probe("die von Hand geschriebene Zeile bleibt (§5.6)",
+              "von Hand eingetragen" in eins, eins)
+        probe("die maschinell gesetzte Zeile bleibt auch",
+              "dinge/zwei|Das Zweite]] — im Body" in eins, eins)
+        probe("der Body kommt aus der Lieferung",
+              "Ein Satz aus der zweiten Lieferung." in eins, eins)
+        shutil.rmtree(zwei_b, ignore_errors=True)
+        io.open(p, "w", encoding="utf-8").write(vorher_text)
+
+        print("hk-import/hk-export: der Quellenbereich")
+        # Eine Lieferung kennt keinen Quellenbereich (§4.3): Sie traegt die
+        # Notiz unter dem blossen `dir`, die Wissensbasis unter source_base.
+        q_b = os.path.abspath(os.path.join(ziel, "..", "probe-quelle"))
+        shutil.rmtree(q_b, ignore_errors=True)
+        os.makedirs(os.path.join(q_b, "Books"))
+        io.open(os.path.join(q_b, "hbundle.md"), "w", encoding="utf-8").write(
+            "---\nhkf: \"1.0\"\ntype: bundle\nid: quelle\ntitle: Quelle\n"
+            "description: Ein Buch.\nversion: \"1\"\n---\n\nEine Quelle.\n")
+        io.open(os.path.join(q_b, "Books", "economy.md"), "w", encoding="utf-8").write(
+            "---\ntype: book\ntitle: On the Economy of Machinery\n"
+            "authors:\n  - Charles Babbage\nyear: 1832\nplace: London\n"
+            "created: 2026-01-01\nmodified: 2026-01-01T00:00:00\n---\n\n"
+            "Über Fabrikarbeit.\n")
+        r = lauf(os.path.join(BIN, "hk-import"), q_b, ziel)
+        probe("die Lieferung wird übernommen", r.returncode == 0, r.stdout + r.stderr)
+        probe("die Quellennotiz landet unter source_base (§4.3)",
+              os.path.exists(os.path.join(ziel, "Sources", "Books", "economy.md")))
+        probe("und nicht neben den übrigen Typverzeichnissen",
+              not os.path.exists(os.path.join(ziel, "Books", "economy.md")))
+        probe("`authors` nimmt einen blossen Namen (§2.1)",
+              lauf(os.path.join(BIN, "hk-lint"), ziel).returncode == 0
+              or "authors" not in lauf(os.path.join(BIN, "hk-lint"), ziel).stdout)
+        raus = os.path.abspath(os.path.join(ziel, "..", "probe-quelle-raus"))
+        shutil.rmtree(raus, ignore_errors=True)
+        r = lauf(os.path.join(BIN, "hk-export"), "quelle", raus, ziel)
+        probe("der Export streift den Quellenbereich ab (§4.3)",
+              os.path.exists(os.path.join(raus, "Books", "economy.md"))
+              and not os.path.exists(os.path.join(raus, "Sources", "Books",
+                                                  "economy.md")), r.stdout)
+        probe("die Lieferung ist für sich sauber",
+              lauf(os.path.join(BIN, "hk-lint"), raus).returncode == 0)
+        shutil.rmtree(q_b, ignore_errors=True)
+        shutil.rmtree(raus, ignore_errors=True)
+
+        print("hk-import: extends")
+        # §6.1 Schritt 5: Eine Notiz mit `extends` haengt an, sie ersetzt nicht.
+        e_b = os.path.abspath(os.path.join(ziel, "..", "probe-extends"))
+        shutil.rmtree(e_b, ignore_errors=True)
+        os.makedirs(os.path.join(e_b, "dinge"))
+        io.open(os.path.join(e_b, "hbundle.md"), "w", encoding="utf-8").write(
+            "---\nhkf: \"1.0\"\ntype: bundle\nid: nachtrag\n"
+            "required_bundles:\n  - probe\ntitle: Nachtrag\n"
+            "description: Schreibt Das Erste fort.\nversion: \"1\"\n---\n\n"
+            "Ein Nachtrag.\n")
+        io.open(os.path.join(e_b, "dinge", "nachtrag.md"), "w", encoding="utf-8").write(
+            "---\ntype: ding\ntitle: Das Erste\nextends: dinge/eins\n"
+            "menge: 7\ncreated: 2026-01-01\nmodified: 2026-06-01T00:00:00\n---\n\n"
+            "Ein Satz, der angehängt gehört.\n\n# Siehe auch\n\n"
+            "- [[Typedefs/ding|Ding]] — aus dem Nachtrag\n")
+        r = lauf(os.path.join(BIN, "hk-lint"), e_b)
+        probe("eine Lieferung mit extends ist konform (§7.1)",
+              r.returncode == 0, r.stdout)
+        r = lauf(os.path.join(BIN, "hk-import"), "--check", e_b, ziel)
+        probe("--check meldet den Zustand `ergänzt`", "1 ergänzt" in r.stdout, r.stdout)
+        r = lauf(os.path.join(BIN, "hk-import"), e_b, ziel)
+        eins = io.open(os.path.join(ziel, "dinge", "eins.md"), encoding="utf-8").read()
+        probe("keine eigene Notiz entsteht",
+              not os.path.exists(os.path.join(ziel, "dinge", "nachtrag.md")))
+        probe("der Body ist angehängt",
+              "Ein Satz, der angehängt gehört." in eins, eins)
+        probe("und steht vor `# Siehe auch`",
+              eins.index("angehängt gehört") < eins.index("# Siehe auch"), eins)
+        probe("`extends` wird abgestreift (§4.2)", "extends:" not in eins, eins)
+        probe("die Zeile aus der Ergänzung kommt dazu (§5.6)",
+              "aus dem Nachtrag" in eins, eins)
+        probe("beide Bundles stehen darin",
+              "Bundles/probe|Probe]]" in eins and "Bundles/nachtrag|" in eins, eins)
+        probe("ein abweichender Skalar wird vorgelegt, nicht gesetzt",
+              "menge" in r.stdout and "menge: 7" not in eins, r.stdout)
+        probe("die Ablage bleibt konform",
+              lauf(os.path.join(BIN, "hk-lint"), ziel).returncode == 0)
+        io.open(os.path.join(ziel, "dinge", "drei-extends.md"), "w",
+                encoding="utf-8").write(
+            "---\ntype: ding\ntitle: X\nextends: dinge/eins\n"
+            "created: 2026-01-01\nmodified: 2026-01-01T00:00:00\n---\n\nX.\n")
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        probe("`extends` in einer Wissensbasis ist ein Befund (§7.2)",
+              "extends" in r.stdout and r.returncode == 1, r.stdout)
+        os.remove(os.path.join(ziel, "dinge", "drei-extends.md"))
+        shutil.rmtree(e_b, ignore_errors=True)
+
+        print("hk-ingest")
+        inbox = os.path.abspath(os.path.join(ziel, "..", "probe-inbox"))
+        shutil.rmtree(inbox, ignore_errors=True)
+        os.makedirs(inbox)
+        umg = dict(os.environ, HKF_INBOX=inbox)
+        io.open(os.path.join(inbox, "artikel.md"), "w", encoding="utf-8").write(
+            "---\ntitle: Die Maschine von Turin\n"
+            "source: https://example.org/turin\nauthor: Jean Rossi\n"
+            "published: 2024-03-11\ncreated: 2026-08-30T09:12:00\n"
+            "site: Computing History Review\n"
+            "description: Ein Überblick.\nseltsam:\n  tief: ja\n---\n\n"
+            "Der erfasste Text der Seite.\n")
+        io.open(os.path.join(inbox, "buch.md"), "w", encoding="utf-8").write(
+            "---\ntype: book\ntitle: On the Economy of Machinery\n"
+            "url: https://example.org/verlag/economy\n"
+            "file: https://nas.example.org/economy.pdf\nyear: 1832\n---\n")
+        io.open(os.path.join(inbox, "scan.pdf"), "wb").write(b"%PDF-1.4\n%%EOF\n")
+
+        r = lauf(os.path.join(BIN, "hk-ingest"), env=umg)
+        probe("ohne Argumente zeigt es die Inbox",
+              "3 Stück" in r.stdout and "Es wurde nichts geschrieben" in r.stdout,
+              r.stdout)
+        probe("und nennt den fehlenden Typ der PDF",
+              "scan.pdf" in r.stdout and "--typ" in r.stdout, r.stdout)
+        probe("dabei entsteht keine Lieferung",
+              set(os.listdir(inbox)) == {"artikel.md", "buch.md", "scan.pdf"})
+
+        lief = os.path.abspath(os.path.join(ziel, "..", "probe-lieferung"))
+        shutil.rmtree(lief, ignore_errors=True)
+        r = lauf(os.path.join(BIN, "hk-ingest"), "--alles", "--bundle", lief,
+                 "--id", "probe-ingest", env=umg)
+        probe("--alles liest die .md-Stücke ein", r.returncode == 0, r.stdout)
+        clip = os.path.join(lief, "Clippings", "die-maschine-von-turin.md")
+        probe("ein Clipping wird zur Quellennotiz", os.path.isfile(clip))
+        c = io.open(clip, encoding="utf-8").read() if os.path.isfile(clip) else ""
+        probe("das Clipper-Frontmatter ist abgebildet",
+              "type: clipping" in c and "url: https://example.org/turin" in c
+              and "- Jean Rossi" in c and "year: 2024" in c
+              and "container: Computing History Review" in c, c)
+        probe("der erfasste Text steht im Body",
+              "Der erfasste Text der Seite." in c, c)
+        probe("`checksum` ist gesetzt", "checksum: sha256:" in c, c)
+        probe("Unabbildbares wird verworfen und gemeldet",
+              "seltsam" not in c and "seltsam" in r.stdout, r.stdout)
+        probe("und nichts landet unter Media/",
+              not os.path.isdir(os.path.join(lief, "Media")))
+        buch = os.path.join(lief, "Books", "on-the-economy-of-machinery.md")
+        probe("ein .md, das nur auf ein Original zeigt, kopiert nichts",
+              os.path.isfile(buch)
+              and "file: https://nas.example.org/economy.pdf"
+              in io.open(buch, encoding="utf-8").read())
+        probe("fehlende Zitationsangaben werden gemeldet, nicht geraten",
+              "authors" in r.stdout and "Was noch fehlt" in r.stdout, r.stdout)
+        probe("die PDF bleibt ohne --typ liegen",
+              os.path.isfile(os.path.join(inbox, "scan.pdf")), r.stdout)
+        probe("die eingelesenen Stücke sind verschoben, nicht gelöscht",
+              os.path.isfile(os.path.join(inbox, "erledigt", "probe-ingest",
+                                          "artikel.md")))
+        probe("die Lieferung ist konform",
+              lauf(os.path.join(BIN, "hk-lint"), lief).returncode == 0)
+
+        r = lauf(os.path.join(BIN, "hk-ingest"), "scan.pdf", "--typ", "book",
+                 "--bundle", lief, "--id", "probe-ingest", env=umg)
+        probe("mit --typ landet die PDF unter Media/Documents/",
+              os.path.isfile(os.path.join(lief, "Media", "Documents", "scan.pdf")),
+              r.stdout)
+        probe("und die Quellennotiz daneben",
+              os.path.isfile(os.path.join(lief, "Books", "scan.md")))
+
+        l2 = os.path.abspath(os.path.join(ziel, "..", "probe-lieferung-2"))
+        shutil.rmtree(l2, ignore_errors=True)
+        r = lauf(os.path.join(BIN, "hk-ingest"), "--bundle", l2, "--typ", "book",
+                 "--title", "On the Economy of Machinery",
+                 "--authors", "Charles Babbage", "--year", "1832",
+                 "--ausfertigung", "https://nas.example.org/economy.pdf",
+                 "--id", "haendisch", env=umg)
+        probe("händisch mit --ausfertigung kopiert nichts",
+              not os.path.isdir(os.path.join(l2, "Media")), r.stdout)
+        probe("und schreibt dieselbe Quellennotiz",
+              os.path.isfile(os.path.join(l2, "Books",
+                                          "on-the-economy-of-machinery.md")))
+        # Ein Codepfad, zwei Eingaenge: der direkte Ingest ist der
+        # Bundle-Ingest mit sofortigem Import.
+        io.open(os.path.join(inbox, "seite.md"), "w", encoding="utf-8").write(
+            "---\ntype: webpage\ntitle: Eine zitierte Seite\n"
+            "url: https://example.org/seite\n---\n\nEine Zusammenfassung.\n")
+        r = lauf(os.path.join(BIN, "hk-ingest"), "--alles", "--hkb", ziel, env=umg)
+        probe("--hkb importiert die Lieferung gleich mit",
+              "1 neu" in r.stdout and "Übernommen" in r.stdout, r.stdout)
+        probe("die Quellennotiz landet unter source_base",
+              os.path.isfile(os.path.join(ziel, "Sources", "Webpages",
+                                          "eine-zitierte-seite.md")))
+        probe("und die Ablage bleibt konform",
+              lauf(os.path.join(BIN, "hk-lint"), ziel).returncode == 0)
+        shutil.copy(os.path.join(inbox, "erledigt", "eine-zitierte-seite",
+                                 "seite.md"), os.path.join(inbox, "seite.md"))
+        r = lauf(os.path.join(BIN, "hk-ingest"), "--alles", "--hkb", ziel, env=umg)
+        probe("ein zweiter Lauf erkennt die unveränderte Quelle",
+              "nicht geändert" in r.stdout, r.stdout)
+
+        for d in (inbox, lief, l2):
+            shutil.rmtree(d, ignore_errors=True)
+
+        print("hk-lint: der Quellenbereich ist reserviert")
+        fremd = os.path.join(ziel, "Sources", "Fremd")
+        os.makedirs(fremd, exist_ok=True)
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        probe("ein fremdes Verzeichnis unter source_base ist ein Befund (§3.2.2)",
+              "Sources/Fremd" in r.stdout and r.returncode == 1, r.stdout)
+        os.rmdir(fremd)
+        p = os.path.join(ziel, "Typedefs", "zettel.md")
+        io.open(p, "w", encoding="utf-8").write(
+            "---\ntype: typedef\ntitle: Zettel\ndescription: Ein Zettel.\n"
+            "dir: Sources/Zettel\ncreated: 2026-01-01\n"
+            "modified: 2026-01-01T00:00:00\n---\n\n# Properties\n\n"
+            "| Property | Typ | Pflicht | Vorgabe | Beschreibung |\n"
+            "|---|---|---|---|---|\n| menge | number | nein | — | Wie viele |\n")
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        probe("ein Typ ohne `source: true` darf nicht dorthin (§3.2.2)",
+              "kein `source: true`" in r.stdout, r.stdout)
+        os.remove(p)
+
+        print("hk-lint: Unterverzeichnis eines Typverzeichnisses")
+        # §3.2 erlaubt sie ausdruecklich, §3.7.1 loest den Typ ueber ein
+        # segmentweises Praefix auf — nicht ueber Gleichheit.
+        os.makedirs(os.path.join(ziel, "dinge", "kiste"), exist_ok=True)
+        io.open(os.path.join(ziel, "dinge", "kiste", "drei.md"), "w",
+                encoding="utf-8").write(
+            "---\ntype: ding\ntitle: Das Dritte\ncreated: 2026-01-01\n"
+            "modified: 2026-01-01T00:00:00\n---\n\nLiegt eine Ebene tiefer.\n")
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        probe("eine Notiz darin liegt nicht am falschen Ort (§3.2)",
+              "gehört nach dinge/" not in r.stdout, r.stdout)
+        shutil.rmtree(os.path.join(ziel, "dinge", "kiste"))
     finally:
         shutil.rmtree(ziel, ignore_errors=True)
 

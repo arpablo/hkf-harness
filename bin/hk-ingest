@@ -1,0 +1,226 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""hk-ingest — eine Quelle in eine Lieferung einlesen.
+
+    hk-ingest                                    zeigt, was in der Inbox liegt
+    hk-ingest <stück> --bundle <ziel>            ein Stück aus der Inbox
+    hk-ingest --alles --bundle <ziel>            die ganze Inbox
+    hk-ingest --bundle <ziel> --typ book --title T [weitere Angaben]
+
+    --hkb [<pfad>]   die Lieferung anschließend importieren
+    --typ            book, article, clipping oder webpage
+    --datei D        Datei mitnehmen und nach Media/Documents/ kopieren
+    --ausfertigung A Adresse einer Ausfertigung; es wird nichts kopiert
+    --inbox P        die Inbox; sonst $HKF_INBOX, sonst ~/hkf-inbox
+    --id             Kennung der Lieferung (Vorgabe: aus dem ersten Stück)
+
+Weitere Angaben, alle optional: --title --subtitle --authors --editors
+--container --publisher --place --year --edition --volume --pages --isbn
+--doi --lang --url.
+
+Was das Werkzeug tut: den Typ feststellen, die Ausfertigung ablegen oder
+verzeichnen, `sha256` bilden, die Quellennotiz schreiben, die Lücken melden.
+Was es nicht tut: abrufen, extrahieren, zusammenfassen. Das ist Sache eines
+Sprachmodells, das die Quelle liest (Harness §2).
+
+Eine Regel entscheidet über das Kopieren:
+
+    Eine `.md` wird nie kopiert — sie *ist* die Notiz.
+    Alles andere wird kopiert.
+
+Geraten wird nichts. Eine nackte Datei sagt ihren Typ nicht; dann verlangt das
+Werkzeug `--typ` und nennt die vier.
+"""
+import datetime, os, subprocess, sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
+from hkf import ablage, einlesen                              # noqa: E402
+
+ANGABEN = ("title", "subtitle", "authors", "editors", "container", "publisher",
+           "place", "year", "edition", "volume", "pages", "isbn", "doi",
+           "lang", "url")
+LISTEN = ("authors", "editors")
+
+
+def wert(name, roh):
+    if name in LISTEN:
+        return [t.strip() for t in roh.split(",") if t.strip()]
+    if name == "year":
+        try:
+            return int(roh)
+        except ValueError:
+            return roh
+    return roh
+
+
+def argumente(argv):
+    """(werte, positionale). Ein Kennzeichen ohne Wert ist True."""
+    werte, rest, i = {}, [], 0
+    while i < len(argv):
+        a = argv[i]
+        if a.startswith("--"):
+            name = a[2:]
+            folgt = argv[i + 1] if i + 1 < len(argv) else None
+            if folgt is not None and not folgt.startswith("--"):
+                werte[name] = folgt
+                i += 2
+            else:
+                werte[name] = True
+                i += 1
+        else:
+            rest.append(a)
+            i += 1
+    return werte, rest
+
+
+def zeigen(inbox):
+    stuecke = einlesen.stuecke(inbox)
+    print("Inbox: %s" % inbox)
+    if not stuecke:
+        print("  leer")
+        return 0
+    for p in stuecke:
+        typ, grund = einlesen.typ_erkennen(p)
+        print("  %-34s %s"
+              % (os.path.basename(p),
+                 typ if typ else "Typ fehlt — %s, nenne ihn mit --typ" % grund))
+    print()
+    print("%d Stück. Es wurde nichts geschrieben." % len(stuecke))
+    return 0
+
+
+def bericht(plan, geschrieben, ziel):
+    print()
+    print("Was geschieht" if not geschrieben else "Was geschehen ist")
+    if plan.abgebrochen:
+        print("  nichts")
+    else:
+        for n in plan.notizen:
+            print("  %-14s %s" % ("Quellennotiz:", n["rel"]))
+        for m in plan.medien:
+            print("  %-14s %s" % ("Ausfertigung:", m["rel"]))
+        if not plan.notizen:
+            print("  nichts")
+    luecken = plan.luecken()
+    if luecken:
+        print()
+        print("Was noch fehlt")
+        for l in luecken:
+            print("  · " + l)
+        print("  → Die Quelle lesen lassen und die Angaben nachtragen.")
+    andere = [(t, tun) for a, t, tun in plan.befunde if a != "lücke"]
+    if andere:
+        print()
+        print("Hinweise")
+        for t, tun in andere:
+            print("  · " + t + (("  → " + tun) if tun else ""))
+    print()
+    if plan.abgebrochen:
+        print(plan.abgebrochen)
+    elif geschrieben and plan.notizen:
+        print("Geschrieben nach %s." % ziel)
+    else:
+        print("Nichts wurde geschrieben.")
+
+
+def main(argv):
+    if "--help" in argv or "-h" in argv:
+        print(__doc__.strip())
+        return 0
+    werte, rest = argumente(argv)
+    heute = datetime.date.today().isoformat()
+    jetzt = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+
+    try:
+        inbox = einlesen.finde_inbox(
+            werte.get("inbox") if isinstance(werte.get("inbox"), str) else None,
+            anlegen=True)
+    except einlesen.KeineInbox as e:
+        sys.stderr.write(str(e) + "\n")
+        return 2
+
+    ziel = werte.get("bundle")
+    if not argv or (not ziel and not werte.get("hkb")):
+        return zeigen(inbox)
+
+    # Woher die Stuecke kommen
+    quellen = [os.path.abspath(p) for p in rest]
+    if werte.get("alles"):
+        quellen = einlesen.stuecke(inbox)
+    elif quellen:
+        quellen = [q if os.path.isfile(q) else os.path.join(inbox, os.path.basename(q))
+                   for q in quellen]
+    if werte.get("datei"):
+        quellen.append(os.path.abspath(str(werte["datei"])))
+    fehlt = [q for q in quellen if not os.path.isfile(q)]
+    if fehlt:
+        sys.stderr.write("Nicht gefunden: %s\n" % ", ".join(fehlt))
+        return 2
+
+    angaben = dict((k, wert(k, werte[k])) for k in ANGABEN
+                   if isinstance(werte.get(k), str))
+    if isinstance(werte.get("ausfertigung"), str):
+        angaben["file"] = werte["ausfertigung"]
+    if not quellen and not angaben.get("title"):
+        sys.stderr.write("Ohne Stück braucht es mindestens --title.\n")
+        return 2
+
+    # Ohne --bundle in ein Zwischenverzeichnis: der direkte Ingest ist der
+    # Bundle-Ingest mit sofortigem Import.
+    import tempfile
+    zwischen = None
+    if not isinstance(ziel, str):
+        zwischen = tempfile.mkdtemp(prefix="hk-ingest-")
+        ziel = zwischen
+    ziel = os.path.abspath(os.path.expanduser(str(ziel)))
+
+    hkb, quellbasis = None, "Sources"
+    if werte.get("hkb"):
+        try:
+            hkb = ablage.finde(werte["hkb"] if isinstance(werte["hkb"], str) else None)
+        except ablage.KeineAblage as e:
+            sys.stderr.write(str(e) + "\n")
+            return 2
+        from hkf import frontmatter
+        wurzel, _ = frontmatter.lesen(os.path.join(hkb, "hkb.md"))
+        quellbasis = str(wurzel.get("source_base", "Sources") or "").strip("/")
+
+    plan = einlesen.Plan(ziel, hkb=hkb, quellbasis=quellbasis)
+    typ = werte.get("typ") if isinstance(werte.get("typ"), str) else None
+    if quellen:
+        for q in quellen:
+            einlesen.stueck(plan, q, typ=typ, angaben=angaben, heute=heute,
+                            zeitpunkt=jetzt)
+            if plan.abgebrochen and werte.get("alles"):
+                plan.melde("hinweis", plan.abgebrochen.split("\n")[0],
+                           "Mit --typ einlesen.")
+                plan.abgebrochen = None
+    else:
+        einlesen.stueck(plan, None, typ=typ, angaben=angaben, heute=heute,
+                        zeitpunkt=jetzt)
+
+    bundle_id = werte.get("id") if isinstance(werte.get("id"), str) else None
+    if not bundle_id:
+        bundle_id = (einlesen.slug(plan.notizen[0]["titel"])
+                     if plan.notizen else "ingest")
+    beschreibung = "Eingelesen am %s." % heute
+    if not plan.abgebrochen:
+        einlesen.ausfuehren(plan, bundle_id, beschreibung, heute, inbox=inbox)
+    bericht(plan, True, ziel)
+    if plan.abgebrochen:
+        return 1
+    if not plan.notizen:
+        return 0
+
+    if hkb:
+        print()
+        sys.stdout.flush()        # sonst schreibt der Unterprozess zuerst
+        return subprocess.call([os.path.join(os.path.dirname(
+            os.path.realpath(__file__)), "hk-import"), ziel, hkb])
+    if zwischen:
+        print("Die Lieferung liegt in %s." % zwischen)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

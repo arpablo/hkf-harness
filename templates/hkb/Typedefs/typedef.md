@@ -14,6 +14,7 @@ modified_by: claude-opus-5
 | description | text | ja | — | Einzeiliger Zweck; erscheint in der Typtabelle der Wurzeldatei |
 | dir | text | nein | — | Verzeichnis der Instanzen; Vorgabe ist der groß geschriebene Typname mit angehängtem `s` (Core §3.7) |
 | provisional | checkbox | nein | false | Beim Import angelegt, weil niemand den Typ definiert hat (Core §5.4) |
+| source | checkbox | nein | false | Die Instanzen dieses Typs sind Quellen; ihr Verzeichnis liegt unter `source_base` statt unter `base` (Core §3.2.2) |
 
 # Konventionen
 
@@ -21,9 +22,18 @@ Der Dateiname ist der Typname (Core §3.7). Der Body trägt die Property-Tabelle
 die Konventionen des Typs. `dir` ist ein relativer Pfad zum Basispfad, mit
 `/` als Trennzeichen und beliebig vielen Abschnitten, ohne führenden und
 abschließenden `/` und ohne `.`- oder `..`-Abschnitte; er darf nicht unter
-`media_base` liegen.
+`media_base` liegen und, wenn der Typ nicht `source: true` trägt, auch nicht
+unter `source_base` (Core §3.2.2).
 
 `provisional` steht nur an einer Typdefinition, nur mit dem Wert `true` und
 nur in einer HKB — ein Bundle enthält keine vorläufige Typdefinition (Core §7.1).
 Eine solche Notiz trägt kein `dir`, keinen Abschnitt `# Properties` und kein
 `bundles`.
+
+`source` verschiebt allein den Ort und sonst nichts: Ein Quelltyp bestimmt
+sein Verzeichnis über `dir` wie jeder andere, und die Vorgabe gilt
+unverändert; nur hängt das Verzeichnis dann unter `source_base` statt unter
+`base`. Die Angabe steht an der Typdefinition und nicht als Liste in der
+Wurzeldatei, weil dort schon alles andere über den Typ steht — und weil eine
+Ablage, die einen eigenen Quellentyp anlegt, sonst zwei Stellen ändern
+müsste.

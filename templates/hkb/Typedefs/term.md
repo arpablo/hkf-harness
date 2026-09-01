@@ -13,7 +13,7 @@ modified_by: claude-opus-5
 |---|---|---|---|---|
 | lang | hkf-lang | ja | — | Sprache des Begriffs |
 | broader | hkf-link:term | nein | — | Übergeordneter Begriff |
-| sources | hkf-link-list:source | nein | — | Belege der Definition |
+| sources | hkf-link-list | nein | — | Belege der Definition; Verweise auf Notizen eines Quelltyps (Core §3.2.2) |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
 

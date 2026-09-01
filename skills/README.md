@@ -23,8 +23,14 @@ einen gebrochenen Wikilink immer, ein Modell meistens.
 | [`hkb-import`](hkb-import/SKILL.md) | Eine Lieferung übernehmen — und die Urteile fällen und aufschreiben, die `hk-import` verweigert |
 | [`hkb-export`](hkb-export/SKILL.md) | Eine Lieferung herausschreiben und beurteilen, ob sie weitergegeben werden kann |
 | [`hkb-lint`](hkb-lint/SKILL.md) | Prüfen, korrigieren lassen, und die Befunde abarbeiten, die kein Werkzeug beheben darf |
+| [`hkb-quelle`](hkb-quelle/SKILL.md) | Aus einer Quelle eine Lieferung machen — und wahlweise gleich importieren |
 
-Zwei davon tragen die eigentliche Last. **`hkb-import`** ist der Ort, an dem
+**Ein Skill ruft einen Agenten.** `hkb-quelle` liest eine Quelle nie
+selbst, sondern schickt [`wilma`](../agents/wilma.md) — sie liest in ihrem
+eigenen Kontext und gibt ein belegtes Destillat zurück. Für die Regel oben
+ändert das nichts: Ein Agent liest, er schreibt nicht.
+
+Drei davon tragen die eigentliche Last. **`hkb-import`** ist der Ort, an dem
 die drei Urteile aus der Spezifikation fallen und als Zeile in
 `# Entscheidungen` festgehalten werden (§5.7) — ohne das fragt jeder weitere
 Lauf dieselbe Frage neu. **`hkb-notiz`** ist die einzige Operation, die kein

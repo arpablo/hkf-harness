@@ -22,7 +22,7 @@ import yaml                                                   # noqa: E402
 from hkf import CONFIG, frontmatter                           # noqa: E402
 
 BLOCK = re.compile(r"^## 3\.\d+ `(\w+)`\n\n```markdown\n(.*?)\n```", re.S | re.M)
-TYPEN, PROPTYPES = 17, 15
+TYPEN, PROPTYPES = 20, 16
 ZEITEN = re.compile(r"^(created|modified|modified_by):.*\n", re.M)
 EINSCHRAENKUNG = re.compile(r"`([a-z]+): ([^`]+)`")
 
@@ -54,7 +54,9 @@ def kern_typen(spec, vorlage, melde):
 
 
 def standard_proptypes(spec, vorlage, melde):
-    teil = spec.split("## 2.1 Die dreizehn Standard-Property-Typen", 1)[-1]
+    m = re.search(r"^## 2\.1 .*$", spec, re.M)
+    assert m, "Config §2.1 nicht gefunden"
+    teil = spec[m.end():]
     teil = teil.split("\n# 3.", 1)[0]
     erwartet = {}
     for zeile in teil.splitlines():

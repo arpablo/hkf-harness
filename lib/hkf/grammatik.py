@@ -28,6 +28,7 @@ TYPANGABE = re.compile(
     + r"(?:" + WERTFORM + r")"
     + r"|hkf-link(?:-list)?(?::" + KEBAB + r"(?:," + KEBAB + r")*)?"
     + r"|hkf-file(?:-list)?(?::(?:" + MEDIENART + r")(?:,(?:" + MEDIENART + r"))*)?"
+    + r"|hkf-link-or-text(?:-list)?(?::" + KEBAB + r"(?:," + KEBAB + r")*)?"
     + r"|" + KEBAB
     + r")\Z")
 

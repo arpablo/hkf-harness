@@ -12,7 +12,7 @@ modified_by: claude-opus-5
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
 | compares | hkf-link-list | ja | — | Die verglichenen Gegenstände, mindestens zwei |
-| sources | hkf-link-list:source | nein | — | Quellen des Vergleichs |
+| sources | hkf-link-list | nein | — | Quellen des Vergleichs; Verweise auf Notizen eines Quelltyps (Core §3.2.2) |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
 
 # Konventionen

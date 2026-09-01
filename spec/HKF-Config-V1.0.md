@@ -1,14 +1,14 @@
 ---
 type: specification
 title: HKF Config V1.0 — Typen und Property-Typen
-description: Siebzehn Typdefinitionen und fünfzehn Property-Typen an einem Ort: die Grundausstattung jeder Wissensbasis und das Vokabular, das als Bundle dazukommt.
+description: Zwanzig Typdefinitionen und sechzehn Property-Typen an einem Ort: die Grundausstattung jeder Wissensbasis und das Vokabular, das als Bundle dazukommt.
 status: draft
 ---
 
 # HKF Config V1.0
 
 Dieses Dokument enthält alles, was HKF konkret festlegt: **jede Typdefinition
-und jeden Property-Typ** — siebzehn und fünfzehn. HKF Core beschreibt daneben nur noch, wie eine
+und jeden Property-Typ** — zwanzig und sechzehn. HKF Core beschreibt daneben nur noch, wie eine
 Ablage funktioniert — Verzeichnisse, Wertformen, Verweise, Typdefinitionen als
 Bauform, das Bundle-Format, die drei Methoden — und verweist für jede einzelne
 Definition hierher.
@@ -50,12 +50,12 @@ Typ daneben (Core §3.7).
 # 2. Property-Typen
 
 Was ein Property-Typ ist und wie er wirkt, steht in Core §3.5. Hier stehen
-die, die es gibt: dreizehn, die jede Ablage kennt, und zwei, die nur mit den
+die, die es gibt: vierzehn, die jede Ablage kennt, und zwei, die nur mit den
 Typen aus §3 Sinn ergeben.
 
-## 2.1 Die dreizehn Standard-Property-Typen
+## 2.1 Die vierzehn Standard-Property-Typen
 
-Diese dreizehn Property-Typen kennt jede HKB. Sie sind Teil dieser
+Diese vierzehn Property-Typen kennt jede HKB. Sie sind Teil dieser
 Spezifikation und gehören zur **Grundausstattung**: Eine HKB legt sie beim
 Anlegen als Notizen in `Proptypes/` an (Core §5.3).
 
@@ -74,6 +74,7 @@ Anlegen als Notizen in `Proptypes/` an (Core §5.3).
 | `hkf-link` | `text` | genau ein qualifizierter Wikilink nach Core §3.6 |
 | `hkf-link-list` | `list` | jeder Eintrag ein qualifizierter Wikilink nach Core §3.6 |
 | `hkf-link-or-url` | `text` | entweder ein qualifizierter Wikilink nach Core §3.6 oder eine Adresse nach `hkf-url` |
+| `hkf-link-or-text` | `text` | entweder ein qualifizierter Wikilink nach Core §3.6 oder ein beliebiger Text |
 
 `hkf-year` trägt eine Jahreszahl, wenn kein vollständiges Datum bekannt ist.
 Negative Werte bezeichnen Jahre vor der Zeitenwende. Ein bekanntes Datum
@@ -138,6 +139,31 @@ hkf-url` (Core §3.7.2). Das ist dasselbe in ausführlich und sagt in der Tabell
 deutlicher, was gemeint ist. `hkf-link-or-url` ist die Abkürzung für den
 häufigen Fall, in dem der Zieltyp gleichgültig ist.
 
+`hkf-link-or-text` lässt einen Verweis oder freien Text zu. Er ist für die
+Fälle gedacht, in denen dasselbe Feld mal auf eine Notiz zeigt und mal nur
+einen Namen trägt: Ein Verfasser ist manchmal eine Personennotiz und manchmal
+die Zeile auf einem Titelblatt, eine Zugehörigkeit manchmal eine
+`organisation` und manchmal die Angabe unter einem Aufsatztitel. Für jeden
+davon eine Notiz anzulegen hieße, die Ablage mit Namen zu füllen, über die
+nichts weiter zu sagen ist.
+
+Geprüft wird der Reihe nach wie bei `hkf-link-or-url`: Sieht der Wert wie
+`[[…]]` aus, gilt Core §3.6 samt Zieltyp — ein Tippfehler im Pfad bleibt also
+ein Befund. Sonst ist es Text und immer gültig.
+
+**Er nimmt einen `:`-Zusatz**, anders als `hkf-link-or-url`, und das ist kein
+Widerspruch, sondern folgt aus dem Unterschied der zweiten Alternative: Dort
+ist sie eine Adresse im Netz, die keinen Typ hat, den man fordern könnte, hier
+ein Text. Der Zieltyp betrifft in beiden Fällen allein die erste. Die
+Grammatik führt ihn darum als eigene Produktion (Core Anhang B.3).
+
+**Und er ist nicht dasselbe wie die Alternative `hkf-link:person / text`.**
+Die wird nach Core §3.7.2 der Reihe nach durchprobiert, und `text` erfüllt
+*jeder* Wert: Ein Wikilink auf den falschen Typ fiele durch die erste
+Alternative und würde von der zweiten stillschweigend als Text angenommen. Die
+Zieltypprüfung wäre wirkungslos. `hkf-link-or-text` entscheidet stattdessen an
+der Form des Wertes, welche Alternative gilt, und prüft dann nur diese.
+
 ## 2.2 Die beiden Aufzählungen
 
 Zwei Property-Typen zählen Werte auf, statt eine Form einzuschränken. Sie
@@ -165,10 +191,10 @@ ungültig machte.
 
 # 3. Typdefinitionen
 
-Siebzehn Typen. Die ersten drei sind die **Kern-Typen** — ohne sie ließe sich
-keine Ablage beschreiben. Die vierzehn danach sind das **Vokabular**: Gegenstände,
-die in nahezu jeder Wissensbasis vorkommen, und die wenigen, mit denen eine
-Wissensbasis über sich selbst spricht.
+Zwanzig Typen. Die ersten drei sind die **Kern-Typen** — ohne sie ließe sich
+keine Ablage beschreiben. Die siebzehn danach sind das **Vokabular**: Gegenstände,
+die in nahezu jeder Wissensbasis vorkommen, die vier Arten von Quellen, und die
+wenigen, mit denen eine Wissensbasis über sich selbst spricht.
 
 | Typ | Verzeichnis | Zweck |
 |---|---|---|
@@ -181,7 +207,10 @@ Wissensbasis über sich selbst spricht.
 | `city` | `Cities` | Eine Stadt. |
 | `country` | `Countries` | Ein Staat. |
 | `event` | `Events` | Ein Geschehen zu einer bestimmten Zeit. |
-| `source` | `Sources` | Eine zitierbare Quelle: Buch, Aufsatz, Webseite, Vortrag. |
+| `book` | `Books` | Ein Werk für sich: Monographie, Sammelband, Bericht. |
+| `article` | `Articles` | Ein Beitrag in einem größeren Werk: Zeitschrift, Zeitung, Sammelband. |
+| `clipping` | `Clippings` | Eine erfasste Webseite; ihr Text steht im Body der Notiz. |
+| `webpage` | `Webpages` | Eine zitierte Webseite; ihr Text bleibt draußen. |
 | `term` | `Terms` | Ein definierter Begriff. |
 | `concept` | `Concepts` | Eine Sache und der Stand des Wissens über sie. |
 | `comparison` | `Comparisons` | Eine Gegenüberstellung mehrerer Gegenstände entlang benannter Dimensionen. |
@@ -190,10 +219,30 @@ Wissensbasis über sich selbst spricht.
 | `specification` | `Specifications` | Ein normatives Dokument, an das sich die Wissensbasis hält. |
 | `hint` | `Hints` | Eine Festlegung, wie diese Wissensbasis geführt wird. |
 
-**Zwei Typen tragen ein `dir`, die anderen fünfzehn nicht.** Deren
+**Zwei Typen tragen ein `dir`, die anderen achtzehn nicht.** Deren
 Verzeichnisse ergeben sich aus der Vorgabe „Typname groß geschrieben, mit
 angehängtem `s`" (Core §3.7); ein Werkzeug kennt den Ablageort damit, ohne die
 Typdefinition zu lesen.
+
+**Vier Typen tragen `source: true`** — `book`, `article`, `clipping` und
+`webpage`. Ihre Verzeichnisse liegen nicht unter `base`, sondern unter
+`source_base`, also nach Vorgabe in `Sources/Books`, `Sources/Articles`,
+`Sources/Clippings` und `Sources/Webpages` (Core §3.2.2). Die Spalte oben
+nennt das `dir`, nicht den vollen Pfad.
+
+**Warum vier Typen und nicht ein `source` mit einer Werkart-Property.** Ein
+Buch, ein Zeitschriftenaufsatz und eine Webseite wollen Verschiedenes: Das
+Buch hat Verlag, Auflage und ISBN, der Aufsatz ein aufnehmendes Werk und
+Seiten, die Webseite ein Abrufdatum. In einem Typ zusammengelegt stünden an
+jeder Quellennotiz zwei Dutzend Properties, von denen die meisten immer leer
+blieben — und keine Property-Tabelle könnte noch sagen, welche zu einer
+vollständigen Zitation gehören. Der Typ trägt die Werkart besser als ein Feld
+darin.
+
+`clipping` gegen `webpage` ist die Unterscheidung zwischen **erfasst** und
+**zitiert**. Ein Clipping bringt den Text der Seite mit und hält ihn im Body;
+eine Webpage nennt nur die Adresse. Damit braucht HKF keine eigene
+Rohtextschicht neben den Notizen — ein Clipping ist sie.
 
 Die Vorgabe ist mechanisch und kein Sprachgefühl — bei `city` und `country`
 ergäbe sie `Citys` und `Countrys`. Beide schreiben darum ein `dir` und heißen
@@ -235,6 +284,7 @@ description: Registriert einen Typ und legt sein Verzeichnis fest.
 | description | text | ja | — | Einzeiliger Zweck; erscheint in der Typtabelle der Wurzeldatei |
 | dir | text | nein | — | Verzeichnis der Instanzen; Vorgabe ist der groß geschriebene Typname mit angehängtem `s` (Core §3.7) |
 | provisional | checkbox | nein | false | Beim Import angelegt, weil niemand den Typ definiert hat (Core §5.4) |
+| source | checkbox | nein | false | Die Instanzen dieses Typs sind Quellen; ihr Verzeichnis liegt unter `source_base` statt unter `base` (Core §3.2.2) |
 
 # Konventionen
 
@@ -242,12 +292,21 @@ Der Dateiname ist der Typname (Core §3.7). Der Body trägt die Property-Tabelle
 die Konventionen des Typs. `dir` ist ein relativer Pfad zum Basispfad, mit
 `/` als Trennzeichen und beliebig vielen Abschnitten, ohne führenden und
 abschließenden `/` und ohne `.`- oder `..`-Abschnitte; er darf nicht unter
-`media_base` liegen.
+`media_base` liegen und, wenn der Typ nicht `source: true` trägt, auch nicht
+unter `source_base` (Core §3.2.2).
 
 `provisional` steht nur an einer Typdefinition, nur mit dem Wert `true` und
 nur in einer HKB — ein Bundle enthält keine vorläufige Typdefinition (Core §7.1).
 Eine solche Notiz trägt kein `dir`, keinen Abschnitt `# Properties` und kein
 `bundles`.
+
+`source` verschiebt allein den Ort und sonst nichts: Ein Quelltyp bestimmt
+sein Verzeichnis über `dir` wie jeder andere, und die Vorgabe gilt
+unverändert; nur hängt das Verzeichnis dann unter `source_base` statt unter
+`base`. Die Angabe steht an der Typdefinition und nicht als Liste in der
+Wurzeldatei, weil dort schon alles andere über den Typ steht — und weil eine
+Ablage, die einen eigenen Quellentyp anlegt, sonst zwei Stellen ändern
+müsste.
 ```
 
 ## 3.2 `proptype`
@@ -337,7 +396,7 @@ description: Ein Mensch.
 | died_year | hkf-year | nein | — | Sterbejahr, wenn kein vollständiges Datum bekannt ist |
 | birthplace | hkf-link:place,city,country | nein | — | Geburtsort |
 | p_categories | hkf-person-category-list | nein | — | Rollen der Person |
-| affiliations | hkf-link-list:organisation | nein | — | Zugehörigkeiten |
+| affiliations | hkf-link-or-text-list:organisation | nein | — | Zugehörigkeiten: als Verweis auf eine Organisationsnotiz oder als Name |
 | homepage | hkf-url | nein | — | Persönliche Webseite |
 | email | hkf-email | nein | — | Kontaktadresse |
 | phone | hkf-phone | nein | — | Telefonnummer |
@@ -440,43 +499,218 @@ Eine Veranstaltung trägt entweder `starts_at` oder `date`, nicht beides.
 Zeiten gelten in der `timezone` der Ablage (Core §3.4).
 ```
 
-## 3.8 `source`
+## 3.8 `book`
 
 ```markdown
 ---
 type: typedef
-title: Quelle
-description: 'Eine zitierbare Quelle: Buch, Aufsatz, Webseite, Vortrag.'
+title: Buch
+description: 'Ein Werk für sich: Monographie, Sammelband, Bericht.'
+source: true
 ---
 
 # Properties
 
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
-| authors | hkf-link-list:person | nein | — | Urheber |
+| authors | hkf-link-or-text-list:person | nein | — | Urheber: als Verweis auf eine Personennotiz oder als Name, wie das Werk ihn nennt |
+| subtitle | text | nein | — | Untertitel, wenn er zur Zitation gehört |
+| editors | hkf-link-or-text-list:person | nein | — | Herausgeber, wenn sie von den Urhebern abweichen |
+| publisher | hkf-link-or-text:organisation | nein | — | Verlag: als Verweis oder als Name |
+| place | text | nein | — | Erscheinungsort |
 | year | hkf-year | nein | — | Erscheinungsjahr |
-| publisher | hkf-link:organisation | nein | — | Verlag oder Herausgeber |
-| url | hkf-url | nein | — | Fundstelle im Netz |
-| doi | hkf-url | nein | — | DOI, vollständig als `https://doi.org/…` |
+| edition | text | nein | — | Auflage, etwa `2., überarbeitete Auflage` |
+| volume | text | nein | — | Band; Text, weil auch `12A` vorkommt |
+| pages | text | nein | — | Seitenzahl oder Umfang |
 | isbn | text | nein | — | ISBN |
-| lang | hkf-lang | nein | — | Sprache der Quelle |
+| doi | hkf-url | nein | — | DOI, vollständig als `https://doi.org/…` |
+| lang | hkf-lang | nein | — | Sprache des Werks |
+| url | hkf-url | nein | — | Fundstelle des Werks: wo es veröffentlicht ist |
+| file | hkf-file:document / hkf-url | nein | — | Ausfertigung des Werks: als Datei in der Ablage oder als Adresse, etwa auf einem Dateiserver |
 | accessed | date | nein | — | Datum des Abrufs |
-| file | hkf-file:document | nein | — | Beigelegtes Dokument |
-| wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
+| checksum | text | nein | — | `sha256:<hex>` über den erfassten Text; sagt beim nächsten Einlesen, ob sich die Quelle geändert hat |
+| wikidata_id | hkf-wikidata | nein | — | Kennung des Werks in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
 
 # Konventionen
 
-Eine Quellennotiz beschreibt das zitierte Werk, nicht die eigene Auswertung.
-Was man daraus gelernt hat, gehört in eine `note`, die per `sources` auf die
-Quelle verweist.
+Ein Buch steht für sich: Es hat einen Verlag, oft eine ISBN, und es ist nicht
+Teil eines größeren Werks. Ein Beitrag darin — ein Kapitel in einem
+Sammelband — ist ein `article` mit diesem Buch als `container`.
 
-`url` und `file` sind bewusst zwei Properties und keine Alternative (Core §3.7.2):
-`url` ist die Fundstelle des Werks, `file` eine in der Ablage liegende
-Ausfertigung. Beide dürfen nebeneinander gesetzt sein.
+`url` und `file` bezeichnen Verschiedenes und stehen darum als zwei
+Properties da, nicht als Alternative (Core §3.7.2): `url` ist, **wo das Werk
+veröffentlicht ist** — die Verlagsseite, die DOI-Adresse —, und damit
+zitierfähig. `file` ist, **wo die eigene Ausfertigung liegt**: als Datei in
+der Ablage oder als Adresse, etwa auf einem Dateiserver im eigenen Netz. Ein
+Original muss also nicht in die Ablage kopiert werden, um verzeichnet zu sein.
+Beide dürfen nebeneinander stehen.
+
+Eine Quellennotiz beschreibt das zitierte Werk und fasst zusammen, **was es
+sagt** — gegliedert nach seinem eigenen Aufbau, je Kapitel oder Hauptabschnitt
+eine Überschrift. Was man daraus **für die eigene Sache schließt**, gehört
+nicht hierher, sondern in eine `note` oder ein `concept`, das per `sources`
+auf die Quelle verweist.
 ```
 
-## 3.9 `term`
+## 3.9 `article`
+
+```markdown
+---
+type: typedef
+title: Aufsatz
+description: 'Ein Beitrag in einem größeren Werk: Zeitschrift, Zeitung, Sammelband.'
+source: true
+---
+
+# Properties
+
+| Property | Typ | Pflicht | Vorgabe | Beschreibung |
+|---|---|---|---|---|
+| authors | hkf-link-or-text-list:person | nein | — | Urheber: als Verweis auf eine Personennotiz oder als Name, wie der Beitrag ihn nennt |
+| subtitle | text | nein | — | Untertitel, wenn er zur Zitation gehört |
+| editors | hkf-link-or-text-list:person | nein | — | Herausgeber des aufnehmenden Werks |
+| container | text | nein | — | Das aufnehmende Werk: Zeitschrift, Zeitung, Sammelband |
+| publisher | hkf-link-or-text:organisation | nein | — | Verlag: als Verweis oder als Name |
+| place | text | nein | — | Erscheinungsort |
+| year | hkf-year | nein | — | Erscheinungsjahr |
+| volume | text | nein | — | Band oder Jahrgang; Text, weil auch `12A` vorkommt |
+| pages | text | nein | — | Seitenbereich, etwa `34–56` |
+| doi | hkf-url | nein | — | DOI, vollständig als `https://doi.org/…` |
+| lang | hkf-lang | nein | — | Sprache des Werks |
+| url | hkf-url | nein | — | Fundstelle des Werks: wo es veröffentlicht ist |
+| file | hkf-file:document / hkf-url | nein | — | Ausfertigung des Werks: als Datei in der Ablage oder als Adresse, etwa auf einem Dateiserver |
+| accessed | date | nein | — | Datum des Abrufs |
+| checksum | text | nein | — | `sha256:<hex>` über den erfassten Text; sagt beim nächsten Einlesen, ob sich die Quelle geändert hat |
+| wikidata_id | hkf-wikidata | nein | — | Kennung des Werks in Wikidata |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+
+# Konventionen
+
+Ein Aufsatz ist ein Beitrag und kein Werk für sich; `container` nennt, worin
+er steht. Ohne diese Angabe lässt er sich nicht zitieren, sie ist aber
+trotzdem nicht Pflicht: Eine Quelle wird oft eingelesen, bevor alle Angaben
+beisammen sind, und eine Pflicht machte die Notiz bis dahin unschreibbar.
+
+`url` und `file` bezeichnen Verschiedenes und stehen darum als zwei
+Properties da, nicht als Alternative (Core §3.7.2): `url` ist, **wo das Werk
+veröffentlicht ist** — die Verlagsseite, die DOI-Adresse —, und damit
+zitierfähig. `file` ist, **wo die eigene Ausfertigung liegt**: als Datei in
+der Ablage oder als Adresse, etwa auf einem Dateiserver im eigenen Netz. Ein
+Original muss also nicht in die Ablage kopiert werden, um verzeichnet zu sein.
+Beide dürfen nebeneinander stehen.
+
+Eine Quellennotiz beschreibt das zitierte Werk und fasst zusammen, **was es
+sagt** — gegliedert nach seinem eigenen Aufbau, je Kapitel oder Hauptabschnitt
+eine Überschrift. Was man daraus **für die eigene Sache schließt**, gehört
+nicht hierher, sondern in eine `note` oder ein `concept`, das per `sources`
+auf die Quelle verweist.
+```
+
+## 3.10 `clipping`
+
+```markdown
+---
+type: typedef
+title: Erfasste Webseite
+description: Eine erfasste Webseite; ihr Text steht im Body der Notiz.
+source: true
+---
+
+# Properties
+
+| Property | Typ | Pflicht | Vorgabe | Beschreibung |
+|---|---|---|---|---|
+| authors | hkf-link-or-text-list:person | nein | — | Urheber: als Verweis auf eine Personennotiz oder als Name, wie die Seite ihn nennt |
+| container | text | nein | — | Name der Website, auf der die Seite erschien |
+| year | hkf-year | nein | — | Jahr der Veröffentlichung |
+| lang | hkf-lang | nein | — | Sprache des Werks |
+| url | hkf-url | nein | — | Fundstelle des Werks: wo es veröffentlicht ist |
+| file | hkf-file:document / hkf-url | nein | — | Ausfertigung des Werks: als Datei in der Ablage oder als Adresse, etwa auf einem Dateiserver |
+| accessed | date | nein | — | Datum des Abrufs |
+| checksum | text | nein | — | `sha256:<hex>` über den erfassten Text; sagt beim nächsten Einlesen, ob sich die Quelle geändert hat |
+| wikidata_id | hkf-wikidata | nein | — | Kennung des Werks in Wikidata |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+
+# Konventionen
+
+Der Body trägt den **erfassten Text der Seite**, so wie er abgerufen wurde,
+und darunter die Zusammenfassung. Das ist der Unterschied zu `webpage`, und er
+ist der ganze Unterschied: Die Property-Tabellen der beiden sind bis auf
+nichts gleich, aber ein Clipping hat den Text, eine Webpage nur die Adresse.
+Wer wissen will, was tatsächlich im Haus ist, sieht in `Clippings/` nach.
+
+Damit braucht HKF keine eigene Rohtextschicht neben den Notizen: Ein Clipping
+**ist** sie. `checksum` sagt beim nächsten Einlesen, ob sich die Seite seither
+geändert hat — eine Webseite ändert sich still.
+
+`url` und `file` bezeichnen Verschiedenes und stehen darum als zwei
+Properties da, nicht als Alternative (Core §3.7.2): `url` ist, **wo das Werk
+veröffentlicht ist** — die Verlagsseite, die DOI-Adresse —, und damit
+zitierfähig. `file` ist, **wo die eigene Ausfertigung liegt**: als Datei in
+der Ablage oder als Adresse, etwa auf einem Dateiserver im eigenen Netz. Ein
+Original muss also nicht in die Ablage kopiert werden, um verzeichnet zu sein.
+Beide dürfen nebeneinander stehen.
+
+Eine Quellennotiz beschreibt das zitierte Werk und fasst zusammen, **was es
+sagt** — gegliedert nach seinem eigenen Aufbau, je Kapitel oder Hauptabschnitt
+eine Überschrift. Was man daraus **für die eigene Sache schließt**, gehört
+nicht hierher, sondern in eine `note` oder ein `concept`, das per `sources`
+auf die Quelle verweist.
+```
+
+## 3.11 `webpage`
+
+```markdown
+---
+type: typedef
+title: Webseite
+description: Eine zitierte Webseite; ihr Text bleibt draußen.
+source: true
+---
+
+# Properties
+
+| Property | Typ | Pflicht | Vorgabe | Beschreibung |
+|---|---|---|---|---|
+| authors | hkf-link-or-text-list:person | nein | — | Urheber: als Verweis auf eine Personennotiz oder als Name, wie die Seite ihn nennt |
+| container | text | nein | — | Name der Website, auf der die Seite erschien |
+| year | hkf-year | nein | — | Jahr der Veröffentlichung |
+| lang | hkf-lang | nein | — | Sprache des Werks |
+| url | hkf-url | nein | — | Fundstelle des Werks: wo es veröffentlicht ist |
+| file | hkf-file:document / hkf-url | nein | — | Ausfertigung des Werks: als Datei in der Ablage oder als Adresse, etwa auf einem Dateiserver |
+| accessed | date | nein | — | Datum des Abrufs |
+| checksum | text | nein | — | `sha256:<hex>` über den erfassten Text; sagt beim nächsten Einlesen, ob sich die Quelle geändert hat |
+| wikidata_id | hkf-wikidata | nein | — | Kennung des Werks in Wikidata |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+
+# Konventionen
+
+Eine Webseite wird zitiert, nicht erfasst: Der Body trägt die
+Zusammenfassung, nicht den Text der Seite. Wer den Text behalten will, legt
+ein `clipping` an.
+
+`accessed` wiegt hier schwerer als bei jedem anderen Quelltyp. Eine Webseite
+hat kein Erscheinungsjahr, auf das man sich verlassen könnte, und sie kann
+morgen anders lauten; das Abrufdatum ist oft das einzige, was die Zitation
+festhält.
+
+`url` und `file` bezeichnen Verschiedenes und stehen darum als zwei
+Properties da, nicht als Alternative (Core §3.7.2): `url` ist, **wo das Werk
+veröffentlicht ist** — die Verlagsseite, die DOI-Adresse —, und damit
+zitierfähig. `file` ist, **wo die eigene Ausfertigung liegt**: als Datei in
+der Ablage oder als Adresse, etwa auf einem Dateiserver im eigenen Netz. Ein
+Original muss also nicht in die Ablage kopiert werden, um verzeichnet zu sein.
+Beide dürfen nebeneinander stehen.
+
+Eine Quellennotiz beschreibt das zitierte Werk und fasst zusammen, **was es
+sagt** — gegliedert nach seinem eigenen Aufbau, je Kapitel oder Hauptabschnitt
+eine Überschrift. Was man daraus **für die eigene Sache schließt**, gehört
+nicht hierher, sondern in eine `note` oder ein `concept`, das per `sources`
+auf die Quelle verweist.
+```
+
+## 3.12 `term`
 
 ```markdown
 ---
@@ -491,7 +725,7 @@ description: Ein definierter Begriff.
 |---|---|---|---|---|
 | lang | hkf-lang | ja | — | Sprache des Begriffs |
 | broader | hkf-link:term | nein | — | Übergeordneter Begriff |
-| sources | hkf-link-list:source | nein | — | Belege der Definition |
+| sources | hkf-link-list | nein | — | Belege der Definition; Verweise auf Notizen eines Quelltyps (Core §3.2.2) |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
 
@@ -513,7 +747,7 @@ Wird die Notiz länger, gehört, was über die Definition hinausgeht, in ein
 `concept`.
 ```
 
-## 3.10 `concept`
+## 3.13 `concept`
 
 ```markdown
 ---
@@ -528,7 +762,7 @@ description: Eine Sache und der Stand des Wissens über sie.
 |---|---|---|---|---|
 | terms | hkf-link-list:term | nein | — | Die Begriffe, unter denen die Wissensbasis die Sache führt |
 | broader | hkf-link:concept | nein | — | Übergeordnetes Konzept |
-| sources | hkf-link-list:source | nein | — | Quellen, aus denen der Stand des Wissens stammt |
+| sources | hkf-link-list | nein | — | Quellen, aus denen der Stand des Wissens stammt; Verweise auf Notizen eines Quelltyps (Core §3.2.2) |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
 
@@ -547,7 +781,7 @@ Hat eine Konzeptnotiz keine eigenen Aussagen, sondern nur Verweise, ist sie
 ein `topic`.
 ```
 
-## 3.11 `comparison`
+## 3.14 `comparison`
 
 ```markdown
 ---
@@ -561,7 +795,7 @@ description: Eine Gegenüberstellung mehrerer Gegenstände entlang benannter Dim
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
 | compares | hkf-link-list | ja | — | Die verglichenen Gegenstände, mindestens zwei |
-| sources | hkf-link-list:source | nein | — | Quellen des Vergleichs |
+| sources | hkf-link-list | nein | — | Quellen des Vergleichs; Verweise auf Notizen eines Quelltyps (Core §3.2.2) |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
 
 # Konventionen
@@ -577,7 +811,7 @@ vergleichen lässt — zwei Konzepte ebenso wie zwei Körperschaften. Was nur
 einen der Gegenstände betrifft, gehört in dessen eigene Notiz.
 ```
 
-## 3.12 `topic`
+## 3.15 `topic`
 
 ```markdown
 ---
@@ -600,7 +834,7 @@ eine Einstiegsseite mit Verweisen; Inhalte, die anderswo hingehören, stehen
 nicht hier.
 ```
 
-## 3.13 `note`
+## 3.16 `note`
 
 ```markdown
 ---
@@ -614,7 +848,7 @@ description: Eine Notiz ohne spezifischeren Typ.
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
 | about | hkf-link-list | nein | — | Worauf sich die Notiz bezieht |
-| sources | hkf-link-list:source | nein | — | Verwendete Quellen |
+| sources | hkf-link-list | nein | — | Verwendete Quellen; Verweise auf Notizen eines Quelltyps (Core §3.2.2) |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
 
 # Konventionen
@@ -627,7 +861,7 @@ Quelle, ein Protokoll, ein Gedanke. Überlebt ihr Gegenstand den Anlass, gehört
 er in ein `concept`, und die Notiz verweist per `about` dorthin.
 ```
 
-## 3.14 `specification`
+## 3.17 `specification`
 
 ```markdown
 ---
@@ -642,7 +876,7 @@ description: Ein normatives Dokument, an das sich die Wissensbasis hält.
 |---|---|---|---|---|
 | version | text | ja | — | Fassung, etwa `1.0` |
 | url | hkf-url | nein | — | Kanonische Adresse |
-| authority | hkf-link:organisation | nein | — | Herausgebende Stelle |
+| authority | hkf-link-or-text:organisation | nein | — | Herausgebende Stelle: als Verweis oder als Name |
 | supersedes | hkf-link:specification | nein | — | Abgelöste Fassung |
 | lang | hkf-lang | nein | — | Sprache des Dokuments |
 | file | hkf-file:document | nein | — | Beigelegter Volltext |
@@ -663,7 +897,7 @@ Welche Spezifikation für die Wissensbasis selbst gilt, sagt `spec` in ihrer
 Wurzeldatei (Core A.1).
 ```
 
-## 3.15 `hint`
+## 3.18 `hint`
 
 ```markdown
 ---
@@ -700,7 +934,7 @@ noch aufheben.
 jede Notiz dieses Typs. Ohne `applies_to` gilt er für die ganze Wissensbasis.
 ```
 
-## 3.16 `city`
+## 3.19 `city`
 
 ```markdown
 ---
@@ -738,7 +972,7 @@ zwei Gegenstände.
 `latitude` und `longitude` werden nur gemeinsam gesetzt.
 ```
 
-## 3.17 `country`
+## 3.20 `country`
 
 ```markdown
 ---
@@ -801,9 +1035,15 @@ mehr braucht, legt einen eigenen Typ daneben (Core §3.7).
 Diese Fassung ist **HKF Config 1.0** und setzt HKF Core 1.0 voraus.
 
 Config wird getrennt von Core fortgeschrieben. Eine Minor-Version darf Typen
-ergänzen, Properties ergänzen und die `values` der Aufzählungen aus §2.2
-erweitern. Sie darf keine Property und keinen Wert entfernen und keine
-Bedeutung ändern, weil das vorhandene Notizen ungültig machte.
+ergänzen, Property-Typen ergänzen, Properties ergänzen und die `values` der
+Aufzählungen aus §2.2 erweitern. Sie darf keinen Typ, keinen Property-Typ,
+keine Property und keinen Wert entfernen und keine Bedeutung ändern, weil das
+vorhandene Notizen ungültig machte.
+
+Eine Property, deren Typ-Angabe **erweitert** wird, ist davon nicht betroffen:
+`hkf-link-list:person` zu `hkf-link-or-text-list:person` zu machen lässt jeden
+bisher geschriebenen Wert gültig, weil er die erste Alternative erfüllt. Was
+zulässig wird, ist eine Ergänzung; was unzulässig wird, ein Bruch.
 
 Die Schranke wiegt hier schwerer als bei einer Lieferung: **Eine neue Fassung
 erreicht bestehende Wissensbasen durch keinen Import**, weil nichts von hier

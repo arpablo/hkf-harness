@@ -21,8 +21,9 @@ dort nie aus dem Abschnitt kam — eine Adresse, ein von Hand gesetzter Verweis
 import io, os, re, shutil
 
 from . import CORE, ablage, frontmatter, notiz
-from .importieren import (ARTVERZEICHNIS, STANDARD_PROPTYPES, grundtypen,
-                          medienart, _property_tabelle, _verzeichnis)
+from .importieren import (ARTVERZEICHNIS, QUELLBASIS, STANDARD_PROPTYPES,
+                          grundtypen, medienart, _property_tabelle,
+                          _verzeichnis)
 
 WERKZEUG = "hk-export"
 
@@ -37,6 +38,7 @@ class Plan(object):
         daten, _ = frontmatter.lesen(os.path.join(hkb, "hkb.md"))
         self.hkb_media = str(daten.get("media_base") or "").strip("/")
         self.hkb_base = str(daten.get("base") or "").strip("/")
+        self.quellbasis = str(daten.get("source_base", QUELLBASIS) or "").strip("/")
         self.media_base = media_base.strip("/")
         self.bundle = {}
         self.bundle_body = ""
@@ -110,8 +112,23 @@ def planen(hkb, bundle_id, ziel, media_base="Media"):
     von_anderen = _gelieferte_typen(plan, vorausgesetzt)
 
     # 1. Die Notizen der Lieferung
-    for p in ablage.dateien(plan.basis):
+    #
+    # Der Quellenbereich gehoert der Wissensbasis und nicht der Lieferung
+    # (§4.3): Er wird beim Sammeln abgestreift, sonst truege das Bundle den
+    # `source_base` des Absenders. Wo `base` nicht leer ist, liegt er neben
+    # den Typverzeichnissen und wird eigens durchlaufen.
+    quellen = os.path.join(plan.hkb, plan.quellbasis) if plan.quellbasis else None
+    wurzeln = [plan.basis]
+    if quellen and os.path.isdir(quellen) and \
+       not os.path.abspath(quellen).startswith(
+           os.path.abspath(plan.basis).rstrip("/") + os.sep):
+        wurzeln.append(quellen)
+    for p in [x for w in wurzeln for x in ablage.dateien(w)]:
         rel = os.path.relpath(p, plan.basis).replace(os.sep, "/")
+        if rel.startswith("../") and quellen:
+            rel = os.path.relpath(p, quellen).replace(os.sep, "/")
+        elif plan.quellbasis and rel.startswith(plan.quellbasis + "/"):
+            rel = rel[len(plan.quellbasis) + 1:]
         if "/" not in rel:
             continue
         daten, body = frontmatter.lesen(p)
@@ -240,6 +257,10 @@ def _umschreiben(plan, e, drin):
                                     "art": medienart(neu)})
             return neu, True
         neu = ziel[len(pre_n) + 1:] if pre_n and ziel.startswith(pre_n + "/") else ziel
+        # Der Quellenbereich bleibt zu Hause (§4.3); die Notiz liegt in der
+        # Lieferung unter ihrem blossen `dir`.
+        if plan.quellbasis and neu.startswith(plan.quellbasis + "/"):
+            neu = neu[len(plan.quellbasis) + 1:]
         return neu, neu in drin
 
     def ersetzen(m):
@@ -305,7 +326,8 @@ def _hbundle(plan):
     for typ in sorted(typen):
         p = os.path.join(plan.basis, "Typedefs", typ + ".md")
         d = frontmatter.lesen(p)[0] if os.path.isfile(p) else {}
-        zeilen.append("| %s | %s | %s |" % (typ, _verzeichnis(typ, d),
+        # Eine Lieferung hat keinen Quellenbereich (§4.3): das blosse `dir`.
+        zeilen.append("| %s | %s | %s |" % (typ, _verzeichnis(typ, d, ""),
                                             d.get("description") or ""))
     return kopf, (body + "\n\n" if body else "") + "\n".join(zeilen) + "\n"
 

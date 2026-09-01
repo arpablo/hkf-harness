@@ -28,8 +28,8 @@ Das Format ist auf zwei Dokumente verteilt, weil es zwei Fragen beantwortet:
 - **HKF Core** — dieses Dokument. Wie eine Ablage funktioniert: Verzeichnisse,
   Wertformen, Verweise, Typdefinitionen als Bauform, das Bundle-Format und die
   drei Methoden. Es nennt **keine einzige konkrete Definition**.
-- **[HKF Config](HKF-Config-V1.0.md)** — das Inventar: siebzehn
-  Typdefinitionen und fünfzehn Property-Typen. Sie bilden zusammen die
+- **[HKF Config](HKF-Config-V1.0.md)** — das Inventar: zwanzig
+  Typdefinitionen und sechzehn Property-Typen. Sie bilden zusammen die
   **Grundausstattung** jeder Ablage und entstehen mit ihr; geliefert wird
   keine davon.
 
@@ -82,7 +82,7 @@ Wurzel des Vaults sein.
    Wissensbasis führt, steht in der Typtabelle ihrer Wurzeldatei; in einer
    Lieferung sagt es der `type` jeder Notiz. Ein verbreitetes
    Vokabular liefert **HKF Config**.
-7. **Grundausstattung und Zuladung.** Die dreizehn Property-Typen und die drei
+7. **Grundausstattung und Zuladung.** Die vierzehn Property-Typen und die drei
    Kern-Typen entstehen mit der Wissensbasis — ohne sie ließe sich nichts
    importieren. Alles Weitere kommt als Bundle dazu und ist freiwillig (§5.3).
 8. **Ein unbekannter Typ hält einen Import nicht auf.** Eine Notiz mit einem
@@ -171,6 +171,13 @@ Vorgabe ist der leere Wert, also ebenfalls die Wurzel. In einem Bundle bleibt
 auch er ohne Wirkung: Dort erkennt man eine Mediendatei an ihrer Endung, nicht
 an ihrem Verzeichnis (§4.3).
 
+`source_base` ist der Basispfad für die Quellenverzeichnisse (§3.2.2), nach
+denselben Regeln. Anders als bei `media_base` ist die Vorgabe **nicht** leer,
+sondern `Sources`: Ein leerer Wert legte die Quellenverzeichnisse neben die
+übrigen Typverzeichnisse und höbe damit genau die Trennung auf, für die es die
+Property gibt. Wer keine Trennung will, vergibt kein `source: true`. In einem
+Bundle bleibt auch `source_base` ohne Wirkung (§4.3).
+
 Ihr Body enthält den Abschnitt `# Typen`:
 
 ```markdown
@@ -183,6 +190,11 @@ Ihr Body enthält den Abschnitt `# Typen`:
 | bundle | bundles | Beschreibt eine Lieferung. |
 | person | persons | Ein Mensch. |
 ```
+
+Die Spalte **Verzeichnis** nennt den Ort, an dem die Notizen des Typs
+tatsächlich liegen — bei einem Quelltyp also `<source_base>/<dir>` und nicht
+bloß sein `dir` (§3.2.2). Die Tabelle beantwortet die Frage „wo liegt was",
+und dafür hilft ein halber Pfad niemandem.
 
 Die Tabelle ist **abgeleitet**: Sie fasst alle Typdefinitionen der Ablage
 zusammen und wird von `hk-lint --fix` neu erzeugt. Sie existiert allein
@@ -207,6 +219,9 @@ Alle Notizen liegen typbezogen unter dem Basispfad:
 
 Unterverzeichnisse innerhalb eines Typverzeichnisses sind erlaubt.
 
+Eine Ausnahme sind die **Quelltypen**: Ihre Verzeichnisse liegen nicht unter
+`base`, sondern unter `source_base` (§3.2.2).
+
 Im Basispfad existieren **immer** die Verzeichnisse `Typedefs`, `Proptypes`
 und `Bundles`. Dort liegen die Typdefinitionen, die Property-Typen und die
 Bundle-Notizen. In einem Bundle bleibt `Bundles/` leer oder entfällt, weil
@@ -218,8 +233,8 @@ still. Ein Werkzeug legt ein fehlendes Verzeichnis an, sobald es etwas
 hineinschreibt, und meldet sein Fehlen nicht.
 
 **Zur Ablage gehört**, was unter ihrem Wurzelverzeichnis liegt: die
-Wurzeldatei, die Typverzeichnisse unter `base` und die Medienverzeichnisse
-unter `media_base`. Alles andere im Vault ist außerhalb von HKF und wird
+Wurzeldatei, die Typverzeichnisse unter `base`, die Quellenverzeichnisse unter
+`source_base` und die Medienverzeichnisse unter `media_base`. Alles andere im Vault ist außerhalb von HKF und wird
 weder geprüft noch verwaltet — eine Spezifikation, ein README, Notizen, die
 zu keiner Wissensbasis gehören.
 
@@ -249,8 +264,11 @@ Erkennung unabhängig davon, ob jemand eine Notiz `hbundle` nennt.
    eindeutig. Derselbe Name darf in verschiedenen Typverzeichnissen
    vorkommen.
 4. Die **Notiz-ID** ist der Pfad ab dem Basispfad ohne `.md`, etwa
-   `Persons/ada-lovelace`. Sie ist die Identität der Notiz **innerhalb einer
-   Ablage**. Über zwei Ablagen hinweg sagt sie nichts: Zwei Bundles dürfen
+   `Persons/ada-lovelace`; bei einer Quellennotiz der Pfad ab dem
+   Wurzelverzeichnis der Ablage, also **einschließlich** `source_base` — etwa
+   `Sources/Books/babbage-economy-1832`. Wo `base` leer ist, und das ist der
+   Normalfall, fallen beide Lesarten ohnehin zusammen. Sie ist die Identität
+   der Notiz **innerhalb einer Ablage**. Über zwei Ablagen hinweg sagt sie nichts: Zwei Bundles dürfen
    beide `Persons/john-smith` liefern und dabei zwei verschiedene Menschen
    meinen. Was der Import damit macht, steht in §6.1 Schritt 5.
 5. Umbenennen oder Verschieben ändert die Identität. Ein Werkzeug MUSS
@@ -288,6 +306,39 @@ vier Verzeichnissen:
   Medienverzeichnisse darf als `dir` einer Typdefinition beansprucht werden.
 - Die Medienart ergibt sich allein aus dem Verzeichnis, nicht aus der
   Dateiendung.
+
+### 3.2.2 Quellenverzeichnisse
+
+**Auch dieser Abschnitt gilt für eine HKB.** In einem Bundle liegt eine
+Quellennotiz, wo sie will; wohin sie beim Import kommt, sagt §4.3.
+
+Eine Quellennotiz beschreibt nicht die Sache, sondern das Werk, in dem über
+sie geschrieben steht. Sie ist Apparat, nicht Inhalt, und wächst mit jedem
+Einlesen weiter. Darum liegt sie nicht zwischen den übrigen Notizen, sondern
+mit ihresgleichen unter `source_base`:
+
+```text
+<source_base>/<verzeichnis des typs>/<dateiname>.md
+```
+
+**Welcher Typ ein Quelltyp ist, sagt seine Typdefinition.** Sie trägt
+`source: true` (HKF Config §3.1). Die Angabe verschiebt allein den Ort und
+sonst nichts: Das Verzeichnis bestimmt ein Quelltyp über `dir` wie jeder
+andere, und die Vorgabe aus §3.7 gilt unverändert — `book` liegt also in
+`<source_base>/Books/`.
+
+- Vorgabe für `source_base` ist `Sources` (A.1).
+- Unmittelbar unter `source_base` liegen **nur** Verzeichnisse von Quelltypen.
+- Kein Verzeichnis eines anderen Typs darf unter `source_base` liegen, und
+  `source_base` selbst darf von keiner Typdefinition als `dir` beansprucht
+  werden.
+- Innerhalb eines Quellenverzeichnisses ist jede Unterstruktur erlaubt, wie
+  bei jedem Typverzeichnis.
+
+Warum nicht einfach ein mehrteiliges `dir`, also `dir: Sources/Books`? Weil
+der Ort dann in jeder betroffenen Typdefinition stünde statt einmal in der
+Wurzeldatei, und weil eine Ablage ihn so nicht verlegen könnte, ohne jede
+davon anzufassen. `media_base` löst dieselbe Aufgabe seit jeher so.
 
 ## 3.3 Notizen
 
@@ -403,7 +454,7 @@ wenig für Obsidian-eigene Properties wie `tags`, `aliases` und `cssclasses`.
 
 ### 3.5.1 Die Standard-Property-Typen
 
-Dreizehn Property-Typen kennt jede HKB. Sie sind Teil dieser Spezifikation und
+Vierzehn Property-Typen kennt jede HKB. Sie sind Teil dieser Spezifikation und
 gehören zur **Grundausstattung**: Eine HKB legt sie beim Anlegen als Notizen in
 `Proptypes/` an (§5.3).
 
@@ -731,8 +782,10 @@ Für einen Wert wird der Reihe nach ermittelt:
    nur für `hkf-file`; für `hkf-link` ist es ein Fehler. Die Prüfung endet
    hier. Für `hkf-file` endet sie umgekehrt hier auch dann, wenn das Ziel
    **keine** Mediendatei ist — dann als Fehler.
-5. **Typverzeichnis suchen.** Gesucht wird die Typdefinition, deren `dir` ein
-   **segmentweises Präfix** der Notiz-ID ist. Der Vergleich läuft über ganze
+5. **Typverzeichnis suchen.** Gesucht wird die Typdefinition, deren
+   Verzeichnis ein **segmentweises Präfix** der Notiz-ID ist. Das Verzeichnis
+   ist `<source_base>/<dir>`, wenn die Typdefinition `source: true` trägt,
+   sonst `<dir>` (§3.2.2). Der Vergleich läuft über ganze
    Pfadsegmente: `Persons` ist ein Präfix von `Persons/historisch/ada`,
    aber nicht von `Persons-archiv/ada`. Nach §3.2 trifft höchstens eine
    Typdefinition zu.
@@ -862,7 +915,7 @@ in Anhang A.
 Mehr definiert dieses Dokument nicht. Welche Typen es sonst noch gibt, sagt
 **HKF Config**; jede Ablage ergänzt darüber hinaus, was sie braucht.
 
-Alles, was in HKF Config steht — siebzehn Typdefinitionen und fünfzehn
+Alles, was in HKF Config steht — zwanzig Typdefinitionen und sechzehn
 Property-Typen —, bildet die **Grundausstattung** einer HKB. Sie entsteht mit
 der Wissensbasis und wird nicht geliefert. Für die drei Kern-Typen ist das
 zwingend: Ohne den Typ `typedef` ließe sich keine Typdefinition ablegen, ohne
@@ -1044,6 +1097,12 @@ der zweite, was damals geliefert wurde; die dritte, wie die Lieferung mit dem
 zusammenhängt, was schon da war. Keines davon steht im Bundle, weil keines
 die Lieferung beschreibt.
 
+In die Gegenrichtung läuft `extends`: Die Property steht in der Lieferung und
+sagt dem Import, welche Notiz fortzuschreiben ist (§6.1 Schritt 5). Sobald er
+gelaufen ist, hat sie nichts mehr zu sagen, und er **streift sie ab** — wie
+der Export umgekehrt `bundles` und `rejected_links` abstreift (§6.2). Was
+eine Anweisung war, bleibt nicht als Property stehen.
+
 ## 4.3 Was übernommen wird
 
 Ein Bundle darf enthalten, was der Absender für nützlich hält — ein README,
@@ -1065,9 +1124,16 @@ Bundle, ein README zu haben, ohne dass es als Notiz in der Wissensbasis landet.
 nicht in ein Bundle (§4.1).
 
 **Wohin die Notiz kommt.** Nicht dorthin, wo sie in der Lieferung lag, sondern
-nach `<base>/<dir des Typs>/<dateiname>` in der aufnehmenden Wissensbasis. Das
-`dir` steht in deren Typdefinition; kennt sie den Typ nicht, entsteht eine
-vorläufige und es gilt die Vorgabe aus §3.7 (§5.4). Der Dateiname bleibt.
+nach `<base>/<dir des Typs>/<dateiname>` in der aufnehmenden Wissensbasis —
+und nach `<source_base>/<dir des Typs>/<dateiname>`, wenn deren Typdefinition
+`source: true` trägt (§3.2.2). Das `dir` steht in deren Typdefinition; kennt
+sie den Typ nicht, entsteht eine vorläufige und es gilt die Vorgabe aus §3.7
+(§5.4). Der Dateiname bleibt.
+
+Damit hängt der Ort einer Quellennotiz allein an der aufnehmenden
+Wissensbasis. Eine Lieferung muss von `source_base` nichts wissen, und
+dieselbe Lieferung läuft in eine Ablage, die ihre Quellen woanders führt,
+genauso hinein.
 
 Tragen zwei Dateien einer Lieferung denselben Typ **und** denselben
 Dateinamen, ergäben sie dieselbe Notiz-ID. Das ist ein Konflikt: melden, nichts
@@ -1276,7 +1342,7 @@ gepflegt oder geparst werden muss.
 ## 5.3 Grundausstattung und Zuladung
 
 Eine HKB entsteht mit ihrer **Grundausstattung**: allem, was in **HKF Config**
-steht — siebzehn Typdefinitionen und fünfzehn Property-Typen. Sie wird nicht
+steht — zwanzig Typdefinitionen und sechzehn Property-Typen. Sie wird nicht
 geliefert, sondern angelegt, denn ein Import setzt sie voraus: Er muss
 Typdefinitionen ablegen, Property-Typen einordnen und die Lieferung verbuchen
 können, bevor er irgendetwas anderes tut. Damit ist die Wissensbasis konform,
@@ -1811,9 +1877,35 @@ Schnittstelle. Ein Bundle stellt keine Methoden bereit.
 
    Bei einem Konflikt hält das Werkzeug an und meldet ihn; ein Mensch
    entscheidet. Nichts wird stillschweigend zusammengelegt.
-4. Jede Notiz nach `<base>/<dir des typs>/<dateiname>` schreiben.
-5. Existiert die Ziel-Notiz-ID bereits, ist zuerst zu klären, **ob es
-   dieselbe Notiz ist**. Der Pfad allein beweist das nicht (§3.2 Regel 4):
+4. Jede Notiz nach `<base>/<dir des typs>/<dateiname>` schreiben — bei einem
+   Quelltyp nach `<source_base>/<dir des typs>/<dateiname>` (§3.2.2). Trägt
+   die Notiz `extends`, ist ihr Ziel stattdessen die dort genannte Notiz-ID
+   (A.2, Schritt 5).
+5. **Eine Notiz mit `extends` ergänzt; sie ersetzt nicht.** Trägt die
+   ankommende Notiz diese Property, nennt ihr Wert die Notiz-ID in der
+   aufnehmenden Wissensbasis, die sie fortschreibt. Dann entfällt der
+   Vergleich über `modified`: Die Lieferung behauptet keine neuere Fassung,
+   sondern einen Zusatz.
+
+   | Lage | Folge |
+   |---|---|
+   | Die genannte Notiz-ID gibt es nicht | Die Notiz entsteht dort als neue Notiz, Zustand `neu`; `extends` entfällt dabei. |
+   | Es gibt sie | Der Body der Lieferung wird **vor** dem Abschnitt `# Siehe auch` angehängt, unverändert. Zustand `ergänzt`. |
+
+   Listen-Properties werden dabei vereinigt. Einen Skalar, den beide tragen
+   und der abweicht, überschreibt der Import **nicht**: Die Fassung der
+   Wissensbasis gilt, und die Abweichung wird vorgelegt. `modified` wird auf
+   den Zeitpunkt des Imports gesetzt, `modified_by` auf das Werkzeug.
+
+   **Angehängt wird, nicht verschmolzen.** Zwei Darstellungen derselben Sache
+   zu einer zu machen heißt deuten, und eine Deutung, die niemand angefordert
+   hat, ist der teuerste Fehler, den ein Import machen kann — teurer als eine
+   Lücke, weil sie sich nicht ansieht wie einer. Widerspricht die Ergänzung
+   dem Bestand, steht danach beides da, mit seiner Herkunft; zusammengezogen
+   wird es von einem Menschen oder einem Sprachmodell.
+
+   Ohne `extends` gilt der gewöhnliche Weg. Existiert die Ziel-Notiz-ID
+   bereits, ist zuerst zu klären, **ob es dieselbe Notiz ist**. Der Pfad allein beweist das nicht (§3.2 Regel 4):
    `Persons/john-smith` heißt in zwei Lieferungen leicht denselben Dateinamen
    und meint zwei verschiedene Menschen.
 
@@ -1876,6 +1968,15 @@ Schnittstelle. Ein Bundle stellt keine Methoden bereit.
    bleiben unangetastet — sie beschreiben die Notiz, nicht die Lieferung, und
    ein Zurücksetzen auf den Importzeitpunkt zerstörte den Vergleich aus
    Schritt 5.
+
+   **Was nur in der Wissensbasis steht, überlebt.** Eine Lieferung kennt den
+   `bundles`-Eintrag einer früheren Lieferreihe nicht, kennt `rejected_links`
+   nicht und kennt die von Hand geschriebenen Zeilen unter `# Siehe auch`
+   nicht. Sie dürfen nicht verschwinden, nur weil die Lieferung sie nicht
+   mitbringt: Listen-Properties werden vereinigt, der Abschnitt `# Siehe auch`
+   ebenso, und eine Property, die allein die Wissensbasis führt, bleibt
+   stehen. Skalare der Lieferung gelten — das ist, was `aktualisiert` heißt.
+   Eine Maschine fügt hinzu und entfernt nie (§5.6).
 7. Mediendateien nach `<media_base>/<medienart>/<restpfad>` übernehmen; die
    Medienart folgt aus der Dateiendung, der `restpfad` aus §4.3. Trifft ein
    Pfad auf eine vorhandene Datei mit abweichendem Inhalt, ist das ein
@@ -2218,20 +2319,35 @@ beiden Fälle vorliegt, entscheidet ein Mensch.
 5. alle Frontmatter-Werte den Wertformen aus §3.4 entsprechen und die
    Property-Tabellen ihrer Typen erfüllen,
 6. alle internen Verweise Wikilinks nach §3.6 auf Dateien der Lieferung sind
-   und sich eindeutig auflösen,
+   und sich eindeutig auflösen; davon ausgenommen sind `extends` und die
+   Verweise einer Notiz, die `extends` trägt — sie zeigen auf den Bestand der
+   aufnehmenden Wissensbasis und lösen erst dort auf (§6.1 Schritt 5),
 7. kein Standard-Property-Typ umdefiniert wird,
 8. keine Notiz die Property `bundles` oder `rejected_links` trägt,
 9. `hbundle.md` weder Import- noch Entscheidungsnachweis enthält,
 10. jeder Eintrag in `required_bundles` §4.1 erfüllt, und
 11. keine Typdefinition `provisional: true` trägt (§5.4).
 
+`extends` ist die Umkehrung von Punkt 8: Die Property gehört in eine
+Lieferung und nicht in eine Wissensbasis. Sie ist eine Anweisung an den
+Import und hat, sobald er gelaufen ist, nichts mehr zu sagen — er streift sie
+darum ab (§4.2).
+
+Punkt 6 ist die einzige Zusage, die `extends` lockert, und sie wiegt: Eine
+Lieferung, die einen bestehenden Begriff fortschreibt oder zwei vorhandene
+Notizen vergleicht, kann für sich nicht vollständig auflösbar sein — ihre
+Ziele liegen anderswo. Der Import prüft diese Verweise beim Ankommen und legt
+vor, was nicht auflöst; `hk-lint` auf der Lieferung meldet sie als Hinweis,
+nicht als Befund.
+
 ## 7.2 Eine HKB ist konform, wenn
 
 1. `hkb.md` mit `hkf: "1.0"` und `name` im Wurzelverzeichnis der HKB liegt
    und keine weitere Ablage darunter liegt,
 2. `Typedefs`, `Proptypes` und `Bundles` im Basispfad existieren, soweit sie
-   nicht leer wären, und unter `media_base` nur die vier Medienverzeichnisse
-   aus §3.2.1 liegen,
+   nicht leer wären, unter `media_base` nur die vier Medienverzeichnisse aus
+   §3.2.1 liegen und unter `source_base` nur Verzeichnisse von Quelltypen
+   (§3.2.2),
 3. die Grundausstattung aus §3.8 vorhanden ist — jede Typdefinition und jeder
    Property-Typ aus HKF Config,
 4. jeder davon der dortigen Fassung entspricht,
@@ -2249,6 +2365,9 @@ Notiz nicht ungültig. Vorläufige Typdefinitionen machen eine HKB nicht
 unkonform: Der Typ ist registriert, seine Notizen liegen am richtigen Ort und
 seine Verweise sind prüfbar — ungeklärt ist allein die Bedeutung (§5.4). Ein
 Bundle darf eine solche Typdefinition dagegen nicht enthalten (§7.1).
+
+Keine Notiz einer HKB trägt `extends`: Die Property ist eine Anweisung an den
+Import, und was sie anweist, ist danach geschehen (§4.2).
 
 ---
 
@@ -2289,11 +2408,13 @@ diese Properties:
 | `name` | text | Pflicht | — | Anzeigename der HKB |
 | `base` | text | optional | ohne Wirkung | Basispfad der Typverzeichnisse |
 | `media_base` | text | optional | ohne Wirkung | Basispfad der Medienverzeichnisse |
+| `source_base` | text | optional | ohne Wirkung | Basispfad der Quellenverzeichnisse (§3.2.2); Vorgabe `Sources` |
 | `timezone` | text | optional | optional | IANA-Zonenname für Ortszeiten (§3.4) |
 | `spec` | text | optional | optional | Wo die geltende Spezifikation steht |
 
 „Ohne Wirkung" heißt: Ein Bundle darf die Property tragen, aber kein Werkzeug
-wertet sie aus. Ein Bundle hat weder Typ- noch Medienverzeichnisse (§4.3).
+wertet sie aus. Ein Bundle hat weder Typ-, Quellen- noch Medienverzeichnisse
+(§4.3).
 Alle Namen sind `snake_case` wie in jeder Notiz (§3.4) — die Wurzeldatei ist
 keine eigene Welt.
 
@@ -2337,6 +2458,7 @@ brauchen keinen Eintrag in einer Property-Tabelle.
 | `bundles` | hkf-link-list:bundle | nein | — | Zugehörigkeit; nur in einer HKB (§5.2) |
 | `related` | hkf-link-or-url-list | nein | — | Verwandtes: Verweise in die eigene Ablage oder Adressen im Netz (§5.6) |
 | `rejected_links` | hkf-link-list | nein | — | Ziele, die nicht selbsttätig verlinkt werden; nur in einer HKB (§5.6) |
+| `extends` | text | nein | — | Notiz-ID, die diese Notiz ergänzt statt sie zu ersetzen; nur in einer Lieferung (§6.1) |
 
 ### Die drei Zeitangaben
 
@@ -2451,12 +2573,14 @@ bevor es das Ziel auflöst.
 ```abnf
 typzelle      = typangabe *( " / " typangabe )
 
-typangabe     = wertform / link-angabe / file-angabe / proptyp-angabe
+typangabe     = wertform / link-angabe / file-angabe / linktext-angabe
+              / proptyp-angabe
 
 wertform      = "text" / "list" / "number" / "checkbox" / "date" / "datetime"
 
 link-angabe   = "hkf-link" [ "-list" ] [ ":" zieltypen ]
 file-angabe   = "hkf-file" [ "-list" ] [ ":" medienarten ]
+linktext-angabe = "hkf-link-or-text" [ "-list" ] [ ":" zieltypen ]
 proptyp-angabe = proptyp-name [ "-list" ]
 
 zieltypen     = typname *( "," typname )
@@ -2467,12 +2591,12 @@ typname       = kebab
 proptyp-name  = kebab
 ```
 
-**Die Alternativen sind in dieser Reihenfolge zu versuchen.** `hkf-link` und
-`hkf-file` erfüllen als Zeichenketten auch `proptyp-name`; nur weil ihre
-eigenen Regeln zuerst greifen, ist der `:`-Zusatz an ihnen erlaubt und
-anderswo nicht. Ein Werkzeug, das `proptyp-angabe` zuerst probiert, hielte
-`hkf-link:person` für einen Property-Typ namens `hkf-link` mit unerklärtem
-Rest.
+**Die Alternativen sind in dieser Reihenfolge zu versuchen.** `hkf-link`,
+`hkf-file` und `hkf-link-or-text` erfüllen als Zeichenketten auch
+`proptyp-name`; nur weil ihre eigenen Regeln zuerst greifen, ist der
+`:`-Zusatz an ihnen erlaubt und anderswo nicht. Ein Werkzeug, das
+`proptyp-angabe` zuerst probiert, hielte `hkf-link:person` für einen
+Property-Typ namens `hkf-link` mit unerklärtem Rest.
 
 Ebenso wird ein `-list` **zuerst abgetrennt** und erst dann entschieden, welche
 Argumente zulässig sind (§3.5.2) — sonst gilt `hkf-link-list:person` als
@@ -2488,7 +2612,10 @@ unzulässig, obwohl §3.7.1 es ausdrücklich erlaubt.
 4. Die Leerzeichen um das `/` sind Pflicht. Ein Werkzeug liest den Trenner auch
    ohne sie; geschrieben wird er mit, und `hk-lint --fix` ergänzt sie (§3.7.2).
 5. `hkf-link-or-url` ist ein gewöhnlicher `proptyp-name` und nimmt darum keinen
-   `:`-Zusatz (§3.5.1).
+   `:`-Zusatz (§3.5.1). `hkf-link-or-text` nimmt einen, und das ist kein
+   Widerspruch, sondern folgt aus dem Unterschied der zweiten Alternative: Sie
+   ist dort eine Adresse im Netz, die keinen Typ hat, den man fordern könnte,
+   hier ein Text. Der Zieltyp betrifft in beiden Fällen allein die erste.
 
 ## B.4 Das Frontmatter-Schema
 
@@ -2501,7 +2628,7 @@ lässt:
 - `snake_case` als Form jedes Property-Namens (§3.4),
 - `type` als einzige Pflicht einer Notiz (§3.3),
 - die notizübergreifenden Properties samt ihrer Typen (A.2),
-- die dreizehn Standard-Property-Typen als Muster und Grenzen (§3.5.1),
+- die vierzehn Standard-Property-Typen als Muster und Grenzen (§3.5.1),
 - die beiden Wurzeldateien mit ihren Pflichten (A.1, §4.1).
 
 Drei Einstiegspunkte: `#/$defs/notiz`, `#/$defs/hkb`, `#/$defs/hbundle`.

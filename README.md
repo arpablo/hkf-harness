@@ -58,6 +58,7 @@ Python 3 und PyYAML.
 | `hk-lint [--fix] [--strict]` | prüft eine Wissensbasis **oder eine Lieferung** (§6.3): Frontmatter gegen Anhang B.4, Grammatik gegen Anhang B, dazu die strukturellen Prüfungen; `--fix` führt die elf erlaubten Handgriffe aus | **läuft** |
 | `hk-import <bundle>` | übernimmt eine Lieferung (§6.1): Typen abgleichen, Notizen und Mediendateien einsortieren, Verweise umschreiben, verknüpfen, Bundle-Notiz und Typtabelle fortschreiben | **läuft** |
 | `hk-export <id> <ziel>` | schreibt eine Lieferung heraus (§6.2): Notizen, Typdefinitionen und Mediendateien der Lieferung in den typbezogenen Baum, Verweise ohne Ablagepfad | **läuft** |
+| `hk-ingest [<stück>]` | liest eine Quelle ein: Typ feststellen, Ausfertigung ablegen oder verzeichnen, `sha256` bilden, Quellennotiz und `hbundle.md` schreiben, die Lücken melden. Mit `--hkb` gleich importieren | **läuft** |
 
 Was geprüft wird, entscheidet die Wurzeldatei: `hkb.md` heißt Wissensbasis,
 `hbundle.md` heißt Lieferung. §6.3 gilt für beide, mit den Unterschieden aus §4
@@ -146,13 +147,14 @@ nicht.
 ```
 spec/        die Fassung, die dieser Harness umsetzt
 lib/hkf/     ablage, frontmatter, schema, grammatik, pruefen, korrigieren,
-             importieren, exportieren, notiz, vorlage, fassung
-bin/         hk-init, hk-lint, hk-import, hk-export
+             importieren, exportieren, einlesen, notiz, vorlage, fassung
+bin/         hk-init, hk-lint, hk-import, hk-export, hk-ingest
 py           das Python des Harness — baut die venv und startet sie
 tools/       spec.py hält die Kopie unter spec/ auf Stand,
              grundausstattung.py die Vorlage gegen Anhang A und §3.5.1
 templates/   die Grundausstattung, aus der hk-init schöpft
-skills/      die KI-Schicht: hkb und fünf Operationen, siehe skills/README.md
+skills/      die KI-Schicht: hkb und sechs Operationen, siehe skills/README.md
+agents/      die Subagenten, die für einen Skill lesen — wilma
 test/        Rauchprobe: python3 test/smoke.py
 ```
 
@@ -211,13 +213,26 @@ Skript, und ein Neustart verlöre den Code.
 
 ## Die KI-Schicht
 
-Unter [`skills/`](skills/) liegen sechs Skills, die ein Sprachmodell durch die
+Unter [`skills/`](skills/) liegen sieben Skills, die ein Sprachmodell durch die
 Methoden führen. [`hkb`](skills/hkb/SKILL.md) ist die Grundlage, die übrigen
 setzen ihn voraus: [`hkb-notiz`](skills/hkb-notiz/SKILL.md),
 [`hkb-typ`](skills/hkb-typ/SKILL.md),
 [`hkb-import`](skills/hkb-import/SKILL.md),
 [`hkb-export`](skills/hkb-export/SKILL.md),
-[`hkb-lint`](skills/hkb-lint/SKILL.md).
+[`hkb-lint`](skills/hkb-lint/SKILL.md),
+[`hkb-quelle`](skills/hkb-quelle/SKILL.md).
+
+Unter [`agents/`](agents/) liegt daneben ein Subagent:
+[`wilma`](agents/wilma.md) liest eine Quelle in ihrem eigenen Kontext und gibt
+ein belegtes Destillat zurück. `hkb-quelle` ruft sie und liest nie selbst —
+wer ein Buch im laufenden Gespräch liest, hat es danach im Rücken, und die
+Notizen aus den letzten Kapiteln werden flacher als die aus den ersten. Ein
+Agent liest, er schreibt nicht; für die Regel oben ändert er nichts.
+
+**Damit ein Modell sie findet**, gehören Skills und Agenten dorthin, wo es
+sucht — bei Claude Code sind das `~/.claude/skills/` und `~/.claude/agents/`.
+Ein Symlink je Verzeichnis genügt; der Harness kopiert nichts dorthin und
+richtet nichts ein.
 
 Sie fügen nichts hinzu, was die Werkzeuge nicht können — sie tun genau das,
 was ein Programm nicht darf. Am deutlichsten bei `hkb-import`: `hk-import`
@@ -260,7 +275,7 @@ ab, `hk-lint` meldet eine Ablage, die neuer ist als er selbst.
 ## Die Grundausstattung gegen die Spezifikation
 
 Die Kern-Typen stehen zweimal: als Markdown-Block in Anhang A und als
-ausgelieferte Datei unter `templates/hkb/Typedefs/`. Die dreizehn
+ausgelieferte Datei unter `templates/hkb/Typedefs/`. Die vierzehn
 Standard-Property-Typen ebenso — dort als Tabelle in §3.5.1.
 
 ```
