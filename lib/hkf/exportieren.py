@@ -3,7 +3,7 @@
 
 Streng im Schreiben, grosszuegig im Lesen: Ein Bundle duerfte beliebig
 aufgebaut sein (§4), aber geschrieben wird der typbezogene Baum mit
-`Typedefs/`, `Proptypes/` und `media/<art>/`.
+`Typedefs/`, `Proptypes/` und `Media/<art>/`.
 
 Zwei Lesarten seien genannt, wo §6.2 offen ist:
 
@@ -28,7 +28,7 @@ WERKZEUG = "hk-export"
 
 
 class Plan(object):
-    def __init__(self, hkb, bundle_id, ziel, media_base="media"):
+    def __init__(self, hkb, bundle_id, ziel, media_base="Media"):
         self.hkb = hkb
         self.bundle_id = bundle_id
         self.ziel = os.path.abspath(ziel)
@@ -93,7 +93,7 @@ def _gelieferte_typen(plan, vorausgesetzt):
     return aus
 
 
-def planen(hkb, bundle_id, ziel, media_base="media"):
+def planen(hkb, bundle_id, ziel, media_base="Media"):
     plan = Plan(hkb, bundle_id, ziel, media_base)
     quelle = os.path.join(plan.basis, "Bundles", bundle_id + ".md")
     if not os.path.isfile(quelle):
@@ -218,7 +218,7 @@ def _unverwiesene_medien(plan):
 
 
 def _medienziel(plan, ziel):
-    """`<ablagepfad>/<media_base>/Images/x.png` → `media/Images/x.png`."""
+    """`<ablagepfad>/<media_base>/Images/x.png` → `Media/Images/x.png`."""
     pre = plan.praefix_medien()
     rest = ziel[len(pre) + 1:] if pre else ziel
     return "%s/%s" % (plan.media_base, rest) if plan.media_base else rest

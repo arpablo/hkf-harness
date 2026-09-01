@@ -141,7 +141,7 @@ Ihr Frontmatter trägt mindestens:
 ```yaml
 hkf: "1.0"
 base: ""
-media_base: media
+media_base: Media
 ```
 
 `base` ist der Basispfad für die Typverzeichnisse, relativ zur Wurzel, ohne
@@ -499,7 +499,7 @@ participants:
   **nicht** konform, auch wenn Obsidian ihn auflösen könnte.
 - `.md`, `./` und `../` kommen im Ziel nicht vor. Mediendateien behalten
   dagegen **immer** ihre Dateiendung, weil sie dort zum Namen gehört:
-  `[[media/Images/portraet-ada.png|portraet-ada.png]]`.
+  `[[Media/Images/portraet-ada.png|portraet-ada.png]]`.
 - In einer HKB bilden Ablagepfad und `base` zusammen den **Präfix** jedes
   Verweises. Er ist genau der Pfad, unter dem Obsidian die Datei findet; damit
   bleibt ein Verweis klickbar, auch wenn die Wissensbasis nur ein
@@ -813,7 +813,7 @@ man die Grammatik dieser Spezifikation kennt. Wer nur die Tabelle liest, muss
 aus der Beschreibungsspalte erfahren, dass beides zulässig ist.
 
 ```yaml
-portrait: "[[media/Images/portraet-ada.png|portraet-ada.png]]"   # erste Alternative
+portrait: "[[Media/Images/portraet-ada.png|portraet-ada.png]]"   # erste Alternative
 portrait: https://example.org/ada.jpg                           # zweite Alternative
 ```
 
@@ -915,8 +915,8 @@ biografie-2026/                              rezeption/
   Typedefs/person.md                           README.md          ← übergangen
   Typedefs/organisation.md                     typen/person.md
   Proptypes/hkf-url.md                         leute/ada.md
-  media/Images/portraet-ada.png                leute/babbage.md
-  media/Documents/notes-1843.pdf               scans/portraet.png
+  Media/Images/portraet-ada.png                leute/babbage.md
+  Media/Documents/notes-1843.pdf               scans/portraet.png
   Persons/ada-lovelace.md                      scans/notizen.pdf
   Organisations/analytical-society.md
 ```
@@ -1097,11 +1097,11 @@ Verzeichnisse, deren Name mit einem Punkt beginnt — `.git`, `.obsidian`,
 Versionsgeschichte als Dokumente in die Wissensbasis.
 
 **Wohin die Mediendatei kommt.** Nach `<media_base>/<medienart>/<restpfad>`.
-Der `restpfad` ist der Pfad in der Lieferung, von dem ein führendes `media/`
+Der `restpfad` ist der Pfad in der Lieferung, von dem ein führendes `Media/`
 und ein anschließendes Verzeichnis mit dem Namen der Medienart entfernt wurden:
 
 ```text
-media/Images/personen/portraet.png   →  <media_base>/Images/personen/portraet.png
+Media/Images/personen/portraet.png   →  <media_base>/Images/personen/portraet.png
 scans/portraet.png                  →  <media_base>/Images/scans/portraet.png
 portraet.png                        →  <media_base>/Images/portraet.png
 ```
@@ -1141,7 +1141,7 @@ Zusätzen:
 hkf: "1.0"
 name: Henni Knowledge Base
 base: ""
-media_base: media
+media_base: Media
 timezone: Europe/Berlin
 ---
 
@@ -1165,7 +1165,7 @@ wissen/Typedefs/person.md
 wissen/Proptypes/hkf-url.md
 wissen/Bundles/biografie-2026.md
 wissen/Persons/ada-lovelace.md
-media/Images/portraet-ada.png
+Media/Images/portraet-ada.png
 ```
 
 `base` und `media_base` sind voneinander unabhängig. Die Medienverzeichnisse
@@ -1220,7 +1220,7 @@ Imports** enthielt. Je übernommener Fassung entsteht ein Abschnitt
 
 | Mediendatei | Medienart | Zustand |
 |---|---|---|
-| [[media/Images/portraet-ada.png\|portraet-ada.png]] | image | neu |
+| [[Media/Images/portraet-ada.png\|portraet-ada.png]] | image | neu |
 
 | Verweis | Gegenstelle | Grund |
 |---|---|---|
@@ -2003,7 +2003,7 @@ Schreibt ein HKF-Bundle heraus.
 
 Ein Bundle darf beliebig aufgebaut sein (§4), aber `hk-export` nutzt diese
 Freiheit nicht: Es schreibt den typbezogenen Baum, mit `Typedefs/`,
-`Proptypes/` und `media/<art>/`. Streng im Schreiben, großzügig im Lesen — ein
+`Proptypes/` und `Media/<art>/`. Streng im Schreiben, großzügig im Lesen — ein
 Ergebnis, das aussieht wie eine Wissensbasis, ist leichter zu prüfen und zu
 lesen als eines, das jede erlaubte Form annehmen dürfte.
 

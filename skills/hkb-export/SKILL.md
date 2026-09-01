@@ -17,7 +17,7 @@ hk-export <bundle-id> <zielpfad>
 
 Welche Bundles es gibt, sagt `<base>/Bundles/`. Geschrieben wird der
 typbezogene Baum mit `Typedefs/`, `Proptypes/`, je einem Verzeichnis pro Typ
-und `media/<art>/` — auch wenn ein Bundle beliebig aufgebaut sein dürfte.
+und `Media/<art>/` — auch wenn ein Bundle beliebig aufgebaut sein dürfte.
 Streng im Schreiben, großzügig im Lesen.
 
 Danach prüfst du die Lieferung, denn `hk-lint` kann das auch:

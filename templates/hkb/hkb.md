@@ -2,7 +2,7 @@
 hkf: "1.0"
 name: Meine Wissensbasis
 base: ""
-media_base: media
+media_base: Media
 timezone: Europe/Berlin
 spec: https://github.com/arpablo/hkf-spec/blob/main/HKF-Core-V1.0.md
 ---

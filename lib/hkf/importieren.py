@@ -584,7 +584,7 @@ def _medien_planen(plan, medien, force):
         art = medienart(rel)
         verz = ARTVERZEICHNIS[art]
         teile = rel.split("/")
-        if teile[0] == "media":
+        if teile[0] == "Media":
             teile = teile[1:]
         if teile and teile[0] == verz:
             teile = teile[1:]

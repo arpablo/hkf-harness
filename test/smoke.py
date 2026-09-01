@@ -255,7 +255,7 @@ def main():
         r = lauf(os.path.join(BIN, "hk-import"), bundle, ziel)
         probe("übernimmt die Lieferung", r.returncode == 0, r.stdout + r.stderr)
         for f in ("Typedefs/ding.md", "dinge/eins.md", "dinge/zwei.md",
-                  "Bundles/probe.md", "media/Images/bilder/bild.png"):
+                  "Bundles/probe.md", "Media/Images/bilder/bild.png"):
             probe("legt %s an" % f, os.path.exists(os.path.join(ziel, f)))
         eins = io.open(os.path.join(ziel, "dinge", "eins.md"), encoding="utf-8").read()
         probe("trägt die Zugehörigkeit ein", "Bundles/probe|Probe" in eins, eins)
@@ -265,7 +265,7 @@ def main():
         zwei = io.open(os.path.join(ziel, "dinge", "zwei.md"), encoding="utf-8").read()
         probe("und keinen Gegeneintrag (§5.6)", "# Siehe auch" not in zwei, zwei)
         probe("schreibt den Wikilink auf den Pfad der HKB um",
-              "[[media/Images/bilder/bild.png|" in eins, eins)
+              "[[Media/Images/bilder/bild.png|" in eins, eins)
         probe("Typtabelle in hkb.md ergänzt",
               "| ding | dinge |" in io.open(os.path.join(ziel, "hkb.md"),
                                             encoding="utf-8").read())
@@ -393,11 +393,11 @@ def main():
         r = lauf(os.path.join(BIN, "hk-export"), "probe", aus, ziel)
         probe("schreibt heraus", r.returncode == 0, r.stdout + r.stderr)
         for f in ("hbundle.md", "Typedefs/ding.md", "dinge/eins.md",
-                  "dinge/zwei.md", "media/Images/bilder/bild.png"):
+                  "dinge/zwei.md", "Media/Images/bilder/bild.png"):
             probe("legt %s an" % f, os.path.exists(os.path.join(aus, f)))
         hb = io.open(os.path.join(aus, "hbundle.md"), encoding="utf-8").read()
         probe("hbundle traegt base und media_base",
-              'base: ""' in hb and "media_base: media" in hb, hb)
+              'base: ""' in hb and "media_base: Media" in hb, hb)
         probe("und eine frische Typtabelle", "| ding | dinge |" in hb, hb)
         probe("ohne Importnachweis", "# Import" not in hb, hb)
         eins_aus = io.open(os.path.join(aus, "dinge", "eins.md"),
@@ -407,7 +407,7 @@ def main():
         probe("behaelt den Verweis innerhalb der Lieferung",
               "# Siehe auch" in eins_aus and "[[dinge/zwei|" in eins_aus, eins_aus)
         probe("verweist auf die Mediendatei ohne Ablagepfad",
-              "[[media/Images/bilder/bild.png|" in eins_aus, eins_aus)
+              "[[Media/Images/bilder/bild.png|" in eins_aus, eins_aus)
 
         # Der Rundlauf: wieder einlesen ergibt dieselben Notizen
         zurueck = os.path.join(os.path.dirname(bundle), "kreis")
