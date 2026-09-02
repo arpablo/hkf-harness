@@ -130,6 +130,11 @@
         "$ref": "#/$defs/wikilink"
       }
     },
+    "hkf-link-or-text": {
+      "description": "Config §2.1 — ein qualifizierter Wikilink oder ein beliebiger Text; beides ist Text.",
+      "type": "string",
+      "minLength": 1
+    },
     "hkf-link-or-url": {
       "oneOf": [
         {

@@ -2817,6 +2817,12 @@ lässt:
 
 Drei Einstiegspunkte: `#/$defs/notiz`, `#/$defs/hkb`, `#/$defs/hbundle`.
 
+**Bei Abweichung zwischen Prosa und Schema gilt das Schema**, wie in Anhang B
+die Grammatik gilt. Die Tabelle in A.2 und die Muster in §3.5.1 sagen
+dasselbe ein zweites Mal, für Menschen; das Schema sagt es für Werkzeuge, und
+es ist die Fassung, gegen die geprüft wird. Wer eine dieser Angaben ändert,
+ändert das Schema zuerst und die Prosa danach.
+
 **Warum JSON Schema und nicht ABNF.** Eine Grammatik beschreibt eine
 Zeichenkette; Frontmatter ist eine Abbildung von Namen auf Werte, und was
 daran zu prüfen ist — welcher Name welche Wertform verlangt, was Pflicht ist,
