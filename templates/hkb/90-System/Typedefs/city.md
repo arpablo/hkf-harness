@@ -4,7 +4,7 @@ title: Stadt
 description: Eine Stadt.
 dir: Cities
 created: 2026-08-31
-modified: 2026-09-01T09:40:00
+modified: 2026-09-02T15:28:03
 modified_by: claude-opus-5
 ---
 
@@ -25,8 +25,10 @@ modified_by: claude-opus-5
 
 Eine Stadt ist ein Ort, aber **HKF kennt keine Untertypen** (Core §3.7.1):
 `hkf-link:place` nimmt keine `city` an. Wo ein Verweis beides zulassen soll,
-werden beide genannt — `birthplace`, `seat`, `location` und `part_of` tun das
-und schreiben `hkf-link:place,city,country`.
+werden beide genannt — `birthplace`, `seat` und `location` tun das und
+schreiben `hkf-link:place,city,country`, ebenso `part_of` an `place`. Das
+`part_of` einer Stadt lässt `city` aus: Eine Stadt liegt in einer Region oder
+einem Staat, nicht in einer anderen Stadt.
 
 Wer die Unterscheidung nicht braucht, führt `city` nicht und legt Städte als
 `place` ab. Wer sie führt, entscheidet einmal und bleibt dabei: Dieselbe Stadt

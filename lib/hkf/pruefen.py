@@ -983,9 +983,41 @@ def _typseiten(b, befunde):
                                   % (typ, ", ".join(ids))))
 
 
+def _grundtypen_der_angabe(angabe):
+    """Die Typen einer Typangabe ohne ihre Argumente (§3.7.3).
+
+    `hkf-link:person,organisation / hkf-url` → {"hkf-link", "hkf-url"}. Was
+    hinter dem `:` steht, darf je Typdefinition verschieden sein; was davor
+    steht, nicht.
+    """
+    return frozenset(teil.strip().split(":", 1)[0].strip()
+                     for teil in str(angabe).split(" / ") if teil.strip())
+
+
+def _ein_name_eine_angabe(b, befunde):
+    """§3.7.3: Derselbe Property-Name trägt überall dieselbe Typangabe."""
+    nach_name = {}
+    for typ, e in sorted(b.typdefs.items()):
+        for prop, (angabe, _pflicht) in sorted(
+                _property_tabelle(e["daten"] and e["body"] or "").items()):
+            nach_name.setdefault(prop, []).append((typ, angabe, e["rel"]))
+    for prop, zeilen in sorted(nach_name.items()):
+        grund = {}
+        for typ, angabe, rel in zeilen:
+            grund.setdefault(_grundtypen_der_angabe(angabe), []).append((typ, angabe))
+        if len(grund) < 2:
+            continue
+        wie = "; ".join("`%s` in %s" % (angabe, typ)
+                        for eintraege in grund.values()
+                        for typ, angabe in eintraege[:1])
+        befunde.append(Befund("Typedefs/", "`%s` trägt verschiedene Typangaben: "
+                              "%s. Verschieden sein dürfen nur die Argumente "
+                              "hinter dem `:` (§3.7.3)." % (prop, wie)))
+
+
 PRUEFUNGEN = PRUEFUNGEN + (_typangaben, _werte, _vorgaben,
                            _medienverzeichnisse, _quellenverzeichnisse,
-                           _typseiten)
+                           _typseiten, _ein_name_eine_angabe)
 
 
 # ── Was nur für ein Bundle gilt (§4, §7.1) ──────────────────────────────

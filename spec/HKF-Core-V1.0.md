@@ -1036,6 +1036,47 @@ beide Formen **dasselbe** bezeichnen und sich ausschließen. Bezeichnen sie
 Verschiedenes — etwa die Fundstelle einer Quelle und ihr beigelegtes
 Dokument —, gehören sie in zwei Properties.
 
+### 3.7.3 Ein Name, eine Typangabe
+
+**Derselbe Property-Name trägt in jeder Typdefinition einer Ablage dieselbe
+Typangabe.** Verschieden sein dürfen allein die Argumente hinter dem `:` — die
+Zieltypen eines `hkf-link`, die Medienarten eines `hkf-file`. Die Typen selbst
+und ihre Alternativen sind dieselben.
+
+```text
+| broader | hkf-link:concept | …        in `concept`
+| broader | hkf-link:term    | …        in `term`        zulässig
+```
+
+Beide sind ein `hkf-link`; worauf er zeigt, sagt der Typ, der ihn führt. So
+verweist `broader` überall auf das Übergeordnete derselben Art, und `part_of`
+lässt dort weniger zu, wo weniger in Frage kommt.
+
+```text
+| country | hkf-country      | …        in `place`
+| country | hkf-link:country | …        in `city`        unzulässig
+```
+
+Hier stünden zwei verschiedene Sachen unter einem Namen: einmal eine Kennung,
+einmal ein Verweis. Wer `country:` liest, wüsste ohne den Typ der Notiz nicht,
+was dasteht — und genau das soll ein Property-Name ersparen.
+
+**Der Grund ist derselbe wie bei den Alternativen (§3.7.2), nur eine Ebene
+höher.** Obsidian ordnet einem Property-Namen genau einen Property-Typ zu, und
+zwar für das ganze Vault. Zwei Typdefinitionen, die für einen Namen
+Unvereinbares zusichern, sind dort nicht darstellbar: Eine gewinnt, und welche,
+entscheidet die Reihenfolge, in der die Notizen angelegt wurden.
+
+**Die Regel bindet innerhalb einer Ablage und reserviert keine Namen.** Eine
+Wissensbasis, die einen eigenen Typ mit einer Property `parent` anlegt, ist
+nicht auf die Bedeutung des Vokabulars festgelegt — sie muss nur bei einer
+Bedeutung bleiben. Welche Properties das Vokabular führt und was sie dort
+heißen, steht in [HKF Config §2.3](HKF-Config-V1.0.md).
+
+Ein Verstoß ist ein Fehler an den Typdefinitionen, nicht an einer Notiz. Beim
+Import trifft er auf denselben Fall wie zwei gleichnamige Typen: Was er
+bedeutet, entscheidet ein Mensch (§5.5).
+
 ## 3.8 Kern-Typen
 
 Jede Ablage registriert mindestens diese drei Typen. Die Vorgabe für `dir`
@@ -2337,6 +2378,8 @@ Bundle; die letzten vier Punkte gelten nur für eine HKB.
   steht `type` als Text (§3.3, §4.2),
 - jede Typseite trägt `definition` und kein `type`, und keine zwei Typseiten
   nennen dieselbe Typdefinition (§3.3),
+- kein Property-Name trägt in zwei Typdefinitionen verschiedene Typangaben;
+  verschieden sein dürfen nur die Argumente hinter dem `:` (§3.7.3),
 - in einem Bundle ergäben keine zwei Notizen desselben Typs denselben
   Dateinamen — sonst fielen sie beim Import zu einer Notiz-ID zusammen,
 - jeder `type` hat genau eine Typdefinition; `dir`-Werte sind wohlgeformte

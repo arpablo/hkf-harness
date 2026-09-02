@@ -872,6 +872,19 @@ def main():
               r.stdout)
         shutil.rmtree(aus, ignore_errors=True)
 
+        print("§3.7.3: ein Name, eine Typangabe")
+        td = os.path.join(ziel, KONFIG, "Typedefs", "person.md")
+        vorher = io.open(td, encoding="utf-8").read()
+        io.open(td, "w", encoding="utf-8").write(
+            vorher.replace("| homepage | hkf-url |", "| homepage | text |", 1))
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        probe("zwei Typdefinitionen mit verschiedener Angabe sind ein Befund",
+              "verschiedene Typangaben" in r.stdout, r.stdout)
+        io.open(td, "w", encoding="utf-8").write(vorher)
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        probe("und die Grundausstattung selbst ist frei davon",
+              "verschiedene Typangaben" not in r.stdout, r.stdout)
+
         print("Das Inventar: Prosa, Schema und Grundausstattung")
         # Die Pruefung braucht keine Ablage — sie haelt den Harness gegen die
         # Fassung unter spec/, die er umsetzt.

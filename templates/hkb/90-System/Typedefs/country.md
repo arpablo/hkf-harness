@@ -4,7 +4,7 @@ title: Staat
 description: Ein Staat.
 dir: Countries
 created: 2026-08-31
-modified: 2026-09-01T09:40:00
+modified: 2026-09-02T15:28:03
 modified_by: claude-opus-5
 ---
 
@@ -22,10 +22,11 @@ modified_by: claude-opus-5
 
 # Konventionen
 
-`code` und der Property-Typ `hkf-country` sagen dasselbe auf zwei Wegen, und
-beide werden gebraucht. `place` trägt die Kennung unmittelbar, weil ein Ort in
-einem Staat liegen kann, zu dem die Wissensbasis keine Notiz führt. Führt sie
-eine, verweist sie darauf — und `code` verbindet die beiden Schreibweisen.
+`code` trägt die Kennung nach ISO 3166-1, mit der sich eine Staatsnotiz
+gegen fremde Datenbestände abgleichen lässt. Sie ist eine Angabe **über**
+den Staat und nicht der Weg, auf einen zu verweisen: Wer einen Staat nennt,
+verweist auf seine Notiz (Core §3.7.3). Führt die Wissensbasis keine, bleibt
+die Property leer.
 
 `dissolved_year` macht den Typ für historische Bestände brauchbar: Ein Staat,
 der untergegangen ist, bleibt der Staat, in dem jemand geboren wurde. Er wird

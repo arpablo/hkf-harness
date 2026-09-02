@@ -207,6 +207,100 @@ entfernen darf sie keine, weil das vorhandene Notizen ungültig machte.
 
 ---
 
+## 2.3 Die Properties des Vokabulars
+
+Die 68 Property-Namen, die die siebzehn Typdefinitionen aus §3 zusichern —
+an einer Stelle, damit sich nachschlagen lässt, was ein Name bedeutet, ohne
+jede Typdefinition zu öffnen. Die notizübergreifenden Properties aus Core A.2
+stehen nicht darin; sie gelten ohnehin für jede Notiz.
+
+**Ein Name, eine Typangabe** (Core §3.7.3): Verschieden sein dürfen allein die
+Argumente hinter dem `:` — die Zieltypen eines `hkf-link`, die Medienarten
+eines `hkf-file`. Wo diese Tabelle unter einem Namen zwei Angaben nennt, mit
+`·` getrennt, ist genau das der Fall: `broader` verweist in `concept` auf ein
+Konzept und in `term` auf einen Begriff, und beides ist ein `hkf-link`.
+
+**Die Tabelle ist abgeleitet.** Zugesichert wird eine Property in der
+Property-Tabelle ihres Typs (Core §3.7); dort steht auch, was sie im
+Einzelnen heißt. Bei Abweichung gewinnen die Typdefinitionen — wie bei der
+Typtabelle einer Wurzeldatei (Core §3.1). `tools/inventar.py` im Harness hält
+beide gegeneinander.
+
+**Fett gesetzt ist der Typ, in dem die Property Pflicht ist.**
+
+| Property | Typangabe | In den Typen |
+|---|---|---|
+| `about` | `hkf-link-list` | note |
+| `accessed` | `date` | source |
+| `address` | `text` | place |
+| `affiliations` | `hkf-link-or-text-list:organisation` | person |
+| `applies_to` | `hkf-link-list` | hint |
+| `authority` | `hkf-link-or-text:organisation` | specification |
+| `authors` | `hkf-link-or-text-list:person` | source |
+| `birthplace` | `hkf-link:place,city,country` | person |
+| `born` | `date` | person |
+| `born_year` | `hkf-year` | person |
+| `broader` | `hkf-link:concept · hkf-link:term` | concept, term |
+| `cancelled` | `checkbox` | event |
+| `capital` | `hkf-link:city` | country |
+| `checksum` | `text` | source |
+| `code` | `hkf-country` | country |
+| `compares` | `hkf-link-list` | **comparison** |
+| `country` | `hkf-link:country` | city, place |
+| `date` | `date` | event |
+| `description` | `text` | **bundle**, **typedef** |
+| `died` | `date` | person |
+| `died_year` | `hkf-year` | person |
+| `dir` | `text` | typedef |
+| `dissolved` | `date` | organisation |
+| `dissolved_year` | `hkf-year` | country, organisation |
+| `email` | `hkf-email` | organisation, person |
+| `ends_at` | `datetime` | event |
+| `file` | `hkf-file:document / hkf-url · hkf-file:document,clipping / hkf-url` | source, specification |
+| `flag` | `hkf-file:image / hkf-url` | country |
+| `form` | `text` | **proptype** |
+| `founded` | `date` | organisation |
+| `founded_year` | `hkf-year` | city, country, organisation |
+| `full_name` | `text` | person |
+| `homepage` | `hkf-url` | event, organisation, person |
+| `id` | `text` | **bundle** |
+| `image` | `hkf-file:image / hkf-url` | city, place |
+| `imported` | `datetime` | bundle |
+| `kind` | `hkf-source-kind` | source |
+| `lang` | `hkf-lang` | source, specification, **term** |
+| `latitude` | `hkf-latitude` | city, place |
+| `location` | `hkf-link:place,city,country` | event |
+| `logo` | `hkf-file:image / hkf-url` | organisation |
+| `longitude` | `hkf-longitude` | city, place |
+| `max` | `number` | proptype |
+| `min` | `number` | proptype |
+| `o_categories` | `hkf-organisation-category-list` | organisation |
+| `organizer` | `hkf-link:person,organisation` | event |
+| `p_categories` | `hkf-person-category-list` | person |
+| `parent` | `hkf-link:organisation · hkf-link:topic` | organisation, topic |
+| `part_of` | `hkf-link:place,city,country · hkf-link:place,country` | city, place |
+| `participants` | `hkf-link-list:person,organisation` | event |
+| `pattern` | `text` | proptype |
+| `phone` | `hkf-phone` | organisation, person |
+| `portrait` | `hkf-file:image / hkf-url` | person |
+| `provisional` | `checkbox` | typedef |
+| `published` | `date` | source |
+| `published_year` | `hkf-year` | source |
+| `related` | `hkf-link-or-url-list` | city, comparison, concept, country, event, hint, note, organisation, person, place, source, specification, term, topic |
+| `required_bundles` | `list` | bundle |
+| `seat` | `hkf-link:place,city,country` | organisation |
+| `source` | `text` | bundle |
+| `starts_at` | `datetime` | event |
+| `supersedes` | `hkf-link:specification` | specification |
+| `terms` | `hkf-link-list:term` | concept |
+| `unit` | `text` | proptype |
+| `url` | `hkf-url` | source, specification |
+| `values` | `list` | proptype |
+| `version` | `text` | bundle, **specification** |
+| `wikidata_id` | `hkf-wikidata` | city, concept, country, organisation, person, place, source, term |
+
+---
+
 # 3. Typdefinitionen
 
 Siebzehn Typen. Die ersten drei sind die **Kern-Typen** — ohne sie ließe sich
@@ -453,7 +547,7 @@ description: Ein geographischer Ort.
 |---|---|---|---|---|
 | latitude | hkf-latitude | nein | — | Geographische Breite |
 | longitude | hkf-longitude | nein | — | Geographische Länge |
-| country | hkf-country | nein | — | Staat |
+| country | hkf-link:country | nein | — | Staat, in dem der Ort liegt |
 | address | text | nein | — | Anschrift in einer Zeile |
 | part_of | hkf-link:place,city,country | nein | — | Übergeordneter Ort |
 | image | hkf-file:image / hkf-url | nein | — | Ansicht, als Datei in der Ablage oder als Adresse im Netz |
@@ -464,6 +558,12 @@ description: Ein geographischer Ort.
 
 `latitude` und `longitude` werden nur gemeinsam gesetzt. `part_of` bildet die
 räumliche Schachtelung ab — Gebäude in Stadt, Stadt in Region.
+
+`country` ist ein Verweis und keine Kennung. Es hieße sonst auf `place`
+etwas anderes als auf `city`, und ein Property-Name bedeutet überall dasselbe
+(Core §3.7.3). Der Preis ist, dass ein Ort in einem Staat ohne eigene Notiz
+seinen Staat nicht nennen kann: Dann bleibt `country` leer, und der Staat
+steht im Body oder wird als Notiz angelegt.
 ```
 
 ## 3.7 `event`
@@ -735,7 +835,7 @@ description: Ein normatives Dokument, an das sich die Wissensbasis hält.
 | authority | hkf-link-or-text:organisation | nein | — | Herausgebende Stelle: als Verweis oder als Name |
 | supersedes | hkf-link:specification | nein | — | Abgelöste Fassung |
 | lang | hkf-lang | nein | — | Sprache des Dokuments |
-| file | hkf-file:document | nein | — | Beigelegter Volltext |
+| file | hkf-file:document / hkf-url | nein | — | Volltext: als Datei in der Ablage oder als Adresse |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
 
 # Konventionen
@@ -817,8 +917,10 @@ dir: Cities
 
 Eine Stadt ist ein Ort, aber **HKF kennt keine Untertypen** (Core §3.7.1):
 `hkf-link:place` nimmt keine `city` an. Wo ein Verweis beides zulassen soll,
-werden beide genannt — `birthplace`, `seat`, `location` und `part_of` tun das
-und schreiben `hkf-link:place,city,country`.
+werden beide genannt — `birthplace`, `seat` und `location` tun das und
+schreiben `hkf-link:place,city,country`, ebenso `part_of` an `place`. Das
+`part_of` einer Stadt lässt `city` aus: Eine Stadt liegt in einer Region oder
+einem Staat, nicht in einer anderen Stadt.
 
 Wer die Unterscheidung nicht braucht, führt `city` nicht und legt Städte als
 `place` ab. Wer sie führt, entscheidet einmal und bleibt dabei: Dieselbe Stadt
@@ -852,10 +954,11 @@ dir: Countries
 
 # Konventionen
 
-`code` und der Property-Typ `hkf-country` sagen dasselbe auf zwei Wegen, und
-beide werden gebraucht. `place` trägt die Kennung unmittelbar, weil ein Ort in
-einem Staat liegen kann, zu dem die Wissensbasis keine Notiz führt. Führt sie
-eine, verweist sie darauf — und `code` verbindet die beiden Schreibweisen.
+`code` trägt die Kennung nach ISO 3166-1, mit der sich eine Staatsnotiz
+gegen fremde Datenbestände abgleichen lässt. Sie ist eine Angabe **über**
+den Staat und nicht der Weg, auf einen zu verweisen: Wer einen Staat nennt,
+verweist auf seine Notiz (Core §3.7.3). Führt die Wissensbasis keine, bleibt
+die Property leer.
 
 `dissolved_year` macht den Typ für historische Bestände brauchbar: Ein Staat,
 der untergegangen ist, bleibt der Staat, in dem jemand geboren wurde. Er wird

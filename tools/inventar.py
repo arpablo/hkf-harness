@@ -19,13 +19,16 @@ noch stimmt.
 - Config §2.1 und §2.2 zusammen gegen `templates/hkb/` — die Property-Typen
   der Grundausstattung,
 - die Abschnitte `## 3.x` gegen deren Typdefinitionen,
-- die Zahlwoerter in Core und Config gegen die gezaehlten Mengen.
+- die Zahlwoerter in Core und Config gegen die gezaehlten Mengen,
+- die abgeleitete Tabelle in Config §2.3 gegen die Property-Tabellen der
+  Typdefinitionen (Core §3.7.3).
 """
 import io, os, re, sys
 
 WURZEL = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(WURZEL, "lib"))
-from hkf import CORE, SPEC, TEMPLATES, ablage                   # noqa: E402
+from hkf import CORE, SPEC, TEMPLATES, ablage, frontmatter      # noqa: E402
+from hkf.importieren import _property_tabelle                   # noqa: E402
 from hkf import schema as schemamodul                           # noqa: E402
 
 ZAHLWORT = {13: "dreizehn", 14: "vierzehn", 15: "fünfzehn", 16: "sechzehn",
@@ -89,7 +92,9 @@ def main(argv=()):
               % ", ".join(ohne))
 
     # 3. Die Grundausstattung
-    aufzaehlungen = tabelle(cfg, "## 2.2", "# 3. Typdefinitionen")
+    # Die Grenze ist §2.3 und nicht das Typkapitel: Dazwischen liegt die
+    # abgeleitete Tabelle der Properties, deren Zeilen genauso aussehen.
+    aufzaehlungen = tabelle(cfg, "## 2.2", "## 2.3")
     grund = os.path.join(TEMPLATES, "hkb", ablage.VORGABEN["config_base"])
     for teil, erwartet, wo in (
             ("Proptypes", set(aus_prosa) | set(aufzaehlungen),
@@ -129,8 +134,38 @@ def main(argv=()):
         melde("Die Überschrift von Config §2.1 nennt nicht %s."
               % ZAHLWORT[len(aus_prosa)])
 
-    print("%d Typdefinitionen, %d Property-Typen (%d Standard, %d Aufzählungen)"
-          % (n_typen, n_props, len(aus_prosa), n_props - len(aus_prosa)))
+    # 5. Config §2.3 gegen die Property-Tabellen der Grundausstattung
+    reg = {}
+    verz = os.path.join(grund, "Typedefs")
+    if os.path.isdir(verz):
+        for f in sorted(os.listdir(verz)):
+            if not f.endswith(".md"):
+                continue
+            body = frontmatter.lesen(os.path.join(verz, f))[1]
+            for prop, (angabe, _pflicht) in _property_tabelle(body).items():
+                reg.setdefault(prop, set()).add(angabe)
+    aus_23 = {}
+    for zeile in tabelle(cfg, "## 2.3", "# 3. Typdefinitionen",
+                         muster=r"^\| `([a-z_]+)` \| `([^`]+)` \|"):
+        aus_23[zeile[0]] = set(x.strip() for x in zeile[1].split("·"))
+    if not aus_23:
+        melde("Config §2.3 führt keine Tabelle der Properties (Core §3.7.3).")
+    else:
+        if sorted(set(reg) - set(aus_23)):
+            melde("In den Typdefinitionen, nicht in Config §2.3: %s"
+                  % ", ".join(sorted(set(reg) - set(aus_23))))
+        if sorted(set(aus_23) - set(reg)):
+            melde("In Config §2.3, nicht in den Typdefinitionen: %s"
+                  % ", ".join(sorted(set(aus_23) - set(reg))))
+        for prop in sorted(set(reg) & set(aus_23)):
+            if reg[prop] != aus_23[prop]:
+                melde("`%s`: Config §2.3 nennt %s, die Typdefinitionen %s."
+                      % (prop, " · ".join(sorted(aus_23[prop])),
+                         " · ".join(sorted(reg[prop]))))
+
+    print("%d Typdefinitionen, %d Property-Typen (%d Standard, %d Aufzählungen), "
+          "%d Properties" % (n_typen, n_props, len(aus_prosa),
+                             n_props - len(aus_prosa), len(reg)))
     for b in befunde:
         print("  -", b)
     print("%d Befunde" % len(befunde))

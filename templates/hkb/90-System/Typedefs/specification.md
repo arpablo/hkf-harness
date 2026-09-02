@@ -3,7 +3,7 @@ type: typedef
 title: Spezifikation
 description: Ein normatives Dokument, an das sich die Wissensbasis hält.
 created: 2026-08-27
-modified: 2026-08-31T15:25:58
+modified: 2026-09-02T15:28:03
 modified_by: claude-opus-5
 ---
 
@@ -16,7 +16,7 @@ modified_by: claude-opus-5
 | authority | hkf-link-or-text:organisation | nein | — | Herausgebende Stelle: als Verweis oder als Name |
 | supersedes | hkf-link:specification | nein | — | Abgelöste Fassung |
 | lang | hkf-lang | nein | — | Sprache des Dokuments |
-| file | hkf-file:document | nein | — | Beigelegter Volltext |
+| file | hkf-file:document / hkf-url | nein | — | Volltext: als Datei in der Ablage oder als Adresse |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
 
 # Konventionen
