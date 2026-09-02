@@ -19,7 +19,7 @@ niemand beantworten kann.
 """
 import datetime, hashlib, io, os, re, shutil
 
-from . import CORE, TEMPLATES, ablage, fassung, frontmatter, notiz
+from . import CORE, TEMPLATES, ablage, fassung, frontmatter, notiz, schema
 
 WERKZEUG = "hk-import"
 
@@ -52,13 +52,13 @@ def grundtypen():
         return set(KERN_TYPEN)
     return set(f[:-3] for f in os.listdir(verz) if f.endswith(".md"))
 
-# Die vierzehn aus Core §3.5.1, aufgezaehlt in HKF Config §2.1. Nicht dazu
-# gehoeren die drei Aufzaehlungen aus Config §2.2: Sie sind Vokabular, und ein
-# Bundle darf sie mitliefern.
-STANDARD_PROPTYPES = {
-    "hkf-country", "hkf-email", "hkf-file", "hkf-lang", "hkf-latitude",
-    "hkf-link", "hkf-link-list", "hkf-link-or-text", "hkf-link-or-url",
-    "hkf-longitude", "hkf-phone", "hkf-url", "hkf-wikidata", "hkf-year"}
+# Die vierzehn aus Core §3.5.1 — abgeleitet und nicht abgeschrieben. Die von
+# Hand gefuehrte Menge war einmal um `hkf-link-or-text` zu klein, und niemand
+# merkte es: Sie entscheidet, was eine Ablage nicht umdefinieren und eine
+# Lieferung weglassen darf. Die drei Aufzaehlungen aus HKF Config §2.2 stehen
+# nicht darin; sie sind Vokabular, und ein Bundle darf sie mitliefern.
+STANDARD_PROPTYPES = frozenset(
+    schema.laden()["$defs"]["standard-proptypes"]["enum"])
 
 
 def medienart(rel):

@@ -59,6 +59,11 @@ Diese vierzehn Property-Typen kennt jede HKB. Sie sind Teil dieser
 Spezifikation und gehören zur **Grundausstattung**: Eine HKB legt sie beim
 Anlegen als Notizen in `Proptypes/` an (Core §5.3).
 
+Die Tabelle unten ist für Menschen. **Maschinenlesbar stehen dieselben Namen
+als `#/$defs/standard-proptypes` im Schema** (Core Anhang B.4), und bei
+Abweichung gilt das Schema. Ein Werkzeug liest sie dort; wer die Tabelle
+ändert, ändert das Schema mit.
+
 | Property-Typ | Wertform | Einschränkung |
 |---|---|---|
 | `hkf-url` | `text` | `pattern: "^https?://\\S+$"` |

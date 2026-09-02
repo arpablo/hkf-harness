@@ -130,6 +130,25 @@
         "$ref": "#/$defs/wikilink"
       }
     },
+    "standard-proptypes": {
+      "description": "3.5.1 — die vierzehn Standard-Property-Typen, aufgezählt in HKF Config §2.1. Nicht dazu gehören die drei Aufzählungen aus Config §2.2: Sie sind Vokabular, und ein Bundle darf sie mitliefern.",
+      "enum": [
+        "hkf-country",
+        "hkf-email",
+        "hkf-file",
+        "hkf-lang",
+        "hkf-latitude",
+        "hkf-link",
+        "hkf-link-list",
+        "hkf-link-or-text",
+        "hkf-link-or-url",
+        "hkf-longitude",
+        "hkf-phone",
+        "hkf-url",
+        "hkf-wikidata",
+        "hkf-year"
+      ]
+    },
     "hkf-link-or-text": {
       "description": "Config §2.1 — ein qualifizierter Wikilink oder ein beliebiger Text; beides ist Text.",
       "type": "string",

@@ -595,6 +595,12 @@ Name, Wertform und Einschränkung jedes einzelnen, dazu was `hkf-wikidata`,
 `hkf-file` und `hkf-link-or-url` bedeuten. Dieses Dokument sagt nur, was ein
 Property-Typ ist (§3.5) und wie eine Property-Tabelle ihn benutzt (§3.7).
 
+**Ihre Namen stehen maschinenlesbar im Schema**, als `#/$defs/standard-proptypes`
+(Anhang B.4). Ein Werkzeug, das wissen muss, welche vierzehn gemeint sind,
+liest sie dort und schreibt sie nicht ab. Die Liste gehört hierher und nicht
+zum Vokabular: Sie entscheidet, was eine Ablage nicht umdefinieren und eine
+Lieferung weglassen darf, und das ist eine Aussage von Core.
+
 Ihre Bedeutung ist festgelegt und darf von einer Ablage nicht umdefiniert
 werden. Ein Bundle darf sie weglassen, weil jede HKB sie ohnehin kennt; jede
 andere verwendete Property-Typ-Notiz muss es mitliefern (§4).
@@ -2815,7 +2821,9 @@ lässt:
 - die vierzehn Standard-Property-Typen als Muster und Grenzen (§3.5.1),
 - die beiden Wurzeldateien mit ihren Pflichten (A.1, §4.1).
 
-Drei Einstiegspunkte: `#/$defs/notiz`, `#/$defs/hkb`, `#/$defs/hbundle`.
+Drei Einstiegspunkte: `#/$defs/notiz`, `#/$defs/hkb`, `#/$defs/hbundle`. Dazu
+`#/$defs/standard-proptypes`, das die vierzehn Namen aus §3.5.1 aufzählt — kein
+Einstieg, sondern eine Liste zum Nachschlagen.
 
 **Bei Abweichung zwischen Prosa und Schema gilt das Schema**, wie in Anhang B
 die Grammatik gilt. Die Tabelle in A.2 und die Muster in §3.5.1 sagen
