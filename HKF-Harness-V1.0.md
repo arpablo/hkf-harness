@@ -66,7 +66,9 @@ hkf-harness/
   lib/hkf/              Ablage, Frontmatter, Schema, Grammatik, Vorlage,
                         Fassung, Einlesen
   py                    das Python des Harness
-  tools/                spec.py — hält die Kopie unter spec/ auf Stand
+  tools/                spec.py — hält die Kopie unter spec/ auf Stand,
+                        inventar.py — hält Prosa, Schema und
+                        Grundausstattung gegeneinander
   templates/            die Grundausstattung für hk-init
   skills/               die KI-Schicht: hkb und sieben Operationen
   agents/               die Subagenten, die für einen Skill lesen

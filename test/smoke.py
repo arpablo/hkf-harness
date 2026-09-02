@@ -871,6 +871,13 @@ def main():
               and "type: person" in io.open(h, encoding="utf-8").read(),
               r.stdout)
         shutil.rmtree(aus, ignore_errors=True)
+
+        print("Das Inventar: Prosa, Schema und Grundausstattung")
+        # Die Pruefung braucht keine Ablage — sie haelt den Harness gegen die
+        # Fassung unter spec/, die er umsetzt.
+        r = lauf(sys.executable, os.path.join(WURZEL, "tools", "inventar.py"))
+        probe("Config, Schema und templates/hkb/ nennen dasselbe",
+              r.returncode == 0, r.stdout + r.stderr)
     finally:
         shutil.rmtree(ziel, ignore_errors=True)
 
