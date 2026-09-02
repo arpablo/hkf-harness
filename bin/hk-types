@@ -1,0 +1,180 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""hk-types — Typseiten und Bases fuer die Typen einer Wissensbasis.
+
+    hk-types [pfad] [--check] [--ohne-bases] [--umstellen] [--force]
+
+Ohne Pfad gilt $HKB_PATH, sonst ~/hkb.
+
+Eine Typseite liegt unter `<config_base>/Types/` und traegt `definition`,
+einen Verweis auf die Typdefinition. Notizen duerfen `type` dann als Verweis
+auf sie schreiben statt als Text (Core §3.3). Der Typname steht nicht im
+Dateinamen der Typseite, sondern in ihrer `definition` — dieses Skript
+benennt sie `Type <Typ>`, weil ein Name gewaehlt sein muss, nicht weil das
+Format ihn vorschriebe.
+
+    --check        nur berichten, nichts schreiben
+    --ohne-bases   keine `.base`-Dateien anlegen
+    --umstellen    danach `type` in allen Notizen auf die Linkform bringen
+    --force        vorhandene Typseiten und Bases ueberschreiben
+
+`.base` ist Obsidian und nicht HKF: eine Tabelle aller Notizen des Typs, die
+die Typseite einbettet. Ihr Verzeichnis liegt ausserhalb der Ablage und wird
+von keiner Pruefung angefasst.
+
+Ohne `--umstellen` aendert sich an den Notizen nichts. Beide Schreibweisen
+sind zulaessig, und `hk-import` waehlt von allein die Linkform, sobald es
+eine Typseite fuer den Typ gibt.
+"""
+import io, os, re, sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
+from hkf import ablage, frontmatter, notiz                   # noqa: E402
+
+BASES = "Bases"
+
+SEITE = """---
+definition: "[[%(pfad)s/Typedefs/%(typ)s|%(typ)s]]"
+aliases: %(kurz)s
+---
+## Notizen
+
+![[%(pfad)s/%(bases)s/%(kurz)s.base|%(kurz)s]]
+"""
+
+SEITE_OHNE_BASE = """---
+definition: "[[%(pfad)s/Typedefs/%(typ)s|%(typ)s]]"
+aliases: %(kurz)s
+---
+"""
+
+BASE = """filters:
+  and:
+    - type == link("%(pfad)s/Types/Type %(kurz)s", "%(kurz)s")
+    - '!file.path.startsWith("%(konfig)s/Templates")'
+views:
+  - type: table
+    name: Tabelle
+"""
+
+
+def kurzname(typ):
+    """`person` → `Person`. Dieselbe Regel wie die `dir`-Vorgabe (§3.7)."""
+    return typ[:1].upper() + typ[1:]
+
+
+def main(argv):
+    if "--help" in argv or "-h" in argv:
+        print(__doc__.strip())
+        return 0
+    check = "--check" in argv
+    ohne_bases = "--ohne-bases" in argv
+    umstellen = "--umstellen" in argv
+    force = "--force" in argv
+    args = [a for a in argv if not a.startswith("-")]
+    try:
+        hkb, art = ablage.finde_ablage(args[0] if args else None)
+    except ablage.KeineAblage as e:
+        sys.stderr.write(str(e) + "\n")
+        return 2
+    if art != "hkb":
+        sys.stderr.write("hk-types gilt nur für eine Wissensbasis; eine "
+                         "Lieferung führt `type` als Text (§4.2).\n")
+        return 2
+
+    bereiche = ablage.bereiche(hkb)
+    konfig = bereiche["config_base"]
+    pfad = "/".join(x for x in (ablage.ablagepfad(hkb), konfig) if x)
+    konfigverz = os.path.join(hkb, konfig)
+    typverz = os.path.join(konfigverz, "Typedefs")
+    if not os.path.isdir(typverz):
+        sys.stderr.write("%s: kein Typedefs-Verzeichnis.\n" % typverz)
+        return 2
+
+    typen = sorted(f[:-3] for f in os.listdir(typverz) if f.endswith(".md"))
+    vorhanden = ablage.typseiten(konfigverz)
+    schon = dict((typ, id) for id, typ in vorhanden.items())
+
+    print("%s — %d Typen, %d Typseiten%s"
+          % (hkb, len(typen), len(vorhanden), ", --check" if check else ""))
+
+    getan, uebergangen = [], []
+    for typ in typen:
+        kurz = kurzname(typ)
+        felder = {"pfad": pfad, "konfig": konfig, "typ": typ, "kurz": kurz,
+                  "bases": BASES}
+        ziel = os.path.join(konfigverz, ablage.TYPES, "Type %s.md" % kurz)
+        if typ in schon and not force:
+            uebergangen.append("%s → %s" % (typ, schon[typ]))
+        else:
+            getan.append("Types/Type %s.md" % kurz)
+            if not check:
+                os.makedirs(os.path.dirname(ziel), exist_ok=True)
+                io.open(ziel, "w", encoding="utf-8").write(
+                    (SEITE_OHNE_BASE if ohne_bases else SEITE) % felder)
+        if ohne_bases:
+            continue
+        b = os.path.join(konfigverz, BASES, "%s.base" % kurz)
+        if os.path.exists(b) and not force:
+            continue
+        getan.append("%s/%s.base" % (BASES, kurz))
+        if not check:
+            os.makedirs(os.path.dirname(b), exist_ok=True)
+            io.open(b, "w", encoding="utf-8").write(BASE % felder)
+
+    for z in getan:
+        print("  + %s" % z)
+    for z in uebergangen:
+        print("  · %s — Typseite vorhanden, unberührt" % z)
+    if not getan:
+        print("  nichts anzulegen")
+
+    if umstellen:
+        n = _umstellen(hkb, bereiche, konfigverz, pfad, check)
+        print("  %s %d Notizen auf die Linkform%s"
+              % ("umzustellen:" if check else "umgestellt:", n,
+                 "" if n else " — nichts zu tun"))
+    print("\nDanach: hk-lint")
+    return 0
+
+
+def _umstellen(hkb, bereiche, konfigverz, pfad, check):
+    """`type: person` → `type: "[[…/Types/Type Person|Type Person]]"`.
+
+    Nur wo genau eine Typseite den Typ nennt. Zwei Typseiten fuer denselben
+    Typ sind ein Befund von `hk-lint` (§6.3) und hier kein Anlass zu raten.
+    """
+    nach_typ = {}
+    for id, typ in ablage.typseiten(konfigverz).items():
+        nach_typ.setdefault(typ, []).append(id)
+    link = dict((typ, '[[%s/%s|%s]]' % (pfad, ids[0], ids[0].rsplit("/", 1)[-1]))
+                for typ, ids in nach_typ.items() if len(ids) == 1)
+    n = 0
+    for schluessel in ("wiki_base", "source_base", "config_base"):
+        wurzel = os.path.join(hkb, bereiche[schluessel])
+        if not os.path.isdir(wurzel):
+            continue
+        for p in ablage.dateien(wurzel):
+            rel = os.path.relpath(p, wurzel).replace(os.sep, "/")
+            if "/" not in rel and schluessel != "source_base":
+                continue
+            if ablage.konfigfremd(schluessel, rel) or \
+               rel.partition("/")[0] == ablage.TYPES:
+                continue
+            text = io.open(p, encoding="utf-8").read()
+            kopf, body = notiz.teilen(text)
+            if kopf is None:
+                continue
+            m = re.search(r"^type: *([a-z][a-z0-9-]*) *$", kopf, re.M)
+            if not m or m.group(1) not in link:
+                continue
+            neu = notiz.setze_skalar(kopf, "type",
+                                     notiz.skalar(link[m.group(1)]))
+            n += 1
+            if not check:
+                io.open(p, "w", encoding="utf-8").write(notiz.bauen(neu, body))
+    return n
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

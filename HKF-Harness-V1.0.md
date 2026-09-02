@@ -61,13 +61,14 @@ wohin sie kommt, entscheidet erst der Import (Core §4.3).
 hkf-harness/
   HKF-Harness-V1.0.md   dieses Dokument
   spec/                 die Fassung von HKF Core und Config, die er umsetzt
-  bin/                  hk-init, hk-lint, hk-import, hk-export, hk-ingest
+  bin/                  hk-init, hk-lint, hk-import, hk-export, hk-ingest,
+                        hk-types
   lib/hkf/              Ablage, Frontmatter, Schema, Grammatik, Vorlage,
                         Fassung, Einlesen
   py                    das Python des Harness
   tools/                spec.py — hält die Kopie unter spec/ auf Stand
   templates/            die Grundausstattung für hk-init
-  skills/               die KI-Schicht: hkb und sechs Operationen
+  skills/               die KI-Schicht: hkb und sieben Operationen
   agents/               die Subagenten, die für einen Skill lesen
   test/                 die Rauchprobe
 ```
@@ -296,8 +297,14 @@ Was daraus folgt:
   Export in ein Bundle mit Textform, Import in eine HKB mit Typseiten ergibt
   wieder die Linkform, Import in eine ohne ergibt Text.
 - `hk-init` legt kein `Types/` an. Eine frische Wissensbasis führt `type` als
-  Text; wer Typseiten will, legt sie an, und der Import zieht danach von
+  Text; wer Typseiten will, ruft `hk-types`, und der Import zieht danach von
   allein nach.
+- `hk-types` legt sie an — je Typ eine Typseite und eine Base, wiederholbar,
+  und mit `--umstellen` bringt es `type` in allen vorhandenen Notizen auf die
+  Linkform. Der Skill [`hkb-typseite`](skills/hkb-typseite/SKILL.md) liegt
+  darüber und entscheidet, was das Skript nicht entscheidet: ob die Ablage
+  die Linkform überhaupt will, wie die Typseiten heißen und was in ihrem Body
+  steht.
 
 ## 5. Jede Wissensbasis ist ein Git-Repository
 

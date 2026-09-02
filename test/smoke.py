@@ -838,6 +838,39 @@ def main():
         probe("und einer im Codeblock ebenso",
               "```markdown\n[[Persons/grace-hopper]]\n```" in g, g)
         shutil.rmtree(lief, ignore_errors=True)
+
+        print("hk-types: Typseiten, Bases und die Linkform von `type`")
+        r = lauf(os.path.join(BIN, "hk-types"), ziel, "--umstellen")
+        probe("das Skript läuft durch", r.returncode == 0, r.stdout)
+        seite = os.path.join(ziel, KONFIG, "Types", "Type Person.md")
+        probe("es legt eine Typseite an", os.path.isfile(seite), r.stdout)
+        probe("sie bindet sich über `definition` (§3.3)",
+              "definition:" in io.open(seite, encoding="utf-8").read()
+              and "type:" not in io.open(seite, encoding="utf-8").read(),
+              io.open(seite, encoding="utf-8").read())
+        probe("und eine Base daneben",
+              os.path.isfile(os.path.join(ziel, KONFIG, "Bases", "Person.base")),
+              r.stdout)
+        g = io.open(os.path.join(ziel, WIKI, "Persons", "grace-hopper.md"),
+                    encoding="utf-8").read()
+        probe("`--umstellen` bringt `type` auf die Linkform",
+              "Types/Type Person" in g.split("---")[1], g)
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        probe("die Ablage bleibt konform", "Struktur (§6.3)            0" in r.stdout,
+              r.stdout)
+        r = lauf(os.path.join(BIN, "hk-types"), ziel)
+        probe("ein zweiter Lauf legt nichts an", "nichts anzulegen" in r.stdout,
+              r.stdout)
+        # Der Export schreibt die Textform zurueck (§4.2).
+        aus = os.path.abspath(os.path.join(ziel, "..", "typ-lieferung"))
+        shutil.rmtree(aus, ignore_errors=True)
+        r = lauf(os.path.join(BIN, "hk-export"), "code-probe", aus, ziel)
+        h = os.path.join(aus, "Persons", "grace-hopper.md")
+        probe("der Export schreibt `type` als Text zurück (§4.2)",
+              os.path.isfile(h)
+              and "type: person" in io.open(h, encoding="utf-8").read(),
+              r.stdout)
+        shutil.rmtree(aus, ignore_errors=True)
     finally:
         shutil.rmtree(ziel, ignore_errors=True)
 

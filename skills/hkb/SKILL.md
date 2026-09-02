@@ -35,14 +35,16 @@ Bereiche, `timezone` und die Typtabelle. Führt die Ablage den Typ `hint`,
 lies auch `Hints/`: Dort steht, was **diese** Wissensbasis für sich festgelegt
 hat, und das geht den sieben Regeln vor, wo es sie berührt.
 
-## Die vier Werkzeuge
+## Die Werkzeuge
 
 | | |
 |---|---|
 | `hk-init <ziel>` | legt eine Wissensbasis an: Grundausstattung, Obsidian-Konfiguration, Git |
 | `hk-import <bundle>` | übernimmt eine Lieferung (§6.1) |
 | `hk-export <id> <ziel>` | schreibt eine Lieferung heraus (§6.2) |
+| `hk-ingest <stück> --bundle <ziel>` | macht aus einer Quelle eine Lieferung; ohne Argumente zeigt es die Inbox |
 | `hk-lint [--fix] [--strict]` | prüft eine Wissensbasis oder eine Lieferung (§6.3) |
+| `hk-types [--umstellen]` | legt Typseiten und Bases an, damit `type` ein Verweis sein kann (§3.3) |
 
 `hk-import --check` und `hk-lint` ohne `--fix` schreiben nichts. **Fang immer
 damit an.**

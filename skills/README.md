@@ -20,6 +20,7 @@ einen gebrochenen Wikilink immer, ein Modell meistens.
 | [`hkb`](hkb/SKILL.md) | Die Grundlage: wo die Ablage liegt, welche Regeln gelten, welche Werkzeuge es gibt. Die übrigen setzen ihn voraus. |
 | [`hkb-notiz`](hkb-notiz/SKILL.md) | Eine Notiz anlegen oder fortschreiben |
 | [`hkb-typ`](hkb-typ/SKILL.md) | Einen eigenen Typ anlegen oder seine Property-Tabelle erweitern |
+| [`hkb-typseite`](hkb-typseite/SKILL.md) | Typseiten und Bases anlegen, damit `type` ein Verweis sein kann |
 | [`hkb-import`](hkb-import/SKILL.md) | Eine Lieferung übernehmen — und die Urteile fällen und aufschreiben, die `hk-import` verweigert |
 | [`hkb-export`](hkb-export/SKILL.md) | Eine Lieferung herausschreiben und beurteilen, ob sie weitergegeben werden kann |
 | [`hkb-lint`](hkb-lint/SKILL.md) | Prüfen, korrigieren lassen, und die Befunde abarbeiten, die kein Werkzeug beheben darf |
