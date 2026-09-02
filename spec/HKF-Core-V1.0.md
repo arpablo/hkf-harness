@@ -247,9 +247,14 @@ still. Ein Werkzeug legt ein fehlendes Verzeichnis an, sobald es etwas
 hineinschreibt, und meldet sein Fehlen nicht.
 
 **Zur Ablage gehört**, was unter ihrem Wurzelverzeichnis liegt: die
-Wurzeldatei und die vier Bereiche aus §3.1. Alles andere im Vault ist außerhalb von HKF und wird
-weder geprüft noch verwaltet — eine Spezifikation, ein README, Notizen, die
-zu keiner Wissensbasis gehören.
+Wurzeldatei und die vier Bereiche aus §3.1. Alles andere im Vault ist
+außerhalb von HKF und wird weder geprüft noch verwaltet — eine
+Spezifikation, ein README, Notizen, die zu keiner Wissensbasis gehören.
+
+Innerhalb eines Bereichs entscheidet der Typ. Eine Notiz in einem
+Verzeichnis, das keinem gehört, ist unter `wiki_base` verlegt und wird nach
+Regel 1 gemeldet; unter `config_base` ist sie keine Notiz und liegt
+außerhalb von HKF (§3.2.3).
 
 Eine Ablage darf **keine zweite Ablage enthalten**. Ein Werkzeug erkennt eine
 Ablage an ihrer Wurzeldatei; läge unter einer weitere, wäre für jede Notiz
@@ -375,11 +380,13 @@ bliebe außerdem am Ort kleben: So heißt sie `economy-1832` und nicht
 **Auch dieser Abschnitt gilt für eine HKB.** In einem Bundle liegen
 Typdefinitionen und Property-Typen, wo sie wollen (§4.3).
 
-`Typedefs` und `Proptypes` liegen unter `config_base`:
+`Typedefs` und `Proptypes` liegen unter `config_base`, dazu freigestellt
+`Types` mit den Typseiten (§3.3):
 
 ```text
 <config_base>/Typedefs/<typname>.md
 <config_base>/Proptypes/<name des property-typs>.md
+<config_base>/Types/<dateiname>.md
 ```
 
 Sie beschreiben nicht, worüber die Wissensbasis handelt, sondern **wie** sie
@@ -387,12 +394,36 @@ gebaut ist — die Grammatik, nicht der Text. Wer den Vault öffnet, um etwas
 nachzuschlagen, sucht nicht danach; wer sie ändert, weiß, wo sie stehen.
 
 - Vorgabe für `config_base` ist `90-System` (A.1).
-- Unmittelbar unter `config_base` liegen **nur** `Typedefs` und `Proptypes`.
-- Die Verzeichnisnamen selbst sind fest: Sie kommen aus der `dir`-Vorgabe der
-  beiden Kern-Typen (§3.8) und werden nicht umbenannt.
+- Zur Ablage gehören unter `config_base` **nur** `Typedefs`, `Proptypes` und
+  `Types`. Ein weiteres Verzeichnis dort liegt außerhalb von HKF und wird
+  weder geprüft noch ausgeliefert (§3.2).
+- `Typedefs` und `Proptypes` existieren immer, `Types` nur, wenn die
+  Wissensbasis die Linkform von `type` benutzt (§3.3).
+- Die Verzeichnisnamen selbst sind fest: die beiden ersten aus der
+  `dir`-Vorgabe der Kern-Typen (§3.8), `Types` als Name. Umbenannt wird
+  keines.
 - `Bundles` gehört **nicht** hierher. Eine Bundle-Notiz ist ein Protokoll über
   Inhalt — sie sagt, was wann hereinkam (§5.1) — und liegt darum unter
   `wiki_base`.
+
+**Ein Vorlagenordner ist der Fall, für den das gemacht ist.**
+Eine Obsidian-Vorlage trägt `type`, weil sie den Typ nennt, den sie anlegen
+soll — und ist darum keine Notiz. Sie muss trotzdem im Vault liegen, sonst
+findet Obsidian sie nicht. HKF sagt nicht, wohin ein Vault legt, was ihm
+selbst gehört; es muss nur sagen, dass es nicht dazugehört. Sonst wäre jede
+Vorlage eine Notiz am falschen Ort, mit leeren Properties und einem
+Platzhalter im Datum.
+
+**`Types` gehört dagegen dazu**, obwohl auch dort keine Notizen liegen: Auf
+eine Typseite zeigt jede Notiz, die die Linkform benutzt. Ein Verweis, dessen
+Ziel außerhalb der Ablage läge, wäre nicht auflösbar — die Typseite muss
+also drinnen sein. Das ist der Unterschied zwischen den beiden: Auf eine
+Vorlage zeigt nichts.
+
+Der Preis ist, dass eine Notiz, die versehentlich unter `config_base`
+landet, nicht mehr auffällt. Er ist gering: Der Bereich trägt die Grammatik
+und nicht den Inhalt, und dorthin verlegt niemand aus Versehen. Unter
+`wiki_base`, wo es tatsächlich vorkommt, bleibt es beim Befund aus Regel 1.
 
 ## 3.3 Notizen
 
@@ -423,6 +454,53 @@ ausgenommen die fünf ausdrücklich normativen Strukturen: `# Typen` (§3.1),
 `# Properties` (§3.7), `# Siehe auch` (§5.6) sowie Entscheidungsnachweis
 (§5.7) und Importnachweis (§5.1) einer Bundle-Notiz. Werkzeuge MÜSSEN
 unbekannte Properties unverändert erhalten.
+
+### Zwei Schreibweisen für `type`
+
+`type` trägt entweder den **Typnamen als Text** oder einen **Verweis auf eine
+Typseite**:
+
+```yaml
+type: person
+type: "[[90-System/Types/Type Person|Type Person]]"
+```
+
+Beide nennen denselben Typ. Die Textform gilt überall. **Die Linkform gilt
+nur in einer HKB** — eine Lieferung führt den Typnamen als Text (§4.2).
+
+Die Linkform kostet nichts und bringt, was Obsidian aus einem Verweis macht:
+Der Typ ist anklickbar, er sammelt Backlinks, und auf der Typseite steht,
+was ihn ausmacht — eine Erklärung, eine eingebettete Abfrage über alle Notizen
+dieses Typs, was die Wissensbasis sonst dort haben will. Als Text ist der Typ
+ein Wort, an dem nichts hängt.
+
+**Eine Typseite liegt unter `<config_base>/Types/`** und trägt `definition`,
+einen qualifizierten Wikilink auf die Typdefinition:
+
+```yaml
+---
+definition: "[[90-System/Typedefs/person|person]]"
+aliases: Person
+---
+```
+
+Sie trägt **kein** `type`: Eine Typseite ist keine Notiz, sondern — wie die
+Typdefinition, auf die sie zeigt — Grammatik. Sie wird nicht ausgeliefert und
+steht in keiner Typtabelle.
+
+**Der Typname ist der Dateiname der Typdefinition, nicht der der Typseite.**
+Ein Werkzeug löst `type` auf, indem es dem Verweis folgt und dort `definition`
+liest. Damit ist die Benennung der Typseiten frei: `Type Person`, `Person`
+oder `Menschen` — das Format schreibt sie nicht vor, weil es sie nie lesen
+muss. Was es liest, steht in `definition`.
+
+Zwei Typseiten dürfen nicht auf dieselbe Typdefinition zeigen. Sonst wäre
+beim Import nicht bestimmt, welche von beiden eine ankommende Notiz dieses
+Typs bekommt.
+
+Der Verweis ändert an §3.2 Regel 1 nichts: Der Pfad bestimmt den Typ, und der
+aufgelöste Name MUSS zum Verzeichnis passen. Die Linkform ist eine zweite
+Schreibweise für dieselbe Angabe und keine zweite Quelle der Wahrheit.
 
 ## 3.4 Wertformen
 
@@ -1158,6 +1236,15 @@ sagt dem Import, welche Notiz fortzuschreiben ist (§6.1 Schritt 5). Sobald er
 gelaufen ist, hat sie nichts mehr zu sagen, und er **streift sie ab** — wie
 der Export umgekehrt `bundles` und `rejected_links` abstreift (§6.2). Was
 eine Anweisung war, bleibt nicht als Property stehen.
+
+**In einer Lieferung trägt `type` den Typnamen als Text** (§3.3). Die
+Linkform zeigt auf eine Typseite, und die gehört der Wissensbasis, aus der
+die Lieferung kommt: Beim Empfänger gibt es sie nicht, oder sie heißt anders.
+Ein Bundle, das sie mitschickte, brächte fremde Konfiguration mit; eines, das
+sie nicht mitschickt, wäre nicht für sich lesbar (§4). Der Export schreibt
+darum zurück in die Textform, der Import macht daraus wieder, was im
+aufnehmenden Haus üblich ist (§6.1, §6.2). Die Angabe bleibt dieselbe; nur
+ihre Schreibweise ist eine Sache der Ablage und nicht der Lieferung.
 
 ## 4.3 Was übernommen wird
 
@@ -2044,6 +2131,14 @@ Schnittstelle. Ein Bundle stellt keine Methoden bereit.
    ebenso, und eine Property, die allein die Wissensbasis führt, bleibt
    stehen. Skalare der Lieferung gelten — das ist, was `aktualisiert` heißt.
    Eine Maschine fügt hinzu und entfernt nie (§5.6).
+
+   Führt die HKB eine Typseite für den Typ der Notiz, wird `type` auf den
+   Verweis darauf gesetzt (§3.3); sonst bleibt der Typname stehen, wie die
+   Lieferung ihn trägt. Das gilt auch für die Bundle-Notiz aus Schritt 10 und
+   für eine vorläufige Typdefinition aus Schritt 2: Was die Wissensbasis
+   selbst anlegt, schreibt sie in ihrer eigenen Schreibweise. Gibt es zwei
+   Typseiten für denselben Typ, wird nicht geraten — es bleibt beim Text, und
+   `hk-lint` meldet die Doppelung (§6.3).
 7. Mediendateien nach `<media_base>/<medienart>/<restpfad>` übernehmen; die
    Medienart folgt aus der Dateiendung, der `restpfad` aus §4.3. Trifft ein
    Pfad auf eine vorhandene Datei mit abweichendem Inhalt, ist das ein
@@ -2180,7 +2275,10 @@ lesen als eines, das jede erlaubte Form annehmen dürfte.
 2. Jede Notiz nach `<zielpfad>/<dir des typs>/<dateiname>` schreiben, die
    Properties `bundles` und `rejected_links` dabei entfernen (§4.2). Beide
    beschreiben, wie **diese** Wissensbasis die Lieferung einsortiert und
-   beurteilt hat; beim Empfänger bezeichnen sie nichts.
+   beurteilt hat; beim Empfänger bezeichnen sie nichts. Steht `type` in der
+   Linkform, wird der Typname als Text geschrieben (§3.3, §4.2). Zeigt der
+   Verweis auf keine Typseite, ist das ein Fehler und die Notiz wird nicht
+   geschrieben: Ein Bundle ohne bestimmten Typ wäre nicht importierbar.
 3. Die Typdefinitionen und Property-Typen mitschreiben, die von diesen
    Notizen verwendet werden; die Standard-Property-Typen aus §3.5.1 dürfen
    entfallen. Eine vorläufige Typdefinition (§5.4) wird **nicht**
@@ -2228,6 +2326,11 @@ Bundle; die letzten vier Punkte gelten nur für eine HKB.
 - jede Notiz hat `type`, und in einer HKB passt der Typ zu ihrem Verzeichnis.
   In einem Bundle gilt als Notiz, was `type` trägt; jede andere `.md`-Datei
   wird übergangen und nicht geprüft (§4.3),
+- steht `type` in der Linkform, löst der Verweis auf eine Typseite auf, und
+  deren `definition` auf eine vorhandene Typdefinition; in einer Lieferung
+  steht `type` als Text (§3.3, §4.2),
+- jede Typseite trägt `definition` und kein `type`, und keine zwei Typseiten
+  nennen dieselbe Typdefinition (§3.3),
 - in einem Bundle ergäben keine zwei Notizen desselben Typs denselben
   Dateinamen — sonst fielen sie beim Import zu einer Notiz-ID zusammen,
 - jeder `type` hat genau eine Typdefinition; `dir`-Werte sind wohlgeformte
@@ -2513,7 +2616,7 @@ brauchen keinen Eintrag in einer Property-Tabelle.
 
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
-| `type` | text | ja | — | Typ der Notiz; MUSS zum Verzeichnis passen (§3.2) |
+| `type` | text | ja | — | Typ der Notiz, als Name oder in einer HKB als Verweis auf eine Typseite (§3.3); MUSS zum Verzeichnis passen (§3.2) |
 | `title` | text | nein | — | Anzeigetitel; ohne ihn gilt der Dateiname |
 | `description` | text | nein | — | Einzeiler zum Inhalt |
 | `tags` | list | nein | — | Obsidian-eigen |

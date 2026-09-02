@@ -97,6 +97,19 @@ def ohne_abschnitt(body, ueberschrift):
                   body, flags=re.M | re.S)
 
 
+LINKWERT = re.compile(r"^\[\[([^\]|]+)(?:\|([^\]]*))?\]\]$")
+
+
+def linkziel(wert):
+    """Das Ziel, wenn der Wert genau ein Wikilink ist — sonst None.
+
+    Fuer Properties, die zwei Schreibweisen zulassen: `type` traegt den
+    Typnamen als Text oder einen Verweis auf eine Typseite (§3.3).
+    """
+    m = LINKWERT.match(str(wert if wert is not None else "").strip())
+    return m.group(1) if m else None
+
+
 def skalar(wert):
     """Ein Wert so, dass YAML ihn wieder als denselben Text liest.
 

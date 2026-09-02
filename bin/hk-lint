@@ -65,9 +65,17 @@ def main(argv):
     if ihre is not None and not fassung.lesbar(ihre):
         fm_befunde.append("hkb.md: %s. Der Harness prüft gegen Regeln, die "
                           "diese Ablage nicht meint." % fassung.satz(ihre))
+    # Der Frontmatter-Durchgang laeuft von der Wurzel und nicht von den
+    # Bereichen: Er soll auch die Wurzeldatei sehen. Was unter `config_base`
+    # in keinem Typverzeichnis liegt, gehoert darum eigens ausgenommen — es
+    # gehoert nicht zur Ablage (§3.2), und die strukturelle Pruefung
+    # uebergeht es ohnehin.
+    bereiche = ablage.bereiche(hkb) if art == "hkb" else {}
     geprueft = 0
     for p in ablage.dateien(hkb):
         rel = os.path.relpath(p, hkb)
+        if ablage.konfigfremd(*ablage.bereich_von(bereiche, rel)):
+            continue
         try:
             daten, _ = frontmatter.lesen(p)
         except frontmatter.Unlesbar as e:

@@ -41,7 +41,7 @@ eigenem Basispfad in der Wurzeldatei:
 40-Wiki/      der Inhalt — Persons, Terms, Concepts, Bundles …
 50-Sources/   die Quellennotizen, ohne Typverzeichnis darunter
 80-Media/     Images, Videos, Audios, Documents
-90-System/    Typedefs, Proptypes
+90-System/    Typedefs, Proptypes, Types
 ```
 
 Wer den Vault öffnet, sieht in `40-Wiki/` die Sachen und nicht das Gerüst. Die
@@ -219,6 +219,85 @@ Was daraus folgt:
   entfällt.
 - Den Abschnitt „Einstieg für Werkzeuge" in `HenniHKF-Lab/README.md`
   nachziehen; er beschreibt beide Dateien noch als Teil der Beispiel-HKB.
+
+### Der Vorlagenordner ist die Ausnahme
+
+Eine Obsidian-Vorlage kann nicht draußen bleiben. Das Templates-Plugin
+sucht sie im Vault, und der Vault ist die Wissensbasis. Sie ist damit die
+eine Werkzeugdatei, die drinnen liegt — und der Grund, aus dem **Core
+§3.2.3** ein drittes Verzeichnis unter `config_base` zulässt, ohne es zur
+Ablage zu rechnen.
+
+`HenniHKF-Core` führt ihn als `90-System/Templates/`: ein Template je
+registriertem Typ, benannt `Template <Typ>.md`. Jedes trägt den `type` und
+die Properties seiner Typdefinition, leer. Ausgefüllt wird, was bekannt ist;
+`hk-lint --fix` nimmt heraus, was leer geblieben ist (Core §6.3). Die
+Zeitangaben stehen als `{{date}}` und **müssen in Anführungszeichen**: Ohne
+sie liest der YAML-Parser `{{…}}` als Abbildung, und die Datei hat kein
+Frontmatter mehr.
+
+Die Werkzeuge übergehen den Ordner an vier Stellen — den beiden Durchgängen
+von `hk-lint`, dem Sammeln des Exports und dem Bestand des Imports. Eine
+Regel, einmal geschrieben: `ablage.konfigfremd`. Die einzige Ausnahme ist das
+Umschreiben der Verweise beim Umbenennen eines Typverzeichnisses; es läuft
+auch über die Vorlagen, damit ein Verweis darin nicht schal wird.
+
+Was daraus folgt:
+
+- `hk-init` liefert die Templates **nicht** mit. Die Grundausstattung ist die
+  Menge der Typdefinitionen und Property-Typen ohne `bundles` (Core §5.3) —
+  Vorlagen gehören nicht dazu, und welche Typen eine Wissensbasis am Ende
+  führt, weiß sie besser als der Generator. Ob `hk-init` sie aus den
+  registrierten Typen erzeugen sollte, ist offen.
+- `hk-lint` meldet ein fremdes Verzeichnis unter `config_base` nicht. Das ist
+  gewollt und in Core §3.2.3 als Preis benannt.
+
+### Die Typseiten liegen daneben und gehören dazu
+
+`90-System/Types/` sieht aus wie der Vorlagenordner und ist das Gegenteil.
+Eine Typseite ist zwar auch keine Notiz — sie trägt kein `type`, sondern
+`definition` —, aber **auf sie zeigt etwas**: jede Notiz, die `type` in der
+Linkform führt (Core §3.3). Ein Verweis auf eine Datei außerhalb der Ablage
+ließe sich nicht auflösen, also gehört `Types/` hinein. Auf eine Vorlage
+zeigt nichts, also bleibt sie draußen. Das ist der ganze Unterschied, und er
+entscheidet beide Fälle.
+
+`HenniHKF-Core` führt je Typ eine Typseite und eine Base:
+
+```text
+90-System/Types/Type Person.md     definition → Typedefs/person, aliases
+90-System/Bases/Person.base        Tabelle aller Notizen dieses Typs
+```
+
+`Bases/` ist Obsidian und nicht HKF: `.base`-Dateien sind kein Markdown,
+tragen kein Frontmatter und kommen in keiner Prüfung vor. Der Ordner liegt
+unter `config_base` und damit — wie der Vorlagenordner — außerhalb der
+Ablage.
+
+**Der Typname steht nicht im Dateinamen der Typseite, sondern in ihrer
+`definition`.** Das war die Entscheidung, an der alles Übrige hängt: Ein
+Werkzeug, das `Type Person` zerlegte, um auf `person` zu kommen, wäre an eine
+Benennungskonvention gebunden, die Core nicht vorschreiben will. So liest es
+einen Verweis, den es ohnehin auflösen kann, und die Wissensbasis nennt ihre
+Typseiten, wie sie will.
+
+**Die Linkform reist nicht mit** (Core §4.2). `hk-export` schreibt den
+Typnamen als Text zurück, `hk-import` macht daraus wieder einen Verweis, wenn
+die aufnehmende Ablage eine Typseite für den Typ führt — auch in der
+Bundle-Notiz und in einer vorläufigen Typdefinition, die der Import selbst
+anlegt. Beides läuft über `importieren._typwert` und `ablage.typseiten`; im
+Prüfmodul liest `Bestand` die Typseiten mit allem anderen ein und löst `type`
+in einem zweiten Durchgang auf, weil eine Notiz vor ihrer Typseite gelesen
+sein kann.
+
+Was daraus folgt:
+
+- Der Rundlauf ist verlustfrei und geprüft: eine HKB ganz in der Linkform,
+  Export in ein Bundle mit Textform, Import in eine HKB mit Typseiten ergibt
+  wieder die Linkform, Import in eine ohne ergibt Text.
+- `hk-init` legt kein `Types/` an. Eine frische Wissensbasis führt `type` als
+  Text; wer Typseiten will, legt sie an, und der Import zieht danach von
+  allein nach.
 
 ## 5. Jede Wissensbasis ist ein Git-Repository
 

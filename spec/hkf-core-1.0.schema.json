@@ -222,7 +222,11 @@
           "minLength": 1
         },
         "type": {
-          "$ref": "#/$defs/kebab"
+          "description": "3.3 — der Typname als Text, oder in einer HKB ein Verweis auf eine Typseite.",
+          "oneOf": [
+            { "$ref": "#/$defs/kebab" },
+            { "$ref": "#/$defs/wikilink" }
+          ]
         }
       },
       "additionalProperties": {

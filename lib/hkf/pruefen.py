@@ -65,6 +65,7 @@ class Bestand(object):
             self.unlesbar.append((wurzeldatei, e.grund))
             self.wurzel, self.wurzel_body = {}, ""
         self.notizen, self.typdefs, self.proptypes = {}, {}, {}
+        self.typseiten = {}
         self.medien = set()
         if art == "hkb":
             self.bereiche = ablage.bereiche(hkb)
@@ -121,15 +122,23 @@ class Bestand(object):
                 # Quellennotiz: `source` fuehrt keines (§3.2.2).
                 if "/" not in rel and schluessel != "source_base":
                     continue
+                if ablage.konfigfremd(schluessel, rel):
+                    continue
                 e = self._eintrag(p, rel)
                 e["bereich"] = schluessel
+                verz, _, name = rel.partition("/")
+                if verz == ablage.TYPES:
+                    # Eine Typseite ist keine Notiz: Sie traegt kein `type`,
+                    # sondern `definition` (§3.3).
+                    self.typseiten[rel[:-3]] = {"rel": e["rel"], "daten": e["daten"],
+                                                "typ": "", "grund": ""}
+                    continue
                 if not e["typ"]:
                     continue
                 self.notizen[rel[:-3]] = e
-                verz, _, name = rel.partition("/")
-                if verz == "Typedefs":
+                if verz == ablage.TYPEDEFS:
                     self.typdefs[name[:-3]] = e
-                elif verz == "Proptypes":
+                elif verz == ablage.PROPTYPES:
                     self.proptypes[name[:-3]] = e
         mb = os.path.join(self.hkb, self.media_basis) if self.media_basis else self.hkb
         for art in ARTVERZEICHNIS.values():
@@ -139,6 +148,42 @@ class Bestand(object):
                         continue
                     rel = os.path.relpath(os.path.join(r, f), self.hkb)
                     self.medien.add(rel.replace(os.sep, "/"))
+        self._typen_aufloesen()
+
+    def _typen_aufloesen(self):
+        """`type` als Verweis auf eine Typseite auf den Typnamen bringen (§3.3).
+
+        Zwei Durchgaenge, weil eine Notiz vor ihrer Typseite gelesen sein
+        kann: Erst stehen alle Dateien fest, dann wird aufgeloest. Der
+        Typname ist der Dateiname der Typdefinition und nicht der der
+        Typseite — wie eine Wissensbasis ihre Typseiten benennt, geht das
+        Format nichts an.
+        """
+        for ts in self.typseiten.values():
+            ziel = notiz.linkziel(ts["daten"].get("definition"))
+            if ziel is None:
+                ts["grund"] = ("trägt kein `definition`; ohne den Verweis auf "
+                               "die Typdefinition ist sie keine Typseite")
+                continue
+            art, rest = self.aufloesen(ziel)
+            if art != "notiz" or rest.partition("/")[0] != ablage.TYPEDEFS:
+                ts["grund"] = ("`definition` nennt %s — dort liegt keine "
+                               "Typdefinition" % ziel)
+                continue
+            ts["typ"] = rest.partition("/")[2]
+        for e in self.notizen.values():
+            ziel = notiz.linkziel(e["typ"])
+            if ziel is None:
+                continue                          # Textform, §3.3
+            e["typ_link"] = ziel
+            _, rest = self.aufloesen(ziel)
+            ts = self.typseiten.get(rest)
+            if ts is None:
+                e["typ"], e["typ_grund"] = "", "zeigt auf keine Typseite"
+            elif not ts["typ"]:
+                e["typ"], e["typ_grund"] = "", "zeigt auf eine Typseite ohne Typdefinition"
+            else:
+                e["typ"] = ts["typ"]
 
     def _bundle_lesen(self):
         """§4.3: eine `.md` mit `type` ist eine Notiz, alles andere Medium."""
@@ -223,6 +268,8 @@ class Bestand(object):
             rest = ziel
         if rest in self.notizen:
             return ("notiz", rest)
+        if rest in self.typseiten:
+            return ("typseite", rest)
         if rest in self.medien or rest.split("/")[0] == self.media_basis:
             return ("medium", rest)
         return (None, rest)
@@ -264,6 +311,10 @@ def _typen(b, befunde):
                                       "liegen ineinander (§6.3)." % (a, c)))
     for rel, e in sorted(b.notizen.items()):
         typ = e["typ"]
+        if e.get("typ_grund"):
+            befunde.append(Befund(e["rel"], "`type`: [[%s]] %s (§3.3)."
+                                  % (e["typ_link"], e["typ_grund"])))
+            continue
         if typ not in b.typdefs:
             befunde.append(Befund(e["rel"], "Der Typ `%s` hat keine Typdefinition "
                                             "(§3.7)." % typ))
@@ -894,8 +945,47 @@ def _quellenverzeichnisse(b, befunde):
                                             "Verzeichnis (§3.2.2)."))
 
 
+def _typseiten(b, befunde):
+    """Die Typseiten unter `<config_base>/Types/` (§3.3).
+
+    Sie sind freigestellt: Eine Wissensbasis, die `type` als Text fuehrt,
+    hat keine. Wer sie fuehrt, bindet jede an genau eine Typdefinition —
+    sonst waere beim Export nicht bestimmt, welcher Typname herauskommt.
+    """
+    if b.art == "bundle":
+        # §4.2: Die Linkform gilt in einer HKB. Eine Lieferung wird woanders
+        # ausgepackt, und ihre Typseiten waeren dort fremde Dateien.
+        for rel, e in sorted(b.notizen.items()):
+            if notiz.linkziel(e["typ"]):
+                befunde.append(Befund(e["rel"], "`type` ist ein Verweis; in einer "
+                                      "Lieferung steht dort der Typname als Text "
+                                      "(§4.2)."))
+        return
+    nach_typ = {}
+    for id, ts in sorted(b.typseiten.items()):
+        if ts["daten"].get("type"):
+            befunde.append(Befund(ts["rel"], "trägt `type`; eine Typseite ist "
+                                             "keine Notiz (§3.3)."))
+        if ts["grund"]:
+            befunde.append(Befund(ts["rel"], ts["grund"] + " (§3.3)."))
+            continue
+        if ts["typ"] not in b.typdefs:
+            befunde.append(Befund(ts["rel"], "`definition` nennt den Typ `%s`, für "
+                                  "den keine Typdefinition vorliegt (§3.7)."
+                                  % ts["typ"]))
+            continue
+        nach_typ.setdefault(ts["typ"], []).append(id)
+    for typ, ids in sorted(nach_typ.items()):
+        if len(ids) > 1:
+            befunde.append(Befund("%s/" % ablage.TYPES, "Für den Typ `%s` gibt es "
+                                  "mehrere Typseiten: %s. Beim Export wäre nicht "
+                                  "bestimmt, welche gemeint ist (§3.3)."
+                                  % (typ, ", ".join(ids))))
+
+
 PRUEFUNGEN = PRUEFUNGEN + (_typangaben, _werte, _vorgaben,
-                           _medienverzeichnisse, _quellenverzeichnisse)
+                           _medienverzeichnisse, _quellenverzeichnisse,
+                           _typseiten)
 
 
 # ── Was nur für ein Bundle gilt (§4, §7.1) ──────────────────────────────

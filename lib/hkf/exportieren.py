@@ -132,17 +132,33 @@ def planen(hkb, bundle_id, ziel, media_base="Media"):
         if os.path.isdir(w) and w not in gesehen:
             gesehen.add(w)
             wurzeln.append((k, w))
+    # §4.2: Die Linkform von `type` gilt in einer HKB. Eine Lieferung wird
+    # woanders ausgepackt, wo es diese Typseiten nicht gibt — sie traegt den
+    # Typnamen als Text, und der Empfaenger macht daraus wieder, was er will.
+    typseiten = ablage.typseiten(plan.konfig)
     for k, w in wurzeln:
         for p in ablage.dateien(w):
             rel = os.path.relpath(p, w).replace(os.sep, "/")
             # Ohne Typverzeichnis liegt nur die Quellennotiz (§3.2.2).
             if ("/" not in rel and k != "source_base") \
-                    or rel.startswith("Bundles/"):
+                    or rel.startswith("Bundles/") \
+                    or ablage.konfigfremd(k, rel):
                 continue
             daten, body = frontmatter.lesen(p)
             if "type" not in daten or not _mitglied(daten, bundle_id):
                 continue
             kopf = notiz.teilen(io.open(p, encoding="utf-8").read())[0]
+            typ = str(daten["type"])
+            ziel = notiz.linkziel(typ)
+            if ziel is not None:
+                typ = typseiten.get("/".join(ziel.split("/")[-2:]), "")
+                if not typ:
+                    plan.melde("fehler", "%s: `type` verweist auf %s, wo keine "
+                               "Typseite liegt." % (rel, ziel),
+                               "Die Typseite anlegen oder den Typnamen als Text "
+                               "schreiben (§3.3).")
+                    continue
+                kopf = notiz.setze_skalar(kopf, "type", typ)
             if "/" not in rel:
                 # Die Quellennotiz liegt in der HKB ohne Typverzeichnis
                 # (§3.2.2). In der Lieferung bekommt sie eines — sonst laege
@@ -150,7 +166,7 @@ def planen(hkb, bundle_id, ziel, media_base="Media"):
                 # beim Import kommt, entscheidet ohnehin ihr Typ (§4.3).
                 rel = "%s/%s" % (QUELLVERZEICHNIS, rel)
             plan.notizen.append({"quelle": p, "rel": rel, "kopf": kopf,
-                                 "body": body, "typ": str(daten["type"])})
+                                 "body": body, "typ": typ})
     if not plan.notizen:
         plan.melde("hinweis", "Keine Notiz trägt dieses Bundle in `bundles`.",
                    "Prüfen, ob die `id` stimmt.")

@@ -8,7 +8,7 @@ sein Ziel errraet, schreibt irgendwann in ein fremdes Verzeichnis.
 """
 import os
 
-from . import frontmatter
+from . import frontmatter, notiz
 
 VORGABE = "~/hkb"
 
@@ -17,6 +17,14 @@ VORGABE = "~/hkb"
 BEREICHE = ("wiki_base", "source_base", "media_base", "config_base")
 VORGABEN = {"wiki_base": "40-Wiki", "source_base": "50-Sources",
             "media_base": "80-Media", "config_base": "90-System"}
+
+# Unter `config_base` liegen genau zwei Typen: `typedef` und `proptype`
+# (§3.2). Ihre Verzeichnisse stehen hier als Namen und nicht als `dir` der
+# Typdefinition — wer sie dort umbenennt, verlegt gerade die Datei, in der es
+# steht, und keines der Werkzeuge faende sie danach wieder. `Types` haelt die
+# Typseiten (§3.3); es ist freigestellt und enthaelt keine Notizen.
+TYPEDEFS, PROPTYPES, TYPES = "Typedefs", "Proptypes", "Types"
+KONFIGVERZEICHNISSE = (TYPEDEFS, PROPTYPES, TYPES)
 
 
 class KeineAblage(Exception):
@@ -118,6 +126,68 @@ def typen(pfad):
             continue
         rows.append(spalten)
     return rows
+
+
+def bereich_von(bereiche, rel):
+    """(Bereich, Pfad ab dem Bereich) fuer eine Datei unter der Wurzel.
+
+    Liegt sie unter keinem der vier, kommt (None, rel) zurueck. Bereiche
+    liegen nicht ineinander (§3.1); der laengste Treffer gewinnt trotzdem,
+    damit ein leerer Bereich, der mit der Wurzel zusammenfaellt, keinen
+    benannten verdeckt.
+    """
+    rel = rel.replace(os.sep, "/")
+    treffer = None
+    for k in BEREICHE:
+        b = bereiche.get(k) or ""
+        if not b or not (rel == b or rel.startswith(b + "/")):
+            continue
+        if treffer is None or len(b) > len(bereiche[treffer]):
+            treffer = k
+    if treffer is None:
+        return None, rel
+    b = bereiche[treffer]
+    return treffer, rel[len(b) + 1:] if rel != b else ""
+
+
+def konfigfremd(bereich, rel):
+    """Liegt unter `config_base`, aber in keinem seiner Typverzeichnisse.
+
+    Zur Ablage gehoeren die Wurzeldatei und die vier Bereiche (§3.2), und
+    unter `config_base` liegen genau zwei Typen. Ein anderes Verzeichnis dort
+    gehoert nicht dazu und wird weder geprueft noch verwaltet — ein
+    Vorlagenordner etwa, dessen Dateien `type` tragen, weil sie den Typ
+    nennen, den sie anlegen sollen, ohne darum Notizen zu sein.
+    """
+    return (bereich == "config_base"
+            and rel.replace(os.sep, "/").partition("/")[0]
+            not in KONFIGVERZEICHNISSE)
+
+
+def typseiten(konfig):
+    """{"Types/<datei>": <typname>} — die Typseiten unter einem `config_base`.
+
+    Eine Typseite bindet sich ueber `definition` an genau eine Typdefinition;
+    deren Dateiname ist der Typname (§3.3). Wer keine Typseiten fuehrt,
+    bekommt ein leeres Verzeichnis zurueck und merkt von der Linkform nichts.
+
+    `hk-lint` liest sie mit allem anderen ueber `Bestand`; das hier ist fuer
+    Import und Export, die ohne einen solchen auskommen.
+    """
+    verz = os.path.join(konfig, TYPES)
+    aus = {}
+    if not os.path.isdir(verz):
+        return aus
+    for p in dateien(verz):
+        try:
+            daten, _ = frontmatter.lesen(p)
+        except frontmatter.Unlesbar:
+            continue
+        ziel = notiz.linkziel((daten or {}).get("definition"))
+        teile = (ziel or "").split("/")
+        if len(teile) >= 2 and teile[-2] == TYPEDEFS:
+            aus["%s/%s" % (TYPES, os.path.basename(p)[:-3])] = teile[-1]
+    return aus
 
 
 def dateien(wurzel):

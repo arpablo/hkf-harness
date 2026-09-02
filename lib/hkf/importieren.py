@@ -141,7 +141,7 @@ class Plan(object):
             return ""
         if "/" not in rel:
             return self.bereiche["source_base"]
-        if verz in ("Typedefs", "Proptypes"):
+        if verz in ablage.KONFIGVERZEICHNISSE:
             return self.bereiche["config_base"]
         for name, tv in self.typen.items():
             if tv.get("dir") == verz:
@@ -768,18 +768,25 @@ def _notizbereiche(plan):
 def _bestand(plan):
     """Alle Notizen, wie sie nach dem Import dastuenden."""
     aus = {}
+    typseiten = ablage.typseiten(plan.konfig)
     for schluessel, wurzel in _notizbereiche(plan):
         for p in ablage.dateien(wurzel):
             rel = os.path.relpath(p, wurzel).replace(os.sep, "/")
             # Ohne Verzeichnis liegt nur die Quellennotiz (§3.2.2).
             if "/" not in rel and schluessel != "source_base":
                 continue
+            if ablage.konfigfremd(schluessel, rel):
+                continue
             daten, body = frontmatter.lesen(p)
             if "type" not in daten:
                 continue
             kopf = notiz.teilen(io.open(p, encoding="utf-8").read())[0]
+            typ = str(daten.get("type") or "")
+            ziel = notiz.linkziel(typ)
+            if ziel is not None:
+                typ = typseiten.get("/".join(ziel.split("/")[-2:]), "")
             aus[rel[:-3]] = {
-                "typ": str(daten.get("type") or ""),
+                "typ": typ,
                 "titel": str(daten.get("title") or rel.rsplit("/", 1)[-1][:-3]),
                 "aliase": [str(a) for a in (daten.get("aliases") or [])],
                 "body": body, "kopf": kopf,
@@ -964,12 +971,32 @@ def _neue_fassung(plan, alt_body):
     return ("# Import %s\n" % version) not in (alt_body or "")
 
 
+def _typwert(plan, name):
+    """`type` in der Schreibweise des Hauses (§3.3).
+
+    Die Lieferung traegt den Typnamen als Text (§4.2). Fuehrt die aufnehmende
+    Wissensbasis eine Typseite fuer den Typ, bekommt die Notiz stattdessen den
+    Verweis darauf — dieselbe Angabe, nur anders geschrieben. Gibt es zwei
+    Typseiten fuer denselben Typ, wird nicht geraten: `hk-lint` meldet das
+    (§6.3), und bis dahin bleibt es beim Text.
+    """
+    if not hasattr(plan, "_typlink"):
+        nach_typ = {}
+        for id, typ in ablage.typseiten(plan.konfig).items():
+            nach_typ.setdefault(typ, []).append(id)
+        plan._typlink = dict(
+            (typ, plan.link(ids[0], ids[0].rsplit("/", 1)[-1]))
+            for typ, ids in nach_typ.items() if len(ids) == 1)
+    return plan._typlink.get(name, name)
+
+
 def _bundle_notiz(plan, zeitpunkt, tag, vorher):
     """Frontmatter und Body der Notiz `<base>/Bundles/<id>.md`."""
     alt_kopf, alt_body = vorher if vorher else (None, "")
     kopf = alt_kopf
     if kopf is None:
-        felder = ["type: bundle", "id: %s" % plan.bundle["id"]]
+        felder = ["type: %s" % notiz.skalar(_typwert(plan, "bundle")),
+                  "id: %s" % plan.bundle["id"]]
         for k in ("title", "description", "source", "version"):
             if plan.bundle.get(k) is not None:
                 felder.append("%s: %s" % (k, notiz.skalar(plan.bundle[k])))
@@ -1076,7 +1103,7 @@ def planen(hkb, quelle, force=False, ohne_verknuepfung=False):
 
 def _vorlaeufige_typdefinition(plan, name, tag, zeitpunkt):
     kopf = "\n".join([
-        "type: typedef",
+        "type: %s" % notiz.skalar(_typwert(plan, "typedef")),
         # Der Typname unveraendert: So steht er in jeder Notiz, die ihn nennt.
         "title: %s" % name,
         "provisional: true",
@@ -1162,6 +1189,10 @@ def ausfuehren(plan):
                 _vorlaeufige_typdefinition(plan, name, tag, zeitpunkt))
 
     # 4. bis 6. die Notizen
+    #
+    # §6.1: Die Lieferung traegt den Typnamen als Text. Fuehrt die aufnehmende
+    # Wissensbasis eine Typseite fuer den Typ, bekommt die Notiz stattdessen
+    # den Verweis (§3.3) — dieselbe Angabe, in der Schreibweise des Hauses.
     for n in plan.notizen:
         if n["zustand"] not in ("neu", "aktualisiert", "ergänzt"):
             continue
@@ -1206,6 +1237,8 @@ def ausfuehren(plan):
                                  ("modified_by", WERKZEUG)):
             if not notiz.hat(kopf, schluessel):
                 kopf = notiz.setze_skalar(kopf, schluessel, wert)
+        kopf = notiz.setze_skalar(kopf, "type",
+                                  notiz.skalar(_typwert(plan, n["typ"])))
         io.open(ziel, "w", encoding="utf-8").write(notiz.bauen(kopf, body))
 
     # 7. Mediendateien
