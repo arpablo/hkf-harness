@@ -4,8 +4,8 @@
 
     hk-init <zielverzeichnis> [--name NAME] [--timezone ZONE] [--no-git] [--force]
 
-Erzeugt die Grundausstattung nach §3.8 — die zwanzig Typdefinitionen, die
-sechzehn Standard-Property-Typen, die vier Bereiche —, dazu die Wurzeldatei, eine
+Erzeugt die Grundausstattung nach §3.8 — die siebzehn Typdefinitionen, die
+siebzehn Property-Typen, die vier Bereiche —, dazu die Wurzeldatei, eine
 Obsidian-Konfiguration, README und .gitignore, und macht das Verzeichnis zu
 einem Git-Repository mit einem ersten Commit.
 """
@@ -20,7 +20,7 @@ README = """# %(name)s
 
 Eine Wissensbasis nach **HKF Core %(core)s**. Dieses Verzeichnis ist zugleich
 ein Obsidian-Vault und ein Git-Repository. Es enthält die Grundausstattung —
-die zwanzig Typdefinitionen und die sechzehn Property-Typen — und sonst
+die siebzehn Typdefinitionen und die siebzehn Property-Typen — und sonst
 nichts: keinen Inhalt und keine Lieferung.
 
 ## Erste Schritte

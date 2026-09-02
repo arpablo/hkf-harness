@@ -52,10 +52,13 @@ def grundtypen():
         return set(KERN_TYPEN)
     return set(f[:-3] for f in os.listdir(verz) if f.endswith(".md"))
 
+# Die vierzehn aus Core §3.5.1, aufgezaehlt in HKF Config §2.1. Nicht dazu
+# gehoeren die drei Aufzaehlungen aus Config §2.2: Sie sind Vokabular, und ein
+# Bundle darf sie mitliefern.
 STANDARD_PROPTYPES = {
     "hkf-country", "hkf-email", "hkf-file", "hkf-lang", "hkf-latitude",
-    "hkf-link", "hkf-link-list", "hkf-link-or-url", "hkf-longitude",
-    "hkf-phone", "hkf-url", "hkf-wikidata", "hkf-year"}
+    "hkf-link", "hkf-link-list", "hkf-link-or-text", "hkf-link-or-url",
+    "hkf-longitude", "hkf-phone", "hkf-url", "hkf-wikidata", "hkf-year"}
 
 
 def medienart(rel):
