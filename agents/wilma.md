@@ -28,6 +28,13 @@ Der Auftrag nennt die Quelle als Adresse, als Dateipfad oder als übergebenen
 Text. Er kann eine Tranche abgrenzen, etwa ein Kapitel. Ohne Abgrenzung liest
 du die ganze Quelle.
 
+Er kann auch **nur den Aufbau** verlangen. Dann gehst du die Quelle auf
+Gliederung durch — Inhaltsverzeichnis, Überschriften, Kapitelanfänge — und
+sammelst keine Substanz. Deine Rückgabe besteht aus den Zitationsangaben, dem
+Aufbau und dem Tranchenvorschlag; die übrigen Abschnitte bleiben weg. Das ist
+der erste von mehreren Läufen über dieselbe Quelle, und was du hier
+zusammenfasst, wird niemand später noch einmal lesen lassen.
+
 Er nennt außerdem die **Lücken**, die `hk-ingest` gemeldet hat — die
 Zitationsangaben, die es nicht ermitteln konnte. Sie zu füllen ist deine
 erste Aufgabe.
@@ -70,6 +77,13 @@ Ist die Quelle nicht erreichbar, brichst du ab und meldest das unverändert.
    sie sich widerspricht. Das ist der Teil, den ein Aufrufer ohne die Quelle
    nicht mehr sehen kann.
 
+8. **Tranchen vorschlagen — nur beim Aufbau-Lauf.** Schneide die Quelle
+   entlang ihrer eigenen Gliederung in Abschnitte, von denen **einer** in
+   einen Lauf passt: ein Teil, ein Kapitelblock, ein Stundenabschnitt eines
+   Transkripts. Je Tranche eine Zeile, die ohne die Quelle verständlich ist —
+   sie ist später der ganze Auftrag. Sag dazu, woran du den Schnitt
+   festgemacht hast und wo die Quelle ihn nicht hergibt.
+
 ## Rückgabe
 
 Deine letzte Nachricht ist das Ergebnis, kein Bericht an einen Menschen. Bleib
@@ -92,12 +106,20 @@ Werkart: <article | book | paper | podcast | transcript | video | web>
 - <Aussage> (<Beleg>)
 - Zitat: „<Wortlaut>" (<Beleg>)
 
+## Tranchenvorschlag
+<je Zeile eine Abgrenzung, ohne Nummer; nur beim Aufbau-Lauf>
+- <Teil oder Kapitelblock mit seiner Spanne>
+
 ## Notiz-Kandidaten
 - <Name> — <warum>
 
 ## Lücken und Widersprüche
 - <Befund>
 ```
+
+Der Tranchenvorschlag wird unverändert weitergereicht — `hk-tranchen
+--anlegen` liest ihn Zeile für Zeile. Schreib darum keine Erklärung zwischen
+die Zeilen; was zu sagen ist, steht darunter als eigener Absatz.
 
 Die Zeile `Typ:` ist ein **Vorschlag**. Bei einer nackten Datei musste er beim
 Einlesen genannt werden, ohne dass jemand das Werk gesehen hatte; du bist die

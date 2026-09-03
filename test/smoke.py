@@ -839,6 +839,48 @@ def main():
               "```markdown\n[[Persons/grace-hopper]]\n```" in g, g)
         shutil.rmtree(lief, ignore_errors=True)
 
+        print("hk-tranchen: der Stand einer großen Quelle steht in der Notiz")
+        q = os.path.join(ziel, QUELLEN, "eine-zitierte-seite.md")
+        HK_TR = os.path.join(BIN, "hk-tranchen")
+        r = lauf(HK_TR, q, "--anlegen", "-",
+                 input="## Tranchenvorschlag\n- Teil I (Kap. 1-7)\n"
+                       "- Teil II: Kitchener | Khartoum (Kap. 8-12)\n"
+                       "\n3. Teil III (Kap. 13-25)\n")
+        probe("--anlegen macht aus dem Vorschlag drei Tranchen",
+              r.returncode == 0 and "3 Tranchen angelegt" in r.stdout, r.stdout)
+        g = io.open(q, encoding="utf-8").read()
+        probe("die Liste steht als Abschnitt `# Tranchen` in der Quellennotiz",
+              "\n# Tranchen\n" in g, g)
+        probe("ein `|` in der Abgrenzung bleibt in der Zelle geschützt",
+              "Kitchener \\| Khartoum" in g, g)
+        probe("und die Notiz sagt, dass sie geändert wurde (Regel 5)",
+              "modified_by: hk-tranchen" in g.split("---")[1], g)
+        r = lauf(HK_TR, q, "--naechste")
+        probe("--naechste nennt die erste offene Tranche",
+              r.returncode == 0 and "Tranche 1 von 3" in r.stdout, r.stdout)
+        r = lauf(HK_TR, q, "--abhaken", "1", "--ertrag", "3 neu, 5 fortgeschrieben")
+        probe("--abhaken schreibt sie fest",
+              r.returncode == 0 and "Noch offen: 2 von 3" in r.stdout, r.stdout)
+        r = lauf(HK_TR, q, "--abhaken", "1")
+        probe("und ein zweites Mal nur mit --force",
+              r.returncode == 2 and "--force" in r.stderr, r.stderr)
+        r = lauf(HK_TR, q, "--naechste")
+        probe("der Lauf steht danach bei Tranche 2",
+              "Tranche 2 von 3" in r.stdout, r.stdout)
+        lauf(HK_TR, q, "--abhaken", "2")
+        lauf(HK_TR, q, "--abhaken", "3")
+        r = lauf(HK_TR, q, "--naechste")
+        probe("ist nichts mehr offen, gibt --naechste 1 zurück",
+              r.returncode == 1 and "erledigt" in r.stdout, r.stdout)
+        probe("der Ertrag der ersten Tranche steht noch da",
+              "3 neu, 5 fortgeschrieben"
+              in io.open(q, encoding="utf-8").read())
+        probe("die Ablage bleibt konform",
+              lauf(os.path.join(BIN, "hk-lint"), ziel).returncode == 0)
+        r = lauf(HK_TR, os.path.join(ziel, WIKI, "Persons", "grace-hopper.md"))
+        probe("eine Notiz, die keine Quelle ist, wird abgewiesen",
+              r.returncode == 2 and "nicht `source`" in r.stderr, r.stderr)
+
         print("hk-types: Typseiten, Bases und die Linkform von `type`")
         r = lauf(os.path.join(BIN, "hk-types"), ziel, "--umstellen")
         probe("das Skript läuft durch", r.returncode == 0, r.stdout)
@@ -861,6 +903,11 @@ def main():
         r = lauf(os.path.join(BIN, "hk-types"), ziel)
         probe("ein zweiter Lauf legt nichts an", "nichts anzulegen" in r.stdout,
               r.stdout)
+        r = lauf(os.path.join(BIN, "hk-tranchen"),
+                 os.path.join(ziel, QUELLEN, "eine-zitierte-seite.md"))
+        probe("hk-tranchen erkennt eine Quellennotiz auch in der Linkform",
+              r.returncode == 0 and "3 Tranchen" in r.stdout,
+              r.stdout + r.stderr)
         # Der Export schreibt die Textform zurueck (§4.2).
         aus = os.path.abspath(os.path.join(ziel, "..", "typ-lieferung"))
         shutil.rmtree(aus, ignore_errors=True)

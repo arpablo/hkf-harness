@@ -43,6 +43,7 @@ hat, und das geht den sieben Regeln vor, wo es sie berührt.
 | `hk-import <bundle>` | übernimmt eine Lieferung (§6.1) |
 | `hk-export <id> <ziel>` | schreibt eine Lieferung heraus (§6.2) |
 | `hk-ingest <stück> --bundle <ziel>` | macht aus einer Quelle eine Lieferung; ohne Argumente zeigt es die Inbox |
+| `hk-tranchen <quellennotiz>` | führt die Tranchen einer großen Quelle: `--anlegen`, `--naechste`, `--abhaken` |
 | `hk-lint [--fix] [--strict]` | prüft eine Wissensbasis oder eine Lieferung (§6.3) |
 | `hk-types [--umstellen]` | legt Typseiten und Bases an, damit `type` ein Verweis sein kann (§3.3) |
 

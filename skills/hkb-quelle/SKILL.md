@@ -1,6 +1,6 @@
 ---
 name: hkb-quelle
-description: "Aus einer Quelle eine Lieferung machen — Quellennotiz mit Zitationsangaben und Zusammenfassung, dazu die Notizen, die aus ihr entstehen. Wahlweise gleich in die Wissensbasis importieren. Verwenden bei: Quelle einlesen, diese URL einlesen, ein Buch erfassen, ein Clipping verarbeiten, Ingest, Bundle aus einer Quelle bauen."
+description: "Aus einer Quelle eine Lieferung machen — Quellennotiz mit Zitationsangaben und Zusammenfassung, dazu die Notizen, die aus ihr entstehen. Wahlweise gleich in die Wissensbasis importieren. Eine große Quelle wird in Tranchen gelesen, einzeln oder auf Anordnung im Durchlauf. Verwenden bei: Quelle einlesen, diese URL einlesen, ein Buch erfassen, ein Clipping verarbeiten, Ingest, Bundle aus einer Quelle bauen, Tranche lesen, alle Tranchen durchlaufen."
 ---
 
 # Aus einer Quelle eine Lieferung machen
@@ -32,6 +32,8 @@ entscheidet erst der Import (§4.3).
 ## Die Reihenfolge steht fest
 
 > `hk-ingest` → **Wilma** → du trägst ein.
+>
+> Bei einer großen Quelle je Tranche einmal, geführt von `hk-tranchen`.
 
 Erst das Mechanische: kopieren oder nicht, `sha256`, die Quellennotiz mit dem,
 was sicher bekannt ist, und eine Liste der Lücken. Dann liest **Wilma** die
@@ -72,6 +74,9 @@ gibt Zitationsangaben, Aufbau, belegte Substanz und Notiz-Kandidaten zurück.
 **Lies die Quelle nicht selbst.** Auch nicht „nur kurz nachschauen": Wandert
 sie nachträglich in deinen Kontext, war Wilmas Lauf umsonst. Reicht das
 Destillat für eine Notiz nicht, starte sie erneut mit einer engeren Frage.
+
+Ist die Quelle zu groß für einen Lauf — ein Buch, ein langes Transkript —,
+geht es hier in Tranchen weiter; der Abschnitt dazu steht unten.
 
 **③ Besprechen.** Sag dem Nutzer, was in der Quelle steht und was daraus
 entstehen soll — auf Grundlage des Destillats, nicht der Quelle. Erst danach
@@ -130,6 +135,18 @@ Aufbau **und** Inhalt ab, nicht nur die Kernaussagen — Wilmas Abschnitt
 Was die Quelle sagt, gehört in die Quellennotiz. Was du daraus für die eigene
 Sache schließt, in eine `note` oder ein `concept`, verbunden über `sources`.
 
+**Die Wikilinks gehören in die Prosa.** Jede Notiz, die eine Tranche
+hervorgebracht hat, wird im zugehörigen Abschnitt genannt und dorthin
+verlinkt. Damit wird die Zusammenfassung zum Einstieg in den Bestand: Wer
+chronologisch lesen will, geht der Reihe nach; wer eine Person oder ein
+Ereignis sucht, springt über den Verweis. Eine Zusammenfassung ohne diese
+Verweise erzählt die Quelle ein zweites Mal, statt an den Bestand zu führen.
+
+Bei einer tranchierten Quelle steht **vor** den Abschnitten ein kurzer
+Abschnitt `# Kernaussagen` — was das Werk im Ganzen behauptet, in wenigen
+Punkten. Er entsteht **nach der letzten Tranche** und nicht vorher: Vorher
+wüsstest du nur, was die ersten Kapitel behaupten.
+
 ## Eine bestehende Notiz fortschreiben
 
 Soll die Lieferung eine Notiz erweitern, die es in der Wissensbasis schon
@@ -146,21 +163,130 @@ Herkunft und führt danach beide Lieferungen.
 ## Große Quellen: Tranchen entlang des Aufbaus
 
 Ab einer Größe, die auch ein Destillat nicht mehr trägt — ein ganzes Buch, ein
-langes Transkript —, reicht ein Wilma-Lauf nicht.
+langes Transkript —, reicht ein Wilma-Lauf nicht. Dann wird die Quelle in
+Tranchen gelesen, **entlang ihrer eigenen Struktur und nicht nach Notiztypen
+gruppiert.** Eine Person und das Ereignis, in dem sie vorkommt, entstehen im
+selben Durchgang und tragen dieselben Wikilinks. Nach Typ gruppiert würde
+derselbe Zusammenhang zwei- oder dreimal gelesen.
 
-1. Ein erster Lauf holt nur den **Aufbau**. Er wird zum Überschriften-Gerüst
-   der Zusammenfassung und zugleich zur Tranchenliste.
-2. Je Tranche eine Zeile in der Quellennotiz: welches Material sie umfasst,
-   welche Notizen sie voraussichtlich auslöst.
-3. Je Tranche dann: Wilma mit der Tranche als Abgrenzung → Notizen schreiben →
-   den zugehörigen Abschnitt der Zusammenfassung füllen → Tranche abhaken.
+**Alle Tranchen arbeiten in derselben Lieferung.** Tranche 7 ergänzt einfach
+die Notizdatei, die Tranche 3 angelegt hat; `extends` braucht es dafür nicht,
+das gilt erst gegenüber dem Bestand einer Ablage. Mit `--hkb` geht die
+Lieferung **einmal am Ende** hinüber — ein Import, ein Bundle-Eintrag, ein
+Importnachweis.
 
-**Entlang der Struktur der Quelle, nicht nach Notiztypen gruppiert.** Eine
-Person und das Ereignis, in dem sie vorkommt, entstehen im selben Durchgang
-und tragen dieselben Wikilinks. Nach Typ gruppiert würde derselbe Zusammenhang
-zwei- oder dreimal gelesen.
+### Die Liste anlegen
 
-Weil die Tranche selbst nie in deinem Kontext lag, trägt eine Sitzung mehrere.
+Ein erster Wilma-Lauf holt **nur den Aufbau**, nicht die Substanz. Er wird
+zum Überschriften-Gerüst der Zusammenfassung und zugleich zur Tranchenliste:
+
+```bash
+hk-tranchen <quellennotiz> --anlegen -     # Wilmas `## Tranchenvorschlag`, Zeile für Zeile
+hk-tranchen <quellennotiz>                 # zeigt die Liste
+```
+
+Durchgereicht wird **nur dieser Abschnitt**, nicht das ganze Destillat: Sonst
+würde jede Aufzählung darin eine Tranche.
+
+Die Liste steht danach als Abschnitt `# Tranchen` in der Quellennotiz und ist
+**der Stand des Laufs, nicht dein Gedächtnis**. Das ist der Grund, warum sie
+dort steht und nicht im Gespräch: Ein Buch trägt ein Dutzend Tranchen, und
+keine darf davon abhängen, dass die vorige noch im Kontext liegt. Nach einer
+Kompaktierung sagt `--naechste`, wo der Lauf steht; nach einem Abbruch morgen
+ebenso.
+
+Eine Tranche ist so groß, dass **ein** Wilma-Lauf sie trägt — ein Teil, ein
+Kapitelblock, ein Stundenabschnitt eines Transkripts. Zu klein geschnitten
+zerreißt sie Zusammenhänge, zu groß geschnitten liefert sie ein dünnes
+Destillat.
+
+### Ein Durchgang je Tranche
+
+```bash
+hk-tranchen <quellennotiz> --naechste
+```
+
+Dann, für genau diese Tranche:
+
+1. **Wilma starten**, mit der Abgrenzung als Auftrag. Ein Auftrag, eine
+   Tranche — auch im Durchlauf.
+2. **Prüfen, was es schon gibt** (Schritt ④ oben), und zwar in der Ablage
+   *und* in der Lieferung: Die frühere Tranche hat vielleicht schon eine
+   Notiz angelegt, an die diese hier anschließt.
+3. **Eintragen**: die Notizen aus den Kandidaten, den zugehörigen Abschnitt
+   der Zusammenfassung, und was Wilma unter Lücken gefunden hat.
+4. **`hk-lint <ziel>`** muss grün sein, bevor die Tranche abgehakt wird.
+5. **Abhaken:**
+
+```bash
+hk-tranchen <quellennotiz> --abhaken 3 --ertrag "3 neu, 5 fortgeschrieben"
+```
+
+**Welche Notizen dabei entstanden sind, schreibst du nicht in die
+Quellennotiz.** Das steht am Ende im Importnachweis der Bundle-Notiz, je
+Notiz mit Typ und Zustand, maschinell und vollständig (§5.1). Es dort und
+hier zu führen hieße, zwei Fassungen derselben Auskunft zu pflegen. `Ertrag`
+trägt eine Zeile, mehr nicht.
+
+### Einzelschritt ist die Vorgabe
+
+Nach einer Tranche hältst du an, berichtest wie in Schritt ⑦ und sagst, was
+die nächste umfasst. Der Benutzer sieht dann, ob der Schnitt trägt und ob die
+Notizen die Schwelle treffen — beim zweiten Dutzend ist das nicht mehr zu
+korrigieren.
+
+### Ein Durchlauf läuft nur auf Anordnung
+
+Ein Durchlauf arbeitet die offenen Tranchen ohne Rückfrage nacheinander ab.
+Er kostet ein Vielfaches eines gewöhnlichen Laufs — je Tranche ein
+Wilma-Lauf und ein Schreibdurchgang —, und darum **ordnet ihn der Benutzer
+an**. Dass er eine große Quelle einlesen ließ, ist keine Anordnung, und ein
+knapper Auftrag ist keine Vollmacht für zwölf Läufe.
+
+Bevor du startest, sag drei Dinge und warte auf ein klares Ja:
+
+- wie viele Tranchen offen sind und welches Material sie umfassen,
+- dass jede davon einen eigenen Wilma-Lauf und einen Schreibdurchgang
+  bedeutet, der Lauf also ungefähr so viel kostet wie diese Zahl einzelner
+  Läufe,
+- dass er jederzeit unterbrochen werden kann: Der Stand steht in der
+  Quellennotiz, die halbe Lieferung ist gültig, und ein späterer Aufruf setzt
+  bei der nächsten offenen Tranche fort.
+
+Im Durchlauf gilt:
+
+- **Je Tranche eine Zeile Bericht** — Nummer, Abgrenzung, was entstanden ist.
+  Der ausführliche Bericht kommt am Ende, über den ganzen Lauf.
+- **Nicht nach jeder Tranche zurückfragen.** Das wäre der Einzelschritt, und
+  der Benutzer hat etwas anderes angeordnet.
+- **Den Stand nach jeder Tranche festschreiben**, bevor die nächste beginnt.
+  Ein Durchlauf, der drei Tranchen im Kopf behält und dann abbricht, hat sie
+  verloren.
+- **Die Quelle nie selbst lesen**, auch nicht bei der letzten Tranche, wenn
+  das Destillat der ersten längst aus dem Kontext gefallen ist.
+
+**Der Durchlauf hält an, wenn:**
+
+| Fall | Was du tust |
+|---|---|
+| Wilma kommt an die Tranche nicht heran | nicht abhaken, anhalten, sagen woran es lag |
+| `hk-lint` bleibt rot und der Befund verlangt ein Urteil | anhalten und vorlegen (§6.3) |
+| Ein Kandidat trifft auf eine Notiz, deren Identität fraglich ist | anhalten. Raten ist der eine Fehler, den ein Durchlauf vervielfacht |
+| Der Aufbau erweist sich als falsch geschnitten | anhalten, den Rest der Liste zur Korrektur vorlegen |
+| Der Benutzer unterbricht | nichts weiter; der Stand steht in der Liste |
+
+### Was am Ende steht
+
+Wenn die letzte Tranche abgehakt ist, fehlt noch das, was erst über die ganze
+Quelle zu sagen ist: der Abschnitt `# Kernaussagen` der Quellennotiz und der
+Bericht nach Schritt ⑦, über den Lauf im Ganzen statt über eine Tranche.
+
+Mit `--hkb` folgt der Import **erst dann** und folgt dem Skill `hkb-import`:
+Die Urteile, die er verlangt, fällt ein Mensch, und ein Durchlauf fällt sie
+nicht nebenbei mit. Danach steht in der Quellennotiz die Zusammenfassung
+entlang des Aufbaus, verlinkt in den Bestand, und darunter die Tranchenliste
+als Nachweis, welches Material gelesen wurde und wann. Welche Notizen dabei
+entstanden sind, steht im Importnachweis der Bundle-Notiz.
 
 ## Wann eine Notiz entsteht
 
@@ -196,6 +322,9 @@ schriebest du eine Notiz über etwas, worüber die Quelle nichts sagt.
   Autorität, die ihr Inhalt nicht deckt (Harness §7).
 - **Nichts entfernen.** Eine Ergänzung fügt hinzu; Streichen ist Sache eines
   Menschen (§5.6).
+- **Keinen Durchlauf ohne Anordnung.** Zwölf Tranchen kosten zwölf Läufe, und
+  wer sie ungefragt startet, hat über fremde Mittel entschieden. Der
+  Einzelschritt ist die Vorgabe.
 - **Keine Angabe raten.** Was Wilma nicht gefunden hat, bleibt leer und wird
   gemeldet. Eine erfundene Jahreszahl in einer Zitation ist schlimmer als
   keine.

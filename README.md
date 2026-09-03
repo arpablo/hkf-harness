@@ -59,6 +59,8 @@ Python 3 und PyYAML.
 | `hk-import <bundle>` | übernimmt eine Lieferung (§6.1): Typen abgleichen, Notizen und Mediendateien einsortieren, Verweise umschreiben, verknüpfen, Bundle-Notiz und Typtabelle fortschreiben | **läuft** |
 | `hk-export <id> <ziel>` | schreibt eine Lieferung heraus (§6.2): Notizen, Typdefinitionen und Mediendateien der Lieferung in den typbezogenen Baum, Verweise ohne Ablagepfad | **läuft** |
 | `hk-ingest [<stück>]` | liest eine Quelle ein: Typ feststellen, Ausfertigung ablegen oder verzeichnen, `sha256` bilden, Quellennotiz und `hbundle.md` schreiben, die Lücken melden. Mit `--hkb` gleich importieren | **läuft** |
+| `hk-tranchen <quellennotiz>` | führt die Tranchen einer großen Quelle im Abschnitt `# Tranchen` der Quellennotiz: `--anlegen` legt die Liste an, `--naechste` sagt, welche dran ist, `--abhaken` schreibt eine fest | **läuft** |
+| `hk-types [--umstellen]` | legt Typseiten und Bases an, damit `type` ein Verweis sein darf (§3.3) | **läuft** |
 
 Was geprüft wird, entscheidet die Wurzeldatei: `hkb.md` heißt Wissensbasis,
 `hbundle.md` heißt Lieferung. §6.3 gilt für beide, mit den Unterschieden aus §4
@@ -148,12 +150,13 @@ nicht.
 spec/        die Fassung, die dieser Harness umsetzt
 lib/hkf/     ablage, frontmatter, schema, grammatik, pruefen, korrigieren,
              importieren, exportieren, einlesen, notiz, vorlage, fassung
-bin/         hk-init, hk-lint, hk-import, hk-export, hk-ingest
+bin/         hk-init, hk-lint, hk-import, hk-export, hk-ingest,
+             hk-tranchen, hk-types
 py           das Python des Harness — baut die venv und startet sie
 tools/       spec.py hält die Kopie unter spec/ auf Stand,
              grundausstattung.py die Vorlage gegen Anhang A und §3.5.1
 templates/   die Grundausstattung, aus der hk-init schöpft
-skills/      die KI-Schicht: hkb und sechs Operationen, siehe skills/README.md
+skills/      die KI-Schicht: hkb und sieben Operationen, siehe skills/README.md
 agents/      die Subagenten, die für einen Skill lesen — wilma
 test/        Rauchprobe: python3 test/smoke.py
 ```

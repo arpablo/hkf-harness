@@ -62,7 +62,7 @@ hkf-harness/
   HKF-Harness-V1.0.md   dieses Dokument
   spec/                 die Fassung von HKF Core und Config, die er umsetzt
   bin/                  hk-init, hk-lint, hk-import, hk-export, hk-ingest,
-                        hk-types
+                        hk-tranchen, hk-types
   lib/hkf/              Ablage, Frontmatter, Schema, Grammatik, Vorlage,
                         Fassung, Einlesen
   py                    das Python des Harness

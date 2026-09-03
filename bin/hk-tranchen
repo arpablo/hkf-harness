@@ -1,0 +1,313 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""hk-tranchen — die Tranchen einer grossen Quelle fuehren.
+
+    hk-tranchen <quellennotiz>                        zeigt die Liste
+    hk-tranchen <quellennotiz> --anlegen <datei|->     legt sie an
+    hk-tranchen <quellennotiz> --naechste              die naechste offene
+    hk-tranchen <quellennotiz> --abhaken <nr>          eine Tranche festschreiben
+
+    --ertrag T   was die Tranche gebracht hat, kurz: „3 neu, 5 fortgeschrieben"
+    --force      eine vorhandene Liste ersetzen, eine erledigte Tranche erneut
+                 abhaken
+
+Ein Buch traegt ein Dutzend Tranchen, und keine davon darf davon abhaengen,
+dass die vorige noch im Kontext liegt. Der Stand steht darum in der
+Quellennotiz selbst, im Abschnitt `# Tranchen`:
+
+    | Nr | Abgrenzung | Stand | Ertrag |
+    |---|---|---|---|
+    | 1 | Teil I: Vor dem Krieg (Kap. 1-7) | erledigt 2026-09-03 | 3 neu, 5 fortgeschrieben |
+    | 2 | Teil II: Kitchener (Kap. 8-12) | offen | — |
+
+Damit uebersteht ein Durchlauf Kompaktierung, Abbruch und Sitzungswechsel:
+`--naechste` sagt jederzeit, wo er steht, und gibt 1 zurueck, wenn nichts mehr
+offen ist. Der Abschnitt bleibt danach stehen — er sagt, welches Material
+gelesen wurde und wann. **Welche Notizen dabei entstanden sind, steht nicht
+hier**, sondern im Importnachweis der Bundle-Notiz (Core §5.1).
+
+`--anlegen` liest je Zeile eine Abgrenzung, aus einer Datei oder von der
+Standardeingabe. Ein fuehrendes `- `, `* ` oder `1. ` faellt weg, eine leere
+Zeile und eine mit `#` ebenso — damit laesst sich der Abschnitt
+`## Tranchenvorschlag` eines Destillats unveraendert durchreichen. **Nur
+dieser Abschnitt**: Wer das ganze Destillat durchreicht, bekommt jede
+Aufzaehlung darin als Tranche.
+"""
+import datetime, io, os, re, sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
+from hkf import ablage, frontmatter, notiz                    # noqa: E402
+
+WERKZEUG = "hk-tranchen"
+QUELLTYP = "source"
+UEBERSCHRIFT = "Tranchen"
+SPALTEN = ("Nr", "Abgrenzung", "Stand", "Ertrag")
+OFFEN = "offen"
+ERLEDIGT = "erledigt"
+LEER = "—"
+
+# Eine Tabellenzelle endet am naechsten `|`, das nicht mit `\` geschuetzt ist.
+ZELLE = re.compile(r"(?<!\\)\|")
+VORSATZ = re.compile(r"^(?:[-*+]\s+|\d+[.)]\s+)")
+
+
+class Fehler(Exception):
+    pass
+
+
+# ── Der Abschnitt ───────────────────────────────────────────────────────
+
+def _zellen(zeile):
+    return [t.strip().replace("\\|", "|")
+            for t in ZELLE.split(zeile.strip().strip("|"))]
+
+
+def _zeile(reihe):
+    nr, abgrenzung, stand, ertrag = reihe
+    return "| %d | %s | %s | %s |" % (nr, abgrenzung.replace("|", "\\|"),
+                                      stand, ertrag.replace("|", "\\|"))
+
+
+def lesen(body):
+    """[(nr, abgrenzung, stand, ertrag)] — oder None ohne den Abschnitt."""
+    text = notiz.abschnitt(body, UEBERSCHRIFT)
+    if text is None:
+        return None
+    reihen = []
+    for z in text.splitlines():
+        if not z.strip().startswith("|"):
+            continue
+        sp = _zellen(z)
+        if len(sp) < 2 or not sp[0].isdigit():
+            continue                       # Kopfzeile, Trennzeile, Fliesstext
+        sp += [""] * (4 - len(sp))
+        reihen.append((int(sp[0]), sp[1], sp[2] or OFFEN, sp[3] or LEER))
+    return reihen
+
+
+def bauen(reihen):
+    tabelle = ["| %s |" % " | ".join(SPALTEN), "|" + "---|" * len(SPALTEN)]
+    tabelle += [_zeile(r) for r in reihen]
+    return "# %s\n\n%s\n" % (UEBERSCHRIFT, "\n".join(tabelle))
+
+
+def einsetzen(body, block):
+    """Den Abschnitt ersetzen oder ihn vor `# Siehe auch` einhaengen.
+
+    Der Abschnitt `# Siehe auch` ist der letzte einer Notiz (Core §5.6); alles
+    andere darf davor.
+    """
+    m = re.search(r"^# %s$" % UEBERSCHRIFT, body, re.M)
+    if m:
+        # `ohne_abschnitt` schneidet ab der Ueberschrift heraus; was davor
+        # steht, bleibt Zeichen fuer Zeichen an seiner Stelle.
+        body = notiz.ohne_abschnitt(body, UEBERSCHRIFT)
+        vorher, nachher = body[:m.start()], body[m.start():]
+    else:
+        m = re.search(r"^# Siehe auch$", body, re.M)
+        vorher = body[:m.start()] if m else body
+        nachher = body[m.start():] if m else ""
+    vorher = vorher.rstrip("\n")
+    aus = (vorher + "\n\n" if vorher else "") + block
+    return aus + ("\n" + nachher.lstrip("\n") if nachher.strip() else "\n")
+
+
+# ── Die Quellennotiz ────────────────────────────────────────────────────
+
+def _typname(pfad, wert):
+    """Der Typ einer Notiz, in Text- wie in Linkform (Core §3.3)."""
+    ziel = notiz.linkziel(wert)
+    if ziel is None:
+        return str(wert or "").strip()
+    seite = "/".join(ziel.split("/")[-2:])
+    verz = os.path.dirname(os.path.abspath(pfad))
+    while True:
+        try:
+            wurzel, art = ablage.finde_ablage(verz)
+        except ablage.KeineAblage:
+            eltern = os.path.dirname(verz)
+            if eltern == verz:
+                return ""
+            verz = eltern
+            continue
+        if art != "hkb":
+            return ""
+        konfig = os.path.join(wurzel, ablage.bereiche(wurzel)["config_base"])
+        return ablage.typseiten(konfig).get(seite, "")
+
+
+def quellennotiz(pfad):
+    """(kopf, body) einer Quellennotiz — sonst `Fehler`."""
+    if not os.path.isfile(pfad):
+        raise Fehler("%s: keine Datei." % pfad)
+    daten, _ = frontmatter.lesen(pfad)
+    typ = _typname(pfad, daten.get("type"))
+    if typ != QUELLTYP:
+        raise Fehler("%s: `type` ist %s und nicht `source`. Tranchen führt "
+                     "eine Quellennotiz." % (pfad, typ and "`%s`" % typ or "leer"))
+    kopf, body = notiz.teilen(io.open(pfad, encoding="utf-8").read())
+    return kopf, body
+
+
+def sichern(pfad, kopf, body):
+    """Schreiben und die Änderung hinschreiben (Core §3.3, Regel 5)."""
+    jetzt = datetime.datetime.now(datetime.timezone.utc)
+    kopf = notiz.setze_skalar(kopf, "modified",
+                              notiz.skalar(jetzt.strftime("%Y-%m-%dT%H:%M:%S")))
+    kopf = notiz.setze_skalar(kopf, "modified_by", WERKZEUG)
+    io.open(pfad, "w", encoding="utf-8").write(notiz.bauen(kopf, body))
+    return jetzt.strftime("%Y-%m-%d")
+
+
+# ── Die vier Aufrufe ────────────────────────────────────────────────────
+
+def zeigen(pfad, reihen):
+    if reihen is None:
+        print("%s trägt keine Tranchenliste." % os.path.basename(pfad))
+        print("  → hk-tranchen %s --anlegen <datei|->" % pfad)
+        return 0
+    offen = [r for r in reihen if r[2] == OFFEN]
+    print("%s — %d Tranchen, %d erledigt, %d offen"
+          % (os.path.basename(pfad), len(reihen),
+             len(reihen) - len(offen), len(offen)))
+    print()
+    for nr, abgrenzung, stand, ertrag in reihen:
+        print("  %2d  %-22s %s" % (nr, stand, abgrenzung))
+        if stand != OFFEN and ertrag != LEER:
+            print("      %-22s %s" % ("", ertrag))
+    print()
+    if offen:
+        print("Als nächstes: Tranche %d." % offen[0][0])
+    else:
+        print("Alle Tranchen sind erledigt.")
+    return 0
+
+
+def naechste(reihen):
+    """Die nächste offene Tranche. 1, wenn keine mehr offen ist."""
+    if reihen is None:
+        raise Fehler("Diese Quellennotiz trägt keine Tranchenliste.")
+    offen = [r for r in reihen if r[2] == OFFEN]
+    if not offen:
+        print("Alle %d Tranchen sind erledigt." % len(reihen))
+        return 1
+    nr, abgrenzung = offen[0][0], offen[0][1]
+    print("Tranche %d von %d" % (nr, len(reihen)))
+    print("Abgrenzung: %s" % abgrenzung)
+    print("Danach offen: %d" % (len(offen) - 1))
+    return 0
+
+
+def anlegen(pfad, kopf, body, reihen, quelle, force):
+    if reihen is not None and not force:
+        raise Fehler("Diese Quellennotiz trägt schon %d Tranchen. "
+                     "--force ersetzt sie." % len(reihen))
+    text = sys.stdin.read() if quelle == "-" else \
+        io.open(quelle, encoding="utf-8").read()
+    neu = []
+    for z in text.splitlines():
+        z = z.strip()
+        if not z or z.startswith("#"):
+            continue
+        z = VORSATZ.sub("", z).strip()
+        if z:
+            neu.append((len(neu) + 1, z, OFFEN, LEER))
+    if not neu:
+        raise Fehler("%s: keine Abgrenzung gefunden."
+                     % ("die Standardeingabe" if quelle == "-" else quelle))
+    sichern(pfad, kopf, einsetzen(body, bauen(neu)))
+    print("%s — %d Tranchen angelegt." % (os.path.basename(pfad), len(neu)))
+    for nr, abgrenzung, _, _ in neu:
+        print("  %2d  %s" % (nr, abgrenzung))
+    print()
+    print("Als nächstes: hk-tranchen %s --naechste" % pfad)
+    return 0
+
+
+def abhaken(pfad, kopf, body, reihen, nr, ertrag, force):
+    if reihen is None:
+        raise Fehler("Diese Quellennotiz trägt keine Tranchenliste.")
+    try:
+        nr = int(nr)
+    except (TypeError, ValueError):
+        raise Fehler("--abhaken verlangt eine Nummer.")
+    treffer = [r for r in reihen if r[0] == nr]
+    if not treffer:
+        raise Fehler("Tranche %d gibt es nicht; die Liste führt %d."
+                     % (nr, len(reihen)))
+    if treffer[0][2] != OFFEN and not force:
+        raise Fehler("Tranche %d ist schon %s. --force schreibt sie erneut fest."
+                     % (nr, treffer[0][2]))
+    tag = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
+    stand = "%s %s" % (ERLEDIGT, tag)
+    neu = [(r[0], r[1], stand, ertrag or LEER) if r[0] == nr else r
+           for r in reihen]
+    sichern(pfad, kopf, einsetzen(body, bauen(neu)))
+    offen = [r for r in neu if r[2] == OFFEN]
+    print("Tranche %d: %s" % (nr, stand))
+    print("  %s" % treffer[0][1])
+    if ertrag:
+        print("  %s" % ertrag)
+    print()
+    if offen:
+        print("Noch offen: %d von %d." % (len(offen), len(neu)))
+    else:
+        print("Alle %d Tranchen sind erledigt." % len(neu))
+    return 0
+
+
+def argumente(argv):
+    werte, rest, i = {}, [], 0
+    while i < len(argv):
+        a = argv[i]
+        if a.startswith("--"):
+            name = a[2:].replace("-", "_")
+            folgt = argv[i + 1] if i + 1 < len(argv) else None
+            if folgt is not None and not folgt.startswith("--"):
+                werte[name], i = folgt, i + 2
+            else:
+                werte[name], i = True, i + 1
+        else:
+            rest.append(a)
+            i += 1
+    return werte, rest
+
+
+def main(argv):
+    if "--help" in argv or "-h" in argv or not argv:
+        print(__doc__.strip())
+        return 0 if argv else 2
+    werte, rest = argumente(argv)
+    if not rest:
+        sys.stderr.write("hk-tranchen verlangt eine Quellennotiz.\n")
+        return 2
+    pfad = os.path.abspath(os.path.expanduser(rest[0]))
+    try:
+        kopf, body = quellennotiz(pfad)
+        if kopf is None:
+            raise Fehler("%s: kein Frontmatter — das ist keine Notiz." % pfad)
+        reihen = lesen(body)
+        force = bool(werte.get("force"))
+        ertrag = werte.get("ertrag")
+        ertrag = ertrag if isinstance(ertrag, str) else None
+        if werte.get("anlegen"):
+            if werte["anlegen"] is True:
+                raise Fehler("--anlegen verlangt eine Datei oder `-`.")
+            return anlegen(pfad, kopf, body, reihen, werte["anlegen"], force)
+        if werte.get("abhaken"):
+            return abhaken(pfad, kopf, body, reihen,
+                           werte["abhaken"] if werte["abhaken"] is not True else None,
+                           ertrag, force)
+        if werte.get("naechste"):
+            return naechste(reihen)
+        return zeigen(pfad, reihen)
+    except (Fehler, ablage.KeineAblage, frontmatter.Unlesbar) as e:
+        sys.stderr.write(str(e) + "\n")
+        return 2
+    except IOError as e:
+        sys.stderr.write("%s\n" % e)
+        return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
