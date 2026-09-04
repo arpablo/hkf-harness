@@ -93,6 +93,7 @@ Python 3 und PyYAML.
 | `hk-publikation <notiz>` | führt die Lesereihenfolge einer Publikation: `--aufnehmen`, `--vor`, `--check`, `--richten` | **läuft** |
 | `hk-buch <publikation>` | schreibt die Texte einer Publikation als ein Manuskript heraus | **läuft** |
 | `hk-epub <publikation>` | baut daraus mit `pandoc` ein EPUB | **läuft** |
+| `hk-kontinuitaet [--richten]` | prüft einen Erzählbestand: Zeiträume, abgeleitete Listen, veraltete Beurteilungen | **läuft** |
 
 Was geprüft wird, entscheidet die Wurzeldatei: `hkb.md` heißt Wissensbasis,
 `hbundle.md` heißt Lieferung. §6.3 gilt für beide, mit den Unterschieden aus §4
@@ -187,14 +188,15 @@ rules/       deutsch.json, der Basissatz der Schreibregeln
 bin/         hk-init, hk-lint, hk-import, hk-export, hk-ingest,
              hk-tranchen, hk-types, hk-ablage, hk-text, hk-install,
              hk-suche, hk-erwaehnungen, hk-kontext, hk-publikation,
-             hk-buch, hk-epub
+             hk-buch, hk-epub, hk-kontinuitaet
 py           das Python des Harness — baut die venv und startet sie
 tools/       spec.py hält die Kopie unter spec/ auf Stand,
              grundausstattung.py die Vorlage gegen Anhang A und §3.5.1
 templates/   die Grundausstattung, aus der hk-init schöpft
 bundles/     Typen, die nicht jede Ablage braucht, als Lieferung zum Import
 skills/      die KI-Schicht: hkb und sieben Operationen, siehe skills/README.md
-agents/      die Subagenten: wilma liest, marlene schreibt, astrid lektoriert
+agents/      die Subagenten: wilma liest, marlene schreibt, astrid lektoriert,
+             doris liest den Bestand
 commands/    die Slash-Kommandos, siehe hk-install
 hooks/       sitzung.py spielt den Kanon ein, schreibregeln.py blockt
 core/        der Kanon: Identität, Zusammenarbeit, Sprache, Schreibregeln, YAML

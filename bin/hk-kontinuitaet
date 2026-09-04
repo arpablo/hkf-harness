@@ -1,0 +1,214 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""hk-kontinuitaet — was in einem Erzaehlbestand auseinanderlaeuft.
+
+    hk-kontinuitaet [pfad]        berichtet
+    hk-kontinuitaet --richten     zieht die abgeleiteten Listen nach
+
+Drei Pruefungen, und alle drei sind mechanisch. Was daraus folgt, ist es
+nicht: Eine Ueberschneidung im Zeitraum kann Absicht sein.
+
+**Der Zeitraum.** `story_date` und `story_end` spannen ihn auf. Zwei Texte, die
+denselben Tag belegen, sind ein Befund: Eine Figur muss beides an einem Tag
+schaffen koennen. Gemeldet wird jede Ueberschneidung, entschieden wird sie
+nicht.
+
+**Die abgeleiteten Listen.** `characters`, `locations`, `beats` und `props`
+folgen aus dem Body und werden nicht daneben gepflegt. Wer im Text als Verweis
+vorkommt, steht in der Liste, und wer in der Liste steht, kommt im Text vor.
+Zwei Stellen, die dasselbe behaupten und getrennt gepflegt werden, laufen
+auseinander. `--richten` zieht die Liste dem Body nach, nie umgekehrt.
+
+**Die Beurteilungen.** Liegt `modified` des Textes nach `reviewed` der
+Beurteilung, gilt sie fuer eine Fassung, die es nicht mehr gibt.
+
+Ohne Befund endet der Lauf mit 0, sonst mit 1.
+"""
+import datetime, os, re, sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
+from hkf import ablage, notiz, pruefen   # noqa: E402
+
+WERKZEUG = "hk-kontinuitaet"
+ABGELEITET = {"characters": "character", "locations": "location",
+              "beats": "beat", "props": "prop"}
+
+
+def _tag(wert):
+    if not wert:
+        return None
+    s = str(wert)[:10]
+    try:
+        return datetime.date.fromisoformat(s)
+    except ValueError:
+        return None
+
+
+def _zeitpunkt(wert):
+    if not wert:
+        return None
+    s = str(wert).replace("Z", "")[:19]
+    for form in ("%Y-%m-%dT%H:%M:%S", "%Y-%m-%d"):
+        try:
+            return datetime.datetime.strptime(s[:len(form.replace("%Y", "0000"))
+                                                if False else len(s)], form)
+        except ValueError:
+            continue
+    return None
+
+
+def _titel(e, rel):
+    return str(e["daten"].get("title") or e["daten"].get("name") or
+               rel.rsplit("/", 1)[-1])
+
+
+def _verweise_im_body(b, e):
+    """{rel} der Notizen, auf die der Body verweist."""
+    aus = set()
+    for m in pruefen.LINK.finditer(pruefen.ohne_code(e["body"])):
+        art, rel = b.aufloesen(m.group(1))
+        if art == "notiz":
+            aus.add(rel)
+    return aus
+
+
+def _aus_liste(b, werte):
+    aus = set()
+    for w in werte or []:
+        m = re.match(r"^\[\[([^\]|]+)", str(w))
+        if not m:
+            continue
+        art, rel = b.aufloesen(m.group(1))
+        if art == "notiz":
+            aus.add(rel)
+    return aus
+
+
+def zeitraeume(b):
+    spannen = []
+    for rel, e in sorted(b.notizen.items()):
+        if e["typ"] != "text":
+            continue
+        von = _tag(e["daten"].get("story_date"))
+        if not von:
+            continue
+        bis = _tag(e["daten"].get("story_end")) or von
+        spannen.append((von, bis, rel, e))
+    befunde = []
+    for i, (v1, b1, r1, _) in enumerate(spannen):
+        for v2, b2, r2, _ in spannen[i + 1:]:
+            if v1 <= b2 and v2 <= b1:
+                befunde.append("%s (%s bis %s) und %s (%s bis %s) belegen "
+                               "dieselben Tage." % (r1, v1, b1, r2, v2, b2))
+    return befunde
+
+
+def listen(b):
+    """[(rel, property, fehlt_in_liste, steht_zuviel_drin)]"""
+    aus = []
+    for rel, e in sorted(b.notizen.items()):
+        if e["typ"] != "text":
+            continue
+        im_body = _verweise_im_body(b, e)
+        for prop, typ in sorted(ABGELEITET.items()):
+            if typ not in b.typdefs:
+                continue
+            soll = set(r for r in im_body if b.notizen[r]["typ"] == typ)
+            ist = _aus_liste(b, e["daten"].get(prop))
+            if soll != ist:
+                aus.append((rel, e, prop, sorted(soll - ist), sorted(ist - soll)))
+    return aus
+
+
+def beurteilungen(b):
+    befunde = []
+    for rel, e in sorted(b.notizen.items()):
+        if e["typ"] != "assessment":
+            continue
+        m = re.match(r"^\[\[([^\]|]+)", str(e["daten"].get("assesses") or ""))
+        if not m:
+            continue
+        art, ziel = b.aufloesen(m.group(1))
+        if art != "notiz" or ziel not in b.notizen:
+            continue
+        gelesen = _tag(e["daten"].get("reviewed"))
+        geaendert = _tag(b.notizen[ziel]["daten"].get("modified"))
+        if gelesen and geaendert and geaendert > gelesen:
+            befunde.append("%s: gelesen am %s, %s ist vom %s."
+                           % (rel, gelesen, ziel, geaendert))
+    return befunde
+
+
+def main(argv):
+    if "--help" in argv or "-h" in argv:
+        print(__doc__.strip()); return 0
+    richten = "--richten" in argv
+    args = [a for a in argv if not a.startswith("-")]
+    try:
+        hkb, art = ablage.finde_ablage(args[0] if args else None, arten=("hkb",))
+    except ablage.KeineAblage as e:
+        sys.stderr.write(str(e) + "\n"); return 2
+    b = pruefen.Bestand(hkb, art)
+    if "text" not in b.typdefs:
+        sys.stderr.write("Diese Ablage kennt `text` nicht.\n"
+                         "  → hk-import <harness>/bundles/hkf-erzaehlung\n")
+        return 2
+
+    print("%s — Kontinuität" % hkb)
+    zeit = zeitraeume(b)
+    print()
+    print("Zeitraum (%d)" % len(zeit))
+    for z in zeit:
+        print("  ·", z)
+
+    abweichung = listen(b)
+    print()
+    print("Abgeleitete Listen (%d)" % len(abweichung))
+    for rel, e, prop, fehlt, zuviel in abweichung:
+        teile = []
+        if fehlt:
+            teile.append("fehlt: " + ", ".join(fehlt))
+        if zuviel:
+            teile.append("steht zu viel drin: " + ", ".join(zuviel))
+        print("  - %s `%s` — %s" % (rel, prop, "; ".join(teile)))
+
+    alt = beurteilungen(b)
+    print()
+    print("Veraltete Beurteilungen (%d)" % len(alt))
+    for z in alt:
+        print("  -", z)
+
+    if richten and abweichung:
+        print()
+        print("Nachgezogen")
+        je_notiz = {}
+        for rel, e, prop, _f, _z in abweichung:
+            je_notiz.setdefault(rel, (e, []))[1].append(prop)
+        for rel, (e, props) in sorted(je_notiz.items()):
+            kopf = e["kopf"]
+            im_body = _verweise_im_body(b, e)
+            for prop in props:
+                typ = ABGELEITET[prop]
+                soll = sorted(r for r in im_body
+                              if b.notizen[r]["typ"] == typ)
+                kopf = notiz.setze_liste(
+                    kopf, prop,
+                    ["[[%s|%s]]" % ("/".join(t for t in (
+                        b.praefix(b.notizen[r].get("bereich") or "wiki_base"), r)
+                        if t), _titel(b.notizen[r], r)) for r in soll])
+            notiz.sichern(e["pfad"], kopf, e["body"], WERKZEUG)
+            print("  · %s (%s)" % (rel, ", ".join(props)))
+        abweichung = []
+
+    summe = len(zeit) + len(abweichung) + len(alt)
+    print()
+    if not summe:
+        print("Nichts auseinandergelaufen.")
+        return 0
+    print("%d Befunde. Der Zeitraum und die veralteten Beurteilungen sind "
+          "Sache eines Menschen." % summe)
+    return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

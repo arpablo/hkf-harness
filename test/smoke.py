@@ -820,6 +820,90 @@ Der Text von Stück %s, mit ein paar Wörtern für die Zählung.
         shutil.rmtree(os.path.join(ziel, WIKI, "Texts"))
         shutil.rmtree(os.path.dirname(lieferung_pub), ignore_errors=True)
 
+        print("hkf-erzaehlung: der Kanon einer Reihe")
+        lief_erz = os.path.join(tempfile.mkdtemp(prefix="hkb-erz-"),
+                                "hkf-erzaehlung")
+        shutil.copytree(os.path.join(WURZEL, "bundles", "hkf-erzaehlung"),
+                        lief_erz)
+        r = lauf(os.path.join(BIN, "hk-lint"), lief_erz)
+        probe("die Lieferung ist konform", r.returncode == 0,
+              (r.stdout + r.stderr)[-300:])
+        erz = os.path.join(tempfile.mkdtemp(prefix="hkb-erzz-"), "ablage")
+        r = lauf(os.path.join(BIN, "hk-init"), erz)
+        r = lauf(os.path.join(BIN, "hk-import"), lief_erz, erz)
+        probe("sie lässt sich in eine frische Ablage importieren",
+              r.returncode == 0, (r.stdout + r.stderr)[-300:])
+        r = lauf(os.path.join(BIN, "hk-lint"), erz)
+        probe("und die Ablage bleibt konform", r.returncode == 0,
+              (r.stdout + r.stderr)[-400:])
+
+        print("hk-kontinuitaet: Zeitraum, Listen, Beurteilungen")
+        _schreib(os.path.join(erz, WIKI, "Characters", "figur.md"), """---
+type: character
+name: Eine Figur
+created: 2026-01-01
+---
+
+# Zweck
+
+Kommt öfter vor.
+""")
+        _schreib(os.path.join(erz, WIKI, "Texts", "abend.md"), """---
+type: text
+name: Der Abend
+story_date: 2026-06-12
+created: 2026-01-01
+modified: 2026-01-05
+---
+
+Der Abend beginnt. [[40-Wiki/Characters/figur|Eine Figur]] kommt zu spät.
+""")
+        _schreib(os.path.join(erz, WIKI, "Texts", "morgen.md"), """---
+type: text
+name: Der Morgen
+story_date: 2026-06-12
+story_end: 2026-06-13
+created: 2026-01-01
+---
+
+Am Morgen danach.
+""")
+        _schreib(os.path.join(erz, WIKI, "Assessments", "abend.md"), """---
+type: assessment
+name: Beurteilung Der Abend
+assesses: "[[40-Wiki/Texts/abend|Der Abend]]"
+reviewed: 2026-01-01
+created: 2026-01-01
+---
+
+# Erster Prüfer
+
+Trägt.
+""")
+        r = lauf(os.path.join(BIN, "hk-kontinuitaet"), erz)
+        probe("zwei Texte am selben Tag sind ein Befund",
+              "belegen dieselben Tage" in r.stdout, r.stdout[-500:])
+        probe("eine Liste, die dem Body nicht folgt, auch",
+              "`characters`" in r.stdout and "Characters/figur" in r.stdout,
+              r.stdout[-500:])
+        probe("und eine Beurteilung, die älter ist als der Text",
+              "gelesen am" in r.stdout, r.stdout[-500:])
+        probe("mit Befund endet der Lauf mit 1", r.returncode == 1)
+        r = lauf(os.path.join(BIN, "hk-kontinuitaet"), erz, "--richten")
+        abend = io.open(os.path.join(erz, WIKI, "Texts", "abend.md"),
+                        encoding="utf-8").read()
+        probe("--richten zieht die Liste dem Body nach",
+              '- "[[40-Wiki/Characters/figur|Eine Figur]]"' in abend,
+              abend[:300])
+        r = lauf(os.path.join(BIN, "hk-kontinuitaet"), erz)
+        probe("danach bleibt nur, was ein Mensch entscheidet",
+              "Abgeleitete Listen (0)" in r.stdout, r.stdout[-400:])
+        r = lauf(os.path.join(BIN, "hk-lint"), erz)
+        probe("die Ablage bleibt konform", r.returncode == 0,
+              (r.stdout + r.stderr)[-400:])
+        shutil.rmtree(os.path.dirname(erz), ignore_errors=True)
+        shutil.rmtree(os.path.dirname(lief_erz), ignore_errors=True)
+
         print("Die Hooks: der Kanon kommt aus der Sitzung, nicht aus der Ablage")
         p_hooks = os.path.join(WURZEL, "hooks", "hooks.json")
         try:
