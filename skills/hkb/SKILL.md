@@ -21,14 +21,26 @@ Spezifikation ein Urteil verlangt, und schreibst das Urteil auf.
 
 ## Wo die Ablage liegt
 
-`$HKB_PATH`, sonst `~/hkb`. Jeder Befehl nimmt einen Pfad als letztes
-Argument, wenn es eine andere sein soll. **Nirgends einen Pfad festschreiben**
-— auch nicht in einem Beispiel.
+Fünf Stufen, in dieser Reihenfolge: der Aufruf, `HKB_PATH`, die gemerkte Wahl,
+eine Aufwärtssuche ab dem Arbeitsverzeichnis, die Vorgabe `~/hkb`.
+**Nirgends einen Pfad festschreiben**, auch nicht in einem Beispiel.
 
 ```bash
-hk-lint                      # die Ablage aus $HKB_PATH
+hk-ablage                    # welche Ablage gilt und woher der Pfad kommt
+hk-ablage --liste            # was zur Wahl steht
+hk-lint                      # die aktive Ablage
 hk-lint /pfad/zur/ablage     # eine andere
 ```
+
+**Fang eine Sitzung mit `hk-ablage` an**, wenn nicht ohnehin klar ist, worin
+gearbeitet wird. Liegen mehrere Ablagen nebeneinander, wählt niemand für dich,
+und die Vorgabe `~/hkb` wäre geraten. Nennt der Benutzer eine Ablage, merk sie
+mit `hk-ablage <pfad>`, dann findet jeder weitere Befehl sie von selbst.
+
+Drei Wurzeldateien. `hkb.md` heißt Wissensbasis, `hbundle.md` heißt Lieferung,
+`vault.md` heißt gewöhnlicher Obsidian-Vault. Im dritten Fall gelten die
+Schreibregeln und die Suche, aber nichts, was Typen und qualifizierte Verweise
+voraussetzt.
 
 Bevor du etwas tust: `hkb.md` lesen — dort stehen `name`, die vier
 Bereiche, `timezone` und die Typtabelle. Führt die Ablage den Typ `hint`,
@@ -46,9 +58,32 @@ hat, und das geht den sieben Regeln vor, wo es sie berührt.
 | `hk-tranchen <quellennotiz>` | führt die Tranchen einer großen Quelle: `--anlegen`, `--naechste`, `--abhaken` |
 | `hk-lint [--fix] [--strict]` | prüft eine Wissensbasis oder eine Lieferung (§6.3) |
 | `hk-types [--umstellen]` | legt Typseiten und Bases an, damit `type` ein Verweis sein kann (§3.3) |
+| `hk-ablage [<pfad>]` | welche Ablage bearbeitet wird: `--liste`, `<pfad>` merkt, `--loeschen` nimmt zurück |
+| `hk-text [--gate]` | prüft deutschsprachige Texte gegen die Schreibregeln |
 
 `hk-import --check` und `hk-lint` ohne `--fix` schreiben nichts. **Fang immer
 damit an.**
+
+## Die Schreibregeln gelten auch hier
+
+Eine Notiz ist deutscher Fließtext, und dafür gibt es Regeln. Sie stehen im
+Basissatz `rules/deutsch.json` des Harness und gelten für jede Ablage: keine
+Gedankenstriche, keine Strichpunkte, keine Umlaut-Ersatzformen, dazu Warnungen
+zu Satzlänge, Wortwahl und Schlussfloskeln.
+
+```bash
+hk-text <datei|verzeichnis>       # Bericht, endet immer mit 0
+hk-text --gate <datei>            # endet mit 1, sobald ein Fehler auftritt
+```
+
+**Prüf, was du geschrieben hast, bevor du es stehen lässt.** Ein Fehler
+blockiert, eine Warnung nicht. Nicht geprüft werden Code, Linkziele und
+Bezeichner. Ebenso wenig der Em-Dash dort, wo das Format ihn verlangt: als
+Trenner in `# Siehe auch` (§5.6) und als leere Vorgabe in einer
+Property-Tabelle (§3.7).
+
+Was **diese** Ablage darüber hinaus festgelegt hat, steht in ihren
+`hint`-Notizen als `json`-Block mit dem Schlüssel `writing_policy`.
 
 ## Die sieben Regeln
 

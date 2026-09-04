@@ -35,16 +35,39 @@ nebenan; was hier liegt, ist eine Art, es zu tun.
 
 ## Die Ablage wird nicht geraten
 
-Kein Werkzeug hier kennt einen festen Pfad. Es nimmt, was im Aufruf steht,
-sonst `HKB_PATH`, sonst `~/hkb` — und bricht ab, wenn dort keine `hkb.md`
-liegt.
+Kein Werkzeug hier kennt einen festen Pfad. Es fragt in fünf Stufen und bricht
+ab, wenn am Ende keine Wurzeldatei liegt.
+
+| Stufe | Woher |
+|---|---|
+| 1 | der Aufruf, als letztes Argument |
+| 2 | `HKB_PATH` aus der Umgebung |
+| 3 | die gemerkte Wahl, siehe `hk-ablage` |
+| 4 | eine Aufwärtssuche ab dem Arbeitsverzeichnis |
+| 5 | die Vorgabe `~/hkb` |
+
+Jede Fehlermeldung nennt die Stufe, aus der ihr Pfad stammt. Stufe 4 deckt den
+Fall ab, dass eine Sitzung in einer Ablage startet, dann ist nichts zu wählen.
+Liegen mehrere Ablagen nebeneinander, greift Stufe 3.
 
 ```bash
-export HKB_PATH=~/wissen
 export PATH="$PATH:$(pwd)/bin"
 
-hk-lint
+hk-ablage --liste          # was zur Wahl steht
+hk-ablage ~/wissen         # gemerkt für dieses Arbeitsverzeichnis
+hk-lint                    # nimmt sie ohne Argument
 ```
+
+Gemerkt wird auf der Platte, unter `~/.cache/hkf-harness/ablagen.json`, und
+geschlüsselt nach Arbeitsverzeichnis. Der Grund ist eine Eigenheit der
+Werkzeugumgebung: Ein `export HKB_PATH` in einem Aufruf überlebt den Aufruf
+nicht. Zwischen zwei Aufrufen bleibt das Arbeitsverzeichnis, sonst nichts.
+Zwei Sitzungen an verschiedenen Ablagen stellen sich so nicht gegenseitig um.
+
+Die Wurzeldatei sagt auch, womit man es zu tun hat. `hkb.md` heißt
+Wissensbasis, `hbundle.md` heißt Lieferung, und `vault.md` heißt: ein
+gewöhnlicher Obsidian-Vault, für den die Schreibregeln und die Suche gelten,
+aber keine Operation, die Typen und qualifizierte Verweise voraussetzt.
 
 Python bringt der Harness selbst mit; `./bootstrap-python.sh` baut die venv,
 und jedes Werkzeug startet sich darunter neu. Wer das nicht will, braucht
@@ -61,6 +84,8 @@ Python 3 und PyYAML.
 | `hk-ingest [<stück>]` | liest eine Quelle ein: Typ feststellen, Ausfertigung ablegen oder verzeichnen, `sha256` bilden, Quellennotiz und `hbundle.md` schreiben, die Lücken melden. Mit `--hkb` gleich importieren | **läuft** |
 | `hk-tranchen <quellennotiz>` | führt die Tranchen einer großen Quelle im Abschnitt `# Tranchen` der Quellennotiz: `--anlegen` legt die Liste an, `--naechste` sagt, welche dran ist, `--abhaken` schreibt eine fest | **läuft** |
 | `hk-types [--umstellen]` | legt Typseiten und Bases an, damit `type` ein Verweis sein darf (§3.3) | **läuft** |
+| `hk-ablage [<pfad>]` | sagt, welche Ablage bearbeitet wird, und merkt eine Wahl für dieses Arbeitsverzeichnis. `--liste` zeigt, was zur Wahl steht | **läuft** |
+| `hk-text [--gate] [--rhythm]` | prüft deutschsprachige Texte gegen die Schreibregeln. `--gate` blockiert, der Bericht nicht | **läuft** |
 
 Was geprüft wird, entscheidet die Wurzeldatei: `hkb.md` heißt Wissensbasis,
 `hbundle.md` heißt Lieferung. §6.3 gilt für beide, mit den Unterschieden aus §4
@@ -150,8 +175,10 @@ nicht.
 spec/        die Fassung, die dieser Harness umsetzt
 lib/hkf/     ablage, frontmatter, schema, grammatik, pruefen, korrigieren,
              importieren, exportieren, einlesen, notiz, vorlage, fassung
+lib/hkf/text/ der Schreibregelprüfer: segment, engine, rules, rhythm_lint
+rules/       deutsch.json, der Basissatz der Schreibregeln
 bin/         hk-init, hk-lint, hk-import, hk-export, hk-ingest,
-             hk-tranchen, hk-types
+             hk-tranchen, hk-types, hk-ablage, hk-text
 py           das Python des Harness — baut die venv und startet sie
 tools/       spec.py hält die Kopie unter spec/ auf Stand,
              grundausstattung.py die Vorlage gegen Anhang A und §3.5.1

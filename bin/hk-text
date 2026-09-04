@@ -1,0 +1,105 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""hk-text — deutschsprachige Texte gegen die Schreibregeln pruefen.
+
+    hk-text [pfad...]            Bericht, endet immer mit 0
+    hk-text --gate [pfad...]     endet mit 1, sobald ein Fehler auftritt
+    hk-text --rhythm [pfad...]   Rhythmus-Signale statt Regelbefunde
+
+Ohne Pfad gilt die aktive Ablage (siehe `hk-ablage`). Ein Pfad ist eine Datei
+oder ein Verzeichnis; Verzeichnisse werden rekursiv nach `.md` durchsucht.
+
+Rueckgabewerte:
+
+    0   keine Befunde, oder nur Warnungen
+    1   mindestens ein Fehler — nur bei --gate
+    2   Betriebsfehler: unlesbare Datei, kaputter Regelsatz, kein Pfad
+
+Der Bericht endet immer mit 0. `--gate` ist die einzige Form, die ueber den
+Rueckgabewert blockiert. Das haelt den Bericht vom Urteil getrennt und macht
+den Gate zur einzigen Stelle, an der etwas scheitert.
+
+Zwei Regelquellen. Der Basissatz `rules/deutsch.json` gilt fuer jede Ablage.
+Was **diese** Ablage fuer sich festgelegt hat, steht als Notiz vom Typ `hint`
+darin, als `json`-Block mit dem Schluessel `writing_policy`.
+
+Nicht geprueft werden Code, Linkziele, nackte Adressen, Bezeichner im
+Frontmatter und Callouts mit dem Praefix `ai-`. Ebenso wenig der Em-Dash dort,
+wo HKF Core ihn verlangt: als Trenner in `# Siehe auch` (§5.6) und als leere
+Vorgabe in einer Property-Tabelle (§3.7).
+"""
+import os, sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
+from hkf import ablage, text as textmodul   # noqa: E402
+from hkf.text import rules   # noqa: E402
+
+OK, BLOCKIERT, KAPUTT = 0, 1, 2
+
+
+def main(argv):
+    if "--help" in argv or "-h" in argv:
+        print(__doc__.strip()); return 0
+    gate = "--gate" in argv
+    rhythmus = "--rhythm" in argv
+    pfade = [a for a in argv if not a.startswith("-")]
+
+    if not pfade:
+        try:
+            pfad, woher = ablage.aufloesen()
+        except ablage.KeineAblage as e:
+            sys.stderr.write(str(e) + "\n"); return KAPUTT
+        if not ablage.art_von(pfad):
+            sys.stderr.write("%s: dort liegt keine Ablage.\nDer Pfad kommt aus "
+                             "%s.\nEinen Pfad angeben oder mit `hk-ablage` "
+                             "waehlen.\n" % (pfad, woher))
+            return KAPUTT
+        pfade = [pfad]
+
+    if rhythmus:
+        from hkf.text import rhythm_lint
+        return rhythm_lint.main(pfade)
+
+    try:
+        dateien = textmodul.sammeln(pfade)
+    except OSError as e:
+        sys.stderr.write("FEHLER: %s\n" % e); return KAPUTT
+    if not dateien:
+        print("Keine Markdown-Datei gefunden."); return OK
+
+    wurzel = textmodul.wurzel_von(dateien)
+    try:
+        regelsaetze = textmodul.laden(wurzel)
+        befunde = textmodul.pruefen(dateien, wurzel, regelsaetze)
+    except rules.RuleError as e:
+        sys.stderr.write("FEHLER: %s\n" % e); return KAPUTT
+    except (OSError, UnicodeDecodeError) as e:
+        sys.stderr.write("FEHLER: %s\n" % e); return KAPUTT
+
+    _bericht(befunde, len(dateien), wurzel)
+
+    if gate and textmodul.fehler_darin(befunde):
+        anzahl = sum(1 for b in befunde if b.severity == "error")
+        sys.stderr.write("\nFEHLER: %d blockierende Befunde. Keine Freigabe.\n"
+                         % anzahl)
+        return BLOCKIERT
+    return OK
+
+
+def _bericht(befunde, gelesen, wurzel):
+    if wurzel is None:
+        sys.stderr.write("Hinweis: keine Ablage gefunden, es gilt nur der "
+                         "Basissatz.\n\n")
+    letzte = None
+    for b in befunde:
+        if b.path != letzte:
+            print("\n%s" % b.path); letzte = b.path
+        print("  %s:%s [%s] %s: %s" % (b.line, b.column, b.severity, b.check,
+                                       b.message))
+    fehler = sum(1 for b in befunde if b.severity == "error")
+    print("%s%d Dateien geprüft, %d Fehler, %d Warnungen."
+          % ("\n" if befunde else "", gelesen, fehler, len(befunde) - fehler))
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

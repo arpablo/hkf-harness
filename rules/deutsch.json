@@ -1,0 +1,76 @@
+{
+  "writing_policy": {
+    "version": 1,
+    "checks": {
+      "forbidden_characters": {
+        "severity": "error",
+        "characters": ["—", "–", "­", "​", "﻿"]
+      },
+      "forbidden_punctuation": {
+        "severity": "error",
+        "characters": [";"]
+      },
+      "umlaut_replacements": {
+        "severity": "error",
+        "stems": [
+          "fuer", "fuehr", "fuehl", "ueber", "gegenueber", "darueber", "uebung",
+          "ueblich", "ausueb", "koenn", "moegl", "moecht", "muess", "duerf",
+          "beduerf", "wuerd", "natuerl", "urspruengl", "zusaetzl", "zustaend",
+          "beruecksicht", "ueberschrift", "kuerz", "kuenft", "buech", "buero",
+          "frueh", "gruend", "gefuehl", "pruef", "schluess", "spruech", "stueck",
+          "glueck", "guelt", "wuensch", "verfueg", "naeml", "waehr", "waehl",
+          "zaehl", "erzaehl", "spaet", "naechst", "taegl", "maessig", "gemaess",
+          "gefaess", "laesst", "haeng", "anhaeng", "haett", "waer", "erklaer",
+          "ungefaehr", "regelmaess", "vollstaend", "staerk", "plaene", "raeume",
+          "baeume", "haeuser", "laender", "laeng", "aender", "abhaeng",
+          "unabhaeng", "faehig", "taetig", "haeuf", "gebaeud", "naehe", "jaehr",
+          "qualitaet", "gehoer", "zugehoer", "behoerd", "hoer", "hoehe",
+          "schoen", "groess", "oeffn", "oeffentl", "koerper", "moeglich",
+          "vermoeg", "foerder", "zerstoer", "woert", "voellig", "loesung",
+          "loesch", "stoer", "noetig", "boes", "troest", "hoechst", "ausserhalb",
+          "ausserdem", "blosse", "strasse", "grosse", "heiss", "gruss",
+          "draussen", "massnahme", "massgeb", "schliess", "fliess", "reissen",
+          "stossen"
+        ],
+        "exceptions": [
+          "Preissenkung", "Preissenkungen", "Preissenkungspolitik",
+          "Fuerteventura", "Hoechst", "Theiss", "Bahnhofstrasse"
+        ]
+      },
+      "forbidden_phrases": {
+        "severity": "warning",
+        "phrases": [
+          "darüber hinaus", "zudem", "ferner", "letztendlich",
+          "im Grunde genommen", "beleuchten", "dynamische Landschaft",
+          "nicht nur", "sondern auch",
+          "fungiert als", "Beobachter sagen", "Experten argumentieren",
+          "in der heutigen Zeit", "im digitalen Zeitalter", "am Ende des Tages",
+          "es ist wichtig zu verstehen", "an dieser Stelle sei erwähnt",
+          "wichtig zu erwähnen", "Zeugnis ablegen"
+        ]
+      },
+      "forbidden_stems": {
+        "severity": "warning",
+        "stems": [
+          "entscheidend", "wesentlich", "nachhaltig", "ganzheitlich",
+          "vielschichtig", "pulsierend", "reichhaltig", "meisterhaft",
+          "bahnbrechend", "nahtlos", "hervorheb", "eintauch", "Wechselspiel"
+        ],
+        "exceptions": [
+          "Nachhaltigkeit"
+        ]
+      },
+      "sentence_length": {
+        "severity": "warning",
+        "maximum_words": 35
+      },
+      "structural_phrases": {
+        "severity": "warning",
+        "phrases": [
+          "abschließend", "zusammenfassend", "kurz gesagt", "Fazit", "Ausblick",
+          "Dieses Thema ist komplex"
+        ]
+      }
+    }
+  }
+}

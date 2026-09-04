@@ -20,6 +20,13 @@ def lauf(*args, **kw):
     return subprocess.run(list(args), capture_output=True, text=True, **kw)
 
 
+def _schreib(pfad, inhalt):
+    ordner = os.path.dirname(pfad)
+    if ordner and not os.path.isdir(ordner):
+        os.makedirs(ordner)
+    io.open(pfad, "w", encoding="utf-8").write(inhalt)
+
+
 def probe(name, bedingung, hinweis=""):
     print("  %-52s %s" % (name, "ok" if bedingung else "FEHLT"))
     if not bedingung:
@@ -385,6 +392,145 @@ def main():
         ohne = sorted(b for b in befehle
                       if not os.path.exists(os.path.join(BIN, b)))
         probe("jeder genannte Befehl liegt in bin/", not ohne, ", ".join(ohne))
+
+        # Bis hierher stand nur die Skillseite unter Aufsicht. Ein Agent, den
+        # ein Skill ruft, konnte fehlen, ohne dass es auffiel — und ein Verweis
+        # auf einen Agenten, den es nicht gibt, ist genau der Fehler, der sich
+        # beim Zusammenlegen zweier Bestaende fortpflanzt.
+        ordner = os.path.join(WURZEL, "agents")
+        agenten = sorted(d[:-3] for d in os.listdir(ordner)
+                         if d.endswith(".md"))
+        probe("es gibt Agenten", len(agenten) >= 1, ", ".join(agenten))
+        maengel = []
+        for name in agenten:
+            t_ag = io.open(os.path.join(ordner, name + ".md"),
+                           encoding="utf-8").read()
+            kopf = t_ag.split("---")[1] if t_ag.startswith("---") else ""
+            for feld in ("name: %s" % name, "description:", "tools:", "model:"):
+                if feld not in kopf:
+                    maengel.append("%s: %s" % (name, feld.rstrip(":")))
+        probe("jeder hat Frontmatter mit name, description, tools, model",
+              not maengel, ", ".join(maengel))
+        gerufen = set()
+        for name in namen:
+            t_sk = io.open(os.path.join(skills, name, "SKILL.md"),
+                           encoding="utf-8").read()
+            gerufen |= set(re.findall(r"(?:Subagenten|Agenten)\s+`?([a-z][a-z0-9-]*)`?",
+                                      t_sk))
+        unbekannt = sorted(g for g in gerufen if g not in agenten)
+        probe("jeder von einem Skill gerufene Agent liegt in agents/",
+              not unbekannt, ", ".join(unbekannt))
+
+        print("hk-text: die Schreibregeln gelten auch in einer Ablage")
+        r = lauf(os.path.join(BIN, "hk-text"), "--help")
+        probe("das Werkzeug laeuft", r.returncode == 0, r.stdout + r.stderr)
+        muster = os.path.join(ziel, WIKI, "Notes", "probe.md")
+        _schreib(muster, """---
+type: note
+name: Probe
+created: 2026-01-01
+---
+
+# Zweck
+
+Ein Satz mit einem Gedankenstrich \u2014 der ist verboten.
+
+| Property | Vorgabe | Zweck |
+|---|---|---|
+| `name` | \u2014 | Der Name; mit Strichpunkt. |
+
+# Siehe auch
+
+- [[40-Wiki/Notes/anderes|Anderes]] \u2014 der Grund steht hier.
+""")
+        r = lauf(os.path.join(BIN, "hk-text"), muster)
+        probe("der Bericht endet mit 0", r.returncode == 0, r.stdout + r.stderr)
+        probe("der Gedankenstrich im Fliesstext ist ein Fehler",
+              "7:35" in r.stdout or "Em-Dash" in r.stdout, r.stdout)
+        probe("der Strichpunkt in der Tabelle auch",
+              "forbidden_punctuation" in r.stdout, r.stdout)
+        probe("die leere Vorgabe `\u2014` ist keiner (§3.7)",
+              r.stdout.count("Em-Dash") == 1, r.stdout)
+        probe("der Trenner in `# Siehe auch` auch nicht (§5.6)",
+              r.stdout.count("Em-Dash") == 1, r.stdout)
+        r = lauf(os.path.join(BIN, "hk-text"), "--gate", muster)
+        probe("--gate endet mit 1", r.returncode == 1, r.stdout + r.stderr)
+        os.remove(muster)
+        r = lauf(os.path.join(BIN, "hk-text"), "--gate",
+                 os.path.join(ziel, WIKI))
+        probe("eine frische Ablage kommt durch den Gate",
+              r.returncode == 0, r.stdout + r.stderr)
+        # Was **diese** Ablage fuer sich festlegt, steht als Notiz vom Typ
+        # `hint` darin (Harness §7). Der Lader kennt json-Bloecke in Markdown
+        # schon, es braucht dafuer keine zweite Mechanik.
+        _schreib(os.path.join(ziel, WIKI, "Hints", "schreibregeln.md"), """---
+type: hint
+name: Schreibregeln dieser Ablage
+created: 2026-01-01
+---
+
+# Zweck
+
+Diese Ablage verbietet ein Wort mehr als der Basissatz.
+
+```json
+{"writing_policy": {"version": 1, "checks": {
+  "forbidden_stems": {"severity": "error", "stems": ["Zeitenwende"]}}}}
+```
+""")
+        _schreib(muster, """---
+type: note
+name: Probe
+created: 2026-01-01
+---
+
+# Zweck
+
+Die Zeitenwende kam, und mit ihr eine entscheidende Frage.
+""")
+        r = lauf(os.path.join(BIN, "hk-text"), muster)
+        probe("eine `hint`-Notiz steuert eigene Regeln bei",
+              "Zeitenwende" in r.stdout, r.stdout)
+        probe("der Basissatz gilt daneben weiter",
+              "entscheidende" in r.stdout, r.stdout)
+        os.remove(muster)
+        # Die Probe raeumt hinter sich auf. Was sie stehen liesse, faende die
+        # naechste als Befund wieder.
+        shutil.rmtree(os.path.join(ziel, WIKI, "Hints"))
+
+        for name in ("test_deutsch", "test_engine", "test_rules",
+                     "test_segment"):
+            r = lauf(sys.executable,
+                     os.path.join(WURZEL, "test", "text", name + ".py"))
+            probe("%s laeuft durch" % name, r.returncode == 0,
+                  (r.stdout + r.stderr)[-400:])
+
+        print("hk-ablage: welche Ablage bearbeitet wird")
+        wahl = os.path.join(ziel, "wahl.json")
+        umgebung = dict(os.environ, HKF_WAHL=wahl)
+        umgebung.pop("HKB_PATH", None)
+        r = lauf(os.path.join(BIN, "hk-ablage"), ziel, env=umgebung, cwd=ziel)
+        probe("eine Ablage laesst sich waehlen", r.returncode == 0,
+              r.stdout + r.stderr)
+        probe("die Wahl steht auf der Platte", os.path.isfile(wahl))
+        r = lauf(os.path.join(BIN, "hk-ablage"), env=umgebung, cwd=ziel)
+        probe("und gilt beim naechsten Aufruf",
+              "der gemerkten Wahl" in r.stdout, r.stdout)
+        r = lauf(os.path.join(BIN, "hk-lint"), env=umgebung, cwd=ziel)
+        probe("hk-lint nimmt sie ohne Argument", r.returncode == 0,
+              (r.stdout + r.stderr)[-300:])
+        oben = os.path.dirname(ziel)
+        r = lauf(os.path.join(BIN, "hk-ablage"), "--liste", env=umgebung,
+                 cwd=oben)
+        probe("--liste zeigt, was danebenliegt",
+              os.path.basename(ziel) in r.stdout, r.stdout)
+        r = lauf(os.path.join(BIN, "hk-ablage"), "--loeschen", env=umgebung,
+                 cwd=ziel)
+        probe("die Wahl laesst sich zuruecknehmen", r.returncode == 0,
+              r.stdout + r.stderr)
+        r = lauf(os.path.join(BIN, "hk-ablage"), env=umgebung, cwd=ziel)
+        probe("dann gilt wieder das Arbeitsverzeichnis",
+              "dem Arbeitsverzeichnis" in r.stdout, r.stdout)
 
         print("Fassung")
         r = lauf(sys.executable, os.path.join(WURZEL, "tools", "grundausstattung.py"))
