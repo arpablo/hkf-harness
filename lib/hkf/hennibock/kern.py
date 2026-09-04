@@ -623,10 +623,25 @@ def strip_callouts_and_verbindungen(body: str) -> str:
 
 
 def strip_wikilink(text: str) -> str:
+    """Der Stem, auf den ein Wikilink zeigt, ohne Alias, Anker und Pfad.
+
+    Der Pfad faellt weg, weil jeder Aufrufer den Stem braucht: der Notiz-Index
+    ist ueber Stems gefuehrt, und `publikationen_der_notiz` vergleicht gegen
+    `path.stem`. In einem gewachsenen Obsidian-Vault stehen kurze Verweise und
+    beides ist dasselbe. In einer HKB nicht: HKF Core §3.6 macht den
+    qualifizierten Verweis zur Pflicht, und ohne diesen Schnitt findet dort
+    kein Kapitel mehr seine Publikation und keine Publikation mehr ihre
+    Kapitel. Der Fehler faellt nicht auf, er liefert nur leere Mengen.
+
+    Dass der Stem allein genuegt, ist keine Verkuerzung: derselbe §3.6 macht
+    einen mehrdeutigen Verweis zum Fehler, ein Stem ist also ablageweit
+    eindeutig.
+    """
     t = text.strip()
     if t.startswith("[[") and t.endswith("]]"):
         t = t[2:-2]
-    return t.split("|", 1)[0].split("#", 1)[0].strip()
+    t = t.split("|", 1)[0].split("#", 1)[0].strip()
+    return t.rsplit("/", 1)[-1]
 
 
 def is_skipped(index, stem: str) -> bool:

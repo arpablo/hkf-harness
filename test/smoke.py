@@ -8,6 +8,7 @@ Kein Testrahmen, keine Fremdpakete. Der Lauf endet mit 0, wenn alle Proben
 zutreffen, sonst mit 1 und einer Zeile pro Fehlschlag.
 """
 import glob
+import pathlib
 import io
 import json, os, re, shutil, subprocess, sys, tempfile
 
@@ -1286,6 +1287,47 @@ Ein kurzer Text.
                   (r.stdout + r.stderr)[-200:])
         shutil.rmtree(os.path.dirname(hb), ignore_errors=True)
         shutil.rmtree(os.path.dirname(lief_hb), ignore_errors=True)
+
+        # HKF Core §3.6 macht den qualifizierten Verweis zur Pflicht. Der
+        # Publisher fuehrt seinen Notiz-Index aber ueber Stems und vergleicht
+        # gegen `path.stem`. Solange `strip_wikilink` den Pfad stehen liess,
+        # fand in einer HKB kein Kapitel mehr seine Publikation, und zwar
+        # lautlos: die Menge kam leer zurueck, nicht falsch.
+        print("hk-publish: der qualifizierte Verweis (§3.6) fuehrt auf den Stem")
+        sys.path.insert(0, os.path.join(WURZEL, "lib"))
+        try:
+            from hkf.hennibock import kern as _hbkern
+        except Exception as e:
+            probe("kern ist importierbar", False, str(e))
+            _hbkern = None
+        if _hbkern is not None:
+            probe("ein qualifizierter Verweis wird auf den Stem gekuerzt",
+                  _hbkern.strip_wikilink(
+                      "[[50 Output/Texts/Kap - Eins|Kap - Eins]]") == "Kap - Eins",
+                  _hbkern.strip_wikilink("[[50 Output/Texts/Kap - Eins|Kap - Eins]]"))
+            probe("ein kurzer Verweis bleibt, was er ist",
+                  _hbkern.strip_wikilink("[[Kap - Eins]]") == "Kap - Eins",
+                  _hbkern.strip_wikilink("[[Kap - Eins]]"))
+            pubdatei = os.path.join(ziel, WIKI, "Pubs", "pub.md")
+            _schreib(pubdatei, """---
+type: publication
+name: Ein Werk
+created: 2026-01-01
+---
+
+1. [[50 Output/Texts/Kap - Eins|Kap - Eins]]
+2. [[Kap - Zwei]]
+
+## Verbindungen
+
+- [[40-Wiki/Sources/quelle|Eine Quelle]]
+""")
+            ordnung = _hbkern.publication_order(pathlib.Path(pubdatei))
+            probe("das Inhaltsverzeichnis liefert beide Kapitel als Stem",
+                  ordnung == ["Kap - Eins", "Kap - Zwei"], repr(ordnung))
+            probe("`## Verbindungen` zaehlt nicht als Kapitel",
+                  "quelle" not in ordnung, repr(ordnung))
+            os.remove(pubdatei)
 
         print("Die Hooks: der Kanon kommt aus der Sitzung, nicht aus der Ablage")
         p_hooks = os.path.join(WURZEL, "hooks", "hooks.json")
