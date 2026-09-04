@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""hk-kontext — was in dieser Ablage gilt.
+
+    hk-kontext [pfad]        alles: Lage, Kanon, Stimme, Hinweise
+    hk-kontext --stimme      nur das Stimmprofil
+    hk-kontext --hinweise    nur die `hint`-Notizen der Ablage
+    hk-kontext --lage        nur, welche Ablage aktiv ist und woher
+
+Dasselbe, was der SessionStart-Hook zu Beginn einer Sitzung einspielt.
+
+Der Aufruf ist fuer einen Subagenten gedacht. Er laeuft in seinem eigenen
+Kontext und sieht nicht, was die Hauptsitzung bekommen hat — wer nach einer
+Stimme schreiben soll, muss sie lesen koennen. Ein Mensch kann damit auch
+nachsehen, was gerade gilt.
+
+**Nichts wird dabei geschrieben.**
+"""
+import os, sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
+from hkf import ablage, kontext   # noqa: E402
+
+TEILE = ("lage", "kanon", "stimme", "hinweise")
+
+
+def main(argv):
+    if "--help" in argv or "-h" in argv:
+        print(__doc__.strip()); return 0
+    gewaehlt = tuple(t for t in TEILE if "--" + t in argv) or TEILE
+    args = [a for a in argv if not a.startswith("-")]
+    try:
+        text, _pfad, art = kontext.zusammensetzen(args[0] if args else None,
+                                                  gewaehlt)
+    except ablage.KeineAblage as e:
+        sys.stderr.write(str(e) + "\n"); return 2
+    print(text)
+    return 0 if art else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

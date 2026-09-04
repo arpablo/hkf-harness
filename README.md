@@ -89,6 +89,7 @@ Python 3 und PyYAML.
 | `hk-install [--check]` | hängt den Harness als Plugin unter `~/.claude/skills/hkf` ein und räumt die alten Zeiger weg | **läuft** |
 | `hk-suche <muster>` | findet Notizen: Volltext, `--typ`, `--hat`, `--verweist-auf`, `--fundstellen` | **läuft** |
 | `hk-erwaehnungen <ziel>` | macht unverlinkte Erwähnungen einer Notiz zu qualifizierten Verweisen | **läuft** |
+| `hk-kontext [--stimme]` | gibt aus, was in dieser Ablage gilt: Lage, Kanon, Stimme, Hinweise | **läuft** |
 
 Was geprüft wird, entscheidet die Wurzeldatei: `hkb.md` heißt Wissensbasis,
 `hbundle.md` heißt Lieferung. §6.3 gilt für beide, mit den Unterschieden aus §4
@@ -182,13 +183,13 @@ lib/hkf/text/ der Schreibregelprüfer: segment, engine, rules, rhythm_lint
 rules/       deutsch.json, der Basissatz der Schreibregeln
 bin/         hk-init, hk-lint, hk-import, hk-export, hk-ingest,
              hk-tranchen, hk-types, hk-ablage, hk-text, hk-install,
-             hk-suche, hk-erwaehnungen
+             hk-suche, hk-erwaehnungen, hk-kontext
 py           das Python des Harness — baut die venv und startet sie
 tools/       spec.py hält die Kopie unter spec/ auf Stand,
              grundausstattung.py die Vorlage gegen Anhang A und §3.5.1
 templates/   die Grundausstattung, aus der hk-init schöpft
 skills/      die KI-Schicht: hkb und sieben Operationen, siehe skills/README.md
-agents/      die Subagenten, die für einen Skill lesen — wilma
+agents/      die Subagenten: wilma liest, marlene schreibt, astrid lektoriert
 commands/    die Slash-Kommandos, siehe hk-install
 hooks/       sitzung.py spielt den Kanon ein, schreibregeln.py blockt
 core/        der Kanon: Identität, Zusammenarbeit, Sprache, Schreibregeln, YAML
@@ -261,12 +262,19 @@ setzen ihn voraus: [`hkb-notiz`](skills/hkb-notiz/SKILL.md),
 [`hkb-lint`](skills/hkb-lint/SKILL.md),
 [`hkb-quelle`](skills/hkb-quelle/SKILL.md).
 
-Unter [`agents/`](agents/) liegt daneben ein Subagent:
+Unter [`agents/`](agents/) liegen drei Subagenten.
 [`wilma`](agents/wilma.md) liest eine Quelle in ihrem eigenen Kontext und gibt
 ein belegtes Destillat zurück. `hkb-quelle` ruft sie und liest nie selbst —
 wer ein Buch im laufenden Gespräch liest, hat es danach im Rücken, und die
 Notizen aus den letzten Kapiteln werden flacher als die aus den ersten. Ein
 Agent liest, er schreibt nicht; für die Regel oben ändert er nichts.
+
+[`marlene`](agents/marlene.md) schreibt die Erstfassung eines längeren
+Sachtextes, [`astrid`](agents/astrid.md) lektoriert ihn. Beide schreiben in die
+Ablage, und für sie gilt dieselbe Regel wie für einen Skill: Was mechanisch
+geht, messen sie mit `hk-text` und `hk-lint`, statt danach zu urteilen. Ihre
+Stimme holen sie sich mit `hk-kontext` — ein Subagent sieht nicht, was die
+Hauptsitzung bekommen hat.
 
 **Damit ein Modell sie findet**, ist der Harness ein Plugin. Das Manifest steht
 in `.claude-plugin/`, die Bausteine liegen an der Wurzel: `skills/`, `agents/`,

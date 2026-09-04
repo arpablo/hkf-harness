@@ -715,6 +715,15 @@ Hier steht [[40-Wiki/Persons/ada-lovelace|Ada Lovelace]] schon verlinkt.
         umg.pop("HKB_PATH", None)
         sitzung = os.path.join(WURZEL, "hooks", "sitzung.py")
         vorher = _abbild(ziel)
+        # Ein Subagent laeuft in seinem eigenen Kontext und sieht nicht, was
+        # die Sitzung bekommen hat. `hk-kontext` gibt ihm denselben Text.
+        r = lauf(os.path.join(BIN, "hk-kontext"), "--stimme", ziel, env=umg)
+        probe("hk-kontext gibt die Stimme aus",
+              "Voice-Profil" in r.stdout, r.stdout[:200])
+        r = lauf(os.path.join(BIN, "hk-kontext"), "--lage", ziel, env=umg)
+        probe("und die Lage, ohne den ganzen Kanon",
+              ziel in r.stdout and "Zusammenarbeit" not in r.stdout,
+              r.stdout[:200])
         r = lauf(os.path.join(WURZEL, "py"), sitzung, input='{"cwd": "%s"}' % ziel,
                  env=umg)
         try:
