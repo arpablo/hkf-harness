@@ -1,0 +1,134 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""hk-epub — aus einem Manuskript ein EPUB bauen.
+
+    hk-epub <publikation> [pfad]     baut, was `hk-buch` geschrieben hat
+    hk-epub <publikation> --neu      schreibt das Manuskript vorher neu
+    hk-epub <publikation> --ziel <datei>
+
+Braucht `pandoc`. Ohne das Programm endet der Lauf mit einer Meldung, die
+sagt, was fehlt — nicht mit einem Fehlschlag mitten im Bau.
+
+Das Titelbild kommt aus `cover` der Publikation, wenn es dort steht.
+
+Ein EPUB ist ein Erzeugnis. Es liegt unter `<media_base>/Documents/` und
+gehoert nicht in die Versionsverwaltung: Es laesst sich jederzeit neu bauen,
+und es ist gross.
+"""
+import os, re, shutil, subprocess, sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
+from hkf import ablage, pruefen   # noqa: E402
+
+ORTE = ("/opt/homebrew/bin/pandoc", "/usr/local/bin/pandoc")
+
+
+def _wert(argv, name):
+    if name in argv:
+        i = argv.index(name)
+        if i + 1 < len(argv):
+            return argv[i + 1]
+    return None
+
+
+def pandoc():
+    p = shutil.which("pandoc")
+    if p:
+        return p
+    for ort in ORTE:
+        if os.path.isfile(ort) and os.access(ort, os.X_OK):
+            return ort
+    return None
+
+
+def main(argv):
+    if "--help" in argv or "-h" in argv:
+        print(__doc__.strip()); return 0
+    programm = pandoc()
+    if not programm:
+        sys.stderr.write(
+            "`pandoc` ist nicht da. Es baut das EPUB, der Harness ruft es nur.\n"
+            "  → brew install pandoc\n")
+        return 2
+
+    ziel_datei = _wert(argv, "--ziel")
+    neu = "--neu" in argv
+    args, ueberspringen = [], False
+    for a in argv:
+        if ueberspringen:
+            ueberspringen = False; continue
+        if a == "--ziel":
+            ueberspringen = True; continue
+        if not a.startswith("-"):
+            args.append(a)
+    if not args:
+        sys.stderr.write("Keine Publikation genannt. `hk-epub --help`.\n")
+        return 2
+    pfad_arg = None
+    if len(args) > 1 and ablage.art_von(
+            os.path.abspath(os.path.expanduser(args[-1]))):
+        pfad_arg = args.pop()
+
+    try:
+        hkb, art = ablage.finde_ablage(pfad_arg, arten=("hkb",))
+    except ablage.KeineAblage as e:
+        sys.stderr.write(str(e) + "\n"); return 2
+
+    if neu:
+        buch = os.path.join(os.path.dirname(os.path.realpath(__file__)), "hk-buch")
+        r = subprocess.run([sys.executable, buch] + args + [hkb],
+                           capture_output=True, text=True)
+        sys.stdout.write(r.stdout)
+        if r.returncode:
+            sys.stderr.write(r.stderr); return r.returncode
+
+    b = pruefen.Bestand(hkb, art)
+    art_p, rel_pub = b.aufloesen(args[0].rstrip("/"))
+    if art_p != "notiz":
+        name = args[0].rstrip("/").rsplit("/", 1)[-1]
+        if name.endswith(".md"):
+            name = name[:-3]
+        treffer = [t for t in (b.nach_namen.get(name) or [])
+                   if b.notizen[t]["typ"] == "publication"]
+        if len(treffer) != 1:
+            sys.stderr.write("`%s` ist keine eindeutige Publikation.\n" % args[0])
+            return 2
+        rel_pub = treffer[0]
+
+    kurz = rel_pub.rsplit("/", 1)[-1]
+    quelle = os.path.join(hkb, b.media_basis, "Documents", kurz + ".md")
+    if not os.path.isfile(quelle):
+        sys.stderr.write("Kein Manuskript unter %s.\n  → hk-buch %s\n"
+                         % (os.path.relpath(quelle, hkb), kurz))
+        return 1
+
+    ziel = (os.path.abspath(os.path.expanduser(ziel_datei)) if ziel_datei
+            else os.path.join(hkb, b.media_basis, "Documents", kurz + ".epub"))
+    befehl = [programm, quelle, "-o", ziel, "--toc", "--toc-depth=1",
+              "--split-level=1", "--from", "markdown", "--to", "epub3"]
+
+    cover = b.notizen[rel_pub]["daten"].get("cover")
+    if cover:
+        m = re.match(r"^\[\[([^\]|]+)", str(cover))
+        art_c, rest = b.aufloesen(m.group(1) if m else str(cover))
+        bild = os.path.join(hkb, b.media_basis, rest) if art_c == "medium" else None
+        if bild and os.path.isfile(bild):
+            befehl += ["--epub-cover-image", bild]
+        else:
+            print("Hinweis: `cover` zeigt auf keine vorhandene Datei.")
+
+    r = subprocess.run(befehl, capture_output=True, text=True)
+    if r.returncode:
+        sys.stderr.write("pandoc endete mit %d:\n%s\n" % (r.returncode, r.stderr))
+        return 1
+    groesse = os.path.getsize(ziel)
+    print("%s → %s" % (os.path.relpath(quelle, hkb), os.path.relpath(ziel, hkb)))
+    print("  %d KB, gebaut mit %s" % (groesse // 1024, programm))
+    if r.stderr.strip():
+        for z in r.stderr.strip().splitlines()[:5]:
+            print("  ·", z)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

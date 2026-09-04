@@ -1,0 +1,203 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""hk-buch — aus einer Publikation ein Manuskript schreiben.
+
+    hk-buch <publikation> [pfad]      schreibt das Manuskript
+    hk-buch <publikation> --ziel <datei>
+
+Eine Datei, die alles enthaelt: einen Kopf, den `pandoc` liest, danach die
+Texte in der Reihenfolge aus `contents`, jeder unter seiner eigenen
+Ueberschrift.
+
+Das Ergebnis ist ein Erzeugnis und keine Notiz. Es liegt unter
+`<media_base>/Documents/` und traegt kein `type`. Wer es loescht, verliert
+nichts: Ein zweiter Lauf schreibt es wieder.
+
+Was dabei wegfaellt: das Frontmatter jedes Textes, sein Abschnitt
+`# Siehe auch` und der `# Inhalt` der Publikation. Was bleibt, ist der Text.
+Ueberschriften darin ruecken eine Ebene tiefer, damit der Titel des Textes die
+oberste bleibt.
+
+Eingebettete Bilder (`![[…]]`) werden zu Markdown-Bildern mit einem Pfad, den
+`pandoc` aufloesen kann.
+
+**Der Text wird nicht geglaettet.** Was gegen die Schreibregeln verstoesst,
+wird gemeldet und bleibt stehen. Ein Bauschritt, der still am Text aendert,
+macht aus dem Manuskript etwas anderes als das, was in der Ablage steht.
+"""
+import io, os, re, sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
+from hkf import ablage, notiz, pruefen   # noqa: E402
+
+EINBETTUNG = re.compile(r"!\[\[([^\]|\n]+)(?:\|[^\]\n]*)?\]\]")
+UEBERSCHRIFT = re.compile(r"(?m)^(#{1,5}) ")
+LEERZEILEN = re.compile(r"\n{3,}")
+KOPFFELDER = (("title", "title"), ("subtitle", "subtitle"),
+              ("publisher", "publisher"), ("rights", "rights"))
+
+
+def _wert(argv, name):
+    if name in argv:
+        i = argv.index(name)
+        if i + 1 < len(argv):
+            return argv[i + 1]
+    return None
+
+
+def _titel(daten, rel):
+    return str(daten.get("title") or daten.get("name") or rel.rsplit("/", 1)[-1])
+
+
+def _rel_aus_verweis(b, wert):
+    m = re.match(r"^\[\[([^\]|]+)", str(wert))
+    if not m:
+        return None
+    art, rel = b.aufloesen(m.group(1))
+    return rel if art == "notiz" else None
+
+
+def _bilder(b, hkb, text):
+    """`![[pfad]]` zu `![](absoluter pfad)`, damit pandoc es findet."""
+    fehlend = []
+
+    def ersetzen(m):
+        ziel = m.group(1)
+        art, rest = b.aufloesen(ziel)
+        if art != "medium":
+            fehlend.append(ziel)
+            return ""
+        return "![](%s)" % os.path.join(hkb, b.media_basis, rest)
+
+    return EINBETTUNG.sub(ersetzen, text), fehlend
+
+
+def _ohne_abschnitte(body):
+    for name in ("Siehe auch", "Inhalt"):
+        body = notiz.ohne_abschnitt(body, name)
+    return body
+
+
+def _tiefer(text):
+    return UEBERSCHRIFT.sub(lambda m: "#" + m.group(1) + " ", text)
+
+
+def _kopf(daten):
+    zeilen = ["---"]
+    for quelle, ziel in KOPFFELDER:
+        # `title` ist an einer Notiz freigestellt, `name` traegt sie immer.
+        wert = daten.get(quelle) or (daten.get("name") if quelle == "title"
+                                     else None)
+        if wert:
+            zeilen.append('%s: "%s"' % (ziel, str(wert).replace('"', '\\"')))
+    autoren = daten.get("authors") or []
+    if autoren:
+        zeilen.append("author:")
+        for a in autoren:
+            zeilen.append('  - "%s"' % re.sub(r"^\[\[[^\]|]*\|?|\]\]$", "",
+                                              str(a)).strip())
+    zeilen.append('lang: "de"')
+    zeilen.append("---")
+    return "\n".join(zeilen)
+
+
+def main(argv):
+    if "--help" in argv or "-h" in argv:
+        print(__doc__.strip()); return 0
+    ziel_datei = _wert(argv, "--ziel")
+    args, ueberspringen = [], False
+    for a in argv:
+        if ueberspringen:
+            ueberspringen = False; continue
+        if a == "--ziel":
+            ueberspringen = True; continue
+        if not a.startswith("-"):
+            args.append(a)
+    if not args:
+        sys.stderr.write("Keine Publikation genannt. `hk-buch --help`.\n")
+        return 2
+    pfad_arg = None
+    if len(args) > 1 and ablage.art_von(
+            os.path.abspath(os.path.expanduser(args[-1]))):
+        pfad_arg = args.pop()
+
+    try:
+        hkb, art = ablage.finde_ablage(pfad_arg, arten=("hkb",))
+    except ablage.KeineAblage as e:
+        sys.stderr.write(str(e) + "\n"); return 2
+    b = pruefen.Bestand(hkb, art)
+    if "publication" not in b.typdefs:
+        sys.stderr.write("Diese Ablage kennt `publication` nicht.\n"
+                         "  → hk-import <harness>/bundles/hkf-publikation\n")
+        return 2
+
+    kennung = args[0]
+    art_p, rel_pub = b.aufloesen(kennung.rstrip("/"))
+    if art_p != "notiz":
+        name = kennung.rstrip("/").rsplit("/", 1)[-1]
+        if name.endswith(".md"):
+            name = name[:-3]
+        treffer = [t for t in (b.nach_namen.get(name) or [])
+                   if b.notizen[t]["typ"] == "publication"]
+        if len(treffer) != 1:
+            sys.stderr.write("`%s` ist keine eindeutige Publikation.\n" % kennung)
+            return 2
+        rel_pub = treffer[0]
+    e_pub = b.notizen[rel_pub]
+    if e_pub["typ"] != "publication":
+        sys.stderr.write("%s ist vom Typ `%s`.\n" % (rel_pub, e_pub["typ"]))
+        return 2
+
+    stuecke, fehlend, fehlende_bilder = [], [], []
+    einleitung = _ohne_abschnitte(e_pub["body"]).strip()
+    if einleitung:
+        text, fb = _bilder(b, hkb, einleitung)
+        fehlende_bilder += fb
+        stuecke.append(_tiefer(text).strip())
+
+    zahl = 0
+    for wert in e_pub["daten"].get("contents") or []:
+        rel = _rel_aus_verweis(b, wert)
+        if rel is None or rel not in b.notizen:
+            fehlend.append(str(wert))
+            continue
+        e = b.notizen[rel]
+        koerper = _tiefer(_ohne_abschnitte(e["body"]).strip())
+        koerper, fb = _bilder(b, hkb, koerper)
+        fehlende_bilder += fb
+        stuecke.append("# %s\n\n%s" % (_titel(e["daten"], rel), koerper.strip()))
+        zahl += 1
+
+    if not zahl:
+        sys.stderr.write("%s führt keine auflösbaren Texte in `contents`.\n"
+                         % rel_pub)
+        return 1
+
+    inhalt = (_kopf(e_pub["daten"]) + "\n\n"
+              + LEERZEILEN.sub("\n\n", "\n\n".join(stuecke)).strip() + "\n")
+
+    if ziel_datei:
+        ziel = os.path.abspath(os.path.expanduser(ziel_datei))
+    else:
+        ordner = os.path.join(hkb, b.media_basis, "Documents")
+        ziel = os.path.join(ordner, rel_pub.rsplit("/", 1)[-1] + ".md")
+    if not os.path.isdir(os.path.dirname(ziel)):
+        os.makedirs(os.path.dirname(ziel))
+    stand = os.path.isfile(ziel)
+    io.open(ziel, "w", encoding="utf-8").write(inhalt)
+
+    print("%s → %s%s" % (rel_pub, os.path.relpath(ziel, hkb),
+                         " (neu geschrieben)" if stand else ""))
+    print("  %d Texte, %d Wörter" % (zahl, len(re.findall(r"[A-Za-zÀ-ÿ0-9]+",
+                                                          inhalt))))
+    for name, liste in (("Nicht auflösbar in `contents`", fehlend),
+                        ("Bild ohne Datei", fehlende_bilder)):
+        if liste:
+            print("  %s: %d" % (name, len(liste)))
+            for x in liste:
+                print("    -", x)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

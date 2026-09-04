@@ -66,7 +66,33 @@ dazu nichts zu sagen. Wenn du nicht weißt, wohin ein Text gehört, frag nach.
 **Ob ein Text dazugehört.** Ein Stück, das thematisch passt, gehört deshalb
 noch nicht in die Sammlung.
 
+## Daraus ein Werk machen
+
+```bash
+hk-buch <publikation>          # das Manuskript als eine Datei
+hk-epub <publikation> --neu    # daraus ein EPUB, mit vorherigem Neubau
+```
+
+`hk-buch` schreibt die Texte in der Reihenfolge aus `contents` in eine Datei
+unter `<media_base>/Documents/`, mit einem Kopf, den `pandoc` liest. Das
+Frontmatter der Texte, ihr `# Siehe auch` und der `# Inhalt` der Publikation
+fallen weg, die Überschriften rücken eine Ebene tiefer. Eingebettete Bilder
+werden zu Pfaden, die `pandoc` auflöst.
+
+**Der Text wird dabei nicht geglättet.** Was gegen die Schreibregeln verstößt,
+wird gemeldet und bleibt stehen. Ein Bauschritt, der still am Text ändert,
+macht aus dem Manuskript etwas anderes als das, was in der Ablage steht. Wer
+das Manuskript sauber will, räumt vorher in den Texten auf, mit `hk-text` und
+[[hkb-text]].
+
+`hk-epub` braucht `pandoc`. Fehlt es, sagt der Lauf das und bricht ab, statt
+mitten im Bau zu scheitern. Das Titelbild kommt aus `cover`.
+
+Beides sind Erzeugnisse und keine Notizen. Sie lassen sich jederzeit neu
+bauen, und das EPUB steht deshalb in der `.gitignore`.
+
 ## Grenzen
 
-`hk-publikation` baut kein Buch und keine Datei. Es führt die Notizen. Was
-daraus entsteht, ist ein anderer Schritt.
+`contents` ist eine flache Folge. Ein Werk mit Teilen, die wieder Kapitel
+enthalten, lässt sich damit nicht abbilden. Solange niemand es braucht, bleibt
+es dabei.

@@ -780,6 +780,42 @@ Der Text von Stück %s, mit ein paar Wörtern für die Zählung.
         r = lauf(os.path.join(BIN, "hk-lint"), ziel)
         probe("die Ablage bleibt konform", r.returncode == 0,
               (r.stdout + r.stderr)[-300:])
+
+        print("hk-buch und hk-epub: was daraus wird, ist ein Erzeugnis")
+        r = lauf(os.path.join(BIN, "hk-buch"), "sammlung", ziel)
+        probe("das Manuskript entsteht", r.returncode == 0,
+              (r.stdout + r.stderr)[-300:])
+        manuskript = os.path.join(ziel, MEDIEN, "Documents", "sammlung.md")
+        probe("es liegt unter media_base", os.path.isfile(manuskript))
+        text_m = io.open(manuskript, encoding="utf-8").read()
+        probe("der Kopf trägt den Titel für pandoc",
+              'title: "Eine Sammlung"' in text_m, text_m[:200])
+        probe("die Texte stehen in der Reihenfolge aus `contents`",
+              text_m.index("# Stück drei") < text_m.index("# Stück eins"),
+              text_m[:400])
+        probe("die Überschriften der Texte rücken eine Ebene tiefer",
+              "## Zweck" in text_m and "\n# Zweck" not in text_m, text_m[:400])
+        probe("kein Frontmatter eines Textes ist mitgekommen",
+              text_m.count("---") == 2, text_m[:400])
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        probe("das Erzeugnis stört die Ablage nicht", r.returncode == 0,
+              (r.stdout + r.stderr)[-300:])
+        r = lauf(os.path.join(BIN, "hk-epub"), "sammlung", ziel)
+        wenn_pandoc = "pandoc` ist nicht da" not in r.stderr
+        if wenn_pandoc:
+            probe("das EPUB entsteht", r.returncode == 0,
+                  (r.stdout + r.stderr)[-300:])
+            probe("und liegt neben dem Manuskript",
+                  os.path.isfile(os.path.join(ziel, MEDIEN, "Documents",
+                                              "sammlung.epub")))
+        else:
+            probe("ohne pandoc sagt hk-epub, was fehlt", r.returncode == 2,
+                  r.stderr[:200])
+        gitignore = io.open(os.path.join(ziel, ".gitignore"),
+                            encoding="utf-8").read()
+        probe("ein gebautes EPUB gehört nicht ins Repository",
+              "*.epub" in gitignore, gitignore)
+        shutil.rmtree(os.path.join(ziel, MEDIEN, "Documents"))
         shutil.rmtree(os.path.join(ziel, WIKI, "Publications"))
         shutil.rmtree(os.path.join(ziel, WIKI, "Texts"))
         shutil.rmtree(os.path.dirname(lieferung_pub), ignore_errors=True)

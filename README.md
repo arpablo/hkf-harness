@@ -91,6 +91,8 @@ Python 3 und PyYAML.
 | `hk-erwaehnungen <ziel>` | macht unverlinkte Erwähnungen einer Notiz zu qualifizierten Verweisen | **läuft** |
 | `hk-kontext [--stimme]` | gibt aus, was in dieser Ablage gilt: Lage, Kanon, Stimme, Hinweise | **läuft** |
 | `hk-publikation <notiz>` | führt die Lesereihenfolge einer Publikation: `--aufnehmen`, `--vor`, `--check`, `--richten` | **läuft** |
+| `hk-buch <publikation>` | schreibt die Texte einer Publikation als ein Manuskript heraus | **läuft** |
+| `hk-epub <publikation>` | baut daraus mit `pandoc` ein EPUB | **läuft** |
 
 Was geprüft wird, entscheidet die Wurzeldatei: `hkb.md` heißt Wissensbasis,
 `hbundle.md` heißt Lieferung. §6.3 gilt für beide, mit den Unterschieden aus §4
@@ -184,7 +186,8 @@ lib/hkf/text/ der Schreibregelprüfer: segment, engine, rules, rhythm_lint
 rules/       deutsch.json, der Basissatz der Schreibregeln
 bin/         hk-init, hk-lint, hk-import, hk-export, hk-ingest,
              hk-tranchen, hk-types, hk-ablage, hk-text, hk-install,
-             hk-suche, hk-erwaehnungen, hk-kontext, hk-publikation
+             hk-suche, hk-erwaehnungen, hk-kontext, hk-publikation,
+             hk-buch, hk-epub
 py           das Python des Harness — baut die venv und startet sie
 tools/       spec.py hält die Kopie unter spec/ auf Stand,
              grundausstattung.py die Vorlage gegen Anhang A und §3.5.1
