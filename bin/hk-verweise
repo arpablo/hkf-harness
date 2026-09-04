@@ -72,41 +72,52 @@ def _ziel(b, art, rel, e=None):
 
 
 def _umschreiben(text, b, verz, befunde, rel_quelle):
-    """Den Text mit qualifizierten Verweisen, plus Zahl der Ersetzungen."""
-    zahl = [0]
+    """Den Text mit qualifizierten Verweisen, plus Zahl der Ersetzungen.
 
-    def zeilenweise(stueck):
-        zeilen = stueck.split("\n")
-        for i, zeile in enumerate(zeilen):
-            in_tabelle = bool(TABELLE.match(zeile))
+    Zeilenweise ueber den **ganzen** Text, nicht ueber die Stuecke zwischen
+    Code-Spans. `ausserhalb_code` zerteilt an jedem Inline-Code, und im
+    zweiten Stueck beginnt eine Tabellenzeile nicht mehr mit `|` — der Trenner
+    bliebe dann unmaskiert. Gemessen an einem gewachsenen Vault waren das vier
+    kaputte Verweise in einer einzigen Zeile.
+    """
+    belegt = [(m.start(), m.end()) for m in notiz.CODE.finditer(text)]
 
-            def ersetzen(m):
-                ruf, ziel, trenner, alias = m.groups()
-                name = ziel.strip()
-                anker = ""
-                if "#" in name:
-                    name, _, anker = name.partition("#")
-                    name, anker = name.strip(), "#" + anker
-                treffer = verz.get(name) or []
-                if not treffer:
-                    befunde.setdefault("ohne", []).append((rel_quelle, ziel))
-                    return m.group(0)
-                if len(set(t for t in treffer)) > 1:
-                    befunde.setdefault("mehrdeutig", []).append(
-                        (rel_quelle, ziel, [x[1] for x in treffer]))
-                    return m.group(0)
-                art, rel = treffer[0]
-                voll = _ziel(b, art, rel) + anker
-                text_alias = alias if trenner else ziel.strip()
-                # In einer Tabellenzelle ist der Trenner maskiert (§3.6).
-                strich = "\\|" if in_tabelle else "|"
-                zahl[0] += 1
-                return "%s[[%s%s%s]]" % (ruf, voll, strich, text_alias)
+    def im_code(a, e):
+        return any(x <= a and e <= y for x, y in belegt)
 
-            zeilen[i] = KURZ.sub(ersetzen, zeile)
-        return "\n".join(zeilen)
+    aus, zahl, stand = [], [0], 0
+    for zeile in text.split("\n"):
+        anfang = stand
+        stand += len(zeile) + 1
+        in_tabelle = bool(TABELLE.match(zeile))
 
-    return notiz.ausserhalb_code(text, zeilenweise), zahl[0]
+        def ersetzen(m):
+            if im_code(anfang + m.start(), anfang + m.end()):
+                return m.group(0)
+            ruf, ziel, trenner, alias = m.groups()
+            name = ziel.strip()
+            anker = ""
+            if "#" in name:
+                name, _, anker = name.partition("#")
+                name, anker = name.strip(), "#" + anker
+            treffer = verz.get(name) or []
+            if not treffer:
+                befunde.setdefault("ohne", []).append((rel_quelle, ziel))
+                return m.group(0)
+            if len(set(treffer)) > 1:
+                befunde.setdefault("mehrdeutig", []).append(
+                    (rel_quelle, ziel, [x[1] for x in treffer]))
+                return m.group(0)
+            art, rel = treffer[0]
+            voll = _ziel(b, art, rel) + anker
+            text_alias = alias if trenner else ziel.strip()
+            # In einer Tabellenzelle ist der Trenner maskiert (§3.6).
+            strich = "\\|" if in_tabelle else "|"
+            zahl[0] += 1
+            return "%s[[%s%s%s]]" % (ruf, voll, strich, text_alias)
+
+        aus.append(KURZ.sub(ersetzen, zeile))
+    return "\n".join(aus), zahl[0]
 
 
 def _quoten(kopf):

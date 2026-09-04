@@ -703,6 +703,60 @@ Hier steht [[40-Wiki/Persons/ada-lovelace|Ada Lovelace]] schon verlinkt.
         for d in ("Persons", "Events"):
             os.rmdir(os.path.join(ziel, WIKI, d))
 
+        print("Ein leerer Bereich fällt mit der Wurzel zusammen (§3.1)")
+        # Ein gewachsener Vault legt seinen Inhalt nicht unter einen
+        # Basispfad, sondern in Ordner nebeneinander. Dafuer darf ein Bereich
+        # leer sein. Zwei Fehler steckten darin, und beide fielen erst an
+        # einem echten Bestand auf: Jede Notiz wurde zweimal gelesen, und ein
+        # Verweis unter dem leeren Bereich loeste nie auf.
+        leer = os.path.join(tempfile.mkdtemp(prefix="hkb-leer-"), "ablage")
+        lauf(os.path.join(BIN, "hk-init"), leer)
+        w = io.open(os.path.join(leer, "hkb.md"), encoding="utf-8").read()
+        _schreib(os.path.join(leer, "hkb.md"),
+                 w.replace('wiki_base: "40-Wiki"', 'wiki_base: ""'))
+        lauf(os.path.join(BIN, "hk-lint"), leer, "--fix")
+        # `Bundles/` liegt unter `wiki_base` (§7.2). Faellt der mit der Wurzel
+        # zusammen, liegt es dort.
+        os.makedirs(os.path.join(leer, "Bundles"), exist_ok=True)
+        io.open(os.path.join(leer, "Bundles", ".gitkeep"), "w").close()
+        _schreib(os.path.join(leer, "Persons", "ada.md"), """---
+type: person
+name: Ada
+created: 2026-01-01
+modified: 2026-01-01T00:00:00
+---
+
+# Zweck
+
+Da.
+""")
+        _schreib(os.path.join(leer, "Notes", "probe.md"), """---
+type: note
+name: Probe
+created: 2026-01-01
+modified: 2026-01-01T00:00:00
+---
+
+# Zweck
+
+Ein Verweis auf [[Persons/ada|Ada]].
+""")
+        r = lauf(os.path.join(BIN, "hk-lint"), leer)
+        probe("ein Verweis unter dem leeren Bereich löst auf",
+              "zeigt auf keine Datei" not in r.stdout, r.stdout[-400:])
+        probe("die Ablage ist ohne Befund", r.returncode == 0,
+              (r.stdout + r.stderr)[-500:])
+        import subprocess as _sp
+        zahl = _sp.run([sys.executable, "-c",
+                        "import sys; sys.path.insert(0, %r); "
+                        "from hkf import pruefen; "
+                        "print(len(pruefen.Bestand(%r, 'hkb').notizen))"
+                        % (os.path.join(WURZEL, "lib"), leer)],
+                       capture_output=True, text=True).stdout.strip()
+        probe("jede Notiz steht genau einmal im Bestand",
+              zahl == "36", "%s statt 36" % zahl)
+        shutil.rmtree(os.path.dirname(leer), ignore_errors=True)
+
         print("hk-verweise: aus einem kurzen Verweis wird ein qualifizierter")
         vw = os.path.join(tempfile.mkdtemp(prefix="hkb-vw-"), "ablage")
         lauf(os.path.join(BIN, "hk-init"), vw)
@@ -740,14 +794,14 @@ Ins Leere: [[gibt-es-nicht]].
 
 | Person | Rolle |
 |---|---|
-| [[ada-lovelace]] | Erste |
+| [[ada-lovelace]] | mit `code` davor und [[babbage]] dahinter |
 
 In Backticks bleibt `[[ada-lovelace]]` stehen.
 """)
         vorher = _abbild(vw)
         r = lauf(os.path.join(BIN, "hk-verweise"), vw)
         probe("der Bericht zählt die kurzen Verweise",
-              "5 Verweise" in r.stdout, r.stdout[-300:])
+              "6 Verweise" in r.stdout, r.stdout[-300:])
         probe("ohne --setzen ändert sich nichts", _abbild(vw) == vorher)
         probe("ein Ziel ohne Datei bleibt eine Vormerkung",
               "Vormerkungen" in r.stdout, r.stdout[-300:])
@@ -764,7 +818,11 @@ In Backticks bleibt `[[ada-lovelace]]` stehen.
               "![[80-Media/Images/portraet.png|portraet.png]]" in text_vw,
               text_vw[-500:])
         probe("in einer Tabellenzelle ist der Trenner maskiert (§3.6)",
-              "[[40-Wiki/Persons/ada-lovelace\\|ada-lovelace]] | Erste" in text_vw,
+              "[[40-Wiki/Persons/ada-lovelace\\|ada-lovelace]] | mit" in text_vw,
+              text_vw[-400:])
+        # Inline-Code teilt die Zeile nicht: auch dahinter ist es eine Zelle.
+        probe("auch hinter einem Inline-Code in derselben Zeile",
+              "[[40-Wiki/Persons/babbage\\|babbage]] dahinter" in text_vw,
               text_vw[-400:])
         probe("was in Backticks steht, bleibt unangetastet",
               "`[[ada-lovelace]]`" in text_vw, text_vw[-300:])

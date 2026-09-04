@@ -118,6 +118,19 @@ class Bestand(object):
         for schluessel, wurzel in self.notizbereiche():
             for p in ablage.dateien(wurzel):
                 rel = os.path.relpath(p, wurzel).replace(os.sep, "/")
+                # Ein leerer Bereich faellt mit der Wurzel zusammen und
+                # umfasst dann die uebrigen. Die Bereiche schliessen einander
+                # aber aus (§3.1): Es zaehlt der laengste Treffer, sonst kaeme
+                # jede Notiz zweimal — einmal unter ihrem Bereich und einmal
+                # unter dem leeren.
+                if not self.bereiche[schluessel]:
+                    ganz = os.path.relpath(p, self.hkb).replace(os.sep, "/")
+                    anderer = ablage.bereich_von(self.bereiche, ganz)[0]
+                    # `bereich_von` uebergeht leere Bereiche und gibt dort None
+                    # zurueck. Ausgeschlossen wird nur, was einem anderen,
+                    # benannten Bereich gehoert.
+                    if anderer is not None and anderer != schluessel:
+                        continue
                 # Eine Notiz liegt in ihrem Typverzeichnis — ausser der
                 # Quellennotiz: `source` fuehrt keines (§3.2.2).
                 if "/" not in rel and schluessel != "source_base":
@@ -261,7 +274,12 @@ class Bestand(object):
             if mpre and ziel.startswith(mpre + "/"):
                 return ("medium", ziel[len(self.ablagepfad) + 1:]
                         if self.ablagepfad else ziel)
-            if any(vorne):
+            # Ein Bereich darf ausdruecklich leer sein (§3.1); er faellt dann
+            # mit der Wurzel zusammen, und ein Verweis darunter traegt keinen
+            # Praefix. Die Schleife oben uebergeht ihn, weil sie nur nichtleere
+            # Praefixe abzieht — ohne diese Stufe waere in einer Ablage mit
+            # leerem `wiki_base` jeder Verweis unaufloesbar.
+            if "" not in vorne and any(vorne):
                 return (None, ziel)
             rest = ziel
         if rest in self.notizen:
