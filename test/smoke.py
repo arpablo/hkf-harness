@@ -14,6 +14,8 @@ import json, os, re, shutil, subprocess, sys, tempfile
 WURZEL = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 # Die vier Bereiche (Core §3.1)
 WIKI, QUELLEN, MEDIEN, KONFIG = "40-Wiki", "50-Sources", "80-Media", "90-System"
+# Wo eine Ablage ihre eigenen Festlegungen fuehrt (Harness §7)
+ablage_hinweise = "Hints"
 BIN = os.path.join(WURZEL, "bin")
 fehler = []
 
@@ -600,6 +602,100 @@ Die Zeitenwende kam, und mit ihr eine entscheidende Frage.
         r = lauf(os.path.join(BIN, "hk-ablage"), env=umgebung, cwd=ziel)
         probe("dann gilt wieder das Arbeitsverzeichnis",
               "dem Arbeitsverzeichnis" in r.stdout, r.stdout)
+
+        print("Die Hooks: der Kanon kommt aus der Sitzung, nicht aus der Ablage")
+        p_hooks = os.path.join(WURZEL, "hooks", "hooks.json")
+        try:
+            hooks = json.load(io.open(p_hooks, encoding="utf-8"))
+        except Exception as e:
+            hooks = {}
+            probe("hooks.json ist lesbar", False, str(e))
+        ereignisse = sorted((hooks.get("hooks") or {}))
+        probe("hooks.json nennt SessionStart und PostToolUse",
+              ereignisse == ["PostToolUse", "SessionStart"], ", ".join(ereignisse))
+        befehle = re.findall(r"\$\{CLAUDE_PLUGIN_ROOT\}/([\w./-]+)",
+                             json.dumps(hooks))
+        fehlend = sorted(set(b for b in befehle
+                             if not os.path.exists(os.path.join(WURZEL, b))))
+        probe("jede genannte Datei liegt im Repository", not fehlend,
+              ", ".join(fehlend))
+
+        umg = dict(os.environ, HKF_WAHL=os.path.join(ziel, "wahl.json"))
+        umg.pop("HKB_PATH", None)
+        sitzung = os.path.join(WURZEL, "hooks", "sitzung.py")
+        vorher = _abbild(ziel)
+        r = lauf(os.path.join(WURZEL, "py"), sitzung, input='{"cwd": "%s"}' % ziel,
+                 env=umg)
+        try:
+            aus = json.loads(r.stdout)
+            k = aus["hookSpecificOutput"]["additionalContext"]
+        except Exception as e:
+            aus, k = {}, ""
+            probe("der Sitzungshook antwortet in der erwarteten Form", False,
+                  str(e) + r.stdout[:200] + r.stderr[:200])
+        probe("er nennt die Ablage und woher ihr Pfad kommt",
+              ziel in k and "Der Pfad kommt aus" in k, k[:200])
+        probe("er spielt den Kanon ein",
+              "# Zusammenarbeit" in k and "Wer hier arbeitet" in k, k[:200])
+        probe("und die Stimme, die die Wurzeldatei nennt",
+              "Voice-Profil" in k or "# Stimme" in k, k[-300:])
+        probe("in der Ablage entsteht dabei nichts", _abbild(ziel) == vorher)
+
+        # Was diese eine Ablage fuer sich festlegt, steht als `hint`-Notiz
+        # darin (Harness §7) und geht dem Kanon vor.
+        _schreib(os.path.join(ziel, WIKI, ablage_hinweise, "kuration.md"), """---
+type: hint
+name: Kuration
+created: 2026-01-01
+---
+
+# Zweck
+
+Eine Person bekommt hier erst ab dem zweiten Auftritt ein Blatt.
+""")
+        r = lauf(os.path.join(WURZEL, "py"), sitzung, input='{"cwd": "%s"}' % ziel,
+                 env=umg)
+        k = json.loads(r.stdout)["hookSpecificOutput"]["additionalContext"]
+        probe("die `hint`-Notizen der Ablage kommen dazu",
+              "ab dem zweiten Auftritt" in k, k[-300:])
+        shutil.rmtree(os.path.join(ziel, WIKI, ablage_hinweise))
+
+        oben = os.path.dirname(ziel)
+        r = lauf(os.path.join(WURZEL, "py"), sitzung, input='{"cwd": "%s"}' % oben,
+                 env=dict(umg, HKF_WAHL=os.path.join(ziel, "leer.json")))
+        k = json.loads(r.stdout)["hookSpecificOutput"]["additionalContext"]
+        probe("ohne Ablage zählt er auf, statt zu raten",
+              "keine Ablage gewählt" in k and "Frag nach" in k, k[:300])
+
+        regeln = os.path.join(WURZEL, "hooks", "schreibregeln.py")
+        muster = os.path.join(ziel, WIKI, "Notes", "hook.md")
+        kopf = "---\ntype: note\nname: Hook\ncreated: 2026-01-01\n---\n\n# Zweck\n\n"
+        ereignis = ('{"cwd": "%s", "tool_input": {"file_path": "%s"}}'
+                    % (ziel, muster))
+        _schreib(muster, kopf + "Ein sauberer Satz ohne Beanstandung.\n")
+        r = lauf(os.path.join(WURZEL, "py"), regeln, input=ereignis, env=umg)
+        probe("ein sauberer Text kommt durch", r.returncode == 0,
+              r.stdout + r.stderr)
+        _schreib(muster, kopf + "Ein Satz mit einem Strichpunkt; das ist ein Fehler.\n")
+        r = lauf(os.path.join(WURZEL, "py"), regeln, input=ereignis, env=umg)
+        probe("ein Fehler hält den Schreibvorgang an", r.returncode == 2,
+              r.stdout + r.stderr)
+        probe("und der Befund nennt den Pfad ab der Ablage",
+              "40-Wiki/Notes/hook.md" in r.stderr, r.stderr[:200])
+        _schreib(muster, kopf + ("Dieser Satz ist mit Bedacht so lang geraten, dass "
+                 "er die Grenze von fünfunddreißig Wörtern überschreitet, denn eine "
+                 "Warnung soll niemanden aufhalten, sondern nur im Bericht "
+                 "auftauchen, wo sie in Ruhe gelesen werden kann.\n"))
+        r = lauf(os.path.join(WURZEL, "py"), regeln, input=ereignis, env=umg)
+        probe("eine Warnung hält niemanden auf", r.returncode == 0,
+              r.stdout + r.stderr)
+        r = lauf(os.path.join(WURZEL, "py"), regeln,
+                 input='{"cwd": "%s", "tool_input": {"file_path": "%s"}}'
+                       % (oben, muster),
+                 env=dict(umg, HKF_WAHL=os.path.join(ziel, "leer.json")))
+        probe("außerhalb einer Ablage tut er nichts", r.returncode == 0,
+              r.stdout + r.stderr)
+        os.remove(muster)
 
         print("Fassung")
         r = lauf(sys.executable, os.path.join(WURZEL, "tools", "grundausstattung.py"))

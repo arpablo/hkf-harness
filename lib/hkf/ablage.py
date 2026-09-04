@@ -24,6 +24,8 @@ VORGABEN = {"wiki_base": "40-Wiki", "source_base": "50-Sources",
 # Typdefinition — wer sie dort umbenennt, verlegt gerade die Datei, in der es
 # steht, und keines der Werkzeuge faende sie danach wieder. `Types` haelt die
 # Typseiten (§3.3); es ist freigestellt und enthaelt keine Notizen.
+# `Hints` haelt, was diese eine Ablage fuer sich festgelegt hat (Harness §7).
+HINWEISE = "Hints"
 TYPEDEFS, PROPTYPES, TYPES = "Typedefs", "Proptypes", "Types"
 KONFIGVERZEICHNISSE = (TYPEDEFS, PROPTYPES, TYPES)
 
@@ -168,7 +170,7 @@ def aufwaerts(start=None):
         hier = oben
 
 
-def aufloesen(arg=None):
+def aufloesen(arg=None, wo=None):
     """(pfad, herkunft) — die fuenf Stufen in ihrer Reihenfolge.
 
     Aufruf, HKB_PATH, die gemerkte Wahl, eine Aufwaertssuche ab dem
@@ -181,10 +183,10 @@ def aufloesen(arg=None):
     aus_umgebung = os.environ.get("HKB_PATH")
     if aus_umgebung:
         return os.path.abspath(os.path.expanduser(aus_umgebung)), "HKB_PATH"
-    wahl = gewaehlt()
+    wahl = gewaehlt(wo)
     if wahl:
         return wahl, "der gemerkten Wahl (hk-ablage)"
-    oben = aufwaerts()
+    oben = aufwaerts(wo)
     if oben:
         return oben, "dem Arbeitsverzeichnis"
     return os.path.abspath(os.path.expanduser(VORGABE)), "der Vorgabe %s" % VORGABE
@@ -229,6 +231,28 @@ def finde_ablage(arg=None, arten=("hkb", "bundle")):
                              " oder ".join(ARTNAME[a] for a in arten), woher))
     raise KeineAblage("%s: keine Wurzeldatei — dort liegt keine Ablage "
                       "(§3.1).\nDer Pfad kommt aus %s." % (pfad, woher))
+
+
+def hinweise(pfad):
+    """Das Verzeichnis mit den `hint`-Notizen einer Ablage.
+
+    Was **diese** Ablage fuer sich festgelegt hat, steht als gewoehnliche Notiz
+    darin (Harness §7). Der Ort ist `Hints/` unter `wiki_base`, oder was die
+    Wurzeldatei unter `hints` nennt.
+    """
+    try:
+        daten, _ = frontmatter.lesen(wurzeldatei(pfad))
+    except Exception:
+        daten = {}
+    eigen = str(daten.get("hints") or "").strip("/")
+    if eigen:
+        return os.path.join(pfad, eigen)
+    try:
+        basis = bereiche(pfad).get("wiki_base", "")
+    except Exception:
+        basis = ""
+    return os.path.join(pfad, basis, HINWEISE) if basis \
+        else os.path.join(pfad, HINWEISE)
 
 
 def bereiche(pfad):

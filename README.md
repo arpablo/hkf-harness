@@ -187,6 +187,9 @@ templates/   die Grundausstattung, aus der hk-init schöpft
 skills/      die KI-Schicht: hkb und sieben Operationen, siehe skills/README.md
 agents/      die Subagenten, die für einen Skill lesen — wilma
 commands/    die Slash-Kommandos, siehe hk-install
+hooks/       sitzung.py spielt den Kanon ein, schreibregeln.py blockt
+core/        der Kanon: Identität, Zusammenarbeit, Sprache, Schreibregeln, YAML
+profiles/    die Stimmen, aus denen eine Ablage eine wählt
 .claude-plugin/  plugin.json und marketplace.json, sonst nichts
 test/        Rauchprobe: python3 test/smoke.py
 ```
@@ -286,6 +289,36 @@ die Fassung aus dem Plugin stillschweigend. Genau daran ist `hkb-typseite` nach
 seiner Entstehung monatelang unsichtbar geblieben, weil niemand den neunten
 Symlink nachgezogen hat. Ein Zeiger auf einen **fremden** Harness wird nicht
 angefasst, sondern gemeldet.
+
+### Der Kanon kommt aus der Sitzung, nicht aus der Ablage
+
+Zwei Hooks liegen im Plugin. Beim Start einer Sitzung sagt `hooks/sitzung.py`,
+welche Ablage aktiv ist und woher ihr Pfad kommt, und spielt ein, was gilt: den
+Kanon aus [`core/`](core/), die Stimme, die die Wurzeldatei unter `voice`
+nennt, und die `hint`-Notizen der Ablage. Ist keine Ablage gewählt und liegt
+die Sitzung nicht in einer, zählt er auf, was zur Wahl steht. Geraten wird
+nicht.
+
+**In der Ablage entsteht dabei nichts.** Das ist der Unterschied zu einem
+Generator, der aus einem Manifest eine `CLAUDE.md` in den Vault schreibt, dazu
+Agentenfassungen, Hook-Einträge und Skill-Zeiger. Acht erzeugte Artefakte, die
+auseinanderlaufen können, in einer Ablage, die nach §4 keine Werkzeugdatei
+tragen soll. Ein Hook braucht nichts davon, und ein fremder Vault bleibt
+unangetastet.
+
+Der zweite, `hooks/schreibregeln.py`, hält einen Schreibvorgang an, der gegen
+die harten Regeln verstößt: unzulässige Zeichen, verbotene Interpunktion,
+Umlaut-Ersatzformen. Warnungen zu Satzlänge und Wortwahl halten niemanden auf.
+Außerhalb einer Ablage tut er nichts, und wenn der Prüfer nicht laufen kann,
+lässt er durch und sagt warum. Ein Prüfer, der nicht läuft, ist kein
+Regelverstoß.
+
+Die Wurzeldatei steuert beides über zwei freigestellte Properties:
+
+| Property | Was sie sagt | Vorgabe |
+|---|---|---|
+| `voice` | welches Profil aus `profiles/voices/` gilt | `henni-knowledge` |
+| `hints` | wo die `hint`-Notizen liegen | `Hints` unter `wiki_base` |
 
 Sie fügen nichts hinzu, was die Werkzeuge nicht können — sie tun genau das,
 was ein Programm nicht darf. Am deutlichsten bei `hkb-import`: `hk-import`

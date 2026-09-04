@@ -1,0 +1,28 @@
+{
+  "description": "HKF: sagt zu Sitzungsbeginn, wo gearbeitet wird und welche Regeln gelten, und hält einen Schreibvorgang an, der gegen die harten Schreibregeln verstößt",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/py\" \"${CLAUDE_PLUGIN_ROOT}/hooks/sitzung.py\"",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/py\" \"${CLAUDE_PLUGIN_ROOT}/hooks/schreibregeln.py\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

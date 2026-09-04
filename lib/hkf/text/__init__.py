@@ -21,11 +21,6 @@ from . import engine, rules
 WURZEL = Path(__file__).resolve().parents[3]
 BASISSATZ = WURZEL / "rules" / "deutsch.json"
 
-# Wo eine Ablage ihre Hinweise fuehrt, wenn die Wurzeldatei nichts anderes
-# sagt. Der Typ `hint` liegt nach HKF Config unter `wiki_base`.
-HINWEISE = "Hints"
-
-
 def sammeln(pfade):
     """Markdown-Dateien aus Dateien und Verzeichnissen, ohne Doppelte."""
     gefunden, gesehen = [], set()
@@ -59,24 +54,8 @@ def wurzel_von(dateien):
 def regelort(wurzel):
     """Das Verzeichnis mit den `hint`-Notizen dieser Ablage."""
     if wurzel is None:
-        return Path(HINWEISE)
-    try:
-        daten, _ = _frontmatter(wurzel)
-    except Exception:
-        daten = {}
-    eigen = str(daten.get("hints") or "").strip("/")
-    if eigen:
-        return wurzel / eigen
-    try:
-        basis = ablage.bereiche(str(wurzel)).get("wiki_base", "")
-    except Exception:
-        basis = ""
-    return wurzel / basis / HINWEISE if basis else wurzel / HINWEISE
-
-
-def _frontmatter(wurzel):
-    from .. import frontmatter
-    return frontmatter.lesen(ablage.wurzeldatei(str(wurzel)))
+        return Path(ablage.HINWEISE)
+    return Path(ablage.hinweise(str(wurzel)))
 
 
 def laden(wurzel):

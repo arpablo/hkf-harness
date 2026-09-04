@@ -146,6 +146,43 @@ dem Plugin, ohne es zu sagen. `hk-install` entfernt die Zeiger, die in dieses
 Repository führen, und lässt einen Zeiger auf einen fremden Harness stehen: Ihn
 umzuhängen entzöge dem anderen seine Skills.
 
+### Der Kanon kommt aus einem Hook und nicht aus einer erzeugten Datei
+
+Was in jeder Sitzung gilt, muss in jeder Sitzung dastehen. Ein Skill leistet
+das nicht, er wird geladen, wenn er gebraucht wird. Ein naheliegender Weg ist
+eine Datei im Vault, die das Modell immer liest, und genau den geht ein zweiter
+Harness in diesem Haus: Ein Generator von 1412 Zeilen leitet aus einem Manifest
+eine `CLAUDE.md` ab, dazu zwei Projektionen, zwei Hook-Konfigurationen, die
+Agentenfassungen beider Laufzeiten und die Skill-Zeiger. Acht Artefakte, die
+niemand von Hand anfassen darf, dazu eine Drift-Prüfung als Hook und eine
+zweite im `pre-commit`, damit es auffällt, wenn es doch jemand tut.
+
+Dieser Harness erzeugt nichts davon. Ein `SessionStart`-Hook liest die
+Wurzeldatei, setzt Kanon, Stimme und die `hint`-Notizen zusammen und gibt den
+Text als Sitzungskontext zurück. **In der Ablage entsteht dabei nichts.** Damit
+fallen die Erzeugnisse weg, die Drift-Prüfungen, die sie bewachen, und die
+Manifestschicht, aus der sie stammen. §4 bleibt unangetastet, und ein fremder
+Vault lässt sich bedienen, ohne ihn vorher umzubauen.
+
+Vier Schichten, in dieser Reihenfolge, und die spätere geht der früheren vor:
+
+| | |
+|---|---|
+| `core/` | wer hier arbeitet, wie zusammengearbeitet wird, Sprache und Schreibregeln |
+| `profiles/voices/<voice>.md` | die Stimme, die die Wurzeldatei nennt |
+| `Hints/` in der Ablage | was **diese** Ablage für sich festgelegt hat (§7) |
+| die Lage | welche Ablage aktiv ist und aus welcher Stufe ihr Pfad stammt |
+
+Nur die erste Schicht ist personenbezogen, und zwar in genau einer Datei:
+`core/identitaet.md`. Wer den Harness übernimmt, ersetzt sie und lässt den Rest
+stehen.
+
+Ein zweiter Hook auf `Write` und `Edit` hält an, was gegen die harten
+Schreibregeln verstößt. Er untersteht derselben Regel wie ein Skill: Er prüft
+mechanische Invarianten und schreibt nichts. Warnungen halten niemanden auf,
+außerhalb einer Ablage tut er nichts, und ein Prüfer, der nicht laufen kann,
+ist kein Regelverstoß.
+
 ## 3. Die Wissensbasis wird über eine Umgebungsvariable gefunden
 
 Vorbild ist der Skill
