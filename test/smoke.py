@@ -694,6 +694,96 @@ Hier steht [[40-Wiki/Persons/ada-lovelace|Ada Lovelace]] schon verlinkt.
         for d in ("Persons", "Events"):
             os.rmdir(os.path.join(ziel, WIKI, d))
 
+        print("hkf-publikation: zwei Typen als Lieferung, nicht als Grundausstattung")
+        # Auf einer Kopie. `hk-import` schreibt einen Nachweis in die
+        # Lieferung zurueck, und eine Probe fasst das Repository nicht an.
+        lieferung_pub = os.path.join(tempfile.mkdtemp(prefix="hkb-lief-"),
+                                     "hkf-publikation")
+        shutil.copytree(os.path.join(WURZEL, "bundles", "hkf-publikation"),
+                        lieferung_pub)
+        r = lauf(os.path.join(BIN, "hk-lint"), lieferung_pub)
+        probe("die Lieferung ist konform", r.returncode == 0,
+              (r.stdout + r.stderr)[-300:])
+        r = lauf(os.path.join(BIN, "hk-publikation"), "irgendwas", ziel)
+        probe("ohne die Typen sagt hk-publikation, was fehlt",
+              r.returncode == 2 and "hk-import" in r.stderr, r.stderr[:200])
+        r = lauf(os.path.join(BIN, "hk-import"), lieferung_pub, ziel)
+        probe("sie lässt sich importieren", r.returncode == 0,
+              (r.stdout + r.stderr)[-300:])
+        wurzel_text = io.open(os.path.join(ziel, "hkb.md"),
+                              encoding="utf-8").read()
+        probe("und trägt sich in die Typtabelle ein",
+              "| publication |" in wurzel_text and "| text |" in wurzel_text)
+
+        print("hk-publikation: die Lesereihenfolge steht an drei Stellen gleich")
+        _schreib(os.path.join(ziel, WIKI, "Publications", "sammlung.md"), """---
+type: publication
+name: Eine Sammlung
+created: 2026-01-01
+---
+
+# Zweck
+
+Drei Texte, die zusammen gelesen werden wollen.
+""")
+        for n in ("eins", "zwei", "drei"):
+            _schreib(os.path.join(ziel, WIKI, "Texts", n + ".md"), """---
+type: text
+name: Stück %s
+created: 2026-01-01
+---
+
+# Zweck
+
+Der Text von Stück %s, mit ein paar Wörtern für die Zählung.
+""" % (n, n))
+        for n in ("eins", "zwei", "drei"):
+            r = lauf(os.path.join(BIN, "hk-publikation"), "sammlung",
+                     "--aufnehmen", n, ziel)
+            if r.returncode:
+                break
+        probe("Texte lassen sich aufnehmen", r.returncode == 0,
+              (r.stdout + r.stderr)[-300:])
+        pub = io.open(os.path.join(ziel, WIKI, "Publications", "sammlung.md"),
+                      encoding="utf-8").read()
+        probe("`contents` steht in der Reihenfolge der Aufnahme",
+              pub.index("Texts/eins") < pub.index("Texts/zwei") <
+              pub.index("Texts/drei"), pub[:400])
+        probe("`# Inhalt` im Body zeigt dieselbe Reihenfolge",
+              "1. [[40-Wiki/Texts/eins|Stück eins]]" in pub, pub[-300:])
+        eins = io.open(os.path.join(ziel, WIKI, "Texts", "eins.md"),
+                       encoding="utf-8").read()
+        probe("der Text nennt die Publikation zurück",
+              "[[40-Wiki/Publications/sammlung|Eine Sammlung]]" in eins,
+              eins[:300])
+        r = lauf(os.path.join(BIN, "hk-publikation"), "sammlung", "--vor",
+                 "drei", "--nach", "eins", ziel)
+        pub = io.open(os.path.join(ziel, WIKI, "Publications", "sammlung.md"),
+                      encoding="utf-8").read()
+        probe("--vor stellt um", pub.index("Texts/drei") < pub.index("Texts/eins"),
+              pub[:400])
+        r = lauf(os.path.join(BIN, "hk-publikation"), "sammlung", "--check", ziel)
+        probe("--check findet nichts, solange alles stimmt", r.returncode == 0,
+              r.stdout[-200:])
+        zwei = os.path.join(ziel, WIKI, "Texts", "zwei.md")
+        _schreib(zwei, io.open(zwei, encoding="utf-8").read().replace(
+            'publications:\n  - "[[40-Wiki/Publications/sammlung|Eine Sammlung]]"\n', ""))
+        r = lauf(os.path.join(BIN, "hk-publikation"), "sammlung", "--check", ziel)
+        probe("und meldet, wenn ein Rückverweis fehlt",
+              r.returncode == 1 and "Texts/zwei" in r.stdout, r.stdout[-300:])
+        r = lauf(os.path.join(BIN, "hk-publikation"), "sammlung", "--richten", ziel)
+        probe("--richten zieht ihn nach", r.returncode == 0, r.stdout[-200:])
+        r = lauf(os.path.join(BIN, "hk-publikation"), "sammlung", "--check", ziel)
+        probe("danach stimmt es wieder", r.returncode == 0, r.stdout[-200:])
+        probe("und `words` steht am Text",
+              "words:" in io.open(zwei, encoding="utf-8").read())
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        probe("die Ablage bleibt konform", r.returncode == 0,
+              (r.stdout + r.stderr)[-300:])
+        shutil.rmtree(os.path.join(ziel, WIKI, "Publications"))
+        shutil.rmtree(os.path.join(ziel, WIKI, "Texts"))
+        shutil.rmtree(os.path.dirname(lieferung_pub), ignore_errors=True)
+
         print("Die Hooks: der Kanon kommt aus der Sitzung, nicht aus der Ablage")
         p_hooks = os.path.join(WURZEL, "hooks", "hooks.json")
         try:

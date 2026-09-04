@@ -28,6 +28,7 @@ einen gebrochenen Wikilink immer, ein Modell meistens.
 | [`hkb-suche`](hkb-suche/SKILL.md) | Eine Frage gegen die Wissensbasis beantworten und mit Verweisen belegen |
 | [`hkb-text`](hkb-text/SKILL.md) | Einen Text messen, seine Muster beurteilen und ihn heben |
 | [`hkb-hinweis`](hkb-hinweis/SKILL.md) | Festhalten, was für diese eine Ablage gilt |
+| [`hkb-publikation`](hkb-publikation/SKILL.md) | Texte zu einer Publikation ordnen und die Reihenfolge führen |
 
 **Ein Skill ruft einen Agenten.** `hkb-quelle` liest eine Quelle nie
 selbst, sondern schickt [`wilma`](../agents/wilma.md) — sie liest in ihrem

@@ -1,0 +1,305 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""hk-publikation — die Lesereihenfolge einer Publikation fuehren.
+
+    hk-publikation <notiz>                    zeigt die Reihenfolge
+    hk-publikation <notiz> --aufnehmen <text> haengt einen Text hinten an
+    hk-publikation <notiz> --vor <text>       stellt ihn vor einen anderen
+    hk-publikation <notiz> --entfernen <text> nimmt ihn heraus
+    hk-publikation <notiz> --check            prueft, ob alles zusammenpasst
+    hk-publikation <notiz> --richten          bringt es in Uebereinstimmung
+
+Die Reihenfolge steht an drei Stellen, und sie muessen dasselbe sagen: in
+`contents` der Publikation, im Abschnitt `# Inhalt` ihres Body, und in
+`publications` jedes Textes. Von Hand geschrieben wird keine davon.
+
+`--aufnehmen` und `--vor` nennen den Text als Verweis oder als Dateiname.
+`--vor <text> --nach <anderer>` stellt ihn vor den genannten.
+
+`contents` ist die einzige Liste des Formats, bei der die Reihenfolge etwas
+bedeutet. Ein Werkzeug, das sie umsortiert, aendert das Werk — dieses tut es
+nur, wenn der Aufruf es sagt.
+
+`--richten` zieht ausserdem `words` an jedem Text nach. Die Zahl ist eine
+Kennzahl und keine Zusicherung; sie steht da, damit sich ein Bestand
+ueberblicken laesst, ohne jede Datei zu oeffnen.
+"""
+import os, re, sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
+from hkf import ablage, notiz, pruefen   # noqa: E402
+
+WERKZEUG = "hk-publikation"
+UEBERSCHRIFT = "Inhalt"
+WORT = re.compile(r"[A-Za-zÀ-ÿ0-9]+")
+
+
+def _wert(argv, name):
+    if name in argv:
+        i = argv.index(name)
+        if i + 1 < len(argv):
+            return argv[i + 1]
+    return None
+
+
+def _finde(b, kennung, typ=None):
+    """(rel, eintrag) fuer einen Verweis oder Dateinamen."""
+    art, rel = b.aufloesen(kennung.rstrip("/"))
+    if art != "notiz":
+        name = kennung.rstrip("/").rsplit("/", 1)[-1]
+        if name.endswith(".md"):
+            name = name[:-3]
+        treffer = [t for t in (b.nach_namen.get(name) or [])
+                   if typ is None or b.notizen[t]["typ"] == typ]
+        if len(treffer) != 1:
+            raise KeyError("`%s` ist keine eindeutige %s dieser Ablage%s"
+                           % (kennung, typ or "Notiz",
+                              ": " + ", ".join(treffer) if treffer else "."))
+        rel = treffer[0]
+    e = b.notizen[rel]
+    if typ and e["typ"] != typ:
+        raise KeyError("`%s` ist vom Typ `%s`, gebraucht wird `%s`."
+                       % (rel, e["typ"], typ))
+    return rel, e
+
+
+def _verweis(b, rel, e):
+    praefix = b.praefix(e.get("bereich") or "wiki_base")
+    titel = str(e["daten"].get("title") or e["daten"].get("name") or
+                rel.rsplit("/", 1)[-1])
+    return "[[%s|%s]]" % ("/".join(t for t in (praefix, rel) if t), titel)
+
+
+def _rel_aus_verweis(b, wert):
+    m = re.match(r"^\[\[([^\]|]+)", str(wert))
+    if not m:
+        return None
+    art, rel = b.aufloesen(m.group(1))
+    return rel if art == "notiz" else None
+
+
+def _reihenfolge(b, e_pub):
+    """[(rel, eintrag)] in der Reihenfolge aus `contents`, Unauflösbares fällt weg."""
+    aus = []
+    for wert in e_pub["daten"].get("contents") or []:
+        rel = _rel_aus_verweis(b, wert)
+        if rel and rel in b.notizen:
+            aus.append((rel, b.notizen[rel]))
+    return aus
+
+
+def _inhalt_block(b, reihe):
+    zeilen = ["# %s" % UEBERSCHRIFT, ""]
+    if reihe:
+        for i, (rel, e) in enumerate(reihe, 1):
+            zeilen.append("%d. %s" % (i, _verweis(b, rel, e)))
+    else:
+        zeilen.append("Noch leer.")
+    return "\n".join(zeilen) + "\n"
+
+
+def einsetzen(body, block):
+    """Den Abschnitt ersetzen oder ihn vor `# Siehe auch` einhaengen (§5.6)."""
+    m = re.search(r"^# %s$" % UEBERSCHRIFT, body, re.M)
+    if m:
+        body = notiz.ohne_abschnitt(body, UEBERSCHRIFT)
+        vorher, nachher = body[:m.start()], body[m.start():]
+    else:
+        m = re.search(r"^# Siehe auch$", body, re.M)
+        vorher = body[:m.start()] if m else body
+        nachher = body[m.start():] if m else ""
+    vorher = vorher.rstrip("\n")
+    aus = (vorher + "\n\n" if vorher else "") + block
+    return aus + ("\n" + nachher.lstrip("\n") if nachher.strip() else "\n")
+
+
+def schreiben(b, rel_pub, reihe, worte=False):
+    """`contents`, `# Inhalt` und die Rueckverweise gleichziehen.
+
+    Je Datei genau ein Schreibvorgang. Zwei Durchgaenge, die beide vom Stand
+    vor dem ersten ausgehen, heben einander auf — der zweite schreibt den
+    alten Kopf zurueck.
+    """
+    e_pub = b.notizen[rel_pub]
+    getan = []
+    verweise = [_verweis(b, r, e) for r, e in reihe]
+    kopf = notiz.setze_liste(e_pub["kopf"], "contents", verweise)
+    body = einsetzen(e_pub["body"], _inhalt_block(b, reihe))
+    if kopf != e_pub["kopf"] or body != e_pub["body"]:
+        notiz.sichern(e_pub["pfad"], kopf, body, WERKZEUG)
+        getan.append(rel_pub)
+
+    hier = _verweis(b, rel_pub, e_pub)
+    drin = set(r for r, _ in reihe)
+    for rel, e in sorted(b.notizen.items()):
+        if e["typ"] != "text":
+            continue
+        kopf = e["kopf"]
+        alt = [str(w) for w in (e["daten"].get("publications") or [])]
+        fremd = [w for w in alt if _rel_aus_verweis(b, w) != rel_pub]
+        soll = sorted(set(fremd + ([hier] if rel in drin else [])))
+        if soll != sorted(alt):
+            kopf = notiz.setze_liste(kopf, "publications", soll)
+        if worte and rel in drin:
+            zahl = _woerter(e)
+            if e["daten"].get("words") != zahl:
+                kopf = notiz.setze_skalar(kopf, "words", str(zahl))
+        if kopf != e["kopf"]:
+            notiz.sichern(e["pfad"], kopf, e["body"], WERKZEUG)
+            getan.append(rel)
+    return getan
+
+
+def _woerter(e):
+    return len(WORT.findall(e["body"]))
+
+
+def zeigen(b, rel_pub, reihe):
+    e_pub = b.notizen[rel_pub]
+    print("%s — %s" % (rel_pub, str(e_pub["daten"].get("title") or
+                                    e_pub["daten"].get("name") or "")))
+    if not reihe:
+        print("Noch leer. `--aufnehmen <text>` nimmt einen Text auf.")
+        return 0
+    summe = 0
+    for i, (rel, e) in enumerate(reihe, 1):
+        w = _woerter(e)
+        summe += w
+        print("  %2d. %-46s %6d Wörter  %s"
+              % (i, rel, w, e["daten"].get("status") or ""))
+    print()
+    print("%d Texte, %d Wörter" % (len(reihe), summe))
+    return 0
+
+
+def pruefen_stand(b, rel_pub, reihe):
+    """Was zwischen contents, `# Inhalt` und den Rueckverweisen auseinanderlaeuft."""
+    e_pub = b.notizen[rel_pub]
+    befunde = []
+    soll = _inhalt_block(b, reihe).strip()
+    ist = (notiz.abschnitt(e_pub["body"], UEBERSCHRIFT) or "").strip()
+    if ist != soll.split("\n", 1)[1].strip() if "\n" in soll else True:
+        if ist != "\n".join(soll.splitlines()[1:]).strip():
+            befunde.append("`# Inhalt` im Body sagt etwas anderes als `contents`.")
+    hier = _verweis(b, rel_pub, e_pub)
+    drin = set(r for r, _ in reihe)
+    for rel, e in sorted(b.notizen.items()):
+        if e["typ"] != "text":
+            continue
+        nennt = any(_rel_aus_verweis(b, w) == rel_pub
+                    for w in (e["daten"].get("publications") or []))
+        if rel in drin and not nennt:
+            befunde.append("%s steht in `contents`, nennt die Publikation "
+                           "aber nicht in `publications`." % rel)
+        elif rel not in drin and nennt:
+            befunde.append("%s nennt die Publikation, steht aber nicht in "
+                           "`contents`." % rel)
+    for wert in e_pub["daten"].get("contents") or []:
+        if _rel_aus_verweis(b, wert) is None:
+            befunde.append("`contents` nennt %s — das löst nicht auf." % wert)
+    return befunde
+
+
+def main(argv):
+    if "--help" in argv or "-h" in argv:
+        print(__doc__.strip()); return 0
+    aufnehmen = _wert(argv, "--aufnehmen")
+    vor = _wert(argv, "--vor")
+    nach = _wert(argv, "--nach")
+    entfernen = _wert(argv, "--entfernen")
+    check = "--check" in argv
+    richten = "--richten" in argv
+
+    args, ueberspringen = [], False
+    for a in argv:
+        if ueberspringen:
+            ueberspringen = False; continue
+        if a in ("--aufnehmen", "--vor", "--nach", "--entfernen"):
+            ueberspringen = True; continue
+        if not a.startswith("-"):
+            args.append(a)
+    if not args:
+        sys.stderr.write("Keine Publikation genannt. `hk-publikation --help`.\n")
+        return 2
+    pfad_arg = None
+    if len(args) > 1 and ablage.art_von(
+            os.path.abspath(os.path.expanduser(args[-1]))):
+        pfad_arg = args.pop()
+
+    try:
+        hkb, art = ablage.finde_ablage(pfad_arg, arten=("hkb",))
+    except ablage.KeineAblage as e:
+        sys.stderr.write(str(e) + "\n"); return 2
+    b = pruefen.Bestand(hkb, art)
+    if "publication" not in b.typdefs or "text" not in b.typdefs:
+        sys.stderr.write("Diese Ablage kennt `publication` und `text` nicht.\n"
+                         "  → hk-import <harness>/bundles/hkf-publikation\n")
+        return 2
+    try:
+        rel_pub, _e = _finde(b, args[0], "publication")
+    except KeyError as e:
+        sys.stderr.write(str(e) + "\n"); return 2
+
+    reihe = _reihenfolge(b, b.notizen[rel_pub])
+
+    if check:
+        befunde = pruefen_stand(b, rel_pub, reihe)
+        print("%s — %d Texte" % (rel_pub, len(reihe)))
+        for f in befunde:
+            print("  -", f)
+        print()
+        print("Alles in Übereinstimmung." if not befunde
+              else "%d Abweichungen. `--richten` zieht sie gleich." % len(befunde))
+        return 1 if befunde else 0
+
+    geaendert = False
+    for kennung, wohin in ((aufnehmen, "hinten"), (vor, "vor")):
+        if not kennung:
+            continue
+        try:
+            rel, e = _finde(b, kennung, "text")
+        except KeyError as fehler:
+            sys.stderr.write(str(fehler) + "\n"); return 2
+        reihe = [(r, x) for r, x in reihe if r != rel]
+        if wohin == "vor":
+            if not nach:
+                sys.stderr.write("`--vor` braucht `--nach <text>`.\n"); return 2
+            try:
+                ziel, _ = _finde(b, nach, "text")
+            except KeyError as fehler:
+                sys.stderr.write(str(fehler) + "\n"); return 2
+            stellen = [i for i, (r, _) in enumerate(reihe) if r == ziel]
+            if not stellen:
+                sys.stderr.write("%s steht nicht in dieser Publikation.\n" % ziel)
+                return 2
+            reihe.insert(stellen[0], (rel, e))
+        else:
+            reihe.append((rel, e))
+        geaendert = True
+
+    if entfernen:
+        try:
+            rel, _ = _finde(b, entfernen, "text")
+        except KeyError as fehler:
+            sys.stderr.write(str(fehler) + "\n"); return 2
+        vorher = len(reihe)
+        reihe = [(r, x) for r, x in reihe if r != rel]
+        if len(reihe) == vorher:
+            sys.stderr.write("%s steht nicht in dieser Publikation.\n" % rel)
+            return 2
+        geaendert = True
+
+    if not (geaendert or richten):
+        return zeigen(b, rel_pub, reihe)
+
+    getan = schreiben(b, rel_pub, reihe, worte=richten)
+    print("%s — %d Texte" % (rel_pub, len(reihe)))
+    for g in getan:
+        print("  ·", g)
+    print()
+    print("%d Notizen geschrieben." % len(getan) if getan else "Nichts zu ändern.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

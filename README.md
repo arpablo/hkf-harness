@@ -90,6 +90,7 @@ Python 3 und PyYAML.
 | `hk-suche <muster>` | findet Notizen: Volltext, `--typ`, `--hat`, `--verweist-auf`, `--fundstellen` | **läuft** |
 | `hk-erwaehnungen <ziel>` | macht unverlinkte Erwähnungen einer Notiz zu qualifizierten Verweisen | **läuft** |
 | `hk-kontext [--stimme]` | gibt aus, was in dieser Ablage gilt: Lage, Kanon, Stimme, Hinweise | **läuft** |
+| `hk-publikation <notiz>` | führt die Lesereihenfolge einer Publikation: `--aufnehmen`, `--vor`, `--check`, `--richten` | **läuft** |
 
 Was geprüft wird, entscheidet die Wurzeldatei: `hkb.md` heißt Wissensbasis,
 `hbundle.md` heißt Lieferung. §6.3 gilt für beide, mit den Unterschieden aus §4
@@ -183,11 +184,12 @@ lib/hkf/text/ der Schreibregelprüfer: segment, engine, rules, rhythm_lint
 rules/       deutsch.json, der Basissatz der Schreibregeln
 bin/         hk-init, hk-lint, hk-import, hk-export, hk-ingest,
              hk-tranchen, hk-types, hk-ablage, hk-text, hk-install,
-             hk-suche, hk-erwaehnungen, hk-kontext
+             hk-suche, hk-erwaehnungen, hk-kontext, hk-publikation
 py           das Python des Harness — baut die venv und startet sie
 tools/       spec.py hält die Kopie unter spec/ auf Stand,
              grundausstattung.py die Vorlage gegen Anhang A und §3.5.1
 templates/   die Grundausstattung, aus der hk-init schöpft
+bundles/     Typen, die nicht jede Ablage braucht, als Lieferung zum Import
 skills/      die KI-Schicht: hkb und sieben Operationen, siehe skills/README.md
 agents/      die Subagenten: wilma liest, marlene schreibt, astrid lektoriert
 commands/    die Slash-Kommandos, siehe hk-install
