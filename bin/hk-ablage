@@ -23,7 +23,7 @@ Eine Wahl macht aus einem Verzeichnis keine Ablage. Wo weder `hkb.md` noch
 import os, sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
-from hkf import ablage   # noqa: E402
+from hkf import ablage, kontext   # noqa: E402
 
 
 def _zeile(pfad, name, art):
@@ -85,7 +85,15 @@ def main(argv):
         except ablage.KeineAblage as e:
             sys.stderr.write(str(e) + "\n"); return 2
         print("Gemerkt für %s" % os.getcwd())
-        return zeigen()
+        rueck = zeigen()
+        # Der Sitzungshook hat den Kanon nicht eingespielt, weil noch keine
+        # Ablage gewaehlt war. Jetzt ist sie es.
+        print()
+        text, _pfad, _art = kontext.zusammensetzen(
+            teile_gewuenscht=("kanon", "stimme", "hinweise"))
+        if text:
+            print(text)
+        return rueck
     return zeigen()
 
 

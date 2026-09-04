@@ -101,17 +101,18 @@ def lage(wo):
             % woher,
         ])
 
+    # Nur was **hier** liegt, kommt zur Sprache. Ein Verzeichnis aus dem
+    # Gedaechtnis vorzuschlagen hiesse, in einem fremden Projekt nach einer
+    # Wissensbasis zu fragen, die damit nichts zu tun hat.
+    kandidaten = ablage.daneben(wo)
+    if not kandidaten:
+        return pfad, None, ""
     zeilen = ["# Es ist keine Ablage gewählt", "",
-              "%s ist keine Ablage, und der Pfad kommt aus %s." % (pfad, woher)]
-    kandidaten = ablage.daneben(wo) or ablage.bekannt()
-    if kandidaten:
-        zeilen += ["", "Zur Wahl steht:", ""]
-        zeilen += ["- `%s` — %s „%s“" % (p, ablage.ARTNAME[a], n)
-                   for p, n, a in kandidaten]
-        zeilen += ["", "**Frag nach, statt eine zu nehmen.** Steht die Wahl "
-                        "fest: `hk-ablage <pfad>`."]
-    else:
-        zeilen += ["", "Hier liegt keine. `hk-init <ziel>` legt eine an."]
+              "Unter diesem Verzeichnis liegen mehrere. Zur Wahl steht:", ""]
+    zeilen += ["- `%s` — %s „%s“" % (p, ablage.ARTNAME[a], n)
+               for p, n, a in kandidaten]
+    zeilen += ["", "**Frag nach, statt eine zu nehmen.** Steht die Wahl "
+                    "fest: `hk-ablage <pfad>`."]
     return pfad, None, "\n".join(zeilen)
 
 
@@ -125,6 +126,14 @@ def zusammensetzen(wo=None, teile_gewuenscht=("lage", "kanon", "stimme",
     if art and "lage" in teile_gewuenscht:
         teile.append("Die Werkzeuge stehen in `bin/`, die Regeln in den Skills "
                      "`hkf:hkb…`. HKF Core %s." % CORE)
+    # Ohne Ablage und ohne Kandidaten schweigt der Hook. Der Kanon gehoert zu
+    # einer Ablage; ihn in ein fremdes Projekt einzuspielen kostet in jeder
+    # Sitzung und hilft in keiner.
+    if not art:
+        # Steht die Wahl noch aus, kommt nur sie. Der Kanon gehoert zu einer
+        # Ablage, und 17 000 Zeichen fuer eine Entscheidung, die vielleicht
+        # nie faellt, sind zu teuer. `hk-ablage <pfad>` gibt ihn danach aus.
+        return kopf, pfad, None
     if "kanon" in teile_gewuenscht:
         teile += kanon()
     if art and "stimme" in teile_gewuenscht:

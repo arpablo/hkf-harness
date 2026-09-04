@@ -976,6 +976,20 @@ Eine Person bekommt hier erst ab dem zweiten Auftritt ein Blatt.
         k = json.loads(r.stdout)["hookSpecificOutput"]["additionalContext"]
         probe("ohne Ablage zählt er auf, statt zu raten",
               "keine Ablage gewählt" in k and "Frag nach" in k, k[:300])
+        probe("und spielt den Kanon dabei noch nicht ein",
+              "# Zusammenarbeit" not in k, k[:300])
+        # In einem fremden Projekt hat der Harness nichts zu sagen. Ein Hook,
+        # der dort trotzdem 17 000 Zeichen einspielt, kostet in jeder Sitzung.
+        fremd = tempfile.mkdtemp(prefix="hkb-fremd-")
+        r = lauf(os.path.join(WURZEL, "py"), sitzung,
+                 input='{"cwd": "%s"}' % fremd,
+                 env=dict(umg, HKF_WAHL=os.path.join(ziel, "leer.json")))
+        probe("wo keine Ablage liegt, schweigt er ganz",
+              r.returncode == 0 and not r.stdout.strip(), r.stdout[:200])
+        shutil.rmtree(fremd, ignore_errors=True)
+        r = lauf(os.path.join(BIN, "hk-ablage"), ziel, env=umg, cwd=ziel)
+        probe("nach der Wahl gibt hk-ablage den Kanon aus",
+              "# Zusammenarbeit" in r.stdout, r.stdout[:300])
 
         regeln = os.path.join(WURZEL, "hooks", "schreibregeln.py")
         muster = os.path.join(ziel, WIKI, "Notes", "hook.md")

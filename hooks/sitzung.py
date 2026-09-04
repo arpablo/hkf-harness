@@ -26,6 +26,10 @@ def main():
     e = gemeinsam.ereignis()
     wo = gemeinsam.arbeitsverzeichnis(e)
     text, pfad, art = kontext.zusammensetzen(wo)
+    if not text:
+        # Hier gibt es nichts zu sagen. Ein Hook, der in jedem fremden
+        # Projekt etwas einspielt, kostet dort in jeder Sitzung.
+        return 0
     kurz = ("%s (%s)" % (ablage.name_von(pfad), ablage.ARTNAME[art])
             if art else "keine Ablage gewählt")
     return gemeinsam.kontext(text, "HKF: " + kurz)
