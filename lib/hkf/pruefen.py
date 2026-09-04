@@ -823,18 +823,29 @@ def _skalar_passt(b, wert, basis, args):
         if str(wert).strip().startswith("[["):
             return _link_passt(b, wert, args, medien=False)
         return True, ""
-    text = str(wert)
+    # Ein Property-Typ mit `form: list` bekommt die ganze Liste. `items` sagt,
+    # wie viele Eintraege sie traegt, wenn die Zahl feststeht — eine Koordinate
+    # ist ein Paar, und eines mit drei Zahlen ist keine.
+    anzahl = d.get("items")
+    if anzahl is not None and isinstance(wert, list) and len(wert) != int(anzahl):
+        return False, ("hat %d Einträge, %s verlangt %d"
+                       % (len(wert), basis, int(anzahl)))
+    # `pattern`, `values`, `min` und `max` gelten je Eintrag. Sie auf die
+    # Zeichenkette der ganzen Liste anzuwenden traefe nie zu.
+    eintraege = wert if isinstance(wert, list) else [wert]
     muster = d.get("pattern")
-    if muster and not re.search(str(muster), text):
-        return False, "passt nicht auf das `pattern` von %s" % basis
     werte = d.get("values")
-    if werte and text not in [str(v) for v in werte]:
-        return False, "steht nicht in den `values` von %s" % basis
-    for grenze, name, schlechter in ((d.get("min"), "min", lambda a, g: a < g),
-                                     (d.get("max"), "max", lambda a, g: a > g)):
-        if grenze is not None and isinstance(wert, (int, float)) and \
-           schlechter(wert, grenze):
-            return False, "verletzt `%s: %s` von %s" % (name, grenze, basis)
+    for x in eintraege:
+        text = str(x)
+        if muster and not re.search(str(muster), text):
+            return False, "passt nicht auf das `pattern` von %s" % basis
+        if werte and text not in [str(v) for v in werte]:
+            return False, "steht nicht in den `values` von %s" % basis
+        for grenze, name, schlechter in ((d.get("min"), "min", lambda a, g: a < g),
+                                         (d.get("max"), "max", lambda a, g: a > g)):
+            if grenze is not None and isinstance(x, (int, float)) and \
+               schlechter(x, grenze):
+                return False, "verletzt `%s: %s` von %s" % (name, grenze, basis)
     return True, ""
 
 

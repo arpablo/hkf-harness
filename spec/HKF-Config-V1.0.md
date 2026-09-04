@@ -1,7 +1,7 @@
 ---
 type: specification
 title: HKF Config V1.0 — Typen und Property-Typen
-description: Siebzehn Typdefinitionen und siebzehn Property-Typen an einem Ort: die Grundausstattung jeder Wissensbasis und das Vokabular, das als Bundle dazukommt.
+description: Siebzehn Typdefinitionen und achtzehn Property-Typen an einem Ort: die Grundausstattung jeder Wissensbasis und das Vokabular, das als Bundle dazukommt.
 status: draft
 ---
 
@@ -53,9 +53,9 @@ Was ein Property-Typ ist und wie er wirkt, steht in Core §3.5. Hier stehen
 die, die es gibt: vierzehn, die jede Ablage kennt, und drei, die nur mit den
 Typen aus §3 Sinn ergeben.
 
-## 2.1 Die vierzehn Standard-Property-Typen
+## 2.1 Die fünfzehn Standard-Property-Typen
 
-Diese vierzehn Property-Typen kennt jede HKB. Sie sind Teil dieser
+Diese fünfzehn Property-Typen kennt jede HKB. Sie sind Teil dieser
 Spezifikation und gehören zur **Grundausstattung**: Eine HKB legt sie beim
 Anlegen als Notizen in `Proptypes/` an (Core §5.3).
 
@@ -66,6 +66,7 @@ Abweichung gilt das Schema. Ein Werkzeug liest sie dort; wer die Tabelle
 
 | Property-Typ | Wertform | Einschränkung |
 |---|---|---|
+| `hkf-geo` | `list` | `items: 2`, je Eintrag `pattern: "^-?[0-9]{1,3}([.,][0-9]+)?$"`; **erst die Breite, dann die Länge** |
 | `hkf-url` | `text` | `pattern: "^(https?://\\S+|\\[[^\\]\\n]+\\]\\(https?://\\S+\\))$"` |
 | `hkf-email` | `text` | `pattern: "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"` |
 | `hkf-phone` | `text` | `pattern: "^\\+[1-9]\\d{6,14}$"` — E.164, also `+4993131885` |
@@ -209,7 +210,7 @@ entfernen darf sie keine, weil das vorhandene Notizen ungültig machte.
 
 ## 2.3 Die Properties des Vokabulars
 
-Die 69 Property-Namen, die die siebzehn Typdefinitionen aus §3 zusichern —
+Die 70 Property-Namen, die die siebzehn Typdefinitionen aus §3 zusichern —
 an einer Stelle, damit sich nachschlagen lässt, was ein Name bedeutet, ohne
 jede Typdefinition zu öffnen. Die notizübergreifenden Properties aus Core A.2
 stehen nicht darin; sie gelten ohnehin für jede Notiz.
@@ -238,6 +239,7 @@ beide gegeneinander.
 | `authority` | `hkf-link-or-text:organisation` | specification |
 | `authors` | `hkf-link-or-text-list:person` | source |
 | `base` | `text` | typedef |
+| `items` | `number` | proptype |
 | `birthplace` | `hkf-link:place,city,country` | person |
 | `born` | `date` | person |
 | `born_year` | `hkf-year` | person |
@@ -423,6 +425,7 @@ description: Schränkt eine Wertform ein.
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
 | form | text | ja | — | Eine der sechs Wertformen aus Core §3.4 |
+| items | number | nein | — | Zahl der Einträge, wenn sie feststeht. Nur bei `form: list` |
 | pattern | text | nein | — | Regulärer Ausdruck, nur bei `text` und `list`, dort je Eintrag |
 | values | list | nein | — | Erlaubte Werte, als Text geführt, auch wenn sie wie Zahlen aussehen |
 | unit | text | nein | — | Maßeinheit, beschreibend und nicht geprüft |

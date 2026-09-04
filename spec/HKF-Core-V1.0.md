@@ -29,7 +29,7 @@ Das Format ist auf zwei Dokumente verteilt, weil es zwei Fragen beantwortet:
   Wertformen, Verweise, Typdefinitionen als Bauform, das Bundle-Format und die
   drei Methoden. Es nennt **keine einzige konkrete Definition**.
 - **[HKF Config](HKF-Config-V1.0.md)** — das Inventar: siebzehn
-  Typdefinitionen und siebzehn Property-Typen. Sie bilden zusammen die
+  Typdefinitionen und achtzehn Property-Typen. Sie bilden zusammen die
   **Grundausstattung** jeder Ablage und entstehen mit ihr; geliefert wird
   keine davon.
 
@@ -1182,7 +1182,7 @@ in Anhang A.
 Mehr definiert dieses Dokument nicht. Welche Typen es sonst noch gibt, sagt
 **HKF Config**; jede Ablage ergänzt darüber hinaus, was sie braucht.
 
-Alles, was in HKF Config steht — siebzehn Typdefinitionen und siebzehn
+Alles, was in HKF Config steht — siebzehn Typdefinitionen und achtzehn
 Property-Typen —, bildet die **Grundausstattung** einer HKB. Sie entsteht mit
 der Wissensbasis und wird nicht geliefert. Für die drei Kern-Typen ist das
 zwingend: Ohne den Typ `typedef` ließe sich keine Typdefinition ablegen, ohne
@@ -1629,7 +1629,7 @@ gepflegt oder geparst werden muss.
 ## 5.3 Grundausstattung und Zuladung
 
 Eine HKB entsteht mit ihrer **Grundausstattung**: allem, was in **HKF Config**
-steht — siebzehn Typdefinitionen und siebzehn Property-Typen. Sie wird nicht
+steht — siebzehn Typdefinitionen und achtzehn Property-Typen. Sie wird nicht
 geliefert, sondern angelegt, denn ein Import setzt sie voraus: Er muss
 Typdefinitionen ablegen, Property-Typen einordnen und die Lieferung verbuchen
 können, bevor er irgendetwas anderes tut. Damit ist die Wissensbasis konform,

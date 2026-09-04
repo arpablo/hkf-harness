@@ -12,6 +12,7 @@ modified_by: claude-opus-5
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
 | form | text | ja | — | Eine der sechs Wertformen aus Core §3.4 |
+| items | number | nein | — | Zahl der Einträge, wenn sie feststeht. Nur bei `form: list` |
 | pattern | text | nein | — | Regulärer Ausdruck, nur bei `text` und `list`, dort je Eintrag |
 | values | list | nein | — | Erlaubte Werte, als Text geführt, auch wenn sie wie Zahlen aussehen |
 | unit | text | nein | — | Maßeinheit, beschreibend und nicht geprüft |

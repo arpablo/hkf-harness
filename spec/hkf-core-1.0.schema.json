@@ -63,6 +63,15 @@
       "type": "string",
       "pattern": "^\\[\\[[^\\u0000-\\u001f/\\]|]+(/[^\\u0000-\\u001f/\\]|]+)*(\\|[^\\u0000-\\u001f\\]|]+)?\\]\\]$"
     },
+    "hkf-geo": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "string",
+        "pattern": "^-?[0-9]{1,3}([.,][0-9]+)?$"
+      }
+    },
     "hkf-url": {
       "type": "string",
       "pattern": "^(https?://\\S+|\\[[^\\]\\n]+\\]\\(https?://\\S+\\))$"
@@ -136,6 +145,7 @@
         "hkf-country",
         "hkf-email",
         "hkf-file",
+        "hkf-geo",
         "hkf-lang",
         "hkf-latitude",
         "hkf-link",

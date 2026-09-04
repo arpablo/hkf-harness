@@ -166,7 +166,7 @@ def main():
         print("hk-init")
         r = lauf(os.path.join(BIN, "hk-init"), ziel, "--name", "Probe")
         probe("legt an", r.returncode == 0, r.stderr.strip())
-        probe("34 Notizen", "34 Notizen" in r.stdout, r.stdout.strip())
+        probe("35 Notizen", "35 Notizen" in r.stdout, r.stdout.strip())
         wurzel = io.open(os.path.join(ziel, "hkb.md"), encoding="utf-8").read()
         probe("Wurzeldatei traegt den Namen", "name: Probe" in wurzel)
         probe("und die vier Bereiche (§3.1)",
@@ -703,6 +703,39 @@ Hier steht [[40-Wiki/Persons/ada-lovelace|Ada Lovelace]] schon verlinkt.
         for d in ("Persons", "Events"):
             os.rmdir(os.path.join(ziel, WIKI, d))
 
+        print("hkf-geo: eine Koordinate ist ein Paar")
+        geo = os.path.join(tempfile.mkdtemp(prefix="hkb-geo-"), "ablage")
+        lauf(os.path.join(BIN, "hk-init"), geo)
+        tp = os.path.join(geo, KONFIG, "Typedefs", "city.md")
+        _schreib(tp, io.open(tp, encoding="utf-8").read().replace(
+            "| latitude |",
+            "| location | hkf-geo | nein | — | Breite und Länge als Paar |\n| latitude |", 1))
+        for name, ort in (("berlin", '  - "52.5200"\n  - "13.4050"'),
+                          ("drei", '  - "52.5"\n  - "13.4"\n  - "99"'),
+                          ("text", '  - "Berlin"\n  - "13.4"')):
+            _schreib(os.path.join(geo, WIKI, "Cities", name + ".md"), """---
+type: city
+name: %s
+location:
+%s
+created: 2026-01-01
+modified: 2026-01-01T00:00:00
+---
+
+# Zweck
+
+Da.
+""" % (name, ort))
+        r = lauf(os.path.join(BIN, "hk-lint"), geo)
+        probe("ein Paar aus zwei Dezimalgraden geht durch",
+              "berlin.md: `location`" not in r.stdout, r.stdout[-500:])
+        probe("drei Einträge sind ein Befund (`items`)",
+              "hat 3 Einträge, hkf-geo verlangt 2" in r.stdout, r.stdout[-500:])
+        probe("ein Eintrag, der keine Zahl ist, auch",
+              "text.md: `location` passt nicht auf das `pattern`" in r.stdout,
+              r.stdout[-500:])
+        shutil.rmtree(os.path.dirname(geo), ignore_errors=True)
+
         print("Was Obsidian mitbringt, sperrt HKF nicht aus")
         # Zwei Regeln, die an einem gewachsenen Vault zu eng waren.
         _schreib(os.path.join(ziel, QUELLEN, "quelle.md"), """---
@@ -800,7 +833,7 @@ Ein Verweis auf [[Persons/ada|Ada]].
                         % (os.path.join(WURZEL, "lib"), leer)],
                        capture_output=True, text=True).stdout.strip()
         probe("jede Notiz steht genau einmal im Bestand",
-              zahl == "36", "%s statt 36" % zahl)
+              zahl == "37", "%s statt 37" % zahl)
         shutil.rmtree(os.path.dirname(leer), ignore_errors=True)
 
         print("hk-verweise: aus einem kurzen Verweis wird ein qualifizierter")
