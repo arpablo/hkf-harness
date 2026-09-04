@@ -119,6 +119,33 @@ liest in seinem eigenen Kontext und gibt ein belegtes Destillat zurück.
 Daraus folgt die Reihenfolge beim Bauen: erst `bin/`, dann `agents/` und
 `skills/`.
 
+### Verteilt wird sie als Plugin
+
+Ein Modell findet eine Fähigkeit nur, wo es sucht. Der Harness ist deshalb ein
+Claude-Code-Plugin: `.claude-plugin/plugin.json` an der Wurzel, daneben die
+Bausteine in `skills/`, `agents/`, `commands/` und `bin/`. Das Plugin heißt
+`hkf`, und alles darin trägt diesen Namensraum, also `hkf:hkb-quelle`.
+
+Der Grund ist nicht Bequemlichkeit. Ein Bestand aus einzeln gesetzten Symlinks
+verrottet, weil niemand ihn zählt. In diesem Harness fehlte der Zeiger auf
+`hkb-typseite` von seiner Entstehung an, und die Werkzeuge in `bin/` lagen auf
+keinem Pfad, obwohl jeder Skill sie beim bloßen Namen aufruft. Beides fiel
+niemandem auf, weil es nichts gab, das es prüft. Ein Plugin nimmt seine
+Bausteine vollständig oder gar nicht, und `bin/` liegt danach auf dem Pfad.
+
+Zwei Wege hinein. Der Marktplatz in `.claude-plugin/marketplace.json` dient der
+Verteilung an andere und kopiert in einen Cache. Auf der Maschine, auf der das
+Repository selbst liegt, taugt das nicht, weil eine Änderung dort nie ankäme.
+Dafür gibt es den zweiten Weg: Ein Verzeichnis unter `~/.claude/skills/`, das
+ein Plugin-Manifest trägt, wird als Plugin geladen. Ein Symlink genügt, und das
+Repository bleibt die gelesene Fassung. `hk-install` setzt ihn.
+
+**Was daneben von Hand gesetzt wurde, muss weg.** Ein gleichnamiger Eintrag
+unter `~/.claude/skills/` oder `~/.claude/agents/` verdrängt die Fassung aus
+dem Plugin, ohne es zu sagen. `hk-install` entfernt die Zeiger, die in dieses
+Repository führen, und lässt einen Zeiger auf einen fremden Harness stehen: Ihn
+umzuhängen entzöge dem anderen seine Skills.
+
 ## 3. Die Wissensbasis wird über eine Umgebungsvariable gefunden
 
 Vorbild ist der Skill

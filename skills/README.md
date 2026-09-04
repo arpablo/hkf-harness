@@ -36,3 +36,14 @@ die drei Urteile aus der Spezifikation fallen und als Zeile in
 `# Entscheidungen` festgehalten werden (§5.7) — ohne das fragt jeder weitere
 Lauf dieselbe Frage neu. **`hkb-notiz`** ist die einzige Operation, die kein
 Script erledigt: Inhalt entsteht nicht mechanisch.
+
+## Wo sie liegen
+
+Sie werden nicht einzeln eingehängt, sondern als Plugin ausgeliefert. Das
+Manifest steht in `.claude-plugin/plugin.json`, die Bausteine liegen an der
+Wurzel des Repositorys. Alles trägt danach den Namensraum `hkf`, also
+`hkf:hkb-quelle` und `hkf:wilma`. `hk-install` hängt das Plugin ein und
+entfernt die Zeiger, die früher von Hand gesetzt wurden.
+
+Ein Slash-Kommando liegt daneben: `/hkf:ablage` sagt, an welcher Wissensbasis
+gearbeitet wird, und merkt eine Wahl.

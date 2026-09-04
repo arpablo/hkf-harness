@@ -1,0 +1,158 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""hk-install — den Harness dort einhaengen, wo ein Modell ihn findet.
+
+    hk-install            richtet ein, was fehlt
+    hk-install --check    berichtet nur, aendert nichts
+    hk-install --loesen   haengt wieder aus
+
+Der Harness ist ein Claude-Code-Plugin. Fuer die Verteilung an andere dient der
+Marktplatz in `.claude-plugin/marketplace.json`. Auf der Maschine, auf der das
+Repository selbst liegt, taugt der Weg nicht: Ein Marktplatz-Install kopiert in
+den Cache, und eine Aenderung am Repository kaeme dort nie an.
+
+Deshalb der zweite Weg, den Claude Code vorsieht. Ein Verzeichnis unter
+`~/.claude/skills/`, das ein `.claude-plugin/plugin.json` traegt, wird als
+Plugin geladen. Ein Symlink dorthin genuegt, und das Repository bleibt die
+gelesene Fassung.
+
+Was frueher von Hand gesetzt wurde, raeumt dieser Befehl weg: je ein Symlink
+unter `~/.claude/skills/` und `~/.claude/agents/`. Solche Eintraege verdraengen
+die Fassung aus dem Plugin stillschweigend, und genau daran ist `hkb-typseite`
+monatelang unsichtbar geblieben.
+
+**Ein Zeiger auf einen fremden Harness wird nicht angefasst.** Ihn umzuhaengen
+entzoege dem anderen seine Skills, ohne dass es jemand merkt. Er wird gemeldet.
+"""
+import os, shutil, sys
+
+WURZEL = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+sys.path.insert(0, os.path.join(WURZEL, "lib"))
+from hkf import CORE   # noqa: E402
+
+CLAUDE = os.path.join(os.path.expanduser("~"), ".claude")
+NAME = "hkf"
+ZIEL = os.path.join(CLAUDE, "skills", NAME)
+
+
+def _eigen(pfad):
+    """Zeigt der Symlink in dieses Repository?"""
+    try:
+        return os.path.realpath(pfad).startswith(WURZEL + os.sep) or \
+               os.path.realpath(pfad) == WURZEL
+    except OSError:
+        return False
+
+
+def _altlasten():
+    """[(pfad, eigen)] der von Hand gesetzten Zeiger, die das Plugin ersetzt."""
+    aus = []
+    for teil, namen in (("skills", None), ("agents", None)):
+        ordner = os.path.join(CLAUDE, teil)
+        if not os.path.isdir(ordner):
+            continue
+        for eintrag in sorted(os.listdir(ordner)):
+            pfad = os.path.join(ordner, eintrag)
+            if pfad == ZIEL or not os.path.islink(pfad):
+                continue
+            if _eigen(pfad):
+                aus.append((pfad, True))
+    return aus
+
+
+def _plan():
+    """[(was, tu_es)] — was zu tun ist, und ob es noch aussteht."""
+    plan = []
+    if os.path.islink(ZIEL):
+        gut = os.path.realpath(ZIEL) == WURZEL
+        plan.append(("Plugin unter ~/.claude/skills/%s" % NAME, not gut))
+    else:
+        plan.append(("Plugin unter ~/.claude/skills/%s" % NAME,
+                     not os.path.exists(ZIEL)))
+    for pfad, _ in _altlasten():
+        plan.append(("Alter Zeiger %s" % pfad.replace(os.path.expanduser("~"), "~"),
+                     True))
+    return plan
+
+
+def zeigen():
+    print("Harness: %s (HKF Core %s)" % (WURZEL, CORE))
+    print()
+    if os.path.islink(ZIEL) and os.path.realpath(ZIEL) == WURZEL:
+        print("  eingehängt   ~/.claude/skills/%s" % NAME)
+    elif os.path.exists(ZIEL):
+        print("  FREMD        ~/.claude/skills/%s zeigt woandershin: %s"
+              % (NAME, os.path.realpath(ZIEL)))
+    else:
+        print("  fehlt        ~/.claude/skills/%s" % NAME)
+    alt = _altlasten()
+    for pfad, _ in alt:
+        print("  überflüssig  %s" % pfad.replace(os.path.expanduser("~"), "~"))
+    if not alt and os.path.islink(ZIEL) and os.path.realpath(ZIEL) == WURZEL:
+        print()
+        print("Nichts zu tun.")
+        return 0
+    print()
+    print("`hk-install` richtet es ein.")
+    return 1
+
+
+def einrichten():
+    getan = []
+    ordner = os.path.dirname(ZIEL)
+    if not os.path.isdir(ordner):
+        os.makedirs(ordner)
+    if os.path.islink(ZIEL):
+        if os.path.realpath(ZIEL) != WURZEL:
+            sys.stderr.write(
+                "~/.claude/skills/%s zeigt auf einen anderen Harness:\n  %s\n"
+                "Ihn umzuhängen entzöge dem anderen seine Skills. Von Hand "
+                "entscheiden.\n" % (NAME, os.path.realpath(ZIEL)))
+            return 2
+    elif os.path.exists(ZIEL):
+        sys.stderr.write("~/.claude/skills/%s ist ein Verzeichnis und kein "
+                         "Zeiger. Von Hand entscheiden.\n" % NAME)
+        return 2
+    else:
+        os.symlink(WURZEL, ZIEL)
+        getan.append("eingehängt: ~/.claude/skills/%s" % NAME)
+
+    for pfad, _ in _altlasten():
+        os.remove(pfad)
+        getan.append("entfernt: %s"
+                     % pfad.replace(os.path.expanduser("~"), "~"))
+
+    if not getan:
+        print("Nichts zu tun.")
+        return 0
+    for g in getan:
+        print("  ·", g)
+    print()
+    print("Das Plugin heißt `%s`. Skills und Agenten tragen den Namensraum "
+          "davor,\netwa `%s:hkb-quelle` und `%s:wilma`. Die Werkzeuge aus "
+          "`bin/` liegen\ndanach auf dem Pfad. Neustart oder `/reload-plugins`."
+          % (NAME, NAME, NAME))
+    return 0
+
+
+def loesen():
+    if os.path.islink(ZIEL) and os.path.realpath(ZIEL) == WURZEL:
+        os.remove(ZIEL)
+        print("  · ausgehängt: ~/.claude/skills/%s" % NAME)
+        return 0
+    print("Nicht eingehängt.")
+    return 0
+
+
+def main(argv):
+    if "--help" in argv or "-h" in argv:
+        print(__doc__.strip()); return 0
+    if "--check" in argv:
+        return zeigen()
+    if "--loesen" in argv:
+        return loesen()
+    return einrichten()
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

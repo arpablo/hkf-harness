@@ -7,7 +7,9 @@
 Kein Testrahmen, keine Fremdpakete. Der Lauf endet mit 0, wenn alle Proben
 zutreffen, sonst mit 1 und einer Zeile pro Fehlschlag.
 """
-import io, os, re, shutil, subprocess, sys, tempfile
+import glob
+import io
+import json, os, re, shutil, subprocess, sys, tempfile
 
 WURZEL = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 # Die vier Bereiche (Core §3.1)
@@ -420,6 +422,72 @@ def main():
         unbekannt = sorted(g for g in gerufen if g not in agenten)
         probe("jeder von einem Skill gerufene Agent liegt in agents/",
               not unbekannt, ", ".join(unbekannt))
+
+        # Ein Verweis auf eine Datei, die es nicht gibt, faellt niemandem auf.
+        # In einem fremden Vault zeigte ein Skill zwei Jahre lang auf zwei
+        # Ordner, die mit einem Umzug verschwunden waren.
+        bausteine = ([os.path.join(WURZEL, "skills", "README.md")] +
+                     [os.path.join(skills, n, "SKILL.md") for n in namen] +
+                     [os.path.join(ordner, a + ".md") for a in agenten] +
+                     sorted(glob.glob(os.path.join(WURZEL, "commands", "*.md"))))
+        tot = []
+        for datei in bausteine:
+            text = io.open(datei, encoding="utf-8").read()
+            kurz = os.path.relpath(datei, WURZEL)
+            for zielpfad in re.findall(r"\]\(([^)\s]+)\)", text):
+                if zielpfad.startswith(("http", "#", "mailto:")):
+                    continue
+                voll = os.path.normpath(os.path.join(
+                    os.path.dirname(datei), zielpfad.split("#")[0]))
+                if not os.path.exists(voll):
+                    tot.append("%s -> %s" % (kurz, zielpfad))
+            # Ein blosser `[[name]]` in kebab-case meint einen Baustein von
+            # hier. Die Beispiele in den Skills tragen einen Pfad oder einen
+            # Alias und fallen nicht darunter.
+            for wl in re.findall(r"\[\[([a-z][a-z0-9-]*)\]\]", text):
+                if wl not in namen and wl not in agenten:
+                    tot.append("%s -> [[%s]]" % (kurz, wl))
+        probe("jeder Verweis zwischen den Bausteinen trägt", not tot,
+              "; ".join(tot))
+
+        print("Das Plugin")
+        p_manifest = os.path.join(WURZEL, ".claude-plugin", "plugin.json")
+        p_markt = os.path.join(WURZEL, ".claude-plugin", "marketplace.json")
+        try:
+            manifest = json.load(io.open(p_manifest, encoding="utf-8"))
+        except Exception as e:
+            manifest = {}
+            probe("das Manifest ist lesbar", False, str(e))
+        probe("das Manifest nennt Name, Fassung und Zweck",
+              all(k in manifest for k in ("name", "version", "description")),
+              ", ".join(sorted(manifest)))
+        try:
+            markt = json.load(io.open(p_markt, encoding="utf-8"))
+        except Exception as e:
+            markt = {}
+            probe("der Marktplatz ist lesbar", False, str(e))
+        eintraege = markt.get("plugins") or []
+        probe("der Marktplatz nennt dasselbe Plugin",
+              len(eintraege) == 1
+              and eintraege[0].get("name") == manifest.get("name")
+              and eintraege[0].get("source") == "./",
+              str(eintraege))
+        # Nur `plugin.json` gehoert in `.claude-plugin/`. Die Bausteine liegen
+        # an der Wurzel, sonst findet Claude Code sie nicht.
+        drin = sorted(os.listdir(os.path.join(WURZEL, ".claude-plugin")))
+        probe("in .claude-plugin/ liegen nur die beiden Manifeste",
+              drin == ["marketplace.json", "plugin.json"], ", ".join(drin))
+        ohne = []
+        for datei in sorted(glob.glob(os.path.join(WURZEL, "commands", "*.md"))):
+            text = io.open(datei, encoding="utf-8").read()
+            kopf = text.split("---")[1] if text.startswith("---") else ""
+            if "description:" not in kopf:
+                ohne.append(os.path.basename(datei))
+        probe("jedes Slash-Kommando hat eine Beschreibung", not ohne,
+              ", ".join(ohne))
+        r = lauf(os.path.join(BIN, "hk-install"), "--check")
+        probe("hk-install berichtet, ohne zu ändern", r.returncode in (0, 1),
+              (r.stdout + r.stderr)[-300:])
 
         print("hk-text: die Schreibregeln gelten auch in einer Ablage")
         r = lauf(os.path.join(BIN, "hk-text"), "--help")

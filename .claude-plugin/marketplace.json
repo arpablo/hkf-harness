@@ -1,0 +1,15 @@
+{
+  "name": "hkf-harness",
+  "owner": {
+    "name": "Armin Pfarr",
+    "url": "https://github.com/arpablo"
+  },
+  "plugins": [
+    {
+      "name": "hkf",
+      "source": "./",
+      "description": "Werkzeuge und KI-Schicht für Wissensbasen nach HKF Core 1.0 und für gewöhnliche Obsidian-Vaults",
+      "version": "1.0.0"
+    }
+  ]
+}

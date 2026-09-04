@@ -86,6 +86,7 @@ Python 3 und PyYAML.
 | `hk-types [--umstellen]` | legt Typseiten und Bases an, damit `type` ein Verweis sein darf (§3.3) | **läuft** |
 | `hk-ablage [<pfad>]` | sagt, welche Ablage bearbeitet wird, und merkt eine Wahl für dieses Arbeitsverzeichnis. `--liste` zeigt, was zur Wahl steht | **läuft** |
 | `hk-text [--gate] [--rhythm]` | prüft deutschsprachige Texte gegen die Schreibregeln. `--gate` blockiert, der Bericht nicht | **läuft** |
+| `hk-install [--check]` | hängt den Harness als Plugin unter `~/.claude/skills/hkf` ein und räumt die alten Zeiger weg | **läuft** |
 
 Was geprüft wird, entscheidet die Wurzeldatei: `hkb.md` heißt Wissensbasis,
 `hbundle.md` heißt Lieferung. §6.3 gilt für beide, mit den Unterschieden aus §4
@@ -185,6 +186,8 @@ tools/       spec.py hält die Kopie unter spec/ auf Stand,
 templates/   die Grundausstattung, aus der hk-init schöpft
 skills/      die KI-Schicht: hkb und sieben Operationen, siehe skills/README.md
 agents/      die Subagenten, die für einen Skill lesen — wilma
+commands/    die Slash-Kommandos, siehe hk-install
+.claude-plugin/  plugin.json und marketplace.json, sonst nichts
 test/        Rauchprobe: python3 test/smoke.py
 ```
 
@@ -259,10 +262,30 @@ wer ein Buch im laufenden Gespräch liest, hat es danach im Rücken, und die
 Notizen aus den letzten Kapiteln werden flacher als die aus den ersten. Ein
 Agent liest, er schreibt nicht; für die Regel oben ändert er nichts.
 
-**Damit ein Modell sie findet**, gehören Skills und Agenten dorthin, wo es
-sucht — bei Claude Code sind das `~/.claude/skills/` und `~/.claude/agents/`.
-Ein Symlink je Verzeichnis genügt; der Harness kopiert nichts dorthin und
-richtet nichts ein.
+**Damit ein Modell sie findet**, ist der Harness ein Plugin. Das Manifest steht
+in `.claude-plugin/`, die Bausteine liegen an der Wurzel: `skills/`, `agents/`,
+`commands/` und `bin/`. Das Plugin heißt `hkf`, und alles darin trägt den
+Namensraum davor, also `hkf:hkb-quelle` und `hkf:wilma`. Die Werkzeuge aus
+`bin/` liegen dabei auf dem Pfad, ohne dass jemand ihn pflegt.
+
+```bash
+hk-install --check     # was fehlt
+hk-install             # einhängen
+```
+
+Auf der Maschine, auf der das Repository selbst liegt, hängt `hk-install` es
+unter `~/.claude/skills/hkf` ein. Claude Code lädt jedes Verzeichnis dort, das
+ein `.claude-plugin/plugin.json` trägt, als Plugin. Ein Symlink genügt, und das
+Repository bleibt die gelesene Fassung. Der Weg über den Marktplatz kopiert
+dagegen in einen Cache, was für die Verteilung an andere richtig ist und für
+die Entwicklung falsch.
+
+`hk-install` räumt dabei weg, was früher von Hand gesetzt wurde: je ein Symlink
+unter `~/.claude/skills/` und `~/.claude/agents/`. Solche Einträge verdrängen
+die Fassung aus dem Plugin stillschweigend. Genau daran ist `hkb-typseite` nach
+seiner Entstehung monatelang unsichtbar geblieben, weil niemand den neunten
+Symlink nachgezogen hat. Ein Zeiger auf einen **fremden** Harness wird nicht
+angefasst, sondern gemeldet.
 
 Sie fügen nichts hinzu, was die Werkzeuge nicht können — sie tun genau das,
 was ein Programm nicht darf. Am deutlichsten bei `hkb-import`: `hk-import`
