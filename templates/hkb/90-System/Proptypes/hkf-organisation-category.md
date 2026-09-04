@@ -18,9 +18,7 @@ modified: 2026-08-31T18:30:00
 modified_by: claude-opus-5
 ---
 
-Art einer Körperschaft. Wird als Listenform
-`hkf-organisation-category-list` verwendet, weil eine Körperschaft mehreres
-zugleich sein kann — eine Landesuniversität ist `university` und `authority`.
+Art einer Körperschaft. Wird als Listenform `hkf-organisation-category-list` verwendet, weil eine Körperschaft mehreres zugleich sein kann — eine Landesuniversität ist `university` und `authority`.
 
 | Wert | Gemeint ist |
 |---|---|
@@ -36,5 +34,4 @@ zugleich sein kann — eine Landesuniversität ist `university` und `authority`.
 | `union` | Gewerkschaft |
 | `university` | Hochschule |
 
-Die Rechtsform gehört nicht hierher, sondern in den Body: `company` sagt
-nichts darüber, ob es eine GmbH oder eine AG ist.
+Die Rechtsform gehört nicht hierher, sondern in den Body: `company` sagt nichts darüber, ob es eine GmbH oder eine AG ist.

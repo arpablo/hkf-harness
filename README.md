@@ -55,7 +55,7 @@ Python 3 und PyYAML.
 | | | |
 |---|---|---|
 | `hk-init <ziel>` | legt eine Wissensbasis an: Grundausstattung, Obsidian-Konfiguration, README, `.gitignore`, `git init` und ein erster Commit | **läuft** |
-| `hk-lint [--fix] [--strict]` | prüft eine Wissensbasis **oder eine Lieferung** (§6.3): Frontmatter gegen Anhang B.4, Grammatik gegen Anhang B, dazu die strukturellen Prüfungen; `--fix` führt die elf erlaubten Handgriffe aus | **läuft** |
+| `hk-lint [--fix] [--strict]` | prüft eine Wissensbasis **oder eine Lieferung** (§6.3): Frontmatter gegen Anhang B.4, Grammatik gegen Anhang B, dazu die strukturellen Prüfungen; `--fix` führt die zwölf erlaubten Handgriffe aus | **läuft** |
 | `hk-import <bundle>` | übernimmt eine Lieferung (§6.1): Typen abgleichen, Notizen und Mediendateien einsortieren, Verweise umschreiben, verknüpfen, Bundle-Notiz und Typtabelle fortschreiben | **läuft** |
 | `hk-export <id> <ziel>` | schreibt eine Lieferung heraus (§6.2): Notizen, Typdefinitionen und Mediendateien der Lieferung in den typbezogenen Baum, Verweise ohne Ablagepfad | **läuft** |
 | `hk-ingest [<stück>]` | liest eine Quelle ein: Typ feststellen, Ausfertigung ablegen oder verzeichnen, `sha256` bilden, Quellennotiz und `hbundle.md` schreiben, die Lücken melden. Mit `--hkb` gleich importieren | **läuft** |
@@ -75,7 +75,7 @@ in drei Gruppen und getrennt nach Schweregrad: `fehler` heißt, die Ablage ist
 nicht konform (§7.2); `hinweis` heißt, es fällt auf, macht sie aber nicht
 ungültig. Der Rückgabewert ist 1 nur bei Fehlern.
 
-`--fix` darf ausschließlich die elf Handgriffe aus §6.3 — Typtabelle neu
+`--fix` darf ausschließlich die zwölf Handgriffe aus §6.3 — Typtabelle neu
 erzeugen, fehlende Standard-Property-Typen anlegen, einen verzeichnislosen
 Wikilink qualifizieren (nur bei genau einem Ziel), einen fehlenden Alias aus
 dem `title` ergänzen, den Trenner ` / ` ausschreiben, ein `datetime` ohne

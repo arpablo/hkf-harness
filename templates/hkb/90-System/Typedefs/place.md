@@ -22,11 +22,6 @@ modified_by: claude-opus-5
 
 # Konventionen
 
-`latitude` und `longitude` werden nur gemeinsam gesetzt. `part_of` bildet die
-räumliche Schachtelung ab — Gebäude in Stadt, Stadt in Region.
+`latitude` und `longitude` werden nur gemeinsam gesetzt. `part_of` bildet die räumliche Schachtelung ab — Gebäude in Stadt, Stadt in Region.
 
-`country` ist ein Verweis und keine Kennung. Es hieße sonst auf `place`
-etwas anderes als auf `city`, und ein Property-Name bedeutet überall dasselbe
-(Core §3.7.3). Der Preis ist, dass ein Ort in einem Staat ohne eigene Notiz
-seinen Staat nicht nennen kann: Dann bleibt `country` leer, und der Staat
-steht im Body oder wird als Notiz angelegt.
+`country` ist ein Verweis und keine Kennung. Es hieße sonst auf `place` etwas anderes als auf `city`, und ein Property-Name bedeutet überall dasselbe (Core §3.7.3). Der Preis ist, dass ein Ort in einem Staat ohne eigene Notiz seinen Staat nicht nennen kann: Dann bleibt `country` leer, und der Staat steht im Body oder wird als Notiz angelegt.

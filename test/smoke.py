@@ -839,6 +839,35 @@ def main():
               "```markdown\n[[Persons/grace-hopper]]\n```" in g, g)
         shutil.rmtree(lief, ignore_errors=True)
 
+        print("§3.3: ein Absatz ist eine Zeile")
+        n = os.path.join(ziel, WIKI, "Persons", "grace-hopper.md")
+        vorher = io.open(n, encoding="utf-8").read()
+        io.open(n, "w", encoding="utf-8").write(
+            vorher.rstrip("\n") + "\n\nEin Absatz, der\numbrochen ist, mit einem\n"
+            "[[%s/Persons/grace-hopper|Verweis über\nden Umbruch]].\n" % WIKI)
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        probe("ein umbrochener Absatz ist ein Hinweis",
+              "Der Fließtext ist umbrochen" in r.stdout, r.stdout)
+        probe("und ein Wikilink über einen Umbruch auch",
+              "reicht über einen Umbruch" in r.stdout, r.stdout)
+        probe("aber kein Fehler",
+              "Struktur (§6.3)            0" in r.stdout, r.stdout)
+        r = lauf(os.path.join(BIN, "hk-lint"), "--fix", ziel)
+        probe("`--fix` entfaltet ihn", "Fließtext entfaltet" in r.stdout, r.stdout)
+        g = io.open(n, encoding="utf-8").read()
+        probe("danach steht der Absatz in einer Zeile",
+              "Ein Absatz, der umbrochen ist, mit einem" in g, g)
+        probe("und der Verweis löst wieder auf",
+              "|Verweis über den Umbruch]]" in g, g)
+        r = lauf(os.path.join(BIN, "hk-lint"), "--strict", ziel)
+        probe("die Ablage ist danach ohne Befund",
+              "Hinweise                   0" in r.stdout, r.stdout)
+        # Tabellen, Listen und Codebloecke bleiben, wie sie sind.
+        io.open(n, "w", encoding="utf-8").write(vorher)
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        probe("die Grundausstattung selbst ist entfaltet",
+              "umbrochen" not in r.stdout, r.stdout)
+
         print("hk-tranchen: der Stand einer großen Quelle steht in der Notiz")
         q = os.path.join(ziel, QUELLEN, "eine-zitierte-seite.md")
         HK_TR = os.path.join(BIN, "hk-tranchen")

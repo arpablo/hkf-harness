@@ -8,6 +8,4 @@ modified: 2026-08-27T12:41:08
 modified_by: claude-opus-5
 ---
 
-Jahreszahl, wenn kein vollständiges Datum bekannt ist. Negative Werte
-bezeichnen Jahre vor der Zeitenwende. Ein bekanntes Datum gehört als `date`
-ins Frontmatter, nicht als Jahr.
+Jahreszahl, wenn kein vollständiges Datum bekannt ist. Negative Werte bezeichnen Jahre vor der Zeitenwende. Ein bekanntes Datum gehört als `date` ins Frontmatter, nicht als Jahr.

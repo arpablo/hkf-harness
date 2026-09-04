@@ -66,6 +66,25 @@ modified_by: claude-opus-5
   einer fremden Notiz: `modified` auf jetzt, `modified_by` auf deinen
   Modellnamen. Vorhandenes `created` bleibt.
 
+## Der Body wird nicht umbrochen
+
+**Ein Absatz ist eine Zeile.** Diese Datei hier ist auf 76 Zeichen umbrochen,
+weil sie in einem Editor und auf GitHub gelesen wird — eine Notiz wird in
+Obsidian gelesen, und dort erzeugt jeder einzelne Umbruch einen Zeilenumbruch.
+Ein umbrochener Absatz erscheint als Stapel kurzer Zeilen.
+
+Zwei Folgen hat es über die Lesbarkeit hinaus:
+
+- **Ein Wikilink über einen Umbruch löst in Obsidian nicht auf.** `hk-lint`
+  findet ihn trotzdem, weil es den Body als Ganzes mustert — der Befund fällt
+  also erst im Vault auf.
+- **Die Prüfung auf bloße Rückverweise greift nicht mehr.** Sie sucht den Titel
+  der Gegennotiz als Zeichenfolge im Body (§5.6); steht er über zwei Zeilen,
+  findet sie ihn nicht und meldet einen Hinweis, der keiner ist.
+
+Umbrochen bleibt nur, was ohnehin zeilenweise steht: Frontmatter, Tabellen,
+Codeblöcke und die Einträge unter `# Siehe auch`.
+
 ## Verweise
 
 Ein Verweis ist ein **qualifizierter Wikilink mit Alias**: der volle Pfad ab

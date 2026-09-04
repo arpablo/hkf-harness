@@ -16,8 +16,7 @@ modified_by: claude-opus-5
 
 Welcher Art ein Werk ist, auf das sich die Wissensbasis beruft.
 
-Anders als die beiden anderen Aufzählungen wird dieser Property-Typ **nicht**
-als Liste verwendet: Ein Werk ist ein Buch oder ein Video, nicht beides.
+Anders als die beiden anderen Aufzählungen wird dieser Property-Typ **nicht** als Liste verwendet: Ein Werk ist ein Buch oder ein Video, nicht beides.
 
 | Wert | Gemeint ist |
 |---|---|
@@ -29,10 +28,6 @@ als Liste verwendet: Ein Werk ist ein Buch oder ein Video, nicht beides.
 | `video` | Bewegtbild, auch ein aufgezeichneter Vortrag |
 | `web` | eine Webseite, die keines der übrigen ist |
 
-Die Werte sind bewusst grob. Was ein Werk darüber hinaus auszeichnet — Verlag,
-Auflage, Jahrgang, Seitenzahl —, ist Zitationsapparat und gehört in den Body
-oder in eine eigene Property der Wissensbasis.
+Die Werte sind bewusst grob. Was ein Werk darüber hinaus auszeichnet — Verlag, Auflage, Jahrgang, Seitenzahl —, ist Zitationsapparat und gehört in den Body oder in eine eigene Property der Wissensbasis.
 
-Ein aufgezeichneter Vortrag ist `video`, seine Mitschrift `transcript`: Es sind
-zwei Ausfertigungen, und wer die Mitschrift liest, hat den Vortrag nicht
-gesehen.
+Ein aufgezeichneter Vortrag ist `video`, seine Mitschrift `transcript`: Es sind zwei Ausfertigungen, und wer die Mitschrift liest, hat den Vortrag nicht gesehen.

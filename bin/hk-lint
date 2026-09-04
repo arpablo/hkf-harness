@@ -10,7 +10,7 @@ den Unterschieden, die §4 und §7.1 machen: Ein Bundle hat keine
 Typverzeichnisse, seine Notizen liegen, wo sie wollen, und `bundles` und
 `rejected_links` stehen dort nicht.
 
-    --fix      die elf Handgriffe aus §6.3 ausfuehren und danach erneut pruefen
+    --fix      die zwoelf Handgriffe aus §6.3 ausfuehren und danach erneut pruefen
     --strict   zusaetzlich undeklarierte Properties melden, je Typ zusammengefasst
 
 Gemeldet wird in drei Gruppen: das Frontmatter gegen das Schema aus Anhang

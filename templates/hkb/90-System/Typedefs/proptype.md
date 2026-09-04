@@ -20,7 +20,4 @@ modified_by: claude-opus-5
 
 # Konventionen
 
-Der Dateiname ist der Name des Property-Typs (Core §3.5) und endet nicht auf
-`-list`. Für eine der sechs Wertformen wird kein Property-Typ angelegt. `min`
-und `max` gibt es nur für Zahlen: Obsidian ordnet einem Property-Namen genau
-eine Wertform zu, sie könnten also nicht zugleich Datumsgrenzen sein.
+Der Dateiname ist der Name des Property-Typs (Core §3.5) und endet nicht auf `-list`. Für eine der sechs Wertformen wird kein Property-Typ angelegt. `min` und `max` gibt es nur für Zahlen: Obsidian ordnet einem Property-Namen genau eine Wertform zu, sie könnten also nicht zugleich Datumsgrenzen sein.

@@ -23,5 +23,4 @@ modified_by: claude-opus-5
 
 # Konventionen
 
-Eine Veranstaltung trägt entweder `starts_at` oder `date`, nicht beides.
-Zeiten gelten in der `timezone` der Ablage (Core §3.4).
+Eine Veranstaltung trägt entweder `starts_at` oder `date`, nicht beides. Zeiten gelten in der `timezone` der Ablage (Core §3.4).

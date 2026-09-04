@@ -18,14 +18,8 @@ modified_by: claude-opus-5
 
 # Konventionen
 
-Ein Begriff definiert einen Ausdruck, ein Konzept sammelt, was über eine Sache
-bekannt ist. Darum ist eine Begriffsnotiz mit ihrer Definition fertig, während
-eine Konzeptnotiz mit jeder ausgewerteten Quelle wächst: Der Body trägt den
-Stand des Wissens und die offenen Fragen.
+Ein Begriff definiert einen Ausdruck, ein Konzept sammelt, was über eine Sache bekannt ist. Darum ist eine Begriffsnotiz mit ihrer Definition fertig, während eine Konzeptnotiz mit jeder ausgewerteten Quelle wächst: Der Body trägt den Stand des Wissens und die offenen Fragen.
 
-Ein Begriff ist sprachgebunden und führt `lang` als Pflicht, ein Konzept
-nicht: Dieselbe Sache hat in drei Sprachen drei Begriffe und bleibt dieselbe
-Sache. `terms` nimmt sie alle auf.
+Ein Begriff ist sprachgebunden und führt `lang` als Pflicht, ein Konzept nicht: Dieselbe Sache hat in drei Sprachen drei Begriffe und bleibt dieselbe Sache. `terms` nimmt sie alle auf.
 
-Hat eine Konzeptnotiz keine eigenen Aussagen, sondern nur Verweise, ist sie
-ein `topic`.
+Hat eine Konzeptnotiz keine eigenen Aussagen, sondern nur Verweise, ist sie ein `topic`.

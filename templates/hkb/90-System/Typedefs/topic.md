@@ -16,6 +16,4 @@ modified_by: claude-opus-5
 
 # Konventionen
 
-Ein Thema ordnet, ein Begriff definiert, ein Konzept sammelt. Der Body ist
-eine Einstiegsseite mit Verweisen; Inhalte, die anderswo hingehören, stehen
-nicht hier.
+Ein Thema ordnet, ein Begriff definiert, ein Konzept sammelt. Der Body ist eine Einstiegsseite mit Verweisen; Inhalte, die anderswo hingehören, stehen nicht hier.

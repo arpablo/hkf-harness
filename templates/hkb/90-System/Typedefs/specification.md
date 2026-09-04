@@ -21,14 +21,8 @@ modified_by: claude-opus-5
 
 # Konventionen
 
-Eine Quelle wird zitiert, eine Spezifikation wird eingehalten. Was man aus
-einem Dokument erfahren hat, gehört als `source` in die Wissensbasis; was für
-sie verbindlich ist, als `specification`.
+Eine Quelle wird zitiert, eine Spezifikation wird eingehalten. Was man aus einem Dokument erfahren hat, gehört als `source` in die Wissensbasis; was für sie verbindlich ist, als `specification`.
 
-Der Body darf den Volltext tragen oder ihn nur zusammenfassen und über `url`
-oder `file` auf ihn verweisen. Beides ist zulässig: Ein kurzes Dokument liegt
-bequem in der Notiz, ein umfangreiches kostet Platz, den die meisten
-Wissensbasen nie lesen.
+Der Body darf den Volltext tragen oder ihn nur zusammenfassen und über `url` oder `file` auf ihn verweisen. Beides ist zulässig: Ein kurzes Dokument liegt bequem in der Notiz, ein umfangreiches kostet Platz, den die meisten Wissensbasen nie lesen.
 
-Welche Spezifikation für die Wissensbasis selbst gilt, sagt `spec` in ihrer
-Wurzeldatei (Core A.1).
+Welche Spezifikation für die Wissensbasis selbst gilt, sagt `spec` in ihrer Wurzeldatei (Core A.1).

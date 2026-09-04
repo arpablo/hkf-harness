@@ -681,9 +681,38 @@ def undeklariert(b):
             for (typ, k), wo in sorted(je_typ.items())]
 
 
+def _umbrueche(b, befunde):
+    """Ein Absatz ist eine Zeile (§3.3, §6.3).
+
+    Zwei Hinweise, kein Fehler: Ein umbrochener Absatz erscheint in der Anzeige
+    als Stapel kurzer Zeilen, und ein Wikilink ueber einen Umbruch loest dort
+    nicht auf, obwohl er §3.6 buchstaeblich erfuellt. Gezaehlt wird in Zeilen
+    der Datei, damit die Meldung hinfuehrt.
+    """
+    for rel, e in sorted(b.notizen.items()):
+        # Der Body beginnt hinter dem Frontmatter: zwei Trennerzeilen dazu.
+        versatz = len((e["kopf"] or "").splitlines()) + 2
+        gebrochen = notiz.gebrochene_verweise(e["body"])
+        if gebrochen:
+            befunde.append(Befund(e["rel"], "Ein Wikilink reicht über einen "
+                                  "Umbruch und löst in der Anzeige nicht auf "
+                                  "(Zeile %d; §3.3)."
+                                  % (versatz + gebrochen[0]), HINWEIS))
+        _, umbrochen = notiz.entfalten(e["body"])
+        if umbrochen:
+            befunde.append(Befund(e["rel"], "Der Fließtext ist umbrochen: %d "
+                                  "Zeile%s gehören an die vorige, die erste in "
+                                  "Zeile %d. Ein Absatz ist eine Zeile (§3.3); "
+                                  "`--fix` entfaltet ihn."
+                                  % (len(umbrochen),
+                                     "" if len(umbrochen) == 1 else "n",
+                                     versatz + umbrochen[0]), HINWEIS))
+
+
 PRUEFUNGEN = (_wurzeldatei, _typen, _vorlaeufige, _proptypes, _zeiten,
               _leere_properties, _verweise, _typtabelle, _siehe_auch,
-              _bundle_notizen, _wikidata, _verwaist)
+              _bundle_notizen, _wikidata, _verwaist,
+              _umbrueche)
 
 
 # ── Die Property-Tabellen gegen die Werte (§3.7.1, §6.3) ────────────────

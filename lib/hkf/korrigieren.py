@@ -208,8 +208,26 @@ def _siehe_auch(b, getan):
             getan.append("%s: %s" % (e["rel"], ", ".join(geaendert)))
 
 
+def _umbrueche(b, getan):
+    """Den Fliesstext entfalten: ein Absatz, eine Zeile (§3.3, §6.3).
+
+    Am Text aendert sich nichts ausser den Umbruechen. Was eine eigene
+    Struktur beginnt, bleibt stehen; Leerzeilen bleiben Absatzgrenzen. Damit
+    loest sich zugleich ein Wikilink, der ueber einen Umbruch reichte.
+    """
+    for rel, e in sorted(b.notizen.items()):
+        body, umbrochen = notiz.entfalten(e["body"])
+        if not umbrochen:
+            continue
+        _schreiben(e, e["kopf"], body)
+        e["body"] = body
+        getan.append("%s: Fließtext entfaltet, %d Zeile%s zusammengezogen"
+                     % (e["rel"], len(umbrochen),
+                        "" if len(umbrochen) == 1 else "n"))
+
+
 KORREKTUREN = (_standard_proptypes, _verweise, _typangaben, _zeiten,
-               _leere_properties, _siehe_auch, _typtabelle)
+               _leere_properties, _siehe_auch, _umbrueche, _typtabelle)
 
 
 def korrigieren(hkb):

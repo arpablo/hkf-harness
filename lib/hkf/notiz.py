@@ -97,6 +97,66 @@ def ohne_abschnitt(body, ueberschrift):
                   body, flags=re.M | re.S)
 
 
+# Was eine eigene Struktur beginnt und darum nie an die vorige Zeile
+# angehaengt wird (§3.3). `---` steht dabei fuer eine Trennlinie im Body; das
+# Frontmatter liegt ausserhalb.
+STRUKTUR = re.compile(r"^(#{1,6} |[-*+] |\d+[.)] |\||>|```|~~~|---\s*$)")
+# Ein Listenpunkt und ein Zitat nehmen eine Fortsetzungszeile auf, eine
+# Ueberschrift oder Tabellenzeile nicht.
+NIMMT_AUF = re.compile(r"^([-*+] |\d+[.)] |>)")
+ZAUN = ("```", "~~~")
+
+
+def entfalten(body):
+    """(entfalteter Body, Zeilennummern der angehaengten Zeilen).
+
+    Ein Absatz ist eine Zeile (§3.3). Angefasst wird allein Fliesstext: Was
+    eine eigene Struktur beginnt, bleibt stehen, eine Leerzeile bleibt
+    Absatzgrenze, und in einem Codeblock wird nichts veraendert. Eine
+    eingerueckte Fortsetzungszeile gehoert zu ihrem Listenpunkt.
+
+    Die Nummern zaehlen ab 1 im Body und sagen, wo ein Absatz umbrochen war.
+    """
+    aus, nummern, im_code = [], [], False
+    for nr, zeile in enumerate(body.split("\n"), 1):
+        blank = zeile.strip() == ""
+        if zeile.lstrip().startswith(ZAUN):
+            im_code = not im_code
+            aus.append(zeile)
+        elif im_code or blank or not aus or aus[-1].strip() == "":
+            aus.append(zeile)
+        elif STRUKTUR.match(zeile.lstrip()):
+            aus.append(zeile)
+        elif STRUKTUR.match(aus[-1].lstrip()) and not NIMMT_AUF.match(aus[-1].lstrip()):
+            aus.append(zeile)
+        else:
+            aus[-1] = aus[-1].rstrip() + " " + zeile.strip()
+            nummern.append(nr)
+    return "\n".join(aus), nummern
+
+
+def gebrochene_verweise(body):
+    """Zeilennummern, in denen ein Wikilink offen bleibt (§3.3).
+
+    Ein `[[` ohne `]]` in derselben Zeile heisst, dass der Verweis ueber einen
+    Umbruch reicht. Er erfuellt §3.6 buchstaeblich und loest doch nicht auf.
+    """
+    aus, im_code, offen = [], False, 0
+    for nr, zeile in enumerate(body.split("\n"), 1):
+        if zeile.lstrip().startswith(ZAUN):
+            im_code = not im_code
+            continue
+        if im_code:
+            continue
+        vorher = offen
+        offen = max(0, offen + zeile.count("[[") - zeile.count("]]"))
+        # Gemeldet wird die Zeile, in der der Verweis aufgeht — nicht die, in
+        # der er sich schliesst.
+        if offen and not vorher:
+            aus.append(nr)
+    return aus
+
+
 LINKWERT = re.compile(r"^\[\[([^\]|]+)(?:\|([^\]]*))?\]\]$")
 
 

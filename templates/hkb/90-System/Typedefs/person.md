@@ -28,5 +28,4 @@ modified_by: claude-opus-5
 
 # Konventionen
 
-`born` und `born_year` schließen einander aus, ebenso `died` und `died_year`.
-Der Dateiname ist `vorname-nachname` in kebab-case.
+`born` und `born_year` schließen einander aus, ebenso `died` und `died_year`. Der Dateiname ist `vorname-nachname` in kebab-case.

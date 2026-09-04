@@ -18,17 +18,8 @@ modified_by: claude-opus-5
 
 # Konventionen
 
-Ein Begriff ist ein Ausdruck in **einer** Sprache, und `lang` nennt sie.
-Darum ist sie Pflicht und keine Vorgabe: Derselbe Gegenstand heißt in drei
-Sprachen dreierlei, und welche gemeint ist, darf nicht davon abhängen, in
-welcher Wissensbasis die Notiz gerade liegt — ein Bundle bliebe sonst nicht
-für sich lesbar (Core §4).
+Ein Begriff ist ein Ausdruck in **einer** Sprache, und `lang` nennt sie. Darum ist sie Pflicht und keine Vorgabe: Derselbe Gegenstand heißt in drei Sprachen dreierlei, und welche gemeint ist, darf nicht davon abhängen, in welcher Wissensbasis die Notiz gerade liegt — ein Bundle bliebe sonst nicht für sich lesbar (Core §4).
 
-Der Body beginnt mit einer Definition in einem Satz. Synonyme werden als
-Obsidian-`aliases` geführt, nicht als eigene Property; sie sind Ausdrücke
-derselben Sprache. Die fremdsprachige Entsprechung ist kein Alias, sondern ein
-eigener Begriff.
+Der Body beginnt mit einer Definition in einem Satz. Synonyme werden als Obsidian-`aliases` geführt, nicht als eigene Property; sie sind Ausdrücke derselben Sprache. Die fremdsprachige Entsprechung ist kein Alias, sondern ein eigener Begriff.
 
-Ein Begriff legt einen Ausdruck fest und ist mit seiner Definition fertig.
-Wird die Notiz länger, gehört, was über die Definition hinausgeht, in ein
-`concept`.
+Ein Begriff legt einen Ausdruck fest und ist mit seiner Definition fertig. Wird die Notiz länger, gehört, was über die Definition hinausgeht, in ein `concept`.

@@ -7,5 +7,4 @@ modified: 2026-08-27T12:41:08
 modified_by: claude-opus-5
 ---
 
-Staatenkennung nach ISO 3166-1 alpha-2, zweistellig und großgeschrieben:
-`DE`, `GB`.
+Staatenkennung nach ISO 3166-1 alpha-2, zweistellig und großgeschrieben: `DE`, `GB`.

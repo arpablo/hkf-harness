@@ -455,6 +455,30 @@ ausgenommen die fünf ausdrücklich normativen Strukturen: `# Typen` (§3.1),
 (§5.7) und Importnachweis (§5.1) einer Bundle-Notiz. Werkzeuge MÜSSEN
 unbekannte Properties unverändert erhalten.
 
+### Ein Absatz ist eine Zeile
+
+**Der Fließtext des Body wird nicht umbrochen.** Ein Absatz steht in einer
+Zeile, so lang sie wird; Absätze trennt eine Leerzeile. Umbrochen bleibt nur,
+was ohnehin zeilenweise steht: Frontmatter, Tabellen, Codeblöcke, Listenpunkte
+und die Einträge unter `# Siehe auch`.
+
+Der Grund ist die Anzeige. Eine Notiz wird in einem Markdown-Editor gelesen,
+der einen einzelnen Umbruch als Zeilenumbruch darstellt — ein auf achtzig
+Zeichen umbrochener Absatz erscheint dort als Stapel kurzer Zeilen. Das ist
+eine Frage der Lesbarkeit, und sie allein wäre kein Gegenstand dieser
+Spezifikation. Zwei Folgen sind es:
+
+- **Ein Wikilink über einen Umbruch löst nicht auf.** Er erfüllt §3.6
+  buchstäblich, aber kein Leser kommt an sein Ziel. Eine Prüfung, die den Body
+  als Ganzes mustert, findet ihn trotzdem — der Fehler fällt erst in der
+  Anzeige auf.
+- **Die Prüfung auf bloße Rückverweise greift nicht mehr.** Sie sucht den
+  Titel der Gegennotiz als Zeichenfolge im Body (§5.6); steht er über zwei
+  Zeilen, findet sie ihn nicht und meldet einen Hinweis, der keiner ist.
+
+Beides sind Hinweise, keine Fehler (§6.3), und beides lässt sich mechanisch
+beheben: `hk-lint --fix` entfaltet den Fließtext.
+
 ### Zwei Schreibweisen für `type`
 
 `type` trägt entweder den **Typnamen als Text** oder einen **Verweis auf eine
@@ -2454,6 +2478,10 @@ Bundle; die letzten vier Punkte gelten nur für eine HKB.
   Hand gesetzte Verweise enthalten (§5.6),
 - eine Notiz, auf die kein einziger Verweis zeigt, ist ein Hinweis: Sie ist
   über die Wissensbasis nicht erreichbar,
+- kein Absatz des Fließtextes steht über mehr als eine Zeile, und kein
+  Wikilink reicht über einen Umbruch (§3.3). Beides sind Hinweise, keine
+  Fehler; Frontmatter, Tabellen, Codeblöcke, Listenpunkte und die Einträge
+  unter `# Siehe auch` bleiben davon unberührt,
 - keine Notiz trägt `bundles` oder `rejected_links` mit leerer Liste.
 
 Jeder Befund nennt Datei, Zeile soweit bestimmbar, Schweregrad und eine
@@ -2477,7 +2505,11 @@ verständliche Meldung.
   Abschnitt ans Ende der Notiz stellen,
 - `related` um die Ziele aus `# Siehe auch` ergänzen, die dort fehlen und in
   keiner anderen Property stehen; entfernt wird daraus nichts,
-- leere Properties und `null`-Werte entfernen.
+- leere Properties und `null`-Werte entfernen,
+- den Fließtext des Body entfalten: Zeilen eines Absatzes zu einer Zeile
+  zusammenziehen (§3.3). Angefasst wird nur, was zusammengehört — was eine
+  eigene Struktur beginnt, bleibt, wo es steht, und Leerzeilen bleiben
+  Absatzgrenzen. Am Text ändert sich nichts außer den Umbrüchen.
 
 Bei mehrdeutigen oder unbekannten Zielen wird nicht geraten. Nach einem
 Korrekturlauf wird erneut geprüft.

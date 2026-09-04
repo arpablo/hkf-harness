@@ -19,7 +19,7 @@ WURZEL = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(WURZEL, "lib"))
 import hkf                                                    # noqa: E402,F401
 import yaml                                                   # noqa: E402
-from hkf import CONFIG, frontmatter                           # noqa: E402
+from hkf import CONFIG, frontmatter, notiz                    # noqa: E402
 
 BLOCK = re.compile(r"^## 3\.\d+ `(\w+)`\n\n```markdown\n(.*?)\n```", re.S | re.M)
 TYPEN, PROPTYPES = 17, 17
@@ -33,6 +33,15 @@ def spec_text():
                    encoding="utf-8").read()
 
 
+def _entfaltet(text):
+    """Zeilen eines Absatzes zusammengezogen, Frontmatter unberuehrt."""
+    kopf, body = notiz.teilen(text.strip())
+    entfaltet, _ = notiz.entfalten(body)
+    if kopf is None:
+        return entfaltet.strip().splitlines()
+    return notiz.bauen(kopf, entfaltet).strip().splitlines()
+
+
 def kern_typen(spec, vorlage, melde):
     bloecke = BLOCK.findall(spec)
     if len(bloecke) != TYPEN:
@@ -43,8 +52,11 @@ def kern_typen(spec, vorlage, melde):
         if not os.path.exists(p):
             melde("%-10s fehlt in der Vorlage" % typ, True)
             continue
-        a = block.strip().splitlines()
-        b = ZEITEN.sub("", io.open(p, encoding="utf-8").read()).strip().splitlines()
+        # Verglichen wird der Inhalt, nicht der Umbruch: Die Spezifikation ist
+        # ein Dokument und bleibt umbrochen, eine Notiz ist es nicht (Core
+        # §3.3). Beide Seiten werden darum entfaltet.
+        a = _entfaltet(block)
+        b = _entfaltet(ZEITEN.sub("", io.open(p, encoding="utf-8").read()))
         if a == b:
             melde("%-10s ok" % typ, False)
             continue

@@ -23,9 +23,7 @@ modified_by: claude-opus-5
 
 Rolle einer Person, nicht ihr Beruf und nicht ihr Rang.
 
-Wird als Listenform `hkf-person-category-list` verwendet: Wer regiert hat, hat
-oft auch geschrieben und gedient. Mehrere Werte nebeneinander sind der
-Normalfall, nicht die Ausnahme.
+Wird als Listenform `hkf-person-category-list` verwendet: Wer regiert hat, hat oft auch geschrieben und gedient. Mehrere Werte nebeneinander sind der Normalfall, nicht die Ausnahme.
 
 | Wert | Gemeint ist |
 |---|---|
@@ -44,5 +42,4 @@ Normalfall, nicht die Ausnahme.
 | `scientist` | Natur- und Formalwissenschaften, Mathematik |
 | `soldier` | Militär |
 
-Die Werte sind bewusst grob. Feineres — Fachgebiet, Amt, Dienstgrad — gehört
-in den Body oder in einen eigenen Property-Typ der Wissensbasis.
+Die Werte sind bewusst grob. Feineres — Fachgebiet, Amt, Dienstgrad — gehört in den Body oder in einen eigenen Property-Typ der Wissensbasis.

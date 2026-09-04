@@ -7,5 +7,4 @@ modified: 2026-08-27T12:41:08
 modified_by: claude-opus-5
 ---
 
-Telefonnummer im Format E.164, also mit führendem `+` und Landesvorwahl,
-ohne Leerzeichen und Trennzeichen: `+4993131885`.
+Telefonnummer im Format E.164, also mit führendem `+` und Landesvorwahl, ohne Leerzeichen und Trennzeichen: `+4993131885`.

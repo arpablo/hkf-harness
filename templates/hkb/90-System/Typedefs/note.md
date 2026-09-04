@@ -16,9 +16,6 @@ modified_by: claude-opus-5
 
 # Konventionen
 
-Auffangtyp. Er wird verwendet, wenn kein anderer Typ passt — nicht, um die
-Wahl eines Typs zu vermeiden. `about` nimmt Verweise beliebigen Typs auf.
+Auffangtyp. Er wird verwendet, wenn kein anderer Typ passt — nicht, um die Wahl eines Typs zu vermeiden. `about` nimmt Verweise beliebigen Typs auf.
 
-Eine Notiz hält fest, was bei einem Anlass anfiel: die Auswertung einer
-Quelle, ein Protokoll, ein Gedanke. Überlebt ihr Gegenstand den Anlass, gehört
-er in ein `concept`, und die Notiz verweist per `about` dorthin.
+Eine Notiz hält fest, was bei einem Anlass anfiel: die Auswertung einer Quelle, ein Protokoll, ein Gedanke. Überlebt ihr Gegenstand den Anlass, gehört er in ein `concept`, und die Notiz verweist per `about` dorthin.

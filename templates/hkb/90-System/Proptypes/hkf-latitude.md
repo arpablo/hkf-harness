@@ -9,5 +9,4 @@ modified: 2026-08-27T12:41:08
 modified_by: claude-opus-5
 ---
 
-Geographische Breite in Dezimalgrad. Nur gemeinsam mit `hkf-longitude`
-verwenden.
+Geographische Breite in Dezimalgrad. Nur gemeinsam mit `hkf-longitude` verwenden.

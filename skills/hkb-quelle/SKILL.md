@@ -135,6 +135,12 @@ Aufbau **und** Inhalt ab, nicht nur die Kernaussagen — Wilmas Abschnitt
 Was die Quelle sagt, gehört in die Quellennotiz. Was du daraus für die eigene
 Sache schließt, in eine `note` oder ein `concept`, verbunden über `sources`.
 
+**Der Body wird nicht umbrochen** — ein Absatz ist eine Zeile. Eine
+Zusammenfassung über zwölf Teile ist der Ort, an dem sich ein harter Umbruch am
+teuersten rächt: In Obsidian wird daraus ein Stapel kurzer Zeilen, und ein
+Wikilink über einen Umbruch löst dort nicht auf. Der Abschnitt dazu steht in
+[[hkb-notiz]].
+
 **Die Wikilinks gehören in die Prosa.** Jede Notiz, die eine Tranche
 hervorgebracht hat, wird im zugehörigen Abschnitt genannt und dorthin
 verlinkt. Damit wird die Zusammenfassung zum Einstieg in den Bestand: Wer

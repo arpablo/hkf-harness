@@ -6,7 +6,7 @@ description: "Eine Wissensbasis oder eine Lieferung gegen HKF Core prüfen, die 
 # Eine Ablage prüfen und in Ordnung bringen
 
 Zuerst [[hkb]] lesen. `hk-lint` prüft alles aus §6.3 und behebt mit `--fix`
-die elf Handgriffe, die es beheben **darf**. Deine Aufgabe fängt bei den
+die zwölf Handgriffe, die es beheben **darf**. Deine Aufgabe fängt bei den
 übrigen Befunden an.
 
 ## Ablauf

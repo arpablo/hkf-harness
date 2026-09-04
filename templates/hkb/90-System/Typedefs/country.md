@@ -22,15 +22,8 @@ modified_by: claude-opus-5
 
 # Konventionen
 
-`code` trägt die Kennung nach ISO 3166-1, mit der sich eine Staatsnotiz
-gegen fremde Datenbestände abgleichen lässt. Sie ist eine Angabe **über**
-den Staat und nicht der Weg, auf einen zu verweisen: Wer einen Staat nennt,
-verweist auf seine Notiz (Core §3.7.3). Führt die Wissensbasis keine, bleibt
-die Property leer.
+`code` trägt die Kennung nach ISO 3166-1, mit der sich eine Staatsnotiz gegen fremde Datenbestände abgleichen lässt. Sie ist eine Angabe **über** den Staat und nicht der Weg, auf einen zu verweisen: Wer einen Staat nennt, verweist auf seine Notiz (Core §3.7.3). Führt die Wissensbasis keine, bleibt die Property leer.
 
-`dissolved_year` macht den Typ für historische Bestände brauchbar: Ein Staat,
-der untergegangen ist, bleibt der Staat, in dem jemand geboren wurde. Er wird
-nicht gelöscht und nicht durch seinen Nachfolger ersetzt.
+`dissolved_year` macht den Typ für historische Bestände brauchbar: Ein Staat, der untergegangen ist, bleibt der Staat, in dem jemand geboren wurde. Er wird nicht gelöscht und nicht durch seinen Nachfolger ersetzt.
 
-Ein Staat ist kein `organisation`. Die Regierung eines Staates ist eine
-Körperschaft und bekommt eine eigene Notiz.
+Ein Staat ist kein `organisation`. Die Regierung eines Staates ist eine Körperschaft und bekommt eine eigene Notiz.
