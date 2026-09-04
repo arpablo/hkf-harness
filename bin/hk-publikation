@@ -292,6 +292,27 @@ def main(argv):
     if not (geaendert or richten):
         return zeigen(b, rel_pub, reihe)
 
+    # `--richten` nimmt `contents` als Wahrheit und zieht `# Inhalt` und die
+    # Rueckverweise daran nach. Ist `contents` leer, waere die Wahrheit
+    # "dieses Werk hat keine Texte", und das Nachziehen loescht `publications`
+    # in jedem Text, der es nennt. Am 04.09.2026 hat genau das 114 Texte einer
+    # migrierten Ablage ihren Rueckverweis gekostet. Leer heisst aber nicht
+    # "keine Texte", sondern "keine Angabe", und aus keiner Angabe folgt kein
+    # Loeschbefehl. `--check` sagt schon heute genau, was fehlt.
+    if richten and not geaendert and not reihe:
+        nennen = [rel for rel, e in sorted(b.notizen.items())
+                  if e["typ"] == "text"
+                  and any(_rel_aus_verweis(b, w) == rel_pub
+                          for w in (e["daten"].get("publications") or []))]
+        if nennen:
+            sys.stderr.write(
+                "`contents` ist leer, aber %d Texte nennen diese Publikation.\n"
+                "--richten wuerde daraus schliessen, dass sie nicht dazu "
+                "gehoeren, und ihnen `publications` nehmen.\n"
+                "Die Reihenfolge zuerst aufbauen, etwa mit --aufnehmen, oder "
+                "sie mit --check ansehen.\n" % len(nennen))
+            return 2
+
     getan = schreiben(b, rel_pub, reihe, worte=richten)
     print("%s — %d Texte" % (rel_pub, len(reihe)))
     for g in getan:

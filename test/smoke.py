@@ -1062,6 +1062,22 @@ Der Text von Stück %s, mit ein paar Wörtern für die Zählung.
         r = lauf(os.path.join(BIN, "hk-lint"), ziel)
         probe("die Ablage bleibt konform", r.returncode == 0,
               (r.stdout + r.stderr)[-300:])
+        # Leeres `contents` heisst "keine Angabe" und nicht "keine Texte".
+        # Ohne diese Sperre schloss `--richten` das eine aus dem anderen und
+        # nahm jedem Text seinen Rueckverweis: 114 Texte einer migrierten
+        # Ablage am 04.09.2026.
+        pubdat = os.path.join(ziel, AUSGABE, "Publications", "sammlung.md")
+        vorher_pub = io.open(pubdat, encoding="utf-8").read()
+        vorher_txt = io.open(zwei, encoding="utf-8").read()
+        _schreib(pubdat, re.sub(r"^contents:\n(?:[ \t]+-.*\n)+", "",
+                                vorher_pub, flags=re.M))
+        r = lauf(os.path.join(BIN, "hk-publikation"), "sammlung", "--richten", ziel)
+        probe("`--richten` verweigert sich bei leerem `contents`",
+              r.returncode == 2, (r.stdout + r.stderr)[-300:])
+        probe("und laesst die Rueckverweise unangetastet",
+              io.open(zwei, encoding="utf-8").read() == vorher_txt,
+              io.open(zwei, encoding="utf-8").read()[:200])
+        _schreib(pubdat, vorher_pub)
 
         print("hk-buch und hk-epub: was daraus wird, ist ein Erzeugnis")
         artefakte = tempfile.mkdtemp(prefix="hkb-art-")
