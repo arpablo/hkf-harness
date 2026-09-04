@@ -19,7 +19,6 @@ modified_by: claude-opus-5
 | cover | hkf-file:image | nein | — | Das Titelbild |
 | contents | hkf-link-list:text | nein | — | Die Texte in ihrer Lesereihenfolge. Wird von `hk-publikation` geführt |
 | status | text | nein | — | Stand, etwa `offen`, `fertig`, `veröffentlicht` |
-| sources | hkf-link-list | nein | — | Worauf die Publikation sich beruft |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
 
 # Konventionen
@@ -31,5 +30,3 @@ Eine Publikation trägt selbst keinen Fließtext des Werkes. Sie sagt, was dazug
 Der Abschnitt `# Inhalt` im Body zeigt dieselbe Reihenfolge lesbar an. `hk-publikation` schreibt beides und hält es gleich.
 
 Eine Publikation ohne `contents` ist kein Fehler, sondern eine, die noch leer ist.
-
-`sources` trägt hier keinen Zieltyp. Eine Lieferung muss in ihren Typen geschlossen sein (§7.1), und `source` liegt außerhalb. Wer den Typ nach dem Import enger fassen will, schreibt `hkf-link-list:source` in seine Fassung der Typdefinition.

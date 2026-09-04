@@ -17,7 +17,6 @@ modified_by: claude-opus-5
 | publications | hkf-link-list:publication | nein | — | In welchen Publikationen er steht. Wird von `hk-publikation` geführt |
 | status | text | nein | — | Stand der Arbeit, etwa `entwurf`, `lektorat`, `fertig` |
 | words | number | nein | — | Wortzahl des Body, ohne Frontmatter |
-| sources | hkf-link-list | nein | — | Worauf der Essay sich beruft |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
 
 # Konventionen
@@ -27,5 +26,3 @@ Ein Essay behauptet etwas. Das unterscheidet ihn von einer Wissensnotiz, die sag
 Der Body beginnt mit der These und nicht mit einer Hinführung. Was gegen sie spricht, steht darin und nicht in einer Fußnote.
 
 **Ein Essay ist ein Erzeugnis und liegt darum unter `output_base`.** Er beruft sich auf den Bestand, der Bestand beruft sich nicht auf ihn. Eine Wissensnotiz, die einen Essay als Beleg führte, hätte ihre Aussage aus einer Behauptung genommen.
-
-`sources` trägt hier keinen Zieltyp. Eine Lieferung muss in ihren Typen geschlossen sein (§7.1), und `source` liegt außerhalb. Wer den Typ nach dem Import enger fassen will, schreibt `hkf-link-list:source` in seine Fassung der Typdefinition.

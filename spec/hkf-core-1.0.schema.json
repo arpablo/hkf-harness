@@ -6,9 +6,9 @@
   "$ref": "#/$defs/notiz",
   "$defs": {
     "property-name": {
-      "description": "3.4 — Property-Namen sind snake_case.",
+      "description": "3.4 — Kleinbuchstaben, Ziffern, _ und -; der Bindestrich, weil Obsidian-Plugins ihn benutzen.",
       "type": "string",
-      "pattern": "^[a-z][a-z0-9_]*$"
+      "pattern": "^[a-z][a-z0-9_-]*$"
     },
     "skalar": {
       "description": "3.4 — Text, Zahl oder Checkbox. Kein null, kein leerer Text.",
@@ -240,7 +240,7 @@
           "$ref": "#/$defs/hkf-link-or-url-list"
         },
         "sources": {
-          "$ref": "#/$defs/hkf-link-list"
+          "$ref": "#/$defs/hkf-link-or-url-list"
         },
         "status": {
           "type": "string",

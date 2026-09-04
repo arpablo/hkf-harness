@@ -17,7 +17,6 @@ modified_by: claude-opus-5
 | publications | hkf-link-list:publication | nein | — | In welchen Publikationen er steht. Wird von `hk-publikation` geführt |
 | status | text | nein | — | Stand der Arbeit, etwa `entwurf`, `lektorat`, `fertig` |
 | words | number | nein | — | Wortzahl des Body, ohne Frontmatter |
-| sources | hkf-link-list | nein | — | Worauf der Text sich beruft |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
 
 # Konventionen
@@ -29,5 +28,3 @@ Der Body ist der Text. Er beginnt ohne Vorrede und endet mit seinem letzten inha
 `publications` und `contents` an der Publikation sagen dasselbe von zwei Seiten. Geführt werden beide von `hk-publikation`, von Hand geschrieben wird keines von beiden.
 
 `words` ist eine Kennzahl und keine Zusicherung. Sie steht da, damit sich ein Bestand ohne Öffnen jeder Datei überblicken lässt.
-
-`sources` trägt hier keinen Zieltyp. Eine Lieferung muss in ihren Typen geschlossen sein (§7.1), und `source` liegt außerhalb. Wer den Typ nach dem Import enger fassen will, schreibt `hkf-link-list:source` in seine Fassung der Typdefinition.

@@ -585,7 +585,15 @@ Strukturierte Information gehört als Liste oder Tabelle in den Body.
 
 Weitere Regeln:
 
-- Property-Namen sind `snake_case`.
+- Property-Namen bestehen aus Kleinbuchstaben, Ziffern, `_` und `-` und
+  beginnen mit einem Buchstaben. `snake_case` ist die Form für alles, was HKF
+  selbst benennt.
+
+  **Der Bindestrich steht darin, weil Obsidian ihn benutzt.** Ein Plugin
+  bestimmt den Namen seiner Properties, und `banner-x` oder `to-publish` sind
+  dort gewöhnlich. Sie umzubenennen bräche das Plugin, das sie liest. Eine
+  Ablage ist ein Obsidian-Vault, bevor sie eine Wissensbasis ist, und ein
+  Format, das ihre Werkzeuge aussperrt, ist am falschen Ende streng.
 - Leere Werte und `null` werden nicht geschrieben; eine unbekannte Property
   entfällt.
 - Ein `datetime`-Wert ohne Uhrzeit bezeichnet den Tagesbeginn: `2026-08-27`
@@ -858,7 +866,7 @@ Dateiname ist Nachname-Vorname in kebab-case.
 Der Abschnitt `# Properties` ist optional. Ist er vorhanden, ist er
 **normativ** und wird von `hk-lint` geprüft.
 
-- **Property** — der `snake_case`-Name im Frontmatter.
+- **Property** — der Name im Frontmatter (§3.4).
 - **Typ** — entweder eine Wertform aus §3.4 oder der Name eines
   Property-Typs aus `Proptypes/`. Bei `hkf-link` darf ein Zieltyp, bei
   `hkf-file` eine Medienart angehängt werden (§3.7.1). Mehrere zulässige
@@ -2766,7 +2774,7 @@ brauchen keinen Eintrag in einer Property-Tabelle.
 | `modified` | datetime | nein | — | Zeitpunkt der letzten Änderung, in **UTC** (§3.4) |
 | `modified_by` | text | nein | — | Wer zuletzt geändert hat |
 | `bundles` | hkf-link-list:bundle | nein | — | Zugehörigkeit; nur in einer HKB (§5.2) |
-| `sources` | hkf-link-list | nein | — | Woher der Inhalt stammt: Verweise auf Notizen eines Quelltyps (§3.2.2) |
+| `sources` | hkf-link-or-url-list | nein | — | Woher der Inhalt stammt: Verweise auf Notizen eines Quelltyps (§3.2.2), oder die Adresse, zu der es noch keine gibt |
 | `related` | hkf-link-or-url-list | nein | — | Verwandtes: Verweise in die eigene Ablage oder Adressen im Netz (§5.6) |
 | `rejected_links` | hkf-link-list | nein | — | Ziele, die nicht selbsttätig verlinkt werden; nur in einer HKB (§5.6) |
 | `extends` | text | nein | — | Notiz-ID, die diese Notiz ergänzt statt sie zu ersetzen; nur in einer Lieferung (§6.1) |

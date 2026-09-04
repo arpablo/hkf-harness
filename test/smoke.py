@@ -703,6 +703,50 @@ Hier steht [[40-Wiki/Persons/ada-lovelace|Ada Lovelace]] schon verlinkt.
         for d in ("Persons", "Events"):
             os.rmdir(os.path.join(ziel, WIKI, d))
 
+        print("Was Obsidian mitbringt, sperrt HKF nicht aus")
+        # Zwei Regeln, die an einem gewachsenen Vault zu eng waren.
+        _schreib(os.path.join(ziel, QUELLEN, "quelle.md"), """---
+type: source
+name: Eine Quelle
+kind: book
+created: 2026-01-01
+modified: 2026-01-01T00:00:00
+---
+
+# Zweck
+
+Da.
+""")
+        _schreib(os.path.join(ziel, WIKI, "Notes", "obsidian.md"), """---
+type: note
+name: Probe
+sources:
+  - "[[50-Sources/quelle|Eine Quelle]]"
+  - "https://example.org/etwas"
+banner-x: 0.5
+to-publish: true
+created: 2026-01-01
+modified: 2026-01-01T00:00:00
+---
+
+# Zweck
+
+Verweist auf [[50-Sources/quelle|Eine Quelle]].
+""")
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        probe("`sources` nimmt eine Notiz und eine Adresse (A.2)",
+              "sources" not in r.stdout.split("Hinweise", 1)[0],
+              r.stdout.split("Hinweise", 1)[0][-400:])
+        probe("ein Property-Name mit Bindestrich ist zulässig (§3.4)",
+              "banner-x" not in r.stdout.split("Hinweise", 1)[0]
+              and "to-publish" not in r.stdout.split("Hinweise", 1)[0],
+              r.stdout.split("Hinweise", 1)[0][-400:])
+        probe("die Ablage bleibt ohne Befund", r.returncode == 0,
+              (r.stdout + r.stderr)[-300:])
+        os.remove(os.path.join(ziel, WIKI, "Notes", "obsidian.md"))
+        os.remove(os.path.join(ziel, QUELLEN, "quelle.md"))
+        shutil.rmtree(os.path.join(ziel, WIKI, "Notes"), ignore_errors=True)
+
         print("Ein leerer Bereich fällt mit der Wurzel zusammen (§3.1)")
         # Ein gewachsener Vault legt seinen Inhalt nicht unter einen
         # Basispfad, sondern in Ordner nebeneinander. Dafuer darf ein Bereich

@@ -24,7 +24,6 @@ modified_by: claude-opus-5
 | props | hkf-link-list:prop | nein | — | Welche Dinge darin eine Rolle spielen |
 | status | text | nein | — | Stand der Arbeit, etwa `entwurf`, `lektorat`, `fertig` |
 | words | number | nein | — | Wortzahl des Body, ohne Frontmatter |
-| sources | hkf-link-list | nein | — | Worauf der Text sich beruft |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
 
 # Konventionen
@@ -40,5 +39,3 @@ Der Body ist der Text. Er beginnt ohne Vorrede und endet mit seinem letzten inha
 **`characters`, `locations` und `beats` werden abgeleitet und nicht daneben gepflegt.** Wer im Body vorkommt, steht dort als Verweis, und die Liste im Frontmatter folgt daraus. Zwei Stellen, die dasselbe behaupten und getrennt gepflegt werden, laufen auseinander.
 
 `story_date` und `story_end` spannen einen Zeitraum. Sie sind die Grundlage der Kontinuitätsprüfung: Zwei Texte dürfen denselben Tag nur belegen, wenn eine Figur beides an einem Tag schafft. `hk-kontinuitaet` meldet die Überschneidungen, entscheiden muss sie ein Mensch.
-
-`sources` trägt hier keinen Zieltyp. Eine Lieferung muss in ihren Typen geschlossen sein (§7.1), und `source` liegt außerhalb. Wer den Typ nach dem Import enger fassen will, schreibt `hkf-link-list:source` in seine Fassung der Typdefinition.
