@@ -1,0 +1,220 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""hk-erwaehnungen — unverlinkte Erwaehnungen einer Notiz zu Verweisen machen.
+
+    hk-erwaehnungen <ziel> [pfad]     berichtet, was zu verlinken waere
+    hk-erwaehnungen <ziel> --setzen   schreibt die Verweise
+
+    --setzen   die Verweise wirklich setzen; ohne das aendert der Lauf nichts
+    --alle     jede Fundstelle einer Notiz, nicht nur die erste
+
+`ziel` ist ein qualifizierter Verweis oder der Dateiname der Notiz. Gesucht
+wird nach ihrem Titel und ihren `aliases`.
+
+Das ist Obsidians „Unlinked mentions" mit „Link all", nur mit den Regeln von
+HKF und mit den Schutzregeln, die dort fehlen. Gesetzt wird die Form aus §3.6:
+voller Pfad ab der Vault-Wurzel, dann `|`, dann der Text, der schon dastand.
+
+Angefasst wird nur eine Notiz, die **noch gar keinen** Verweis auf das Ziel
+traegt. Der Zweck ist, fehlende Verweise zu ergaenzen, nicht vorhandene zu
+verdoppeln.
+
+Nicht angefasst werden das Frontmatter, Code, Ueberschriften, Tabellen, was
+schon in einem Verweis steht, und der Abschnitt `# Siehe auch` — dort steht
+ein Verweis mit Grund, und der ist eine Entscheidung und keine Fundstelle.
+Ebenso wenig `Typedefs/` und `Proptypes/`: Sie sind tabu (Regel 6) und nennen
+Namen als Beispiel.
+
+Ein Suchbegriff unter vier Zeichen wird nur gemeldet und nie gesetzt. „Öl" in
+„Ölfeld" zu verlinken ist kein Gewinn, und der Schaden faellt erst spaeter auf.
+"""
+import os, re, sys, unicodedata
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
+from hkf import ablage, notiz, pruefen   # noqa: E402
+
+WERKZEUG = "hk-erwaehnungen"
+KURZ = 4                       # kuerzere Begriffe werden nur gemeldet
+ZAUN = re.compile(r"^\s*(```|~~~)")
+UEBERSCHRIFT = re.compile(r"^\s*#{1,6}\s")
+TABELLE = re.compile(r"^\s*\|")
+SIEHE_AUCH = re.compile(r"^\s*#{1,6}\s+Siehe auch\s*$")
+INLINE = re.compile(r"`[^`\n]*`")
+VERWEIS = re.compile(r"\[\[[^\]\n]*\]\]")
+
+
+def nfc(text):
+    return unicodedata.normalize("NFC", text)
+
+
+def begriffe(e):
+    """Titel und Aliase der Zielnotiz, laengste zuerst."""
+    aus = []
+    for wert in (e["daten"].get("title"), e["daten"].get("name")):
+        if wert:
+            aus.append(str(wert))
+    for a in e["daten"].get("aliases") or []:
+        if a:
+            aus.append(str(a))
+    gesehen, sauber = set(), []
+    for b in aus:
+        b = nfc(b.strip())
+        if b and b.lower() not in gesehen:
+            gesehen.add(b.lower())
+            sauber.append(b)
+    return sorted(sauber, key=len, reverse=True)
+
+
+def _gesperrt(zeile):
+    return bool(UEBERSCHRIFT.match(zeile) or TABELLE.match(zeile))
+
+
+def _freie_stellen(zeile, muster):
+    """Treffer, die nicht in Inline-Code und nicht in einem Verweis stehen."""
+    belegt = []
+    for r in (INLINE, VERWEIS):
+        belegt += [(m.start(), m.end()) for m in r.finditer(zeile)]
+    aus = []
+    for m in muster.finditer(zeile):
+        if any(a <= m.start() < b for a, b in belegt):
+            continue
+        aus.append(m)
+    return aus
+
+
+def durchgehen(b, e, muster, verweisform, alle):
+    """(neuer Body, Zahl der gesetzten Verweise) fuer eine Notiz."""
+    zeilen = e["body"].splitlines()
+    offen, in_siehe_auch, gesetzt = None, False, 0
+    aus = []
+    for zeile in zeilen:
+        if offen is not None:
+            aus.append(zeile)
+            if zeile.strip().startswith(offen):
+                offen = None
+            continue
+        zaun = ZAUN.match(zeile)
+        if zaun:
+            offen = zaun.group(1)
+            aus.append(zeile)
+            continue
+        if UEBERSCHRIFT.match(zeile):
+            in_siehe_auch = bool(SIEHE_AUCH.match(zeile))
+        if in_siehe_auch or _gesperrt(zeile) or (gesetzt and not alle):
+            aus.append(zeile)
+            continue
+        treffer = _freie_stellen(nfc(zeile), muster)
+        if not treffer:
+            aus.append(zeile)
+            continue
+        neu, ende = [], 0
+        zn = nfc(zeile)
+        for m in treffer:
+            neu.append(zn[ende:m.start()])
+            neu.append("[[%s|%s]]" % (verweisform, m.group(0)))
+            ende = m.end()
+            gesetzt += 1
+            if not alle:
+                break
+        neu.append(zn[ende:])
+        aus.append("".join(neu))
+    return "\n".join(aus) + ("\n" if e["body"].endswith("\n") else ""), gesetzt
+
+
+def main(argv):
+    if "--help" in argv or "-h" in argv:
+        print(__doc__.strip()); return 0
+    setzen = "--setzen" in argv
+    alle = "--alle" in argv
+    args = [a for a in argv if not a.startswith("-")]
+    if not args:
+        sys.stderr.write("Kein Ziel angegeben. `hk-erwaehnungen --help`.\n")
+        return 2
+    pfad_arg = None
+    if len(args) > 1 and ablage.art_von(
+            os.path.abspath(os.path.expanduser(args[-1]))):
+        pfad_arg = args.pop()
+    ziel = args[0]
+
+    try:
+        hkb, art = ablage.finde_ablage(pfad_arg, arten=("hkb",))
+    except ablage.KeineAblage as e:
+        sys.stderr.write(str(e) + "\n"); return 2
+    b = pruefen.Bestand(hkb, art)
+
+    art_z, rel = b.aufloesen(ziel.rstrip("/"))
+    if art_z != "notiz":
+        name = ziel.rstrip("/").rsplit("/", 1)[-1]
+        if name.endswith(".md"):
+            name = name[:-3]
+        treffer = b.nach_namen.get(name) or []
+        if len(treffer) != 1:
+            sys.stderr.write("`%s` ist keine eindeutige Notiz dieser Ablage%s\n"
+                             % (ziel, ": " + ", ".join(treffer) if treffer else "."))
+            return 2
+        rel = treffer[0]
+    e_ziel = b.notizen[rel]
+    verweisform = "/".join(t for t in
+                           (b.praefix(e_ziel.get("bereich") or "wiki_base"), rel)
+                           if t)
+
+    alle_begriffe = begriffe(e_ziel)
+    if not alle_begriffe:
+        sys.stderr.write("%s trägt weder `title` noch `name`.\n" % rel)
+        return 2
+    kurz = [x for x in alle_begriffe if len(x) < KURZ]
+    lang = [x for x in alle_begriffe if len(x) >= KURZ]
+    if not lang:
+        print("Alle Suchbegriffe sind kürzer als %d Zeichen: %s"
+              % (KURZ, ", ".join(kurz)))
+        print("Nichts gesetzt. Zu kurz heißt zu mehrdeutig.")
+        return 1
+
+    muster = re.compile(r"(?<!\w)(?:%s)(?!\w)"
+                        % "|".join(re.escape(x) for x in lang))
+    print("%s — %s" % (hkb, "Verweise setzen" if setzen else "nur Bericht"))
+    print("Ziel:     [[%s]]" % verweisform)
+    print("Begriffe: %s" % ", ".join(lang))
+    if kurz:
+        print("Zu kurz, deshalb ausgelassen: %s" % ", ".join(kurz))
+    print()
+
+    geaendert, summe = [], 0
+    for r, e in sorted(b.notizen.items()):
+        if r == rel:
+            continue
+        # Regel 6: `Typedefs/` und `Proptypes/` sind tabu. Sie fuehren das
+        # Vokabular des Formats und nennen Namen als Beispiel, nicht als
+        # Erwaehnung. Ein Verweis von dort waere eine Aussage ueber diese
+        # Ablage in einer Datei, die in jede andere wandert.
+        if e["typ"] in ("typedef", "proptype") or \
+                e.get("bereich") == "config_base":
+            continue
+        # Wer schon irgendwo auf das Ziel zeigt, wird nicht angefasst.
+        text = notiz.bauen(e["kopf"], pruefen.ohne_code(e["body"]))
+        schon = any(b.aufloesen(m.group(1))[1] == rel
+                    for m in pruefen.LINK.finditer(text))
+        if schon:
+            continue
+        neuer_body, zahl = durchgehen(b, e, muster, verweisform, alle)
+        if not zahl:
+            continue
+        geaendert.append((r, zahl))
+        summe += zahl
+        if setzen:
+            notiz.sichern(e["pfad"], e["kopf"], neuer_body, WERKZEUG)
+
+    for r, zahl in geaendert:
+        print("  %-52s %d" % (r, zahl))
+    print()
+    if not geaendert:
+        print("Keine unverlinkte Erwähnung gefunden.")
+        return 1
+    print("%d Verweise in %d Notizen%s"
+          % (summe, len(geaendert), " gesetzt" if setzen else
+             ", noch nichts geschrieben. `--setzen` schreibt sie."))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

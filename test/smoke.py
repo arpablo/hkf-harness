@@ -603,6 +603,97 @@ Die Zeitenwende kam, und mit ihr eine entscheidende Frage.
         probe("dann gilt wieder das Arbeitsverzeichnis",
               "dem Arbeitsverzeichnis" in r.stdout, r.stdout)
 
+        print("hk-suche: Notizen finden, ohne das Dateisystem abzugrasen")
+        _schreib(os.path.join(ziel, WIKI, "Persons", "ada-lovelace.md"), """---
+type: person
+name: Ada Lovelace
+aliases:
+  - Ada Byron
+created: 2026-01-01
+---
+
+# Zweck
+
+Mathematikerin.
+""")
+        _schreib(os.path.join(ziel, WIKI, "Events", "erste.md"), """---
+type: event
+name: Erste
+created: 2026-01-01
+---
+
+# Zweck
+
+Ada Lovelace schrieb das erste Programm.
+
+## Ein Titel mit Ada Lovelace darin
+
+| Spalte | Ada Lovelace |
+|---|---|
+| a | b |
+
+Und `Ada Lovelace` in Code.
+""")
+        _schreib(os.path.join(ziel, WIKI, "Events", "zweite.md"), """---
+type: event
+name: Zweite
+created: 2026-01-01
+---
+
+# Zweck
+
+Hier steht [[40-Wiki/Persons/ada-lovelace|Ada Lovelace]] schon verlinkt.
+""")
+        r = lauf(os.path.join(BIN, "hk-suche"), "--typ", "person", ziel)
+        probe("--typ findet die Notizen eines Typs",
+              "ada-lovelace" in r.stdout and r.returncode == 0, r.stdout[-200:])
+        r = lauf(os.path.join(BIN, "hk-suche"), "Mathematikerin", ziel)
+        probe("der Volltext findet sie auch", "ada-lovelace" in r.stdout,
+              r.stdout[-200:])
+        r = lauf(os.path.join(BIN, "hk-suche"), "--verweist-auf",
+                 "ada-lovelace", ziel)
+        probe("--verweist-auf findet den Rückverweis",
+              "Events/zweite" in r.stdout and "Events/erste" not in r.stdout,
+              r.stdout[-300:])
+        r = lauf(os.path.join(BIN, "hk-suche"), "gibtesnicht", ziel)
+        probe("ohne Treffer endet der Lauf mit 1", r.returncode == 1, r.stdout)
+
+        print("hk-erwaehnungen: was schon dasteht, wird ein Verweis")
+        vorher = _abbild(ziel)
+        r = lauf(os.path.join(BIN, "hk-erwaehnungen"), "ada-lovelace", ziel)
+        probe("der Bericht nennt die Fundstelle",
+              "Events/erste" in r.stdout, r.stdout[-300:])
+        probe("und die Notiz, die schon verlinkt, bleibt aussen vor",
+              "Events/zweite" not in r.stdout, r.stdout[-300:])
+        probe("die Grundausstattung wird nicht angefasst (Regel 6)",
+              "Proptypes/" not in r.stdout and "Typedefs/" not in r.stdout,
+              r.stdout[-300:])
+        probe("ohne --setzen ändert sich nichts", _abbild(ziel) == vorher)
+        r = lauf(os.path.join(BIN, "hk-erwaehnungen"), "ada-lovelace", ziel,
+                 "--setzen")
+        probe("--setzen schreibt", r.returncode == 0, r.stdout[-200:])
+        gesetzt = io.open(os.path.join(ziel, WIKI, "Events", "erste.md"),
+                          encoding="utf-8").read()
+        probe("der Verweis ist qualifiziert und trägt den alten Text",
+              "[[40-Wiki/Persons/ada-lovelace|Ada Lovelace]] schrieb" in gesetzt,
+              gesetzt[-400:])
+        probe("die Überschrift bleibt unberührt",
+              "## Ein Titel mit Ada Lovelace darin" in gesetzt)
+        probe("die Tabellenzeile auch", "| Spalte | Ada Lovelace |" in gesetzt)
+        probe("und der Inline-Code", "`Ada Lovelace` in Code" in gesetzt)
+        probe("nur die erste Fundstelle je Notiz",
+              gesetzt.count("[[40-Wiki/Persons/ada-lovelace|") == 1, gesetzt[-400:])
+        probe("`modified_by` steht drin (Regel 5)",
+              "modified_by: hk-erwaehnungen" in gesetzt, gesetzt[:200])
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        probe("die Ablage bleibt konform", r.returncode == 0,
+              (r.stdout + r.stderr)[-300:])
+        for f in ("Persons/ada-lovelace.md", "Events/erste.md",
+                  "Events/zweite.md"):
+            os.remove(os.path.join(ziel, WIKI, f))
+        for d in ("Persons", "Events"):
+            os.rmdir(os.path.join(ziel, WIKI, d))
+
         print("Die Hooks: der Kanon kommt aus der Sitzung, nicht aus der Ablage")
         p_hooks = os.path.join(WURZEL, "hooks", "hooks.json")
         try:

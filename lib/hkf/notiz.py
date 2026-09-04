@@ -7,6 +7,8 @@ eine Notiz durch einen YAML-Serialisierer schickt, bekommt sie anders
 formatiert zurueck, und der Textunterschied zeigt dann Aenderungen, die keine
 sind.
 """
+import datetime
+import io
 import re
 
 TRENNER = re.compile(r"\A---\n(.*?)\n---\n?(.*)\Z", re.S)
@@ -186,3 +188,21 @@ def skalar(wert):
     if gleich or "\n" in text:
         return text
     return '"%s"' % text.replace('\\', '\\\\').replace('"', '\\"')
+
+
+def sichern(pfad, kopf, body, werkzeug):
+    """Schreiben und die Aenderung hinschreiben (Core §3.3, Regel 5).
+
+    Wer aendert, schreibt hin, dass er geaendert hat: `modified` auf jetzt in
+    UTC, `modified_by` auf den Namen des Werkzeugs. Die Zeile stand zweimal in
+    `bin/`, und zwei Fassungen derselben Regel laufen irgendwann auseinander.
+
+    Gibt das Datum zurueck, damit ein Aufrufer es in seinen Bericht nehmen
+    kann, ohne es ein zweites Mal zu bilden.
+    """
+    jetzt = datetime.datetime.now(datetime.timezone.utc)
+    kopf = setze_skalar(kopf, "modified",
+                        skalar(jetzt.strftime("%Y-%m-%dT%H:%M:%S")))
+    kopf = setze_skalar(kopf, "modified_by", werkzeug)
+    io.open(pfad, "w", encoding="utf-8").write(bauen(kopf, body))
+    return jetzt.strftime("%Y-%m-%d")

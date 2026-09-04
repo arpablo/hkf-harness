@@ -1,0 +1,178 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""hk-suche — Notizen einer Ablage finden.
+
+    hk-suche <muster> [pfad]          Volltext ueber Frontmatter und Body
+    hk-suche --typ person [pfad]      alle Notizen eines Typs
+    hk-suche --verweist-auf <ziel>    wer auf diese Notiz zeigt
+
+    --typ <typ>            nur Notizen dieses Typs
+    --hat <name>[=<wert>]  nur Notizen mit dieser Property
+    --verweist-auf <ziel>  Rueckverweise, `ziel` ist ein Pfad oder ein Dateiname
+    --regex                das Muster ist ein regulaerer Ausdruck
+    --fundstellen          die getroffenen Zeilen zeigen, nicht nur die Notizen
+    --pfade                nur die Pfade ausgeben, eine Zeile je Notiz
+
+Ohne Pfad gilt die aktive Ablage (siehe `hk-ablage`). Die Bedingungen gelten
+zusammen: `hk-suche Krieg --typ event` findet Ereignisse, in denen das Wort
+vorkommt.
+
+Gesucht wird in den Notizen, die die Ablage fuehrt, also unter `wiki_base`,
+`source_base` und `config_base`. Was dort nicht als Notiz liegt, kommt nicht
+vor: Mediendateien nicht, Vorlagen nicht, und was ausserhalb der Bereiche
+liegt, auch nicht.
+
+Ohne Treffer endet der Lauf mit 1. Das macht ihn in einer Kette brauchbar und
+unterscheidet „nichts gefunden" von „gar nicht gelaufen".
+"""
+import os, re, sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
+from hkf import ablage, notiz, pruefen   # noqa: E402
+
+
+def _wert(argv, name, vorgabe=None):
+    if name in argv:
+        i = argv.index(name)
+        if i + 1 < len(argv):
+            return argv[i + 1]
+    return vorgabe
+
+
+def _titel(e):
+    return str(e["daten"].get("title") or e["daten"].get("name") or
+               e["rel"].rsplit("/", 1)[-1][:-3])
+
+
+def _trifft_property(e, bedingung):
+    name, _, wert = bedingung.partition("=")
+    if name not in e["daten"]:
+        return False
+    if not wert:
+        return True
+    vorhanden = e["daten"][name]
+    if isinstance(vorhanden, list):
+        return any(wert in str(v) for v in vorhanden)
+    return wert in str(vorhanden)
+
+
+def _zeigt_auf(b, e, ziele):
+    text = notiz.bauen(e["kopf"], pruefen.ohne_code(e["body"]))
+    for m in pruefen.LINK.finditer(text):
+        art, rest = b.aufloesen(m.group(1))
+        if art == "notiz" and rest in ziele:
+            return True
+    return False
+
+
+def main(argv):
+    if "--help" in argv or "-h" in argv:
+        print(__doc__.strip()); return 0
+    regex = "--regex" in argv
+    fundstellen = "--fundstellen" in argv
+    nur_pfade = "--pfade" in argv
+    typ = _wert(argv, "--typ")
+    hat = _wert(argv, "--hat")
+    verweist = _wert(argv, "--verweist-auf")
+
+    ohne_optionen, ueberspringen = [], False
+    for a in argv:
+        if ueberspringen:
+            ueberspringen = False
+            continue
+        if a in ("--typ", "--hat", "--verweist-auf"):
+            ueberspringen = True
+            continue
+        if not a.startswith("-"):
+            ohne_optionen.append(a)
+    # Der Pfad steht hinten und ist als solcher erkennbar: ein Verzeichnis mit
+    # einer Wurzeldatei. Ohne diese Probe waere `hk-suche --typ person <pfad>`
+    # nicht von einer Suche nach dem Wort <pfad> zu unterscheiden.
+    pfad_arg = None
+    if ohne_optionen and ablage.art_von(
+            os.path.abspath(os.path.expanduser(ohne_optionen[-1]))):
+        pfad_arg = ohne_optionen.pop()
+    muster = ohne_optionen[0] if ohne_optionen else None
+
+    if muster is None and not (typ or hat or verweist):
+        sys.stderr.write("Kein Muster und keine Bedingung. `hk-suche --help`.\n")
+        return 2
+    try:
+        hkb, art = ablage.finde_ablage(pfad_arg)
+    except ablage.KeineAblage as e:
+        sys.stderr.write(str(e) + "\n"); return 2
+
+    b = pruefen.Bestand(hkb, art)
+
+    ziele = set()
+    if verweist:
+        # Der Aufruf darf abkuerzen. Ein qualifizierter Verweis loest direkt
+        # auf, sonst gilt der Dateiname — solange genau eine Notiz so heisst.
+        art_z, rest = b.aufloesen(verweist.rstrip("/"))
+        if art_z != "notiz":
+            name = verweist.rstrip("/").rsplit("/", 1)[-1]
+            if name.endswith(".md"):
+                name = name[:-3]
+            treffer = b.nach_namen.get(name) or []
+            if len(treffer) != 1:
+                sys.stderr.write(
+                    "`%s` ist keine eindeutige Notiz dieser Ablage%s\n"
+                    % (verweist,
+                       ": " + ", ".join(treffer) if treffer else "."))
+                return 2
+            rest = treffer[0]
+        ziele = {rest}
+
+    if muster is not None:
+        try:
+            suche = re.compile(muster if regex else re.escape(muster),
+                               re.IGNORECASE)
+        except re.error as e:
+            sys.stderr.write("Kein gültiger regulärer Ausdruck: %s\n" % e)
+            return 2
+
+    gefunden = []
+    for rel, e in sorted(b.notizen.items()):
+        if typ and e["typ"] != typ and not e["typ"].endswith("|%s]]" % typ) \
+                and not e["typ"].endswith("/%s]]" % typ):
+            continue
+        if hat and not _trifft_property(e, hat):
+            continue
+        if verweist and not _zeigt_auf(b, e, ziele):
+            continue
+        zeilen = []
+        if muster is not None:
+            ganz = notiz.bauen(e["kopf"], e["body"])
+            zeilen = [(i + 1, z) for i, z in enumerate(ganz.splitlines())
+                      if suche.search(z)]
+            if not zeilen:
+                continue
+        gefunden.append((e, zeilen))
+
+    if not gefunden:
+        print("Nichts gefunden.")
+        return 1
+
+    breite = max(len(e["typ"]) for e, _ in gefunden) if not nur_pfade else 0
+    for e, zeilen in gefunden:
+        if nur_pfade:
+            print(os.path.join(hkb, _bereichspfad(b, e), e["rel"]))
+            continue
+        print("%-*s  %-46s  %s" % (breite, e["typ"], e["rel"], _titel(e)))
+        if fundstellen:
+            for nr, z in zeilen[:5]:
+                print("    %4d  %s" % (nr, z.strip()[:100]))
+            if len(zeilen) > 5:
+                print("    und %d weitere Zeilen" % (len(zeilen) - 5))
+    if not nur_pfade:
+        print()
+        print("%d Notizen" % len(gefunden))
+    return 0
+
+
+def _bereichspfad(b, e):
+    return b.bereiche.get(e.get("bereich") or "wiki_base", "")
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

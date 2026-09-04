@@ -151,12 +151,7 @@ def quellennotiz(pfad):
 
 def sichern(pfad, kopf, body):
     """Schreiben und die Änderung hinschreiben (Core §3.3, Regel 5)."""
-    jetzt = datetime.datetime.now(datetime.timezone.utc)
-    kopf = notiz.setze_skalar(kopf, "modified",
-                              notiz.skalar(jetzt.strftime("%Y-%m-%dT%H:%M:%S")))
-    kopf = notiz.setze_skalar(kopf, "modified_by", WERKZEUG)
-    io.open(pfad, "w", encoding="utf-8").write(notiz.bauen(kopf, body))
-    return jetzt.strftime("%Y-%m-%d")
+    return notiz.sichern(pfad, kopf, body, WERKZEUG)
 
 
 # ── Die vier Aufrufe ────────────────────────────────────────────────────

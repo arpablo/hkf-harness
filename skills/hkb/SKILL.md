@@ -60,6 +60,8 @@ hat, und das geht den sieben Regeln vor, wo es sie berührt.
 | `hk-types [--umstellen]` | legt Typseiten und Bases an, damit `type` ein Verweis sein kann (§3.3) |
 | `hk-ablage [<pfad>]` | welche Ablage bearbeitet wird: `--liste`, `<pfad>` merkt, `--loeschen` nimmt zurück |
 | `hk-text [--gate]` | prüft deutschsprachige Texte gegen die Schreibregeln |
+| `hk-suche <muster>` | findet Notizen: Volltext, `--typ`, `--hat`, `--verweist-auf` |
+| `hk-erwaehnungen <ziel>` | macht unverlinkte Erwähnungen zu Verweisen, `--setzen` schreibt |
 
 `hk-import --check` und `hk-lint` ohne `--fix` schreiben nichts. **Fang immer
 damit an.**
@@ -104,6 +106,22 @@ Sie stehen hier und nirgends sonst — du brauchst sie ständig:
    einen neuen Typ an (dafür gibt es `hkb-typ`).
 7. **`# Siehe auch` wird ergänzt, nicht gekürzt.** Entfernen ist Sache eines
    Menschen; was weg soll, kommt in `rejected_links`.
+
+## Git
+
+Jede Ablage ist ein Git-Repository, und du arbeitest darin wie in jedem
+anderen.
+
+- **`git status --short`, bevor du etwas änderst.** Was schon offen ist,
+  gehört jemand anderem und bleibt liegen.
+- **Ein Commit je abgeschlossenem Vorgang**, nicht je Datei. Ein Import ist
+  ein Commit, ein `hk-lint --fix` ist einer.
+- **Nie blind `git add -A`.** Nenne die Dateien, die zum Vorgang gehören.
+- **Kein Push ohne Auftrag.**
+- Inhalt, Konfiguration und Werkzeug gehören in getrennte Commits.
+- Kein destruktiver Befehl, den der Auftrag nicht ausdrücklich verlangt.
+
+`.obsidian/` ist Konfiguration des Menschen. Sie wird nicht aufgeräumt.
 
 ## Was du nie tust
 
