@@ -1,0 +1,93 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""hk-ablage — welche Ablage bearbeitet wird.
+
+    hk-ablage                nennt die aktive Ablage und woher der Pfad kommt
+    hk-ablage --liste        zeigt, was danebenliegt und was bekannt ist
+    hk-ablage <pfad>         merkt die Wahl fuer dieses Arbeitsverzeichnis
+    hk-ablage --loeschen     nimmt die Wahl zurueck
+
+Der Pfad wird in fuenf Stufen aufgeloest: der Aufruf, `HKB_PATH`, die
+gemerkte Wahl, eine Aufwaertssuche ab dem Arbeitsverzeichnis, die Vorgabe
+`~/hkb`. Jede Fehlermeldung nennt die Stufe, aus der ihr Pfad stammt.
+
+Gemerkt wird auf der Platte und nicht in der Umgebung. Ein `export HKB_PATH`
+in einem Werkzeugaufruf ueberlebt den Aufruf nicht — zwischen zwei Aufrufen
+bleibt das Arbeitsverzeichnis, sonst nichts. Geschluesselt wird deshalb nach
+Arbeitsverzeichnis: Zwei Sitzungen an verschiedenen Ablagen stellen sich
+gegenseitig nicht um.
+
+Eine Wahl macht aus einem Verzeichnis keine Ablage. Wo weder `hkb.md` noch
+`hbundle.md` noch `vault.md` liegt, bricht der Aufruf ab.
+"""
+import os, sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
+from hkf import ablage   # noqa: E402
+
+
+def _zeile(pfad, name, art):
+    return "  %-10s %-28s %s" % (ablage.ARTNAME[art], name, pfad)
+
+
+def liste():
+    hier = os.getcwd()
+    da = ablage.daneben(hier)
+    print("Unter %s" % hier)
+    if da:
+        for pfad, name, art in da:
+            print(_zeile(pfad, name, art))
+    else:
+        print("  nichts")
+
+    schon = [e for e in ablage.bekannt()
+             if e[0] not in set(p for p, _n, _a in da)]
+    if schon:
+        print()
+        print("Schon einmal benutzt")
+        for pfad, name, art in schon:
+            print(_zeile(pfad, name, art))
+    return 0
+
+
+def zeigen():
+    pfad, woher = ablage.aufloesen()
+    art = ablage.art_von(pfad)
+    if not art:
+        sys.stderr.write("%s: dort liegt keine Ablage.\nDer Pfad kommt aus %s.\n"
+                         % (pfad, woher))
+        kandidaten = ablage.daneben() or ablage.bekannt()
+        if kandidaten:
+            sys.stderr.write("\nZur Wahl steht:\n")
+            for k in kandidaten:
+                sys.stderr.write(_zeile(*k) + "\n")
+            sys.stderr.write("\n  hk-ablage <pfad>\n")
+        return 2
+    print("%s — %s" % (pfad, ablage.ARTNAME[art]))
+    print("Name:     %s" % ablage.name_von(pfad))
+    print("Herkunft: %s" % woher)
+    return 0
+
+
+def main(argv):
+    if "--help" in argv or "-h" in argv:
+        print(__doc__.strip()); return 0
+    if "--liste" in argv:
+        return liste()
+    if "--loeschen" in argv:
+        weg = ablage.vergessen()
+        print("Wahl zurückgenommen: %s" % weg if weg else "Keine Wahl gemerkt.")
+        return 0
+    args = [a for a in argv if not a.startswith("-")]
+    if args:
+        try:
+            pfad = ablage.waehlen(args[0])
+        except ablage.KeineAblage as e:
+            sys.stderr.write(str(e) + "\n"); return 2
+        print("Gemerkt für %s" % os.getcwd())
+        return zeigen()
+    return zeigen()
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
