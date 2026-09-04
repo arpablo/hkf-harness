@@ -42,4 +42,4 @@ Wird als Listenform `hkf-person-category-list` verwendet: Wer regiert hat, hat o
 | `scientist` | Natur- und Formalwissenschaften, Mathematik |
 | `soldier` | Militär |
 
-Die Werte sind bewusst grob. Feineres — Fachgebiet, Amt, Dienstgrad — gehört in den Body oder in einen eigenen Property-Typ der Wissensbasis.
+Die Werte sind bewusst grob. Feineres wie Fachgebiet, Amt oder Dienstgrad gehört in den Body oder in einen eigenen Property-Typ der Wissensbasis.

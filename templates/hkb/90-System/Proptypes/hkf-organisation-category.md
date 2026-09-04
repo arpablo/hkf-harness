@@ -18,7 +18,7 @@ modified: 2026-08-31T18:30:00
 modified_by: claude-opus-5
 ---
 
-Art einer Körperschaft. Wird als Listenform `hkf-organisation-category-list` verwendet, weil eine Körperschaft mehreres zugleich sein kann — eine Landesuniversität ist `university` und `authority`.
+Art einer Körperschaft. Wird als Listenform `hkf-organisation-category-list` verwendet, weil eine Körperschaft mehreres zugleich sein kann. Eine Landesuniversität ist `university` und `authority`.
 
 | Wert | Gemeint ist |
 |---|---|

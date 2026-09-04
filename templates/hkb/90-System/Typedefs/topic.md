@@ -12,8 +12,8 @@ modified_by: claude-opus-5
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
 | parent | hkf-link:topic | nein | — | Übergeordnetes Thema |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
 
 # Konventionen
 
-Ein Thema ordnet, ein Begriff definiert, ein Konzept sammelt. Der Body ist eine Einstiegsseite mit Verweisen; Inhalte, die anderswo hingehören, stehen nicht hier.
+Ein Thema ordnet, ein Begriff definiert, ein Konzept sammelt. Der Body ist eine Einstiegsseite mit Verweisen. Inhalte, die anderswo hingehören, stehen nicht hier.

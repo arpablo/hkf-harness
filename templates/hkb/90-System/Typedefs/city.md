@@ -19,11 +19,11 @@ modified_by: claude-opus-5
 | founded_year | hkf-year | nein | — | Jahr der Gründung, soweit überliefert |
 | image | hkf-file:image / hkf-url | nein | — | Ansicht, als Datei in der Ablage oder als Adresse im Netz |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
 
 # Konventionen
 
-Eine Stadt ist ein Ort, aber **HKF kennt keine Untertypen** (Core §3.7.1): `hkf-link:place` nimmt keine `city` an. Wo ein Verweis beides zulassen soll, werden beide genannt — `birthplace`, `seat` und `location` tun das und schreiben `hkf-link:place,city,country`, ebenso `part_of` an `place`. Das `part_of` einer Stadt lässt `city` aus: Eine Stadt liegt in einer Region oder einem Staat, nicht in einer anderen Stadt.
+Eine Stadt ist ein Ort, aber **HKF kennt keine Untertypen** (Core §3.7.1): `hkf-link:place` nimmt keine `city` an. Wo ein Verweis beides zulassen soll, werden beide genannt. `birthplace`, `seat` und `location` tun das und schreiben `hkf-link:place,city,country`, ebenso `part_of` an `place`. Das `part_of` einer Stadt lässt `city` aus: Eine Stadt liegt in einer Region oder einem Staat, nicht in einer anderen Stadt.
 
 Wer die Unterscheidung nicht braucht, führt `city` nicht und legt Städte als `place` ab. Wer sie führt, entscheidet einmal und bleibt dabei: Dieselbe Stadt zweimal, einmal als `place` und einmal als `city`, sind für jedes Werkzeug zwei Gegenstände.
 

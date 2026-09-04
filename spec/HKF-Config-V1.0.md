@@ -149,14 +149,14 @@ häufigen Fall, in dem der Zieltyp gleichgültig ist.
 
 `hkf-link-or-text` lässt einen Verweis oder freien Text zu. Er ist für die
 Fälle gedacht, in denen dasselbe Feld mal auf eine Notiz zeigt und mal nur
-einen Namen trägt: Ein Verfasser ist manchmal eine Personennotiz und manchmal
-die Zeile auf einem Titelblatt, eine Zugehörigkeit manchmal eine
-`organisation` und manchmal die Angabe unter einem Aufsatztitel. Für jeden
-davon eine Notiz anzulegen hieße, die Ablage mit Namen zu füllen, über die
-nichts weiter zu sagen ist.
+einen Namen trägt. Ein Verfasser ist manchmal eine Personennotiz und
+manchmal die Zeile auf einem Titelblatt. Eine Zugehörigkeit ist manchmal
+eine `organisation` und manchmal die Angabe unter einem Aufsatztitel. Für
+jeden davon eine Notiz anzulegen hieße, die Ablage mit Namen zu füllen, über
+die nichts weiter zu sagen ist.
 
 Geprüft wird der Reihe nach wie bei `hkf-link-or-url`: Sieht der Wert wie
-`[[…]]` aus, gilt Core §3.6 samt Zieltyp — ein Tippfehler im Pfad bleibt also
+`[[…]]` aus, gilt Core §3.6 samt Zieltyp, und ein Tippfehler im Pfad bleibt
 ein Befund. Sonst ist es Text und immer gültig.
 
 **Er nimmt einen `:`-Zusatz**, anders als `hkf-link-or-url`, und das ist kein
@@ -374,29 +374,31 @@ description: Registriert einen Typ und legt sein Verzeichnis fest.
 
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
-| description | text | ja | — | Einzeiliger Zweck; erscheint in der Typtabelle der Wurzeldatei |
-| dir | text | nein | — | Verzeichnis der Instanzen; Vorgabe ist der groß geschriebene Typname mit angehängtem `s` (Core §3.7) |
+| description | text | ja | — | Einzeiliger Zweck, erscheint in der Typtabelle der Wurzeldatei |
+| dir | text | nein | — | Verzeichnis der Instanzen. Vorgabe ist der groß geschriebene Typname mit angehängtem `s` (Core §3.7) |
 | provisional | checkbox | nein | false | Beim Import angelegt, weil niemand den Typ definiert hat (Core §5.4) |
 
 # Konventionen
 
-Der Dateiname ist der Typname (Core §3.7). Der Body trägt die Property-Tabelle und
-die Konventionen des Typs. `dir` ist ein relativer Pfad zum Basispfad, mit
-`/` als Trennzeichen und beliebig vielen Abschnitten, ohne führenden und
-abschließenden `/` und ohne `.`- oder `..`-Abschnitte; er darf weder unter
-`media_base` noch unter `source_base` liegen (Core §3.2.1 und §3.2.2). Der Typ
-`source` trägt kein `dir`: Er liegt unmittelbar unter seinem Bereich.
+Der Dateiname ist der Typname (Core §3.7). Der Body trägt die
+Property-Tabelle und die Konventionen des Typs. `dir` ist ein relativer Pfad
+zum Basispfad, mit `/` als Trennzeichen und beliebig vielen Abschnitten,
+ohne führenden und abschließenden `/` und ohne `.`- oder `..`-Abschnitte. Er
+darf weder unter `media_base` noch unter `source_base` liegen (Core §3.2.1
+und §3.2.2). Der Typ `source` trägt kein `dir`: Er liegt unmittelbar unter
+seinem Bereich.
 
 `provisional` steht nur an einer Typdefinition, nur mit dem Wert `true` und
-nur in einer HKB — ein Bundle enthält keine vorläufige Typdefinition (Core §7.1).
+nur in einer HKB. Ein Bundle enthält keine vorläufige Typdefinition (Core §7.1).
 Eine solche Notiz trägt kein `dir`, keinen Abschnitt `# Properties` und kein
 `bundles`.
 
-**Welcher Bereich gilt, sagt der Typname und nicht eine Property.** `typedef`
-und `proptype` liegen unter `config_base`, `source` unter `source_base`, jeder
-andere unter `wiki_base` (Core §3.2). Eine Property dafür — HKF führte kurz ein
-`is_source` — lohnt sich erst, wenn eine Ablage mehrere Quelltypen hätte; sie
-hat einen, und die Werkart trägt `kind` (§3.8).
+**Welcher Bereich gilt, sagt der Typname und nicht eine Property.**
+`typedef` und `proptype` liegen unter `config_base`, `source` unter
+`source_base`, jeder andere unter `wiki_base` (Core §3.2). Eine Property
+dafür lohnt sich erst, wenn eine Ablage mehrere Quelltypen hätte. HKF führte
+kurz ein `is_source`. Eine Ablage hat einen Quelltyp, und die Werkart trägt
+`kind` (§3.8).
 ```
 
 ## 3.2 `proptype`
@@ -413,11 +415,11 @@ description: Schränkt eine Wertform ein.
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
 | form | text | ja | — | Eine der sechs Wertformen aus Core §3.4 |
-| pattern | text | nein | — | Regulärer Ausdruck; nur bei `text` und `list`, dort je Eintrag |
-| values | list | nein | — | Erlaubte Werte; als Text geführt, auch wenn sie wie Zahlen aussehen |
-| unit | text | nein | — | Maßeinheit; beschreibend, nicht geprüft |
-| min | number | nein | — | Kleinster zulässiger Wert; nur bei `form: number` |
-| max | number | nein | — | Größter zulässiger Wert; nur bei `form: number` |
+| pattern | text | nein | — | Regulärer Ausdruck, nur bei `text` und `list`, dort je Eintrag |
+| values | list | nein | — | Erlaubte Werte, als Text geführt, auch wenn sie wie Zahlen aussehen |
+| unit | text | nein | — | Maßeinheit, beschreibend und nicht geprüft |
+| min | number | nein | — | Kleinster zulässiger Wert, nur bei `form: number` |
+| max | number | nein | — | Größter zulässiger Wert, nur bei `form: number` |
 
 # Konventionen
 
@@ -444,26 +446,28 @@ description: Beschreibt eine Lieferung.
 
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
-| id | text | ja | — | Kennung der Lieferreihe in `kebab-case` (Core §4.1); in der HKB gleich dem Dateinamen |
-| version | text | nein | — | Unveränderliche Kennung der gelieferten Fassung; ohne sie hat die Lieferung keine Geschichte, nur einen letzten Stand (Core §4.1) |
+| id | text | ja | — | Kennung der Lieferreihe in `kebab-case` (Core §4.1). In der HKB gleich dem Dateinamen |
+| version | text | nein | — | Unveränderliche Kennung der gelieferten Fassung. Ohne sie hat die Lieferung keine Geschichte, nur einen letzten Stand (Core §4.1) |
 | description | text | ja | — | Ein Satz darüber, was die Lieferung enthält |
 | required_bundles | list | nein | — | Bundles, die vorher importiert sein sollen (Core §4.1) |
 | source | text | nein | — | Herkunft, etwa eine URL oder ein Repository |
-| imported | datetime | nein | — | Zeitpunkt der Übernahme, in **UTC** (Core §3.4); nur in der HKB (Core §5.1). Fehlt es an einer Bundle-Notiz der HKB, wurde die Lieferung geprüft und nicht übernommen (Core §5.7) |
+| imported | datetime | nein | — | Zeitpunkt der Übernahme, in **UTC** (Core §3.4). Nur in der HKB (Core §5.1). Fehlt es an einer Bundle-Notiz der HKB, wurde die Lieferung geprüft und nicht übernommen (Core §5.7) |
 
 # Konventionen
 
 Als `hbundle.md` in der Wurzel eines Bundles trägt die Notiz zusätzlich die
-Wurzeldatei-Properties aus Core A.1 und die Typtabelle im Body; `imported` entfällt
-dort. In der HKB liegt sie als `Bundles/<id>.md` ohne diese Zusätze.
+Wurzeldatei-Properties aus Core A.1 und die Typtabelle im Body. `imported`
+entfällt dort. In der HKB liegt sie als `Bundles/<id>.md` ohne diese
+Zusätze.
 
 `source` ist `text` und nicht `hkf-url`, weil auch ein Repository-Verweis oder
 ein Datenträger als Herkunft in Frage kommt.
 
-`description` ist bei einer Bundle-Notiz **Pflicht**, obwohl sie nach Core A.2 sonst
-freigestellt ist: Wer eine Lieferung vor sich hat, muss ohne sie den Body lesen
-oder die Dateien zählen, um zu erfahren, worum es geht. Sie ist zudem die
-einzige Angabe, die in der Bundle-Liste einer Wissensbasis abfragbar ist.
+`description` ist bei einer Bundle-Notiz **Pflicht**, obwohl Core A.2 sie
+sonst freistellt. Wer eine Lieferung vor sich hat, müsste ohne sie den Body
+lesen oder die Dateien zählen, um zu erfahren, worum es geht. Sie ist
+außerdem die einzige Angabe, die in der Bundle-Liste einer Wissensbasis
+abfragbar ist.
 ```
 
 ## 3.4 `person`
@@ -492,7 +496,7 @@ description: Ein Mensch.
 | phone | hkf-phone | nein | — | Telefonnummer |
 | portrait | hkf-file:image / hkf-url | nein | — | Bild der Person, als Datei in der Ablage oder als Adresse im Netz |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
 
 # Konventionen
 
@@ -525,7 +529,7 @@ description: 'Eine Körperschaft: Unternehmen, Institut, Verein, Behörde.'
 | phone | hkf-phone | nein | — | Telefonnummer |
 | logo | hkf-file:image / hkf-url | nein | — | Bildmarke, als Datei in der Ablage oder als Adresse im Netz |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
 
 # Konventionen
 
@@ -552,12 +556,12 @@ description: Ein geographischer Ort.
 | part_of | hkf-link:place,city,country | nein | — | Übergeordneter Ort |
 | image | hkf-file:image / hkf-url | nein | — | Ansicht, als Datei in der Ablage oder als Adresse im Netz |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
 
 # Konventionen
 
-`latitude` und `longitude` werden nur gemeinsam gesetzt. `part_of` bildet die
-räumliche Schachtelung ab — Gebäude in Stadt, Stadt in Region.
+`latitude` und `longitude` werden nur gemeinsam gesetzt. `part_of` bildet
+die räumliche Schachtelung ab, also Gebäude in Stadt und Stadt in Region.
 
 `country` ist ein Verweis und keine Kennung. Es hieße sonst auf `place`
 etwas anderes als auf `city`, und ein Property-Name bedeutet überall dasselbe
@@ -587,7 +591,7 @@ description: Ein Geschehen zu einer bestimmten Zeit.
 | participants | hkf-link-list:person,organisation | nein | — | Beteiligte |
 | cancelled | checkbox | nein | false | Abgesagt |
 | homepage | hkf-url | nein | — | Ankündigung |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
 
 # Konventionen
 
@@ -616,27 +620,28 @@ description: Ein Werk, auf das sich die Wissensbasis beruft.
 | url | hkf-url | nein | — | Fundstelle des Werks: wo es veröffentlicht ist |
 | file | hkf-file:document,clipping / hkf-url | nein | — | Ausfertigung des Werks: als Datei in der Ablage oder als Adresse, etwa auf einem Dateiserver |
 | accessed | date | nein | — | Datum des Abrufs |
-| checksum | text | nein | — | `sha256:<hex>` über die Ausfertigung; sagt beim nächsten Einlesen, ob sich die Quelle geändert hat |
+| checksum | text | nein | — | `sha256:<hex>` über die Ausfertigung. Sagt beim nächsten Einlesen, ob sich die Quelle geändert hat |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Werks in Wikidata |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
 
 # Konventionen
 
 Eine Quellennotiz beschreibt das Werk, auf das sich die Wissensbasis beruft,
-und fasst zusammen, **was es sagt** — gegliedert nach seinem eigenen Aufbau,
+und fasst zusammen, **was es sagt**, gegliedert nach seinem eigenen Aufbau,
 je Kapitel oder Hauptabschnitt eine Überschrift. Was man daraus **für die
 eigene Sache schließt**, gehört nicht hierher, sondern in eine `note` oder ein
 `concept`, das per `sources` auf die Quelle verweist.
 
 **Die Werkart ist eine Property und kein Typ.** Ein Buch, ein Aufsatz, ein
-Video und eine Webseite unterscheiden sich in dem, was über sie zu wissen ist,
-kaum: Wer es gemacht hat, wann es erschien, wo es liegt. Was sie unterscheidet
-— Verlag, Auflage, Seitenzahl —, ist Zitationsapparat und steht dort, wo er
-gebraucht wird: im Body oder in einer Property, die eine Wissensbasis selbst
-anlegt. Als vier Typen kostete die Unterscheidung vier Verzeichnisse und
-zwanzig Properties, von denen die meisten immer leer blieben — und eine
-Quelle, deren Art keiner der vier entspricht, hätte gar keinen Ort gehabt.
-`kind` kennt sieben Werte (§2.2), und eine spätere Fassung darf ergänzen.
+Video und eine Webseite unterscheiden sich in dem, was über sie zu wissen
+ist, kaum: Wer es gemacht hat, wann es erschien, wo es liegt. Was sie
+unterscheidet, also Verlag, Auflage und Seitenzahl, ist Zitationsapparat und
+steht dort, wo er gebraucht wird: im Body oder in einer Property, die eine
+Wissensbasis selbst anlegt. Als vier Typen kostete die Unterscheidung vier
+Verzeichnisse und zwanzig Properties, von denen die meisten immer leer
+blieben. Eine Quelle, deren Art keiner der vier entspricht, hätte gar keinen
+Ort gehabt. `kind` kennt sieben Werte (§2.2), und eine spätere Fassung darf
+ergänzen.
 
 **Die Quellennotiz liegt direkt unter `source_base`**, ohne Typverzeichnis
 (Core §3.2.2). Bei einem einzigen Quelltyp wäre es reine Verdopplung, und die
@@ -644,18 +649,18 @@ Notiz-ID ist damit der bloße Dateiname.
 
 `url` und `file` bezeichnen Verschiedenes und stehen darum als zwei
 Properties da, nicht als Alternative (Core §3.7.2): `url` ist, **wo das Werk
-veröffentlicht ist** — die Verlagsseite, die DOI-Adresse —, und damit
+veröffentlicht ist**, also die Verlagsseite oder die DOI-Adresse, und damit
 zitierfähig. `file` ist, **wo die eigene Ausfertigung liegt**: als Datei in
 der Ablage oder als Adresse, etwa auf einem Dateiserver im eigenen Netz. Ein
-Original muss also nicht in die Ablage kopiert werden, um verzeichnet zu sein.
-Beide dürfen nebeneinander stehen.
+Original muss also nicht in die Ablage kopiert werden, um verzeichnet zu
+sein. Beide dürfen nebeneinander stehen.
 
 **Ist `file` ein Clipping, steht der erfasste Text dort und nicht im Body.**
 Ein Clipping ist eine Mediendatei unter `<media_base>/Clippings/` (Core
-§3.2.1) — Rohmaterial, das niemand pflegt und das darum auch niemand prüft.
-Die Notiz daneben trägt die Zusammenfassung. Das ist der ganze Unterschied
-zwischen einer erfassten und einer bloß zitierten Seite, und er verlangt
-keinen eigenen Typ: Die Datei ist da oder sie ist es nicht.
+§3.2.1), also Rohmaterial, das niemand pflegt und das darum auch niemand
+prüft. Die Notiz daneben trägt die Zusammenfassung. Das ist der ganze
+Unterschied zwischen einer erfassten und einer bloß zitierten Seite, und er
+verlangt keinen eigenen Typ: Die Datei ist da oder sie ist es nicht.
 
 `checksum` sagt beim nächsten Einlesen, ob sich die Quelle geändert hat. Eine
 Webseite ändert sich still, und ohne die Prüfsumme fiele das erst auf, wenn
@@ -665,8 +670,8 @@ die Zusammenfassung schon nicht mehr stimmt.
 `born_year` bei einer Person (§3.4). Ein Buch von 1989 hat einen Tag, der
 niemanden interessiert, ein Beitrag vom 28. Juli 2026 hat einen, der zählt.
 Eine Angabe zu erzwingen, die die Quelle nicht hergibt, brächte nur falsche
-Genauigkeit — und beide in eine Property zu legen ginge nicht: Alternativen
-müssen dieselbe Wertform haben (§3.7.2).
+Genauigkeit. Beide in eine Property zu legen ginge auch nicht, weil
+Alternativen dieselbe Wertform haben müssen (§3.7.2).
 
 ```
 
@@ -686,20 +691,20 @@ description: Ein definierter Begriff.
 | lang | hkf-lang | ja | — | Sprache des Begriffs |
 | broader | hkf-link:term | nein | — | Übergeordneter Begriff |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
 
 # Konventionen
 
 Ein Begriff ist ein Ausdruck in **einer** Sprache, und `lang` nennt sie.
-Darum ist sie Pflicht und keine Vorgabe: Derselbe Gegenstand heißt in drei
-Sprachen dreierlei, und welche gemeint ist, darf nicht davon abhängen, in
-welcher Wissensbasis die Notiz gerade liegt — ein Bundle bliebe sonst nicht
+Darum ist sie Pflicht und keine Vorgabe. Derselbe Gegenstand heißt in drei
+Sprachen dreierlei. Welche gemeint ist, darf nicht davon abhängen, in
+welcher Wissensbasis die Notiz gerade liegt, sonst bliebe ein Bundle nicht
 für sich lesbar (Core §4).
 
 Der Body beginnt mit einer Definition in einem Satz. Synonyme werden als
-Obsidian-`aliases` geführt, nicht als eigene Property; sie sind Ausdrücke
-derselben Sprache. Die fremdsprachige Entsprechung ist kein Alias, sondern ein
-eigener Begriff.
+Obsidian-`aliases` geführt und nicht als eigene Property. Sie sind Ausdrücke
+derselben Sprache. Die fremdsprachige Entsprechung ist kein Alias, sondern
+ein eigener Begriff.
 
 Ein Begriff legt einen Ausdruck fest und ist mit seiner Definition fertig.
 Wird die Notiz länger, gehört, was über die Definition hinausgeht, in ein
@@ -722,7 +727,7 @@ description: Eine Sache und der Stand des Wissens über sie.
 | terms | hkf-link-list:term | nein | — | Die Begriffe, unter denen die Wissensbasis die Sache führt |
 | broader | hkf-link:concept | nein | — | Übergeordnetes Konzept |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
 
 # Konventionen
 
@@ -753,18 +758,18 @@ description: Eine Gegenüberstellung mehrerer Gegenstände entlang benannter Dim
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
 | compares | hkf-link-list | ja | — | Die verglichenen Gegenstände, mindestens zwei |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
 
 # Konventionen
 
 Der Gegenstand eines Vergleichs ist kein Ding, sondern ein Verhältnis. Der
-Body nennt zuerst, was verglichen wird und warum, dann die Dimensionen — am
-besten als Tabelle mit einer Zeile je Dimension —, zuletzt das Urteil. Ein
+Body nennt zuerst, was verglichen wird und warum, dann die Dimensionen, am
+besten als Tabelle mit einer Zeile je Dimension, zuletzt das Urteil. Ein
 Vergleich ohne Urteil ist eine Tabelle und gehört in die Notiz eines der
 Verglichenen.
 
 `compares` nimmt Verweise beliebigen Typs auf: Verglichen wird, was sich
-vergleichen lässt — zwei Konzepte ebenso wie zwei Körperschaften. Was nur
+vergleichen lässt, zwei Konzepte ebenso wie zwei Körperschaften. Was nur
 einen der Gegenstände betrifft, gehört in dessen eigene Notiz.
 ```
 
@@ -782,12 +787,12 @@ description: Ein Themengebiet als Einstiegspunkt.
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
 | parent | hkf-link:topic | nein | — | Übergeordnetes Thema |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
 
 # Konventionen
 
 Ein Thema ordnet, ein Begriff definiert, ein Konzept sammelt. Der Body ist
-eine Einstiegsseite mit Verweisen; Inhalte, die anderswo hingehören, stehen
+eine Einstiegsseite mit Verweisen. Inhalte, die anderswo hingehören, stehen
 nicht hier.
 ```
 
@@ -805,12 +810,13 @@ description: Eine Notiz ohne spezifischeren Typ.
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
 | about | hkf-link-list | nein | — | Worauf sich die Notiz bezieht |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
 
 # Konventionen
 
-Auffangtyp. Er wird verwendet, wenn kein anderer Typ passt — nicht, um die
-Wahl eines Typs zu vermeiden. `about` nimmt Verweise beliebigen Typs auf.
+Auffangtyp. Er wird verwendet, wenn kein anderer Typ passt, und nicht, um
+die Wahl eines Typs zu vermeiden. `about` nimmt Verweise beliebigen Typs
+auf.
 
 Eine Notiz hält fest, was bei einem Anlass anfiel: die Auswertung einer
 Quelle, ein Protokoll, ein Gedanke. Überlebt ihr Gegenstand den Anlass, gehört
@@ -836,13 +842,13 @@ description: Ein normatives Dokument, an das sich die Wissensbasis hält.
 | supersedes | hkf-link:specification | nein | — | Abgelöste Fassung |
 | lang | hkf-lang | nein | — | Sprache des Dokuments |
 | file | hkf-file:document / hkf-url | nein | — | Volltext: als Datei in der Ablage oder als Adresse |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
 
 # Konventionen
 
 Eine Quelle wird zitiert, eine Spezifikation wird eingehalten. Was man aus
-einem Dokument erfahren hat, gehört als `source` in die Wissensbasis; was für
-sie verbindlich ist, als `specification`.
+einem Dokument erfahren hat, gehört als `source` in die Wissensbasis. Was
+für sie verbindlich ist, gehört als `specification` hinein.
 
 Der Body darf den Volltext tragen oder ihn nur zusammenfassen und über `url`
 oder `file` auf ihn verweisen. Beides ist zulässig: Ein kurzes Dokument liegt
@@ -866,28 +872,29 @@ description: Eine Festlegung, wie diese Wissensbasis geführt wird.
 
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
-| applies_to | hkf-link-list | nein | — | Worauf sich der Hinweis bezieht; meist eine Typdefinition |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| applies_to | hkf-link-list | nein | — | Worauf sich der Hinweis bezieht, meist eine Typdefinition |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
 
 # Konventionen
 
 Was ein Typ überall zusichert, steht im Abschnitt `# Konventionen` seiner
 Typdefinition und reist mit ihr in jedes Bundle. **Ein Hinweis bindet
-niemanden außerhalb.** In der Typdefinition steht darum, was `person` überall
-bedeutet; in einem Hinweis, wie hier mit Personen verfahren wird. Wer ihn
-gleichwohl weitergeben will, nimmt ihn in ein Bundle auf — dann gilt für ihn,
-was für jede gelieferte Notiz gilt (Core §5.5).
+niemanden außerhalb.** In der Typdefinition steht darum, was `person`
+überall bedeutet, in einem Hinweis, wie hier mit Personen verfahren wird.
+Wer ihn gleichwohl weitergeben will, nimmt ihn in ein Bundle auf. Dann gilt
+für ihn, was für jede gelieferte Notiz gilt (Core §5.5).
 
 Eine Spezifikation kommt von außen und wird eingehalten, ein Hinweis wird
 selbst gefasst. Deshalb trägt er weder `version` noch `authority`: Wer ihn
 ändern will, ändert ihn.
 
 Der Body sagt in einem Satz, was gilt, und danach, warum. Der Grund wiegt
-schwerer als die Regel — ein Hinweis ohne ihn lässt sich später weder prüfen
+schwerer als die Regel. Ein Hinweis ohne ihn lässt sich später weder prüfen
 noch aufheben.
 
-`applies_to` zeigt meist auf eine Typdefinition; dann gilt der Hinweis für
-jede Notiz dieses Typs. Ohne `applies_to` gilt er für die ganze Wissensbasis.
+`applies_to` zeigt meist auf eine Typdefinition. Dann gilt der Hinweis für
+jede Notiz dieses Typs. Ohne `applies_to` gilt er für die ganze
+Wissensbasis.
 ```
 
 ## 3.16 `city`
@@ -911,13 +918,13 @@ dir: Cities
 | founded_year | hkf-year | nein | — | Jahr der Gründung, soweit überliefert |
 | image | hkf-file:image / hkf-url | nein | — | Ansicht, als Datei in der Ablage oder als Adresse im Netz |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
 
 # Konventionen
 
 Eine Stadt ist ein Ort, aber **HKF kennt keine Untertypen** (Core §3.7.1):
 `hkf-link:place` nimmt keine `city` an. Wo ein Verweis beides zulassen soll,
-werden beide genannt — `birthplace`, `seat` und `location` tun das und
+werden beide genannt. `birthplace`, `seat` und `location` tun das und
 schreiben `hkf-link:place,city,country`, ebenso `part_of` an `place`. Das
 `part_of` einer Stadt lässt `city` aus: Eine Stadt liegt in einer Region oder
 einem Staat, nicht in einer anderen Stadt.
@@ -950,7 +957,7 @@ dir: Countries
 | dissolved_year | hkf-year | nein | — | Jahr des Untergangs, wenn der Staat nicht mehr besteht |
 | flag | hkf-file:image / hkf-url | nein | — | Flagge, als Datei in der Ablage oder als Adresse im Netz |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
 
 # Konventionen
 

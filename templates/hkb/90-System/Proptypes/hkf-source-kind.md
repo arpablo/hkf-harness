@@ -28,6 +28,6 @@ Anders als die beiden anderen Aufzählungen wird dieser Property-Typ **nicht** a
 | `video` | Bewegtbild, auch ein aufgezeichneter Vortrag |
 | `web` | eine Webseite, die keines der übrigen ist |
 
-Die Werte sind bewusst grob. Was ein Werk darüber hinaus auszeichnet — Verlag, Auflage, Jahrgang, Seitenzahl —, ist Zitationsapparat und gehört in den Body oder in eine eigene Property der Wissensbasis.
+Die Werte sind bewusst grob. Was ein Werk sonst noch auszeichnet, also Verlag, Auflage, Jahrgang und Seitenzahl, ist Zitationsapparat und gehört in den Body oder in eine eigene Property der Wissensbasis.
 
 Ein aufgezeichneter Vortrag ist `video`, seine Mitschrift `transcript`: Es sind zwei Ausfertigungen, und wer die Mitschrift liest, hat den Vortrag nicht gesehen.

@@ -9,7 +9,7 @@ modified_by: claude-opus-5
 
 Kennung des Gegenstands in Wikidata, etwa `Q7259` für Ada Lovelace. Der Wert ist die nackte Kennung, keine Adresse.
 
-Anders als alle übrigen Property-Typen beschreibt diese Kennung nicht die Notiz, sondern das, worüber sie handelt. Zwei Notizen mit derselben Kennung meinen denselben Gegenstand — auch wenn sie verschieden heißen und aus verschiedenen Lieferungen stammen.
+Anders als alle übrigen Property-Typen beschreibt diese Kennung nicht die Notiz, sondern das, worüber sie handelt. Zwei Notizen mit derselben Kennung meinen denselben Gegenstand, auch wenn sie verschieden heißen und aus verschiedenen Lieferungen stammen.
 
 # Weitere Angaben beschaffen
 
@@ -40,8 +40,8 @@ Die Angaben stehen als nummerierte Eigenschaften. Diese lohnen sich für die Typ
 # Regeln für den Umgang
 
 - **Die Kennung bleibt der Anker, die Daten kommen in eigene Properties.** Ein abgerufenes Geburtsdatum gehört nach `born`, nicht als Kopie eines Wikidata-Datensatzes in die Notiz. Die Wissensbasis spiegelt Wikidata nicht.
-- **Vorhandene Werte nicht stillschweigend überschreiben.** Weicht ein abgerufener Wert von dem in der Notiz ab, ist das zu melden, nicht zu ersetzen — die Notiz kann recht haben.
+- **Vorhandene Werte nicht stillschweigend überschreiben.** Weicht ein abgerufener Wert von dem in der Notiz ab, ist das zu melden und nicht zu ersetzen. Die Notiz kann recht haben.
 - **Vor dem Übernehmen prüfen, ob die Kennung den gemeinten Gegenstand bezeichnet.** `P31` und das Label sind dafür der schnellste Test. Verwechselte Kennungen sind der häufigste Fehler.
-- **Zusammenführungen behandeln.** Wird ein Eintrag mit einem anderen vereinigt, antwortet die Abfrage mit einer Weiterleitung auf die neue Kennung. Das ist kein Fehler; die Notiz sollte auf die neue Kennung umgestellt werden.
+- **Zusammenführungen behandeln.** Wird ein Eintrag mit einem anderen vereinigt, antwortet die Abfrage mit einer Weiterleitung auf die neue Kennung. Das ist kein Fehler. Die Notiz sollte auf die neue Kennung umgestellt werden.
 - **Ohne Netz arbeiten können.** Die Kennung ist eine Zugabe. Jede Notiz bleibt ohne sie vollständig benutzbar, und keine Prüfung nach §6.3 hängt an einem Abruf.
 - **Nicht alles hat eine Kennung.** Eigene Vorhaben, Kolleginnen und Kollegen, interne Vorgänge stehen nicht in Wikidata. Die Property ist deshalb nirgends Pflicht.

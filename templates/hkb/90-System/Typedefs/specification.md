@@ -17,11 +17,11 @@ modified_by: claude-opus-5
 | supersedes | hkf-link:specification | nein | — | Abgelöste Fassung |
 | lang | hkf-lang | nein | — | Sprache des Dokuments |
 | file | hkf-file:document / hkf-url | nein | — | Volltext: als Datei in der Ablage oder als Adresse |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
 
 # Konventionen
 
-Eine Quelle wird zitiert, eine Spezifikation wird eingehalten. Was man aus einem Dokument erfahren hat, gehört als `source` in die Wissensbasis; was für sie verbindlich ist, als `specification`.
+Eine Quelle wird zitiert, eine Spezifikation wird eingehalten. Was man aus einem Dokument erfahren hat, gehört als `source` in die Wissensbasis. Was für sie verbindlich ist, gehört als `specification` hinein.
 
 Der Body darf den Volltext tragen oder ihn nur zusammenfassen und über `url` oder `file` auf ihn verweisen. Beides ist zulässig: Ein kurzes Dokument liegt bequem in der Notiz, ein umfangreiches kostet Platz, den die meisten Wissensbasen nie lesen.
 

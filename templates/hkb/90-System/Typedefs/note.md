@@ -12,10 +12,10 @@ modified_by: claude-opus-5
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
 | about | hkf-link-list | nein | — | Worauf sich die Notiz bezieht |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen; nimmt auf, was unter „Siehe auch" steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
 
 # Konventionen
 
-Auffangtyp. Er wird verwendet, wenn kein anderer Typ passt — nicht, um die Wahl eines Typs zu vermeiden. `about` nimmt Verweise beliebigen Typs auf.
+Auffangtyp. Er wird verwendet, wenn kein anderer Typ passt, und nicht, um die Wahl eines Typs zu vermeiden. `about` nimmt Verweise beliebigen Typs auf.
 
 Eine Notiz hält fest, was bei einem Anlass anfiel: die Auswertung einer Quelle, ein Protokoll, ein Gedanke. Überlebt ihr Gegenstand den Anlass, gehört er in ein `concept`, und die Notiz verweist per `about` dorthin.

@@ -39,7 +39,10 @@ ABBREVIATIONS = {
 }
 
 WORD = re.compile(r"\w+", re.UNICODE)
-SENTENCE_END = re.compile(r"[.!?]+(?=\s|$)")
+# Nach dem Schlusszeichen duerfen Auszeichnung und schliessende Zeichen
+# stehen. Ohne sie brach der Satz an `**So endet ein Satz.**` nicht, und
+# der naechste zaehlte doppelt.
+SENTENCE_END = re.compile(r"[.!?]+[*_`'\"\u201c\u201d\u00bb)\]]*(?=\s|$)")
 LAST_TOKEN = re.compile(r"([\w]+)\s*$", re.UNICODE)
 SKIP_LINE = re.compile(r"^\s*(#{1,6}\s|\||---\s*$|===)")
 # Ein Listeneintrag ist eine eigene Einheit. Ohne diese Grenze verschmelzen

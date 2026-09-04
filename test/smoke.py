@@ -456,10 +456,11 @@ Ein Satz mit einem Gedankenstrich \u2014 der ist verboten.
         r = lauf(os.path.join(BIN, "hk-text"), "--gate", muster)
         probe("--gate endet mit 1", r.returncode == 1, r.stdout + r.stderr)
         os.remove(muster)
-        r = lauf(os.path.join(BIN, "hk-text"), "--gate",
-                 os.path.join(ziel, WIKI))
+        # Die Grundausstattung wandert in jede neue Ablage. Was hier
+        # steht, steht ueberall, und darum steht es unter derselben Regel.
+        r = lauf(os.path.join(BIN, "hk-text"), "--gate", ziel)
         probe("eine frische Ablage kommt durch den Gate",
-              r.returncode == 0, r.stdout + r.stderr)
+              r.returncode == 0, (r.stdout + r.stderr)[-400:])
         # Was **diese** Ablage fuer sich festlegt, steht als Notiz vom Typ
         # `hint` darin (Harness §7). Der Lader kennt json-Bloecke in Markdown
         # schon, es braucht dafuer keine zweite Mechanik.

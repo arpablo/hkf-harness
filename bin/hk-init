@@ -19,8 +19,8 @@ VORLAGE = os.path.join(TEMPLATES, "hkb")
 README = """# %(name)s
 
 Eine Wissensbasis nach **HKF Core %(core)s**. Dieses Verzeichnis ist zugleich
-ein Obsidian-Vault und ein Git-Repository. Es enthält die Grundausstattung —
-die siebzehn Typdefinitionen und die siebzehn Property-Typen — und sonst
+ein Obsidian-Vault und ein Git-Repository. Es enthält die Grundausstattung,
+also die siebzehn Typdefinitionen und die siebzehn Property-Typen, und sonst
 nichts: keinen Inhalt und keine Lieferung.
 
 ## Erste Schritte
@@ -31,7 +31,7 @@ nichts: keinen Inhalt und keine Lieferung.
 2. **Schreiben.** Der Pfad bestimmt den Typ, das Frontmatter bleibt flach,
    Verweise sind qualifizierte Wikilinks. Wer Gegenstände verwaltet, für die
    kein Typ da ist, legt eine eigene Typdefinition in `90-System/Typedefs/`
-   an — das Vokabular kommt nicht mehr als Lieferung, es ist schon hier.
+   an. Das Vokabular kommt nicht mehr als Lieferung, es ist schon hier.
 3. **Einlesen.** `hk-ingest` macht aus einer Quelle eine Lieferung,
    `hk-import` nimmt sie herein.
 
@@ -45,7 +45,7 @@ Vier Bereiche, jeder in der Wurzeldatei umbenennbar (§3.1):
 | `%(wiki)s/` | die Notizen, dazu `Bundles/` je eingelesene Lieferung |
 | `%(quellen)s/` | `Books`, `Articles`, `Clippings`, `Webpages` |
 | `%(medien)s/` | `Images`, `Videos`, `Audios`, `Documents` |
-| `%(konfig)s/` | `Typedefs` und `Proptypes` — die Grundausstattung |
+| `%(konfig)s/` | `Typedefs` und `Proptypes`, die Grundausstattung |
 
 ## Werkzeuge
 
