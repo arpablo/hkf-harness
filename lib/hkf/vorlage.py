@@ -13,9 +13,9 @@ GITIGNORE = """# Sitzungsprotokolle und Suchindex der Werkzeugumgebung
 # persönliches Fensterlayout von Obsidian
 .obsidian/workspace.json
 
-# gebaute EPUBs. Sie sind gross und lassen sich mit `hk-epub` jederzeit neu
-# bauen. Das Manuskript daneben bleibt versioniert: Es ist klein, und sein
-# Unterschied von Lauf zu Lauf sagt etwas.
+# Ein gebautes EPUB gehoert nicht hierher: Artefakte liegen ausserhalb der
+# Ablage, unter $HKF_ARTEFAKTE (Core §3.2.4). Die Regel steht trotzdem da,
+# falls doch einmal eines hereingerat.
 *.epub
 
 # macOS

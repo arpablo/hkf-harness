@@ -32,21 +32,32 @@ Der Satz, aus dem alles Übrige folgt:
 
 Was eine der beiden Proben nicht besteht, liegt am falschen Ort.
 
-## Die vier Bereiche einer Ablage
+## Die fünf Bereiche einer Ablage
 
-Seit Core §3.1 gliedert sich eine Wissensbasis in vier Bereiche, jeder mit
+Seit Core §3.1 gliedert sich eine Wissensbasis in fünf Bereiche, jeder mit
 eigenem Basispfad in der Wurzeldatei:
 
 ```text
 40-Wiki/      der Inhalt — Persons, Terms, Concepts, Bundles …
 50-Sources/   die Quellennotizen, ohne Typverzeichnis darunter
+60-Output/    die Erzeugnisse — Essays, Texts, Publications
 80-Media/     Images, Videos, Audios, Documents
 90-System/    Typedefs, Proptypes, Types
 ```
 
 Wer den Vault öffnet, sieht in `40-Wiki/` die Sachen und nicht das Gerüst. Die
-Zahlenpräfixe ordnen die vier in jedem Dateibrowser; die Namen sind Vorgaben
+Zahlenpräfixe ordnen die fünf in jedem Dateibrowser; die Namen sind Vorgaben
 und lassen sich in `hkb.md` ändern.
+
+**Welcher Bereich für einen Typ gilt, sagt seine Typdefinition** mit `base`
+(Core §3.2). Ohne die Angabe gilt `wiki`. Drei Typnamen brauchen sie nicht,
+weil ihr Bereich im Namen steht: `typedef`, `proptype`, `source`.
+
+**Was aus einem Erzeugnis gebaut wird, liegt außerhalb.** Ein Manuskript, ein
+EPUB, ein Cover sind jederzeit neu baubar und tragen nichts, was nicht schon
+in den Notizen steht. Sie gehen nach `$HKF_ARTEFAKTE/<name der ablage>/`,
+Vorgabe `~/hkf-artefakte`. Eine Ablage führt, woraus etwas wird, und nicht,
+was daraus wurde.
 
 **Die Notiz-ID trägt den Bereich nicht.** Sie ist `<typverzeichnis>/<name>` —
 `Persons/ada-lovelace`, `economy-1832`, `Typedefs/person` — und bleibt

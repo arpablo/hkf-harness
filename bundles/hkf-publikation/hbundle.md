@@ -21,5 +21,6 @@ Danach kennt die Ablage `text` und `publication`, und `hk-publikation`, `hk-buch
 
 | Typ | Verzeichnis | Zweck |
 |---|---|---|
+| essay | Essays | Ein Text, der eine eigene These vertritt und sie aus dem Bestand belegt. |
 | publication | Publications | Eine Folge von Texten in einer festgelegten Lesereihenfolge. |
 | text | Texts | Ein Stück Prosa, das für sich steht. |

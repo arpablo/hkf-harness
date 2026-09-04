@@ -107,7 +107,7 @@ class Bestand(object):
     def notizbereiche(self):
         """[(name, pfad)] der Bereiche, unter denen Notizen liegen (§3.2)."""
         aus, gesehen = [], set()
-        for k in ("wiki_base", "source_base", "config_base"):
+        for k in ablage.NOTIZBEREICHE:
             p = os.path.join(self.hkb, self.bereiche[k])
             if os.path.isdir(p) and p not in gesehen:
                 gesehen.add(p)
@@ -220,8 +220,7 @@ class Bestand(object):
         Der laengste zuerst: Ein leerer Bereich faellt mit der Wurzel zusammen
         und traefe sonst zu, bevor der eigentliche geprueft ist.
         """
-        aus = [self.praefix(k) for k in
-               ("wiki_base", "source_base", "config_base")]
+        aus = [self.praefix(k) for k in ablage.NOTIZBEREICHE]
         return sorted(set(aus), key=len, reverse=True)
 
     def verzeichnisse(self):
@@ -249,8 +248,7 @@ class Bestand(object):
             return (None, ziel)
         # §3.7.1 Schritt 3: den Bereich abziehen, gleich welchen — sie
         # schliessen einander aus (§3.1).
-        vorne = ([self.bereiche.get(k, "") for k in
-                  ("wiki_base", "source_base", "config_base")]
+        vorne = ([self.bereiche.get(k, "") for k in ablage.NOTIZBEREICHE]
                  if aus_wurzeldatei else self.praefixe())
         vorne = sorted(set(vorne), key=len, reverse=True)
         rest = None

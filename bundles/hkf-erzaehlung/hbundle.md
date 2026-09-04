@@ -30,5 +30,6 @@ Der Zuschnitt kommt aus einem Vault, der ihn über zwei Jahre gebaut hat. Zwei E
 | character | Characters | Ein Mensch, der in mehreren Texten vorkommt und über sie hinweg gleich bleiben soll. |
 | location | Locations | Ein Ort, an dem gespielt wird und dessen Beschaffenheit über mehrere Texte gleich bleiben soll. |
 | prop | Props | Ein Gegenstand, der in mehreren Texten vorkommt und dabei derselbe bleiben soll. |
+| essay | Essays | Ein Text, der eine eigene These vertritt und sie aus dem Bestand belegt. |
 | publication | Publications | Eine Folge von Texten in einer festgelegten Lesereihenfolge. |
 | text | Texts | Ein Stück Prosa, das für sich steht. |

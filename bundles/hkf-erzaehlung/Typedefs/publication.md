@@ -1,5 +1,6 @@
 ---
 type: typedef
+base: output
 title: Publikation
 description: Eine Folge von Texten in einer festgelegten Lesereihenfolge.
 created: 2026-09-04

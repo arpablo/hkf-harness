@@ -91,7 +91,7 @@ Python 3 und PyYAML.
 | `hk-erwaehnungen <ziel>` | macht unverlinkte Erwähnungen einer Notiz zu qualifizierten Verweisen | **läuft** |
 | `hk-kontext [--stimme]` | gibt aus, was in dieser Ablage gilt: Lage, Kanon, Stimme, Hinweise | **läuft** |
 | `hk-publikation <notiz>` | führt die Lesereihenfolge einer Publikation: `--aufnehmen`, `--vor`, `--check`, `--richten` | **läuft** |
-| `hk-buch <publikation>` | schreibt die Texte einer Publikation als ein Manuskript heraus | **läuft** |
+| `hk-buch <publikation>` | schreibt die Texte einer Publikation als ein Manuskript heraus, außerhalb der Ablage | **läuft** |
 | `hk-epub <publikation>` | baut daraus mit `pandoc` ein EPUB | **läuft** |
 | `hk-kontinuitaet [--richten]` | prüft einen Erzählbestand: Zeiträume, abgeleitete Listen, veraltete Beurteilungen | **läuft** |
 | `hk-publish <kommando> <notiz>` | überträgt eine Notiz an eine HenniBock-Instanz: `analyze`, `build --send`, `attached` | **läuft** |

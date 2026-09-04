@@ -209,7 +209,7 @@ entfernen darf sie keine, weil das vorhandene Notizen ungültig machte.
 
 ## 2.3 Die Properties des Vokabulars
 
-Die 68 Property-Namen, die die siebzehn Typdefinitionen aus §3 zusichern —
+Die 69 Property-Namen, die die siebzehn Typdefinitionen aus §3 zusichern —
 an einer Stelle, damit sich nachschlagen lässt, was ein Name bedeutet, ohne
 jede Typdefinition zu öffnen. Die notizübergreifenden Properties aus Core A.2
 stehen nicht darin; sie gelten ohnehin für jede Notiz.
@@ -237,6 +237,7 @@ beide gegeneinander.
 | `applies_to` | `hkf-link-list` | hint |
 | `authority` | `hkf-link-or-text:organisation` | specification |
 | `authors` | `hkf-link-or-text-list:person` | source |
+| `base` | `text` | typedef |
 | `birthplace` | `hkf-link:place,city,country` | person |
 | `born` | `date` | person |
 | `born_year` | `hkf-year` | person |
@@ -375,6 +376,7 @@ description: Registriert einen Typ und legt sein Verzeichnis fest.
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
 | description | text | ja | — | Einzeiliger Zweck, erscheint in der Typtabelle der Wurzeldatei |
+| base | text | nein | wiki | Bereich, unter dem die Instanzen liegen: `wiki`, `source`, `output` oder `config` (Core §3.2) |
 | dir | text | nein | — | Verzeichnis der Instanzen. Vorgabe ist der groß geschriebene Typname mit angehängtem `s` (Core §3.7) |
 | provisional | checkbox | nein | false | Beim Import angelegt, weil niemand den Typ definiert hat (Core §5.4) |
 
@@ -387,6 +389,12 @@ ohne führenden und abschließenden `/` und ohne `.`- oder `..`-Abschnitte. Er
 darf weder unter `media_base` noch unter `source_base` liegen (Core §3.2.1
 und §3.2.2). Der Typ `source` trägt kein `dir`: Er liegt unmittelbar unter
 seinem Bereich.
+
+`base` sagt, in welchem Bereich die Notizen des Typs liegen (Core §3.2). Ohne
+die Angabe gilt `wiki`. Drei Typnamen brauchen sie nicht, weil ihr Bereich
+schon im Namen steht: `typedef` und `proptype` liegen unter `config_base`,
+`source` unter `source_base`. `base: media` gibt es nicht, dort liegen Dateien
+und keine Notizen.
 
 `provisional` steht nur an einer Typdefinition, nur mit dem Wert `true` und
 nur in einer HKB. Ein Bundle enthält keine vorläufige Typdefinition (Core §7.1).

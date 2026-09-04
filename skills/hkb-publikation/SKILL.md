@@ -17,13 +17,21 @@ hk-import <harness>/bundles/hkf-publikation
 
 Danach kennt die Ablage `text` und `publication`.
 
-## Die beiden Typen
+Die Typen liegen unter `output_base`, dem fünften Bereich (Core §3.2.4), nach
+Vorgabe `60-Output`. Ein Erzeugnis ist gemacht und nicht gewusst: Es beruft
+sich auf den Bestand, und der Bestand beruft sich nicht auf es.
+
+## Die drei Typen
 
 Ein **`text`** ist ein Stück Prosa, das für sich steht. Es gibt genau einen
 Texttyp. Ob ein Stück als Kapitel gelesen wird, entscheidet die
 Lesereihenfolge seiner Publikation und nicht der Text selbst. Eine Trennung in
 Einzelstück und Kapitel trüge zwei Verzeichnisse, zwei Vorlagen und zwei
 Abläufe für denselben Gegenstand.
+
+Ein **`essay`** behauptet etwas. Das unterscheidet ihn von einer Wissensnotiz,
+die sagt, was der Fall ist, und von einem `text`, der erzählt. Er darf sich
+irren, und er muss sagen, worauf er sich stützt.
 
 Eine **`publication`** sagt, was dazugehört und in welcher Reihenfolge. Sie
 trägt selbst keinen Fließtext des Werkes.
@@ -74,7 +82,8 @@ hk-epub <publikation> --neu    # daraus ein EPUB, mit vorherigem Neubau
 ```
 
 `hk-buch` schreibt die Texte in der Reihenfolge aus `contents` in eine Datei
-unter `<media_base>/Documents/`, mit einem Kopf, den `pandoc` liest. Das
+**außerhalb der Ablage**, unter `$HKF_ARTEFAKTE/<name der ablage>/`, Vorgabe
+`~/hkf-artefakte`. Mit einem Kopf, den `pandoc` liest. Das
 Frontmatter der Texte, ihr `# Siehe auch` und der `# Inhalt` der Publikation
 fallen weg, die Überschriften rücken eine Ebene tiefer. Eingebettete Bilder
 werden zu Pfaden, die `pandoc` auflöst.
@@ -88,8 +97,9 @@ das Manuskript sauber will, räumt vorher in den Texten auf, mit `hk-text` und
 `hk-epub` braucht `pandoc`. Fehlt es, sagt der Lauf das und bricht ab, statt
 mitten im Bau zu scheitern. Das Titelbild kommt aus `cover`.
 
-Beides sind Erzeugnisse und keine Notizen. Sie lassen sich jederzeit neu
-bauen, und das EPUB steht deshalb in der `.gitignore`.
+Beides sind Artefakte und keine Notizen. Sie lassen sich jederzeit neu bauen
+und tragen nichts, was nicht schon in den Notizen steht. Darum liegen sie
+nicht in der Ablage.
 
 ## Grenzen
 

@@ -1,8 +1,8 @@
 ---
 type: typedef
 base: output
-title: Text
-description: Ein Stück Prosa, das für sich steht.
+title: Essay
+description: Ein Text, der eine eigene These vertritt und sie aus dem Bestand belegt.
 created: 2026-09-04
 modified: 2026-09-04T00:00:00
 modified_by: claude-opus-5
@@ -17,17 +17,15 @@ modified_by: claude-opus-5
 | publications | hkf-link-list:publication | nein | — | In welchen Publikationen er steht. Wird von `hk-publikation` geführt |
 | status | text | nein | — | Stand der Arbeit, etwa `entwurf`, `lektorat`, `fertig` |
 | words | number | nein | — | Wortzahl des Body, ohne Frontmatter |
-| sources | hkf-link-list | nein | — | Worauf der Text sich beruft |
+| sources | hkf-link-list | nein | — | Worauf der Essay sich beruft |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
 
 # Konventionen
 
-**Es gibt genau einen Texttyp.** Ob ein Stück als Kapitel gelesen wird, entscheidet die Lesereihenfolge seiner Publikation und nicht der Text selbst. Eine Trennung in Einzelstück und Kapitel trüge zwei Verzeichnisse, zwei Vorlagen und zwei Abläufe für denselben Gegenstand, und jede Aufnahme in eine Reihe verlangte eine Umwidmung.
+Ein Essay behauptet etwas. Das unterscheidet ihn von einer Wissensnotiz, die sagt, was der Fall ist, und von einem `text`, der erzählt. Er darf sich irren, und er muss sagen, worauf er sich stützt.
 
-Der Body ist der Text. Er beginnt ohne Vorrede und endet mit seinem letzten inhaltlichen Punkt.
+Der Body beginnt mit der These und nicht mit einer Hinführung. Was gegen sie spricht, steht darin und nicht in einer Fußnote.
 
-`publications` und `contents` an der Publikation sagen dasselbe von zwei Seiten. Geführt werden beide von `hk-publikation`, von Hand geschrieben wird keines von beiden.
-
-`words` ist eine Kennzahl und keine Zusicherung. Sie steht da, damit sich ein Bestand ohne Öffnen jeder Datei überblicken lässt.
+**Ein Essay ist ein Erzeugnis und liegt darum unter `output_base`.** Er beruft sich auf den Bestand, der Bestand beruft sich nicht auf ihn. Eine Wissensnotiz, die einen Essay als Beleg führte, hätte ihre Aussage aus einer Behauptung genommen.
 
 `sources` trägt hier keinen Zieltyp. Eine Lieferung muss in ihren Typen geschlossen sein (§7.1), und `source` liegt außerhalb. Wer den Typ nach dem Import enger fassen will, schreibt `hkf-link-list:source` in seine Fassung der Typdefinition.

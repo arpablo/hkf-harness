@@ -3,6 +3,7 @@ hkf: "1.0"
 name: Meine Wissensbasis
 wiki_base: "40-Wiki"
 source_base: "50-Sources"
+output_base: "60-Output"
 media_base: "80-Media"
 config_base: "90-System"
 timezone: Europe/Berlin

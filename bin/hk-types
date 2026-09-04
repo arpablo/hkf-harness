@@ -150,7 +150,7 @@ def _umstellen(hkb, bereiche, konfigverz, pfad, check):
     link = dict((typ, '[[%s/%s|%s]]' % (pfad, ids[0], ids[0].rsplit("/", 1)[-1]))
                 for typ, ids in nach_typ.items() if len(ids) == 1)
     n = 0
-    for schluessel in ("wiki_base", "source_base", "config_base"):
+    for schluessel in ablage.NOTIZBEREICHE:
         wurzel = os.path.join(hkb, bereiche[schluessel])
         if not os.path.isdir(wurzel):
             continue

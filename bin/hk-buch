@@ -9,9 +9,13 @@ Eine Datei, die alles enthaelt: einen Kopf, den `pandoc` liest, danach die
 Texte in der Reihenfolge aus `contents`, jeder unter seiner eigenen
 Ueberschrift.
 
-Das Ergebnis ist ein Erzeugnis und keine Notiz. Es liegt unter
-`<media_base>/Documents/` und traegt kein `type`. Wer es loescht, verliert
-nichts: Ein zweiter Lauf schreibt es wieder.
+Das Ergebnis ist ein Artefakt und keine Notiz. Es liegt **ausserhalb der
+Ablage**, unter `$HKF_ARTEFAKTE/<name der ablage>/`, Vorgabe
+`~/hkf-artefakte`. `--ziel` verlegt es im Einzelfall.
+
+Eine Ablage fuehrt, woraus etwas wird, und nicht, was daraus wurde (§3.2.4).
+Ein Manuskript ist jederzeit neu baubar und traegt nichts, was nicht schon in
+den Notizen steht. Wer es loescht, verliert nichts.
 
 Was dabei wegfaellt: das Frontmatter jedes Textes, sein Abschnitt
 `# Siehe auch` und der `# Inhalt` der Publikation. Was bleibt, ist der Text.
@@ -179,14 +183,14 @@ def main(argv):
     if ziel_datei:
         ziel = os.path.abspath(os.path.expanduser(ziel_datei))
     else:
-        ordner = os.path.join(hkb, b.media_basis, "Documents")
-        ziel = os.path.join(ordner, rel_pub.rsplit("/", 1)[-1] + ".md")
+        ziel = os.path.join(ablage.artefakte(hkb),
+                            rel_pub.rsplit("/", 1)[-1] + ".md")
     if not os.path.isdir(os.path.dirname(ziel)):
         os.makedirs(os.path.dirname(ziel))
     stand = os.path.isfile(ziel)
     io.open(ziel, "w", encoding="utf-8").write(inhalt)
 
-    print("%s → %s%s" % (rel_pub, os.path.relpath(ziel, hkb),
+    print("%s → %s%s" % (rel_pub, ziel,
                          " (neu geschrieben)" if stand else ""))
     print("  %d Texte, %d Wörter" % (zahl, len(re.findall(r"[A-Za-zÀ-ÿ0-9]+",
                                                           inhalt))))

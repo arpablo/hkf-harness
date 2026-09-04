@@ -197,6 +197,14 @@
           "type": "string",
           "minLength": 1
         },
+        "base": {
+          "enum": [
+            "wiki",
+            "source",
+            "output",
+            "config"
+          ]
+        },
         "dir": {
           "type": "string",
           "pattern": "^[^/][^\\u0000-\\u001f]*[^/]$|^[^/\\u0000-\\u001f]$"
@@ -283,6 +291,9 @@
           "minLength": 1
         },
         "source_base": {
+          "type": "string"
+        },
+        "output_base": {
           "type": "string"
         },
         "spec": {

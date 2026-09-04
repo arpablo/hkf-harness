@@ -14,6 +14,7 @@ import json, os, re, shutil, subprocess, sys, tempfile
 WURZEL = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 # Die vier Bereiche (Core §3.1)
 WIKI, QUELLEN, MEDIEN, KONFIG = "40-Wiki", "50-Sources", "80-Media", "90-System"
+AUSGABE = "60-Output"   # der fuenfte Bereich (Core §3.2.4)
 # Wo eine Ablage ihre eigenen Festlegungen fuehrt (Harness §7)
 ablage_hinweise = "Hints"
 BIN = os.path.join(WURZEL, "bin")
@@ -716,7 +717,7 @@ Hier steht [[40-Wiki/Persons/ada-lovelace|Ada Lovelace]] schon verlinkt.
               "| publication |" in wurzel_text and "| text |" in wurzel_text)
 
         print("hk-publikation: die Lesereihenfolge steht an drei Stellen gleich")
-        _schreib(os.path.join(ziel, WIKI, "Publications", "sammlung.md"), """---
+        _schreib(os.path.join(ziel, AUSGABE, "Publications", "sammlung.md"), """---
 type: publication
 name: Eine Sammlung
 created: 2026-01-01
@@ -727,7 +728,7 @@ created: 2026-01-01
 Drei Texte, die zusammen gelesen werden wollen.
 """)
         for n in ("eins", "zwei", "drei"):
-            _schreib(os.path.join(ziel, WIKI, "Texts", n + ".md"), """---
+            _schreib(os.path.join(ziel, AUSGABE, "Texts", n + ".md"), """---
 type: text
 name: Stück %s
 created: 2026-01-01
@@ -744,30 +745,30 @@ Der Text von Stück %s, mit ein paar Wörtern für die Zählung.
                 break
         probe("Texte lassen sich aufnehmen", r.returncode == 0,
               (r.stdout + r.stderr)[-300:])
-        pub = io.open(os.path.join(ziel, WIKI, "Publications", "sammlung.md"),
+        pub = io.open(os.path.join(ziel, AUSGABE, "Publications", "sammlung.md"),
                       encoding="utf-8").read()
         probe("`contents` steht in der Reihenfolge der Aufnahme",
               pub.index("Texts/eins") < pub.index("Texts/zwei") <
               pub.index("Texts/drei"), pub[:400])
         probe("`# Inhalt` im Body zeigt dieselbe Reihenfolge",
-              "1. [[40-Wiki/Texts/eins|Stück eins]]" in pub, pub[-300:])
-        eins = io.open(os.path.join(ziel, WIKI, "Texts", "eins.md"),
+              "1. [[60-Output/Texts/eins|Stück eins]]" in pub, pub[-300:])
+        eins = io.open(os.path.join(ziel, AUSGABE, "Texts", "eins.md"),
                        encoding="utf-8").read()
         probe("der Text nennt die Publikation zurück",
-              "[[40-Wiki/Publications/sammlung|Eine Sammlung]]" in eins,
+              "[[60-Output/Publications/sammlung|Eine Sammlung]]" in eins,
               eins[:300])
         r = lauf(os.path.join(BIN, "hk-publikation"), "sammlung", "--vor",
                  "drei", "--nach", "eins", ziel)
-        pub = io.open(os.path.join(ziel, WIKI, "Publications", "sammlung.md"),
+        pub = io.open(os.path.join(ziel, AUSGABE, "Publications", "sammlung.md"),
                       encoding="utf-8").read()
         probe("--vor stellt um", pub.index("Texts/drei") < pub.index("Texts/eins"),
               pub[:400])
         r = lauf(os.path.join(BIN, "hk-publikation"), "sammlung", "--check", ziel)
         probe("--check findet nichts, solange alles stimmt", r.returncode == 0,
               r.stdout[-200:])
-        zwei = os.path.join(ziel, WIKI, "Texts", "zwei.md")
+        zwei = os.path.join(ziel, AUSGABE, "Texts", "zwei.md")
         _schreib(zwei, io.open(zwei, encoding="utf-8").read().replace(
-            'publications:\n  - "[[40-Wiki/Publications/sammlung|Eine Sammlung]]"\n', ""))
+            'publications:\n  - "[[60-Output/Publications/sammlung|Eine Sammlung]]"\n', ""))
         r = lauf(os.path.join(BIN, "hk-publikation"), "sammlung", "--check", ziel)
         probe("und meldet, wenn ein Rückverweis fehlt",
               r.returncode == 1 and "Texts/zwei" in r.stdout, r.stdout[-300:])
@@ -782,11 +783,18 @@ Der Text von Stück %s, mit ein paar Wörtern für die Zählung.
               (r.stdout + r.stderr)[-300:])
 
         print("hk-buch und hk-epub: was daraus wird, ist ein Erzeugnis")
-        r = lauf(os.path.join(BIN, "hk-buch"), "sammlung", ziel)
+        artefakte = tempfile.mkdtemp(prefix="hkb-art-")
+        umg_art = dict(os.environ, HKF_ARTEFAKTE=artefakte)
+        r = lauf(os.path.join(BIN, "hk-buch"), "sammlung", ziel, env=umg_art)
         probe("das Manuskript entsteht", r.returncode == 0,
               (r.stdout + r.stderr)[-300:])
-        manuskript = os.path.join(ziel, MEDIEN, "Documents", "sammlung.md")
-        probe("es liegt unter media_base", os.path.isfile(manuskript))
+        manuskript = os.path.join(artefakte, os.path.basename(ziel),
+                                  "sammlung.md")
+        probe("es liegt außerhalb der Ablage", os.path.isfile(manuskript),
+              artefakte)
+        probe("und nichts davon in der Ablage",
+              not os.path.isfile(os.path.join(ziel, MEDIEN, "Documents",
+                                              "sammlung.md")))
         text_m = io.open(manuskript, encoding="utf-8").read()
         probe("der Kopf trägt den Titel für pandoc",
               'title: "Eine Sammlung"' in text_m, text_m[:200])
@@ -800,13 +808,14 @@ Der Text von Stück %s, mit ein paar Wörtern für die Zählung.
         r = lauf(os.path.join(BIN, "hk-lint"), ziel)
         probe("das Erzeugnis stört die Ablage nicht", r.returncode == 0,
               (r.stdout + r.stderr)[-300:])
-        r = lauf(os.path.join(BIN, "hk-epub"), "sammlung", ziel)
+        r = lauf(os.path.join(BIN, "hk-epub"), "sammlung", ziel, env=umg_art)
         wenn_pandoc = "pandoc` ist nicht da" not in r.stderr
         if wenn_pandoc:
             probe("das EPUB entsteht", r.returncode == 0,
                   (r.stdout + r.stderr)[-300:])
             probe("und liegt neben dem Manuskript",
-                  os.path.isfile(os.path.join(ziel, MEDIEN, "Documents",
+                  os.path.isfile(os.path.join(artefakte,
+                                              os.path.basename(ziel),
                                               "sammlung.epub")))
         else:
             probe("ohne pandoc sagt hk-epub, was fehlt", r.returncode == 2,
@@ -815,9 +824,9 @@ Der Text von Stück %s, mit ein paar Wörtern für die Zählung.
                             encoding="utf-8").read()
         probe("ein gebautes EPUB gehört nicht ins Repository",
               "*.epub" in gitignore, gitignore)
-        shutil.rmtree(os.path.join(ziel, MEDIEN, "Documents"))
-        shutil.rmtree(os.path.join(ziel, WIKI, "Publications"))
-        shutil.rmtree(os.path.join(ziel, WIKI, "Texts"))
+        shutil.rmtree(artefakte, ignore_errors=True)
+        shutil.rmtree(os.path.join(ziel, AUSGABE, "Publications"))
+        shutil.rmtree(os.path.join(ziel, AUSGABE, "Texts"))
         shutil.rmtree(os.path.dirname(lieferung_pub), ignore_errors=True)
 
         print("hkf-erzaehlung: der Kanon einer Reihe")
@@ -848,7 +857,7 @@ created: 2026-01-01
 
 Kommt öfter vor.
 """)
-        _schreib(os.path.join(erz, WIKI, "Texts", "abend.md"), """---
+        _schreib(os.path.join(erz, AUSGABE, "Texts", "abend.md"), """---
 type: text
 name: Der Abend
 story_date: 2026-06-12
@@ -858,7 +867,7 @@ modified: 2026-01-05
 
 Der Abend beginnt. [[40-Wiki/Characters/figur|Eine Figur]] kommt zu spät.
 """)
-        _schreib(os.path.join(erz, WIKI, "Texts", "morgen.md"), """---
+        _schreib(os.path.join(erz, AUSGABE, "Texts", "morgen.md"), """---
 type: text
 name: Der Morgen
 story_date: 2026-06-12
@@ -871,7 +880,7 @@ Am Morgen danach.
         _schreib(os.path.join(erz, WIKI, "Assessments", "abend.md"), """---
 type: assessment
 name: Beurteilung Der Abend
-assesses: "[[40-Wiki/Texts/abend|Der Abend]]"
+assesses: "[[60-Output/Texts/abend|Der Abend]]"
 reviewed: 2026-01-01
 created: 2026-01-01
 ---
@@ -890,7 +899,7 @@ Trägt.
               "gelesen am" in r.stdout, r.stdout[-500:])
         probe("mit Befund endet der Lauf mit 1", r.returncode == 1)
         r = lauf(os.path.join(BIN, "hk-kontinuitaet"), erz, "--richten")
-        abend = io.open(os.path.join(erz, WIKI, "Texts", "abend.md"),
+        abend = io.open(os.path.join(erz, AUSGABE, "Texts", "abend.md"),
                         encoding="utf-8").read()
         probe("--richten zieht die Liste dem Body nach",
               '- "[[40-Wiki/Characters/figur|Eine Figur]]"' in abend,

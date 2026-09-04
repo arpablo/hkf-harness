@@ -63,7 +63,7 @@ class Plan(object):
     def praefixe(self):
         """Alle Praefixe, unter denen eine Notiz liegen kann (§3.1)."""
         return [p for p in (self.praefix_notizen(k) for k in
-                            ("wiki_base", "source_base", "config_base")) if p]
+                            ablage.NOTIZBEREICHE) if p]
 
     def praefix_medien(self):
         teile = [t for t in (self.ablagepfad, self.hkb_media) if t]
@@ -127,7 +127,7 @@ def planen(hkb, bundle_id, ziel, media_base="Media"):
     # `source_base` des Absenders. Wo `base` nicht leer ist, liegt er neben
     # den Typverzeichnissen und wird eigens durchlaufen.
     wurzeln, gesehen = [], set()
-    for k in ("wiki_base", "source_base", "config_base"):
+    for k in ablage.NOTIZBEREICHE:
         w = os.path.join(plan.hkb, plan.bereiche[k])
         if os.path.isdir(w) and w not in gesehen:
             gesehen.add(w)

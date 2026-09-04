@@ -1,5 +1,6 @@
 ---
 type: typedef
+base: output
 title: Text
 description: Ein Stück Prosa, das für sich steht.
 created: 2026-09-04

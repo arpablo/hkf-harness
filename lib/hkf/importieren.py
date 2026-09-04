@@ -350,8 +350,21 @@ def _verzeichnis(name, daten=None):
     return str(daten.get("dir") or (name[:1].upper() + name[1:] + "s"))
 
 
+# Was `base` in einer Typdefinition heissen darf (§3.2). `media` steht nicht
+# dabei: Dort liegen Dateien und keine Notizen.
+BEREICHSNAMEN = {"wiki": "wiki_base", "source": "source_base",
+                 "output": "output_base", "config": "config_base"}
+
+
 def _bereich(name, daten=None):
-    """Unter welchem Bereich der Typ liegt (§3.2) — am Typnamen erkennbar."""
+    """Unter welchem Bereich der Typ liegt (§3.2).
+
+    Es sagt die Typdefinition mit `base`. Drei Typnamen tragen ihren Bereich
+    schon im Namen und brauchen die Angabe nicht.
+    """
+    wert = str((daten or {}).get("base") or "").strip()
+    if wert in BEREICHSNAMEN:
+        return BEREICHSNAMEN[wert]
     if name in ("typedef", "proptype"):
         return "config_base"
     if name == "source":
@@ -760,7 +773,7 @@ def _umschreiben(plan, text, karte, namen, woher):
 def _notizbereiche(plan):
     """[(name, pfad)] der Bereiche, unter denen Notizen liegen (§3.2)."""
     aus, gesehen = [], set()
-    for k in ("wiki_base", "source_base", "config_base"):
+    for k in ablage.NOTIZBEREICHE:
         p = os.path.join(plan.hkb, plan.bereiche[k])
         if os.path.isdir(p) and p not in gesehen:
             gesehen.add(p)

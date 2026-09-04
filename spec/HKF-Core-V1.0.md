@@ -142,11 +142,12 @@ Ihr Frontmatter trägt mindestens:
 hkf: "1.0"
 wiki_base: "40-Wiki"
 source_base: "50-Sources"
+output_base: "60-Output"
 media_base: "80-Media"
 config_base: "90-System"
 ```
 
-Eine Ablage gliedert sich in **vier Bereiche**. Jeder hat einen Basispfad
+Eine Ablage gliedert sich in **fünf Bereiche**. Jeder hat einen Basispfad
 relativ zur Wurzel, ohne führenden und ohne abschließenden `/`, und jeder ist
 optional — fehlt er, gilt die Vorgabe:
 
@@ -154,16 +155,18 @@ optional — fehlt er, gilt die Vorgabe:
 |---|---|---|
 | `wiki_base` | `40-Wiki` | die Typverzeichnisse des Inhalts (§3.2) |
 | `source_base` | `50-Sources` | die Verzeichnisse der Quelltypen (§3.2.2) |
+| `output_base` | `60-Output` | die Typverzeichnisse der Erzeugnisse (§3.2.4) |
 | `media_base` | `80-Media` | die fünf Medienverzeichnisse (§3.2.1) |
 | `config_base` | `90-System` | `Typedefs` und `Proptypes` (§3.2.3) |
 
-**Warum vier und nicht einer.** Die drei außerhalb von `wiki_base` tragen
+**Warum fünf und nicht einer.** Die vier außerhalb von `wiki_base` tragen
 nichts, worüber die Wissensbasis handelt: Medien sind Anhang, Quellen sind
-Apparat, Typdefinitionen und Property-Typen sind die Grammatik. Wer den Vault
-öffnet, will die Sachen sehen und nicht das Gerüst. Die Zahlenpräfixe der
-Vorgaben ordnen die vier in der Anzeige jedes Dateibrowsers.
+Apparat, Typdefinitionen und Property-Typen sind die Grammatik, und ein
+Erzeugnis ist gemacht statt gewusst. Wer den Vault öffnet, will die Sachen
+sehen und nicht das Gerüst. Die Zahlenpräfixe der Vorgaben ordnen die fünf in
+der Anzeige jedes Dateibrowsers.
 
-**In einem Bundle bleiben alle vier ohne Wirkung.** Dort gibt es keine
+**In einem Bundle bleiben alle fünf ohne Wirkung.** Dort gibt es keine
 Bereiche, unter denen ein Basispfad etwas zu verschieben hätte; wo eine Notiz
 liegt, ist gleichgültig, und wohin sie kommt, entscheidet erst der Import
 (§4.3).
@@ -228,13 +231,20 @@ gehört:
 ```text
 <wiki_base>/<verzeichnis des typs>/<dateiname>.md     der Inhalt
 <source_base>/<dateiname>.md                          die Quellen (§3.2.2)
+<output_base>/<verzeichnis des typs>/<dateiname>.md   die Erzeugnisse (§3.2.4)
 <config_base>/<verzeichnis des typs>/<dateiname>.md   Typedefs, Proptypes (§3.2.3)
 ```
 
-Welcher Bereich gilt, sagt der **Typname**: `typedef` und `proptype` liegen
-unter `config_base`, `source` unter `source_base`, jeder andere unter
-`wiki_base`. Unterverzeichnisse innerhalb eines Typverzeichnisses sind
-erlaubt.
+Welcher Bereich gilt, sagt die **Typdefinition** mit der Property `base`. Sie
+nimmt `wiki`, `source`, `output` oder `config` und ist freigestellt; ohne sie
+gilt `wiki`. Drei Typnamen tragen ihren Bereich schon im Namen und brauchen
+die Angabe nicht: `typedef` und `proptype` liegen unter `config_base`,
+`source` unter `source_base`. Unterverzeichnisse innerhalb eines
+Typverzeichnisses sind erlaubt.
+
+**Der Bereich gehört zum Typ und nicht zur einzelnen Notiz.** Wo eine Notiz
+liegt, folgt aus ihrem Typ (Regel 4 unten). Eine Property an der Notiz, die
+das überschriebe, gäbe es zwei Wahrheiten über denselben Pfad.
 
 `Typedefs` und `Proptypes` existieren **immer**, unter `config_base`; `Bundles`
 ebenfalls, unter `wiki_base`. Dort liegen die Typdefinitionen, die
@@ -424,6 +434,37 @@ Der Preis ist, dass eine Notiz, die versehentlich unter `config_base`
 landet, nicht mehr auffällt. Er ist gering: Der Bereich trägt die Grammatik
 und nicht den Inhalt, und dorthin verlegt niemand aus Versehen. Unter
 `wiki_base`, wo es tatsächlich vorkommt, bleibt es beim Befund aus Regel 1.
+
+### 3.2.4 Ausgabeverzeichnisse
+
+**Auch dieser Abschnitt gilt für eine HKB.** In einem Bundle liegt jede Notiz,
+wo sie will (§4.3).
+
+Unter `output_base` liegen die Typen, deren Notizen **gemacht** sind und nicht
+gewusst: ein Essay, ein erzählender Text, eine Publikation, die beide ordnet.
+
+```text
+<output_base>/<verzeichnis des typs>/<dateiname>.md
+```
+
+Ein Typ kommt dorthin, weil seine Typdefinition `base: output` trägt (§3.2).
+Sonst gilt für ihn dasselbe wie unter `wiki_base`: Verzeichnis aus `dir`,
+Notiz-ID ohne den Basispfad, Unterverzeichnisse erlaubt.
+
+**Warum getrennt vom Wiki.** Eine Wissensnotiz sagt, was der Fall ist, und
+lässt sich an ihrer Quelle prüfen. Ein Essay behauptet etwas und lässt sich
+nur lesen. Beides im selben Bereich zu führen hieße, den Bestand mit dem zu
+mischen, was aus ihm gemacht wurde, und einer Ablage anzusehen wäre es nicht
+mehr. Ein Erzeugnis darf sich auf den Bestand berufen, der Bestand nicht auf
+ein Erzeugnis.
+
+**Was daraus gebaut wird, gehört nicht in die Ablage.** Ein Manuskript, ein
+EPUB, ein Coverbild: Sie entstehen aus den Notizen unter `output_base`, sind
+jederzeit neu baubar und tragen nichts, was nicht schon dasteht. Sie liegen
+außerhalb. Eine Ablage führt, woraus etwas wird, und nicht, was daraus wurde.
+
+Der Bereich ist freigestellt. Eine Wissensbasis, die nichts hervorbringt,
+lässt ihn leer oder weg.
 
 ## 3.3 Notizen
 
@@ -2660,6 +2701,7 @@ diese Properties:
 | `name` | text | Pflicht | — | Anzeigename der HKB |
 | `wiki_base` | text | optional | ohne Wirkung | Bereich des Inhalts (§3.2); Vorgabe `40-Wiki` |
 | `source_base` | text | optional | ohne Wirkung | Bereich der Quellennotizen (§3.2.2); Vorgabe `50-Sources` |
+| `output_base` | text | optional | ohne Wirkung | Bereich der Erzeugnisse (§3.2.4); Vorgabe `60-Output` |
 | `media_base` | text | optional | ohne Wirkung | Bereich der Medien (§3.2.1); Vorgabe `80-Media` |
 | `config_base` | text | optional | ohne Wirkung | Bereich von `Typedefs` und `Proptypes` (§3.2.3); Vorgabe `90-System` |
 | `timezone` | text | optional | optional | IANA-Zonenname für Ortszeiten (§3.4) |

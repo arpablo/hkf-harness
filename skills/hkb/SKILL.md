@@ -42,7 +42,7 @@ Drei Wurzeldateien. `hkb.md` heißt Wissensbasis, `hbundle.md` heißt Lieferung,
 Schreibregeln und die Suche, aber nichts, was Typen und qualifizierte Verweise
 voraussetzt.
 
-Bevor du etwas tust: `hkb.md` lesen — dort stehen `name`, die vier
+Bevor du etwas tust: `hkb.md` lesen — dort stehen `name`, die fünf
 Bereiche, `timezone` und die Typtabelle. Führt die Ablage den Typ `hint`,
 lies auch `Hints/`: Dort steht, was **diese** Wissensbasis für sich festgelegt
 hat, und das geht den sieben Regeln vor, wo es sie berührt.

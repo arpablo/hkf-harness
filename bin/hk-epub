@@ -11,9 +11,9 @@ sagt, was fehlt — nicht mit einem Fehlschlag mitten im Bau.
 
 Das Titelbild kommt aus `cover` der Publikation, wenn es dort steht.
 
-Ein EPUB ist ein Erzeugnis. Es liegt unter `<media_base>/Documents/` und
-gehoert nicht in die Versionsverwaltung: Es laesst sich jederzeit neu bauen,
-und es ist gross.
+Ein EPUB ist ein Artefakt und liegt **ausserhalb der Ablage**, neben dem
+Manuskript unter `$HKF_ARTEFAKTE/<name der ablage>/` (§3.2.4). Es laesst sich
+jederzeit neu bauen, und es ist gross.
 """
 import os, re, shutil, subprocess, sys
 
@@ -96,14 +96,15 @@ def main(argv):
         rel_pub = treffer[0]
 
     kurz = rel_pub.rsplit("/", 1)[-1]
-    quelle = os.path.join(hkb, b.media_basis, "Documents", kurz + ".md")
+    ordner = ablage.artefakte(hkb)
+    quelle = os.path.join(ordner, kurz + ".md")
     if not os.path.isfile(quelle):
         sys.stderr.write("Kein Manuskript unter %s.\n  → hk-buch %s\n"
-                         % (os.path.relpath(quelle, hkb), kurz))
+                         % (quelle, kurz))
         return 1
 
     ziel = (os.path.abspath(os.path.expanduser(ziel_datei)) if ziel_datei
-            else os.path.join(hkb, b.media_basis, "Documents", kurz + ".epub"))
+            else os.path.join(ordner, kurz + ".epub"))
     befehl = [programm, quelle, "-o", ziel, "--toc", "--toc-depth=1",
               "--split-level=1", "--from", "markdown", "--to", "epub3"]
 
@@ -122,7 +123,7 @@ def main(argv):
         sys.stderr.write("pandoc endete mit %d:\n%s\n" % (r.returncode, r.stderr))
         return 1
     groesse = os.path.getsize(ziel)
-    print("%s → %s" % (os.path.relpath(quelle, hkb), os.path.relpath(ziel, hkb)))
+    print("%s → %s" % (quelle, ziel))
     print("  %d KB, gebaut mit %s" % (groesse // 1024, programm))
     if r.stderr.strip():
         for z in r.stderr.strip().splitlines()[:5]:

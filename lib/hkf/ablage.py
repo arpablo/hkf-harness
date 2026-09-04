@@ -13,11 +13,18 @@ from . import frontmatter, notiz
 
 VORGABE = "~/hkb"
 
-# Die vier Bereiche einer Ablage (§3.1) mit ihren Vorgaben. Die Zahlenpraefixe
+# Die fuenf Bereiche einer Ablage (§3.1) mit ihren Vorgaben. Die Zahlenpraefixe
 # ordnen sie in der Anzeige jedes Dateibrowsers.
-BEREICHE = ("wiki_base", "source_base", "media_base", "config_base")
+BEREICHE = ("wiki_base", "source_base", "output_base", "media_base",
+            "config_base")
 VORGABEN = {"wiki_base": "40-Wiki", "source_base": "50-Sources",
-            "media_base": "80-Media", "config_base": "90-System"}
+            "output_base": "60-Output", "media_base": "80-Media",
+            "config_base": "90-System"}
+
+# Unter welchen Bereichen Notizen liegen (§3.2). `media_base` fehlt: Dort
+# liegen Dateien. Die Liste stand an sieben Stellen einzeln, und beim fuenften
+# Bereich waere sie an sechsen unvollstaendig geblieben.
+NOTIZBEREICHE = ("wiki_base", "source_base", "output_base", "config_base")
 
 # Unter `config_base` liegen genau zwei Typen: `typedef` und `proptype`
 # (§3.2). Ihre Verzeichnisse stehen hier als Namen und nicht als `dir` der
@@ -233,6 +240,25 @@ def finde_ablage(arg=None, arten=("hkb", "bundle")):
                       "(§3.1).\nDer Pfad kommt aus %s." % (pfad, woher))
 
 
+ARTEFAKTE = os.environ.get("HKF_ARTEFAKTE") or "~/hkf-artefakte"
+
+
+def artefakte(pfad):
+    """Wohin ein Erzeugnis geht, das nicht in die Ablage gehoert (§3.2.4).
+
+    Ein Manuskript, ein EPUB, ein Cover: jederzeit neu baubar und ohne eine
+    Aussage, die nicht schon in den Notizen steht. Die Ablage fuehrt, woraus
+    etwas wird, und nicht, was daraus wurde.
+
+    `HKF_ARTEFAKTE` verlegt den Ort, Vorgabe ist `~/hkf-artefakte`. Darunter
+    bekommt jede Ablage ihren eigenen Ordner, benannt nach ihrem Verzeichnis:
+    Zwei Ablagen mit einer Publikation gleichen Namens ueberschrieben sich
+    sonst gegenseitig.
+    """
+    wurzel = os.path.abspath(os.path.expanduser(ARTEFAKTE))
+    return os.path.join(wurzel, os.path.basename(pfad.rstrip("/")))
+
+
 def hinweise(pfad):
     """Das Verzeichnis mit den `hint`-Notizen einer Ablage.
 
@@ -256,7 +282,7 @@ def hinweise(pfad):
 
 
 def bereiche(pfad):
-    """{name: relativer Pfad} der vier Bereiche (§3.1).
+    """{name: relativer Pfad} der fuenf Bereiche (§3.1).
 
     Fehlt einer, gilt die Vorgabe. Ein ausdruecklich leerer Wert bleibt leer —
     dann faellt der Bereich mit der Wurzel zusammen, was erlaubt, aber nicht
