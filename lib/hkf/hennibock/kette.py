@@ -78,8 +78,23 @@ def _vault_root(arg=None) -> Path:
         raise SystemExit("FEHLER: " + str(fehler))
 
 
-VAULT = _vault_root(os.environ.get("HKB_PATH"))
-PUBDIR = VAULT / "50 Output" / "Publications"
+# Die Ablage wird erst in `main` bestimmt und nicht beim Import. Vorher stand
+# hier `VAULT = _vault_root(...)` als Modulglobale, und das hatte drei Folgen:
+# `--ablage` konnte nicht wirken, weil die Aufloesung vor dem Lesen der
+# Argumente lief; das Modul liess sich ohne auflösbare Ablage nicht einmal
+# importieren, auch nicht fuer eine Probe seiner reinen Funktionen; und der
+# Pfad hing an der Umgebung eines Prozesses statt am Aufruf.
+VAULT = None
+INDEX = None
+
+
+def setze_ablage(arg=None):
+    """Bestimmt die Ablage dieses Laufs und baut den Notiz-Index."""
+    global VAULT, INDEX
+    VAULT = _vault_root(arg)
+    from . import kern
+    INDEX = kern.build_note_index(VAULT)
+    return VAULT
 
 
 def split_frontmatter(text: str):
@@ -111,20 +126,29 @@ def fm_list(fm: str, key: str):
     return []
 
 
+def embed_ziel(ziel: str) -> str:
+    """Der Dateipfad eines Embeds, ohne Alias und ohne Anker.
+
+    Anders als `kern.strip_wikilink` bleibt der Pfad stehen, denn hier wird
+    damit auf die Datei zugegriffen. Ohne diesen Schnitt meldete der Audit in
+    einer HKB jedes Bild als ins Leere zeigend: HKF Core §3.6 verlangt den
+    Alias, und `80-Media/Images/x.jpg|x.jpg` ist kein Dateiname.
+    """
+    return ziel.split("|", 1)[0].split("#", 1)[0].strip()
+
+
 def toc_chapters(pubtext: str):
-    """Kapitel-Wikilinks in Dokumentreihenfolge, ohne `# Siehe auch`.
-    Geordnete und ungeordnete Listen zaehlen gleich, beide Schreibweisen sind im
-    Bestand in Gebrauch. Muss deckungsgleich bleiben mit publication_order in
-    hennibock_publish.py: laufen die beiden auseinander, waehlt die Rotation ein
-    anderes Kapitel, als das Publizieren in die Kette haengt."""
-    toc = re.split(r"^#{1,2}\s+Siehe auch\s*$", pubtext, flags=re.M)[0]
-    seen, out = set(), []
-    for m in re.finditer(r"^\s*(?:[-*+]|\d+\.)\s*\[\[(Kap - [^\]|]+)", toc, re.M):
-        name = m.group(1).strip()
-        if name not in seen:
-            seen.add(name)
-            out.append(name)
-    return out
+    """Kapitel-Wikilinks in Dokumentreihenfolge, ohne den Verweisapparat.
+
+    Ruft `kern.publication_order_text`, statt die Regel ein zweites Mal zu
+    fuehren. Die frueher hier stehende Fassung hatte drei eigene Annahmen: sie
+    schnitt nur bei `# Siehe auch`, verlangte das Praefix `Kap - ` im
+    Verweisziel und kannte keinen qualifizierten Verweis. Alle drei gelten in
+    HenniPKA und keine in einer HKB, und deshalb sah sie dort in drei von
+    zwoelf Publikationen ueberhaupt kein Kapitel mehr.
+    """
+    from . import kern
+    return kern.publication_order_text(pubtext)
 
 
 # Stilworte, die dem Hausstil widersprechen. Kommen aus Alt-Callouts, die vor
@@ -363,7 +387,7 @@ def audit_chapter(path: Path):
     if not summary:
         needs.append("summary")
 
-    embeds = re.findall(r"!\[\[([^\]]+)\]\]", body)
+    embeds = [embed_ziel(e) for e in re.findall(r"!\[\[([^\]]+)\]\]", body)]
     callouts = re.findall(r"^>\s*\[!ai-image\]", body, re.M)
     if not embeds:
         needs.append("bilder")
@@ -415,7 +439,7 @@ def audit_chapter(path: Path):
     for m in re.finditer(r"!\[\[([^\]]+)\]\]", body):
         rest = body[m.end():].lstrip("\n")
         if not rest.startswith("> [!ai-image]"):
-            ohne_callout.append(m.group(1))
+            ohne_callout.append(embed_ziel(m.group(1)))
     if ohne_callout:
         needs.append("alt-quelle-fehlt")
 
@@ -441,10 +465,27 @@ def audit_chapter(path: Path):
 
 
 def load_queue():
+    """Die Publikationen mit `hennibock_queue`, nach ihrer Nummer sortiert.
+
+    Gesucht wird ueber das Frontmatter und nicht ueber Ordner und Dateinamen.
+    Vorher stand hier `PUBDIR.glob("*/Pub - *.md")` mit `PUBDIR` fest auf
+    `50 Output/Publications`, und das setzte drei Dinge voraus: den
+    Ordnernamen von HenniPKA, je ein eigenes Unterverzeichnis pro Werk und das
+    Praefix `Pub - ` im Dateinamen. In einer HKB gilt keines davon, dort liegen
+    die Publikationen flach unter `<output_base>/Publications` und tragen kein
+    Praefix (§4). `kern.publikationsnotizen` sucht seit jeher so, und die
+    Docstring dort nennt den Grund: ein gemeinsames Werkzeug kennt die Ablage
+    eines Vaults nicht.
+    """
     pubs = []
-    for pubfile in sorted(PUBDIR.glob("*/Pub - *.md")):
-        text = pubfile.read_text(encoding="utf-8")
+    for pubfile in sorted(INDEX.values()):
+        try:
+            text = pubfile.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
         fm, _ = split_frontmatter(text)
+        if fm_scalar(fm, "hennibock_type") != "publication":
+            continue
         q = fm_scalar(fm, "hennibock_queue")
         if q is None:
             continue
@@ -454,17 +495,47 @@ def load_queue():
             continue
         pubs.append({
             "queue": q,
-            "name": pubfile.parent.name,
+            "name": pub_name(fm, pubfile),
             "pubfile": str(pubfile.relative_to(VAULT)),
             # Der an die Kapitel vererbte Typ, nicht der eigene Typ der Pub.
             # Kein Rueckfall auf hennibock_type, siehe Kopfkommentar.
             "chapter_type": fm_scalar(fm, "hennibock_chapter_type") or "essay",
             "areas": fm_list(fm, "hennibock_areas"),
             "chapters": toc_chapters(text),
-            "dir": pubfile.parent,
         })
     pubs.sort(key=lambda p: p["queue"])
     return pubs
+
+
+def pub_name(fm: str, pubfile: Path) -> str:
+    """Der Name eines Werkes, wie ein Mensch ihn nennt.
+
+    Vorher war es der Name des Elternordners. Das traf in HenniPKA zu, wo jedes
+    Werk sein eigenes Verzeichnis hat, und ergab in einer HKB fuer jedes Werk
+    denselben Namen `Publications`.
+    """
+    return fm_scalar(fm, "title") or strip_praefix(pubfile.stem)
+
+
+def strip_praefix(stem: str) -> str:
+    """Ein Typ-Praefix wie `Pub - ` ordnet einen Vault und gehoert nicht zum
+    Namen. Eine HKB kennt es nicht, HenniPKA schon."""
+    for p in ("Pub - ", "Kap - ", "Text - "):
+        if stem.startswith(p):
+            return stem[len(p):]
+    return stem
+
+
+def kapitel_pfad(name: str):
+    """Der Pfad eines Kapitels, ueber den Notiz-Index.
+
+    Vorher stand hier `pub["dir"] / (name + ".md")`, also die Annahme, ein
+    Kapitel liege im selben Verzeichnis wie seine Publikation. In HenniPKA ist
+    das so, in einer HKB liegen die Texte unter `<output_base>/Texts` und die
+    Publikationen daneben.
+    """
+    from . import kern
+    return INDEX.get(kern.nfc(name))
 
 
 def server_url():
@@ -520,8 +591,8 @@ def bestand_vom_server():
 
 
 def chapter_state(pub, name):
-    path = pub["dir"] / (name + ".md")
-    if not path.exists():
+    path = kapitel_pfad(name)
+    if path is None or not path.exists():
         return "fehlt", path
     fm, _ = split_frontmatter(path.read_text(encoding="utf-8"))
     if (fm_scalar(fm, "hennibock_skip") or "").lower() == "true":
@@ -551,8 +622,8 @@ def last_served(pub):
     bestand = bestand_vom_server()
     dates = []
     for name in pub["chapters"]:
-        path = pub["dir"] / (name + ".md")
-        if not path.exists():
+        path = kapitel_pfad(name)
+        if path is None or not path.exists():
             continue
         fm, _ = split_frontmatter(path.read_text(encoding="utf-8"))
         ref = fm_scalar(fm, "hennibock_ref")
@@ -639,8 +710,8 @@ def cmd_attached(argv):
               + ". Ohne es gibt es weder Publish noch Pruefung.",
               file=sys.stderr)
         return 2
-    return subprocess.run([sys.executable, str(skript), "attached", argv[0]],
-                          text=True).returncode
+    return subprocess.run([sys.executable, str(skript), "attached", argv[0],
+                           "--ablage", str(VAULT)], text=True).returncode
 
 
 def cmd_queue():
@@ -664,17 +735,30 @@ def cmd_queue():
               f"{counts['fehlt']} ohne Datei, {counts['skip']} uebersprungen")
     if gewaehlt:
         print(f"\nRotation: dran ist die Publikation, die am laengsten nichts "
-              f"bekommen hat.\nNaechstes Kapitel: {gewaehlt[3][6:]}")
+              f"bekommen hat.\nNaechstes Kapitel: {strip_praefix(gewaehlt[3])}")
     return 0
 
 
 def main():
-    if len(sys.argv) < 2 or sys.argv[1] not in ("next", "queue", "attached"):
+    argv = sys.argv[1:]
+    # `--ablage <pfad>` gilt wie in jedem Werkzeug des Harness. Es wird hier
+    # von Hand aus der Liste genommen, weil `attached` seine restlichen
+    # Argumente selbst auswertet.
+    ablage_arg = None
+    if "--ablage" in argv:
+        i = argv.index("--ablage")
+        if i + 1 >= len(argv):
+            print("FEHLER: --ablage braucht einen Pfad", file=sys.stderr)
+            return 2
+        ablage_arg = argv[i + 1]
+        del argv[i:i + 2]
+    if not argv or argv[0] not in ("next", "queue", "attached"):
         print(__doc__)
         return 2
-    if sys.argv[1] == "attached":
-        return cmd_attached(sys.argv[2:])
-    return cmd_next() if sys.argv[1] == "next" else cmd_queue()
+    setze_ablage(ablage_arg or os.environ.get("HKB_PATH"))
+    if argv[0] == "attached":
+        return cmd_attached(argv[1:])
+    return cmd_next() if argv[0] == "next" else cmd_queue()
 
 
 if __name__ == "__main__":

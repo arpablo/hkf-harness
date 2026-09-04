@@ -71,7 +71,10 @@ def _bilder(b, hkb, text):
         if art != "medium":
             fehlend.append(ziel)
             return ""
-        return "![](%s)" % os.path.join(hkb, b.media_basis, rest)
+        # `rest` traegt die Medienbasis bereits. Sie hier noch einmal davor zu
+        # haengen ergab `80-Media/80-Media/...`, und pandoc baute das EPUB dann
+        # ohne ein einziges Bild, mit einer Warnung je Bild und rc 0.
+        return "![](%s)" % os.path.join(hkb, rest)
 
     return EINBETTUNG.sub(ersetzen, text), fehlend
 

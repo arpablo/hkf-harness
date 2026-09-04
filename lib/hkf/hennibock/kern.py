@@ -661,13 +661,30 @@ def publication_order(pub_note: Path):
     Gebrauch. Der Verweisapparat wird abgeschnitten: seine Quellen, MOCs und
     Areas stehen ebenfalls als Wikilink-Listenpunkte da, sind aber keine Kapitel,
     und ohne den Schnitt bekaeme das letzte Kapitel eine Quelle als next."""
-    text = pub_note.read_text(encoding="utf-8")
+    return publication_order_text(pub_note.read_text(encoding="utf-8"))
+
+
+def publication_order_text(text: str):
+    """Dasselbe, aber auf dem Text statt auf der Datei.
+
+    Es gibt diese Fassung, damit `kette.toc_chapters` sie rufen kann statt eine
+    zweite zu fuehren. Die beiden sind auseinandergelaufen, und der Schaden war
+    genau der, vor dem die Docstring dort seit jeher warnt: die Rotation waehlt
+    ein anderes Kapitel, als das Publizieren in die Kette haengt. Gemessen am
+    04.09.2026 ueber zwoelf Publikationen einer migrierten Ablage: zwoelf
+    Abweichungen, drei davon mit null erkannten Kapiteln. Eine Regel, die an
+    zwei Stellen steht, gilt frueher oder spaeter nur an einer.
+    """
     toc = VERWEISUEBERSCHRIFT_ZEILE.split(text)[0]
-    order = []
+    order, gesehen = [], set()
     for line in toc.split("\n"):
         m = LIST_ITEM_RE.match(line)
-        if m:
-            order.append(strip_wikilink(m.group(1)))
+        if not m:
+            continue
+        stem = strip_wikilink(m.group(1))
+        if stem and stem not in gesehen:
+            gesehen.add(stem)
+            order.append(stem)
     return order
 
 
@@ -766,6 +783,35 @@ def toc_stems(body: str) -> set:
         if m:
             stems.add(nfc(strip_wikilink(m.group(1))))
     return stems
+
+
+def cover_aus_property(fm_lines, root: Path, slug_base: str, uuid12: str):
+    """Das Titelbild aus der Property `cover`, wenn der Body keins einbettet.
+
+    Die Typdefinition `publication` des Bundles `hkf-publikation` nennt `cover`
+    als das Titelbild eines Werkes, und `hk-epub` liest es auch. Nur hier wurde
+    allein der Body durchsucht, weil eine Pub-Notiz in HenniPKA ihr Titelbild
+    einbettet. Eine Publikation, die der Typdefinition folgt, war damit nicht
+    publizierbar, und die Meldung nannte den Grund nicht.
+
+    Der Zusatz ist additiv: er greift nur, wenn der Body gar kein Bild traegt,
+    und `rewrite_body` setzt ein Bild ohne Fundstelle im Body dort auch nicht
+    ein. Es wird Titelbild und Medium des Bundles, mehr nicht.
+    """
+    wert = frontmatter_value(fm_lines, "cover")
+    ziel = strip_wikilink_pfad(wert)
+    if not ziel or not (root / ziel).is_file():
+        return []
+    return collect_images("![[" + ziel + "]]", root, slug_base, uuid12)
+
+
+def strip_wikilink_pfad(text: str) -> str:
+    """Wie `strip_wikilink`, aber der Pfad bleibt stehen: hier wird damit auf
+    eine Datei zugegriffen und nicht im Notiz-Index gesucht."""
+    t = (text or "").strip()
+    if t.startswith("[[") and t.endswith("]]"):
+        t = t[2:-2]
+    return t.split("|", 1)[0].split("#", 1)[0].strip()
 
 
 def rewrite_body(body: str, root: Path, index, images, cover_slug, alts,
@@ -884,7 +930,11 @@ def prepare(root: Path, note_arg: str, redate: bool = False):
     fm_offset = len(path.read_text(encoding="utf-8").split("\n")) - len(body.split("\n"))
     images = collect_images(body, root, slug_base, uuid12, fm_offset)
     if not images:
-        raise SystemExit("FEHLER: Notiz hat kein Bild als Titelbild")
+        images = cover_aus_property(fm_lines, root, slug_base, uuid12)
+    if not images:
+        raise SystemExit(
+            "FEHLER: Notiz hat kein Bild als Titelbild. Entweder ein Embed im "
+            "Body oder die Property `cover`.")
     for emb in images:
         if not emb["source"].is_file():
             raise SystemExit("FEHLER: Bilddatei fehlt: " + emb["target"])

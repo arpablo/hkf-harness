@@ -1327,6 +1327,32 @@ created: 2026-01-01
                   ordnung == ["Kap - Eins", "Kap - Zwei"], repr(ordnung))
             probe("`## Verbindungen` zaehlt nicht als Kapitel",
                   "quelle" not in ordnung, repr(ordnung))
+            # Die Rotation und das Publizieren muessen dieselbe Reihenfolge
+            # sehen. Sie standen als zwei Fassungen nebeneinander und sind
+            # auseinandergelaufen: gemessen ueber zwoelf Publikationen einer
+            # migrierten Ablage zwoelf Abweichungen, drei davon mit null
+            # erkannten Kapiteln. Jetzt ruft die eine die andere.
+            try:
+                from hkf.hennibock import kette as _hbkette
+            except Exception as e:
+                probe("kette ist ohne Ablage importierbar", False, str(e))
+                _hbkette = None
+            probe("kette ist ohne Ablage importierbar", _hbkette is not None,
+                  "Import beim Laden der Ablage gescheitert")
+            if _hbkette is not None:
+                text = io.open(pubdatei, encoding="utf-8").read()
+                probe("Rotation und Publizieren sehen dieselbe Reihenfolge",
+                      _hbkette.toc_chapters(text) == ordnung,
+                      repr(_hbkette.toc_chapters(text)))
+                probe("ein Embed-Ziel verliert seinen Alias (§3.6)",
+                      _hbkette.embed_ziel("80-Media/Images/x.jpg|x.jpg")
+                      == "80-Media/Images/x.jpg",
+                      _hbkette.embed_ziel("80-Media/Images/x.jpg|x.jpg"))
+                probe("ein Praefix faellt aus dem Namen, ein anderer Name nicht",
+                      _hbkette.strip_praefix("Pub - Eins") == "Eins"
+                      and _hbkette.strip_praefix("Der erste Text")
+                      == "Der erste Text",
+                      _hbkette.strip_praefix("Der erste Text"))
             os.remove(pubdatei)
 
         print("Die Hooks: der Kanon kommt aus der Sitzung, nicht aus der Ablage")

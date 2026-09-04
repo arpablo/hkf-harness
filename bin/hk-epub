@@ -112,7 +112,8 @@ def main(argv):
     if cover:
         m = re.match(r"^\[\[([^\]|]+)", str(cover))
         art_c, rest = b.aufloesen(m.group(1) if m else str(cover))
-        bild = os.path.join(hkb, b.media_basis, rest) if art_c == "medium" else None
+        # `rest` traegt die Medienbasis schon, siehe `hk-buch`.
+        bild = os.path.join(hkb, rest) if art_c == "medium" else None
         if bild and os.path.isfile(bild):
             befehl += ["--epub-cover-image", bild]
         else:

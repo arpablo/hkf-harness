@@ -6,6 +6,8 @@
     hk-kapitel queue             die ganze Warteschlange
     hk-kapitel attached <kap>    haengt das Kapitel in seiner Publikation?
 
+    --ablage <pfad>              eine andere Wissensbasis als die aktive
+
 Die Warteschlange steht in den Publikationen, die `hennibock_queue` tragen.
 Welche als naechste an der Reihe ist, ergibt sich aus der Rotation: die, deren
 letztes Kapitel am laengsten zurueckliegt.
