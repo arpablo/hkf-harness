@@ -28,7 +28,7 @@ Publish derselben Notiz erzeugt ihn nicht noch einmal.
 write-alts ist bewusst ein eigenes Kommando. Als Seiteneffekt von build waere die
 Trennung zwischen Override und dauerhafter Quelle wieder aufgehoben.
 
-build saeubert den Body (entfernt ai-image-Callouts und den Abschnitt `# Siehe auch`,
+build saeubert den Body (entfernt ai-image-Callouts und den Verweisapparat,
 loest Wikilinks auf, schreibt Bild-Einbettungen auf image/<slug> um), baut die
 HenniBock-Frontmatter, die Medien-Sidecars und das ZIP-Bundle. Mit --send geht
 das Bundle erst an $HENNIBOCK_URL/import/validate und dann an /import, mit\nBearer $HENNIBOCK_IMPORT_TOKEN. Beide
@@ -568,8 +568,19 @@ def ensure_identity(path: Path, fm_lines, title: str, redate: bool = False):
 # Body saeubern (build)
 # ---------------------------------------------------------------------------
 
+# Die Ueberschrift, ab der der Verweisapparat einer Notiz beginnt. HKF Core
+# §5.6 nennt ihn `# Siehe auch`. Ein gewachsener Obsidian-Vault nennt ihn
+# `## Verbindungen`, und das sind hier 376 von 376 Texten. Der Publisher hat
+# den Apparat abzuschneiden, wie immer er heisst: was dahinter steht, sind
+# Quellen, MOCs und Kapitelketten, also Vault-Gerüst und kein Lesertext.
+# Nur die Notation zu kennen, die die Spezifikation vorschreibt, hiesse den
+# ganzen Bestand ungeprueft nach draussen zu geben.
+VERWEISUEBERSCHRIFT = re.compile(r"#{1,2}\s+(?:Siehe auch|Verbindungen)\b")
+VERWEISUEBERSCHRIFT_ZEILE = re.compile(
+    r"^#{1,2}\s+(?:Siehe auch|Verbindungen)\s*$", re.M)
+
 def strip_callouts_and_verbindungen(body: str) -> str:
-    """Schneidet alles ab der Ueberschrift `# Siehe auch` ab und behandelt die
+    """Schneidet alles ab der Verweisueberschrift ab und behandelt die
     beiden Callout-Typen, die eine Notiz mitbringen darf. Alles vor dem Schnitt
     bleibt erhalten, insbesondere ein vorangestellter `## Externe Quellen`-
     Abschnitt und externe Markdown-Links.
@@ -587,7 +598,7 @@ def strip_callouts_and_verbindungen(body: str) -> str:
     der Zeile davor bleibt dann erhalten."""
     lines = body.split("\n")
     for i, line in enumerate(lines):
-        m = re.search(r"#{1,2}\s+Siehe auch\b", line)
+        m = VERWEISUEBERSCHRIFT.search(line)
         if m:
             head = line[:m.start()].rstrip()
             lines = lines[:i] + ([head] if head else [])
@@ -632,11 +643,11 @@ def publication_order(pub_note: Path):
     """Kapitelreihenfolge aus dem Inhaltsverzeichnis einer Publication: die
     Ziel-Stems aller Wikilink-Listenpunkte in Dokumentreihenfolge. Geordnete und
     ungeordnete Listen zaehlen gleich, beide Schreibweisen sind im Bestand in
-    Gebrauch. Der Abschnitt `# Siehe auch` wird abgeschnitten: seine Quellen, MOCs und
+    Gebrauch. Der Verweisapparat wird abgeschnitten: seine Quellen, MOCs und
     Areas stehen ebenfalls als Wikilink-Listenpunkte da, sind aber keine Kapitel,
     und ohne den Schnitt bekaeme das letzte Kapitel eine Quelle als next."""
     text = pub_note.read_text(encoding="utf-8")
-    toc = re.split(r"^#{1,2}\s+Siehe auch\s*$", text, flags=re.M)[0]
+    toc = VERWEISUEBERSCHRIFT_ZEILE.split(text)[0]
     order = []
     for line in toc.split("\n"):
         m = LIST_ITEM_RE.match(line)
@@ -731,7 +742,7 @@ def resolve_links(body: str, root: Path, index, beruehrt=None,
 
 def toc_stems(body: str) -> set:
     """Die Ziel-Stems der Listenpunkte eines Inhaltsverzeichnisses, gemessen an
-    dem Body, der schon von Callouts, `# Siehe auch` und uebersprungenen Kapiteln
+    dem Body, der schon von Callouts, Verweisapparat und uebersprungenen Kapiteln
     befreit ist. Ein Kapitel mit `hennibock_skip` faellt vorher aus der Liste
     und bekommt darum auch hier keine UUID."""
     stems = set()
