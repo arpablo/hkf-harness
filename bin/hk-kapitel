@@ -1,0 +1,24 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""hk-kapitel — welches Kapitel als naechstes erscheint.
+
+    hk-kapitel next              das naechste offene Kapitel als JSON
+    hk-kapitel queue             die ganze Warteschlange
+    hk-kapitel attached <kap>    haengt das Kapitel in seiner Publikation?
+
+Die Warteschlange steht in den Publikationen, die `hennibock_queue` tragen.
+Welche als naechste an der Reihe ist, ergibt sich aus der Rotation: die, deren
+letztes Kapitel am laengsten zurueckliegt.
+
+Publiziert wird damit nicht. Das tut `hk-publish build … --send`.
+"""
+import os, sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] in ("--help", "-h"):
+        print(__doc__.strip()); sys.exit(0)
+    from hkf.hennibock import kette   # noqa: E402
+    sys.argv[0] = "hk-kapitel"
+    sys.exit(kette.main())

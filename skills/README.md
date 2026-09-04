@@ -30,6 +30,7 @@ einen gebrochenen Wikilink immer, ein Modell meistens.
 | [`hkb-hinweis`](hkb-hinweis/SKILL.md) | Festhalten, was für diese eine Ablage gilt |
 | [`hkb-publikation`](hkb-publikation/SKILL.md) | Texte zu einer Publikation ordnen und die Reihenfolge führen |
 | [`hkb-erzaehlung`](hkb-erzaehlung/SKILL.md) | Einen Erzählbestand führen: Kanon, Kontinuität, Beurteilung |
+| [`hkb-hennibock`](hkb-hennibock/SKILL.md) | Eine Notiz an eine HenniBock-Instanz übertragen und die Kapitelkette führen |
 
 **Ein Skill ruft einen Agenten.** `hkb-quelle` liest eine Quelle nie
 selbst, sondern schickt [`wilma`](../agents/wilma.md) — sie liest in ihrem

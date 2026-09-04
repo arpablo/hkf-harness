@@ -904,6 +904,100 @@ Trägt.
         shutil.rmtree(os.path.dirname(erz), ignore_errors=True)
         shutil.rmtree(os.path.dirname(lief_erz), ignore_errors=True)
 
+        print("hk-publish und hk-kapitel: die Übertragung nach HenniBock")
+        for befehl in ("hk-publish", "hk-kapitel"):
+            r = lauf(os.path.join(BIN, befehl), "--help")
+            probe("%s läuft" % befehl, r.returncode == 0,
+                  (r.stdout + r.stderr)[-200:])
+        hb = os.path.join(tempfile.mkdtemp(prefix="hkb-hb-"), "ablage")
+        lauf(os.path.join(BIN, "hk-init"), hb)
+        lief_hb = os.path.join(tempfile.mkdtemp(prefix="hkb-hbl-"),
+                               "hkf-publikation")
+        shutil.copytree(os.path.join(WURZEL, "bundles", "hkf-publikation"),
+                        lief_hb)
+        lauf(os.path.join(BIN, "hk-import"), lief_hb, hb)
+        r = lauf(os.path.join(BIN, "hk-kapitel"), "queue",
+                 env=dict(os.environ, HKB_PATH=hb))
+        probe("ohne Warteschlange sagt hk-kapitel das",
+              "hennibock_queue" in r.stderr, (r.stdout + r.stderr)[-200:])
+        _schreib(os.path.join(hb, WIKI, "Texts", "probe.md"), """---
+type: text
+name: Eine Probe
+summary: Ein Text, der nur prüfen soll, ob der Bau trägt.
+hennibock_type: title_story
+hennibock_areas:
+  - Geschichte
+created: 2026-01-01
+---
+
+Ein kurzer Text ohne Bild.
+""")
+        r = lauf(os.path.join(BIN, "hk-publish"), "analyze", "probe",
+                 "--ablage", hb)
+        probe("eine Notiz ohne Titelbild wird abgewiesen",
+              "Titelbild" in (r.stdout + r.stderr),
+              (r.stdout + r.stderr)[-200:])
+        # Ein winziges PNG, damit der Bau bis zum Bundle kommt.
+        import zlib as _zlib, struct as _struct
+
+        def _brocken(art, daten):
+            k = art + daten
+            return (_struct.pack(">I", len(daten)) + k
+                    + _struct.pack(">I", _zlib.crc32(k) & 0xffffffff))
+
+        roh = b"".join(b"\x00" + bytes([90, 110, 140]) * 8 for _ in range(8))
+        png = (b"\x89PNG\r\n\x1a\n"
+               + _brocken(b"IHDR", _struct.pack(">IIBBBBB", 8, 8, 8, 2, 0, 0, 0))
+               + _brocken(b"IDAT", _zlib.compress(roh)) + _brocken(b"IEND", b""))
+        bildpfad = os.path.join(hb, MEDIEN, "Images", "probe.png")
+        os.makedirs(os.path.dirname(bildpfad), exist_ok=True)
+        open(bildpfad, "wb").write(png)
+        _schreib(os.path.join(hb, WIKI, "Texts", "probe.md"), """---
+type: text
+name: Eine Probe
+summary: Ein Text, der nur prüfen soll, ob der Bau trägt.
+hennibock_type: title_story
+hennibock_areas:
+  - Geschichte
+created: 2026-01-01
+---
+
+![[80-Media/Images/probe.png]]
+
+> [!ai-image]
+> alt: Ein einfarbiges Feld, das allein der Prüfung dient.
+>
+> A plain field, used only to verify the build.
+
+Ein kurzer Text.
+
+# Siehe auch
+
+- [[40-Wiki/Texts/probe|Eine Probe]] — steht hier nur als Muster.
+""")
+        r = lauf(os.path.join(BIN, "hk-publish"), "analyze", "probe",
+                 "--ablage", hb)
+        if r.returncode == 0:
+            daten = json.loads(r.stdout)
+            probe("der Titel kommt aus `name`, nicht aus dem Dateinamen",
+                  daten.get("title") == "Eine Probe", str(daten.get("title")))
+            probe("der Alt-Text kommt aus dem Callout",
+                  daten["images"][0].get("alt_source") == "callout",
+                  str(daten["images"][0]))
+            r = lauf(os.path.join(BIN, "hk-publish"), "build", "probe",
+                     "--ablage", hb)
+            probe("das Bundle entsteht und wird nicht gesendet",
+                  r.returncode == 0 and "Nicht gesendet" in r.stdout,
+                  (r.stdout + r.stderr)[-300:])
+            probe("die Textprüfung lief davor",
+                  "Textpruefung bestanden" in r.stdout, r.stdout[-300:])
+        else:
+            probe("analyze braucht `sips` für die Bildmaße",
+                  "sips" in (r.stdout + r.stderr).lower(),
+                  (r.stdout + r.stderr)[-200:])
+        shutil.rmtree(os.path.dirname(hb), ignore_errors=True)
+        shutil.rmtree(os.path.dirname(lief_hb), ignore_errors=True)
+
         print("Die Hooks: der Kanon kommt aus der Sitzung, nicht aus der Ablage")
         p_hooks = os.path.join(WURZEL, "hooks", "hooks.json")
         try:

@@ -94,6 +94,8 @@ Python 3 und PyYAML.
 | `hk-buch <publikation>` | schreibt die Texte einer Publikation als ein Manuskript heraus | **läuft** |
 | `hk-epub <publikation>` | baut daraus mit `pandoc` ein EPUB | **läuft** |
 | `hk-kontinuitaet [--richten]` | prüft einen Erzählbestand: Zeiträume, abgeleitete Listen, veraltete Beurteilungen | **läuft** |
+| `hk-publish <kommando> <notiz>` | überträgt eine Notiz an eine HenniBock-Instanz: `analyze`, `build --send`, `attached` | **läuft** |
+| `hk-kapitel next\|queue` | welches Kapitel als nächstes erscheint, aus der Rotation der Publikationen | **läuft** |
 
 Was geprüft wird, entscheidet die Wurzeldatei: `hkb.md` heißt Wissensbasis,
 `hbundle.md` heißt Lieferung. §6.3 gilt für beide, mit den Unterschieden aus §4
@@ -184,11 +186,12 @@ spec/        die Fassung, die dieser Harness umsetzt
 lib/hkf/     ablage, frontmatter, schema, grammatik, pruefen, korrigieren,
              importieren, exportieren, einlesen, notiz, vorlage, fassung
 lib/hkf/text/ der Schreibregelprüfer: segment, engine, rules, rhythm_lint
+lib/hkf/hennibock/ die Übertragung an eine HenniBock-Instanz
 rules/       deutsch.json, der Basissatz der Schreibregeln
 bin/         hk-init, hk-lint, hk-import, hk-export, hk-ingest,
              hk-tranchen, hk-types, hk-ablage, hk-text, hk-install,
              hk-suche, hk-erwaehnungen, hk-kontext, hk-publikation,
-             hk-buch, hk-epub, hk-kontinuitaet
+             hk-buch, hk-epub, hk-kontinuitaet, hk-publish, hk-kapitel
 py           das Python des Harness — baut die venv und startet sie
 tools/       spec.py hält die Kopie unter spec/ auf Stand,
              grundausstattung.py die Vorlage gegen Anhang A und §3.5.1

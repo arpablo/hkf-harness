@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""hk-publish — eine Notiz an eine HenniBock-Instanz uebertragen.
+
+    hk-publish analyze <notiz>              liest die Notiz, meldet Bilder und Alt-Texte
+    hk-publish write-alts <notiz> --alts …  schreibt Alt-Texte in die Notiz zurueck
+    hk-publish build <notiz> [--send]       baut das Bundle, mit --send auch senden
+    hk-publish attached <notiz>             prueft die Einhaengung in die Publikationen
+
+    --ablage <pfad>   eine andere Wissensbasis als die aktive
+
+Ziel und Zugang stehen in der Umgebung: `HENNIBOCK_URL` und
+`HENNIBOCK_IMPORT_TOKEN`. Es gibt keinen Standardwert fuer das Ziel. Gesendet
+wird erst an `/import/validate` und dann an `/import`.
+
+Vor jedem Bundle laeuft `hk-text --gate` ueber die enthaltenen Texte. Ein
+Befund der Severity `error` haelt an, und es entsteht kein Bundle. **Ein Gate,
+das sich still abschaltet, ist schlechter als keins**: Fehlt der Pruefer,
+bricht der Lauf ab, statt durchzulassen.
+
+Der Skill erzeugt Inhalt und Bundle. Index, Kaskade und Idempotenz bleiben bei
+HenniBock.
+
+Welche Properties eine Notiz dafuer traegt, steht in `skills/hkb-hennibock`.
+Der Harness deklariert sie nicht: HenniBock ist ein Dienst und kein Format.
+"""
+import os, sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
+from hkf.hennibock import kern   # noqa: E402
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] in ("--help", "-h"):
+        print(__doc__.strip()); sys.exit(0)
+    sys.exit(kern.main(["hk-publish"] + sys.argv[1:]))
