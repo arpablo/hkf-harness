@@ -66,7 +66,7 @@ Abweichung gilt das Schema. Ein Werkzeug liest sie dort; wer die Tabelle
 
 | Property-Typ | Wertform | Einschränkung |
 |---|---|---|
-| `hkf-url` | `text` | `pattern: "^https?://\\S+$"` |
+| `hkf-url` | `text` | `pattern: "^(https?://\\S+|\\[[^\\]\\n]+\\]\\(https?://\\S+\\))$"` |
 | `hkf-email` | `text` | `pattern: "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"` |
 | `hkf-phone` | `text` | `pattern: "^\\+[1-9]\\d{6,14}$"` — E.164, also `+4993131885` |
 | `hkf-lang` | `text` | `pattern: "^[a-z]{2}$"` — ISO 639-1, also `de`, `en` |

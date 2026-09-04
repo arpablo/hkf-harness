@@ -65,7 +65,7 @@
     },
     "hkf-url": {
       "type": "string",
-      "pattern": "^https?://\\S+$"
+      "pattern": "^(https?://\\S+|\\[[^\\]\\n]+\\]\\(https?://\\S+\\))$"
     },
     "hkf-email": {
       "type": "string",

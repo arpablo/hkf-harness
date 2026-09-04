@@ -723,6 +723,8 @@ name: Probe
 sources:
   - "[[50-Sources/quelle|Eine Quelle]]"
   - "https://example.org/etwas"
+  - "[Ein Titel](https://example.org/anderes)"
+  - "[Mit Klammern](https://example.org/Cairo_Conference_(1921))"
 banner-x: 0.5
 to-publish: true
 created: 2026-01-01
@@ -734,7 +736,7 @@ modified: 2026-01-01T00:00:00
 Verweist auf [[50-Sources/quelle|Eine Quelle]].
 """)
         r = lauf(os.path.join(BIN, "hk-lint"), ziel)
-        probe("`sources` nimmt eine Notiz und eine Adresse (A.2)",
+        probe("`sources` nimmt Notiz, Adresse und Markdown-Link (A.2)",
               "sources" not in r.stdout.split("Hinweise", 1)[0],
               r.stdout.split("Hinweise", 1)[0][-400:])
         probe("ein Property-Name mit Bindestrich ist zulässig (§3.4)",
