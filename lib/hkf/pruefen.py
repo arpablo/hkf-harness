@@ -448,8 +448,14 @@ def _verweise(b, befunde):
                                       "auf; die Notiz ergänzt eine bestehende, der "
                                       "Verweis gilt dort (§7.1)." % ziel, grad))
             elif art is None:
-                befunde.append(Befund(e["rel"], "[[%s]] lässt sich nicht auflösen "
-                                                "(§3.6)." % ziel))
+                # In einer HKB ist ein Ziel ohne Datei eine Vormerkung und
+                # kein Defekt (§3.6). Eine Wissensbasis waechst, und ein
+                # Verweis auf das, was noch niemand geschrieben hat, ist ihr
+                # Normalzustand. In einer Lieferung bricht er die Zusage,
+                # fuer sich lesbar zu sein (§7.1 Punkt 6).
+                befunde.append(Befund(e["rel"], "[[%s]] zeigt auf keine Datei "
+                                      "(§3.6)." % ziel,
+                                      HINWEIS if b.art == "hkb" else FEHLER))
             elif art == "medium" and rest not in b.medien:
                 befunde.append(Befund(e["rel"], "[[%s]] zeigt auf keine vorhandene "
                                                 "Mediendatei (§3.2.1)." % ziel))

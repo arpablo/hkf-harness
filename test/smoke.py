@@ -230,8 +230,16 @@ def main():
         _kaputt(ziel)
         r = lauf(os.path.join(BIN, "hk-lint"), ziel)
         probe("findet die eingebauten Fehler",
-              "Typtabelle nennt" in r.stdout and "hkf-phone` fehlt" in r.stdout
-              and "lässt sich nicht auflösen" in r.stdout, r.stdout)
+              "Typtabelle nennt" in r.stdout and "hkf-phone` fehlt" in r.stdout,
+              r.stdout)
+        # Ein Ziel ohne Datei ist in einer HKB eine Vormerkung und kein
+        # Defekt (§3.6). In einer Lieferung bleibt es ein Fehler, weil sie
+        # zusagt, fuer sich lesbar zu sein.
+        probe("ein Verweis ohne Ziel ist hier ein Hinweis",
+              "zeigt auf keine Datei" in r.stdout, r.stdout[-400:])
+        hinweisteil = r.stdout.split("Hinweise", 1)[-1]
+        probe("und steht unter den Hinweisen, nicht unter den Befunden",
+              "zeigt auf keine Datei" in hinweisteil, hinweisteil[:300])
         r = lauf(os.path.join(BIN, "hk-lint"), ziel, "--fix")
         probe("legt den fehlenden Standard-Property-Typ an",
               os.path.exists(os.path.join(ziel, KONFIG, "Proptypes", "hkf-phone.md")))
@@ -1153,6 +1161,37 @@ Eine Person bekommt hier erst ab dem zweiten Auftritt ein Blatt.
             probe("meldet %s" % was, muster in r.stdout, r.stdout)
         shutil.rmtree(bundle)
         _bundle_bauen(bundle)
+
+        # Gegenprobe: In einer Lieferung ist derselbe Verweis ein Fehler.
+        tot = os.path.join(tempfile.mkdtemp(prefix="hkb-tot-"), "lieferung")
+        _schreib(os.path.join(tot, "hbundle.md"), """---
+hkf: "1.0"
+type: bundle
+id: probe-tot
+title: Probe
+description: Prüft, dass ein Verweis ohne Ziel in einer Lieferung ein Fehler bleibt.
+version: "2026-01-01"
+---
+
+# Typen
+
+| Typ | Verzeichnis | Zweck |
+|---|---|---|
+""")
+        _schreib(os.path.join(tot, "Notes", "probe.md"), """---
+type: note
+name: Eine Notiz
+created: 2026-01-01
+modified: 2026-01-01T00:00:00
+---
+
+Verweis auf [[Notes/gibt-es-nicht|etwas]].
+""")
+        r = lauf(os.path.join(BIN, "hk-lint"), tot)
+        probe("in einer Lieferung bleibt derselbe Verweis ein Fehler",
+              r.returncode == 1 and "zeigt auf keine Datei" in
+              r.stdout.split("Hinweise", 1)[0], r.stdout[-300:])
+        shutil.rmtree(os.path.dirname(tot), ignore_errors=True)
 
         print("hk-export")
         aus = os.path.join(os.path.dirname(bundle), "wieder-raus")

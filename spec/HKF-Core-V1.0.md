@@ -1051,7 +1051,20 @@ keinen Typ gebunden; sie müssen nur §3.6 erfüllen und auflösbar sein.
 Was in einem Code-Span oder Codeblock steht, ist kein Verweis. Obsidian
 verlinkt es nicht, und `hk-lint` prüft es nicht. Beispiel-Wikilinks in
 erläuterndem Text — etwa in einer `proptype`-Notiz — gehören deshalb in
-Backticks; sonst sind sie echte Verweise und müssen auflösbar sein.
+Backticks; sonst sind sie echte Verweise.
+
+**Ein Verweis darf ins Leere zeigen, aber nur in einer HKB.** Er ist dort ein
+Hinweis und kein Fehler (§6.3). Der Grund ist der Unterschied zwischen einer
+Lieferung und einem Bestand. Eine Lieferung sagt zu, für sich lesbar zu sein,
+und ein Verweis hinaus bricht die Zusage (§7.1 Punkt 6). Eine Wissensbasis
+wächst, und ein Verweis auf etwas, das noch niemand geschrieben hat, ist ihr
+Normalzustand: Er ist die Vormerkung, an der man später sieht, was fehlt.
+Obsidian färbt ihn eigens anders ein.
+
+Zwei Fälle bleiben Fehler, weil sie keine Vormerkung sind. Ein **mehrdeutiger**
+Verweis nennt zwei Dateien und meint eine, und welche, weiß niemand. Ein
+Verweis auf eine **Mediendatei**, die es nicht gibt, ist ein gebrochener
+Anhang: Ein Bild plant man nicht, man hat es oder nicht.
 
 ### 3.7.2 Alternativen
 
@@ -2471,8 +2484,11 @@ Bundle; die letzten vier Punkte gelten nur für eine HKB.
   Property-Typ oder als dessen Listenform nach §3.5.2, jeder genannte Zieltyp
   ist registriert, und der `:`-Zusatz steht nur an `hkf-link` oder
   `hkf-link-list`,
-- alle internen Verweise sind qualifizierte Wikilinks nach §3.6 und auflösbar;
-  in der Wurzeldatei ohne Ablagepfad, in Notizen mit,
+- alle internen Verweise sind qualifizierte Wikilinks nach §3.6; in der
+  Wurzeldatei ohne Ablagepfad, in Notizen mit,
+- ein Verweis, der auf keine Datei zeigt, ist ein **Hinweis** und kein Fehler
+  (§3.6). Ein mehrdeutiger dagegen ist einer, und ein Verweis auf eine
+  Mediendatei, die es nicht gibt, ebenso,
 - interne Verweise tragen einen Alias — fehlt er, ist das ein Hinweis, kein
   Fehler (§3.6),
 - `modified` liegt nicht vor `created`,
