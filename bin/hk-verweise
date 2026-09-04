@@ -1,0 +1,190 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""hk-verweise — kurze Wikilinks zu qualifizierten machen (§3.6).
+
+    hk-verweise [pfad]           berichtet, was zu qualifizieren waere
+    hk-verweise --setzen         schreibt es
+    hk-verweise --nur <verz>     nur unter diesem Verzeichnis der Ablage
+
+Ein Verweis nach HKF traegt den vollen Pfad ab der Vault-Wurzel und einen
+Alias: `[[40-Wiki/Persons/ada-lovelace|Ada Lovelace]]`. Obsidian kommt auch
+mit `[[ada-lovelace]]` zurecht, solange der Name im Vault nur einmal vorkommt.
+Dieses Werkzeug schreibt das eine in das andere um.
+
+**Geraten wird nicht.** Nennt ein Name zwei Dateien, wird der Verweis
+gemeldet und bleibt stehen: Welche gemeint ist, weiss nur ein Mensch. Zeigt er
+auf gar keine Datei, bleibt er ebenfalls stehen — in einer Wissensbasis ist
+das eine Vormerkung und kein Fehler (§3.6).
+
+Der Anzeigetext bleibt, was dastand. Aus `[[Ada Lovelace]]` wird
+`[[…/ada-lovelace|Ada Lovelace]]`, aus `[[ada-lovelace|Ada]]` wird
+`[[…/ada-lovelace|Ada]]`. Ein Verweis ohne Alias bekommt einen, denn ohne ihn
+meldet `hk-lint` einen Hinweis.
+
+Nicht angefasst wird, was in Backticks steht: Eine Typdefinition zeigt
+Wikilinks als Muster her, ein Clipping bringt die fremden Verweise der
+erfassten Seite mit. Beide umzuschreiben verfaelschte sie.
+"""
+import io, os, re, sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
+from hkf import ablage, notiz, pruefen   # noqa: E402
+
+WERKZEUG = "hk-verweise"
+# Ein Verweis, dessen Ziel kein `/` traegt. Mehr braucht es nicht: Was einen
+# Pfad hat, ist schon qualifiziert.
+KURZ = re.compile(r"(!?)\[\[([^\]\n|/]+)(?:(\\?\|)([^\]\n]*))?\]\]")
+TABELLE = re.compile(r"^\s*\|")
+UNGEQUOTET = re.compile(r"^(\s*(?:-\s+|[A-Za-z_][\w-]*:\s+))(\[\[[^\n]*\]\])\s*$")
+
+
+def _wert(argv, name):
+    if name in argv:
+        i = argv.index(name)
+        if i + 1 < len(argv):
+            return argv[i + 1]
+    return None
+
+
+def _index(b):
+    """Dateiname ohne Endung -> [(art, ziel)] ueber Notizen, Medien, Typseiten."""
+    aus = {}
+    for rel in b.notizen:
+        aus.setdefault(rel.rsplit("/", 1)[-1], []).append(("notiz", rel))
+    for rel in b.medien:
+        name = rel.rsplit("/", 1)[-1]
+        aus.setdefault(name, []).append(("medium", rel))
+        aus.setdefault(name.rsplit(".", 1)[0], []).append(("medium", rel))
+    for rel in b.typseiten:
+        aus.setdefault(rel.rsplit("/", 1)[-1], []).append(("typseite", rel))
+    return aus
+
+
+def _ziel(b, art, rel, e=None):
+    """Der volle Pfad, wie er in einen Verweis gehoert."""
+    if art == "medium":
+        # `b.medien` traegt den Medienbereich schon im Schluessel.
+        return "/".join(t for t in (b.ablagepfad, rel) if t)
+    if art == "typseite":
+        return "/".join(t for t in (b.praefix("config_base"), rel) if t)
+    bereich = (b.notizen[rel].get("bereich") or "wiki_base")
+    return "/".join(t for t in (b.praefix(bereich), rel) if t)
+
+
+def _umschreiben(text, b, verz, befunde, rel_quelle):
+    """Den Text mit qualifizierten Verweisen, plus Zahl der Ersetzungen."""
+    zahl = [0]
+
+    def zeilenweise(stueck):
+        zeilen = stueck.split("\n")
+        for i, zeile in enumerate(zeilen):
+            in_tabelle = bool(TABELLE.match(zeile))
+
+            def ersetzen(m):
+                ruf, ziel, trenner, alias = m.groups()
+                name = ziel.strip()
+                anker = ""
+                if "#" in name:
+                    name, _, anker = name.partition("#")
+                    name, anker = name.strip(), "#" + anker
+                treffer = verz.get(name) or []
+                if not treffer:
+                    befunde.setdefault("ohne", []).append((rel_quelle, ziel))
+                    return m.group(0)
+                if len(set(t for t in treffer)) > 1:
+                    befunde.setdefault("mehrdeutig", []).append(
+                        (rel_quelle, ziel, [x[1] for x in treffer]))
+                    return m.group(0)
+                art, rel = treffer[0]
+                voll = _ziel(b, art, rel) + anker
+                text_alias = alias if trenner else ziel.strip()
+                # In einer Tabellenzelle ist der Trenner maskiert (§3.6).
+                strich = "\\|" if in_tabelle else "|"
+                zahl[0] += 1
+                return "%s[[%s%s%s]]" % (ruf, voll, strich, text_alias)
+
+            zeilen[i] = KURZ.sub(ersetzen, zeile)
+        return "\n".join(zeilen)
+
+    return notiz.ausserhalb_code(text, zeilenweise), zahl[0]
+
+
+def _quoten(kopf):
+    """Ein Wikilink im Frontmatter muss in Anfuehrungszeichen (§3.4)."""
+    zeilen = kopf.split("\n")
+    for i, z in enumerate(zeilen):
+        m = UNGEQUOTET.match(z)
+        if m:
+            zeilen[i] = '%s"%s"' % (m.group(1), m.group(2))
+    return "\n".join(zeilen)
+
+
+def main(argv):
+    if "--help" in argv or "-h" in argv:
+        print(__doc__.strip()); return 0
+    setzen = "--setzen" in argv
+    nur = _wert(argv, "--nur")
+    args, ueberspringen = [], False
+    for a in argv:
+        if ueberspringen:
+            ueberspringen = False; continue
+        if a == "--nur":
+            ueberspringen = True; continue
+        if not a.startswith("-"):
+            args.append(a)
+    try:
+        hkb, art = ablage.finde_ablage(args[0] if args else None, arten=("hkb",))
+    except ablage.KeineAblage as e:
+        sys.stderr.write(str(e) + "\n"); return 2
+
+    b = pruefen.Bestand(hkb, art)
+    verz = _index(b)
+    befunde, geaendert, summe = {}, [], 0
+
+    for rel, e in sorted(b.notizen.items()):
+        if nur and not rel.startswith(nur.strip("/") + "/") and rel != nur:
+            continue
+        kopf, zahl_k = _umschreiben(e["kopf"] or "", b, verz, befunde, rel)
+        body, zahl_b = _umschreiben(e["body"], b, verz, befunde, rel)
+        if not (zahl_k + zahl_b):
+            continue
+        summe += zahl_k + zahl_b
+        geaendert.append((rel, zahl_k + zahl_b))
+        if setzen:
+            notiz.sichern(e["pfad"], _quoten(kopf), body, WERKZEUG)
+
+    print("%s — %s" % (hkb, "Verweise setzen" if setzen else "nur Bericht"))
+    print()
+    if geaendert:
+        for rel, n in geaendert[:20]:
+            print("  %-52s %d" % (rel, n))
+        if len(geaendert) > 20:
+            print("  und %d weitere Notizen" % (len(geaendert) - 20))
+        print()
+    mehrdeutig = befunde.get("mehrdeutig") or []
+    ohne = befunde.get("ohne") or []
+    print("%d Verweise in %d Notizen%s"
+          % (summe, len(geaendert),
+             " qualifiziert" if setzen else ", noch nichts geschrieben"))
+    if mehrdeutig:
+        print()
+        print("Mehrdeutig, deshalb stehengeblieben (%d):" % len(mehrdeutig))
+        namen = {}
+        for _q, ziel, ziele in mehrdeutig:
+            namen.setdefault(ziel, ziele)
+        for ziel, ziele in sorted(namen.items()):
+            print("  [[%s]] → %s" % (ziel, ", ".join(ziele)))
+    if ohne:
+        print()
+        print("Ohne Ziel, also Vormerkungen (%d Verweise auf %d Namen)."
+              % (len(ohne), len(set(z for _q, z in ohne))))
+        print("  Sie bleiben stehen; in einer Wissensbasis sind sie ein "
+              "Hinweis (§3.6).")
+    if not setzen and summe:
+        print()
+        print("`--setzen` schreibt sie.")
+    return 0 if summe or not (mehrdeutig or ohne) else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

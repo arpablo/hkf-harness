@@ -89,6 +89,7 @@ Python 3 und PyYAML.
 | `hk-install [--check]` | hängt den Harness als Plugin unter `~/.claude/skills/hkf` ein und räumt die alten Zeiger weg | **läuft** |
 | `hk-suche <muster>` | findet Notizen: Volltext, `--typ`, `--hat`, `--verweist-auf`, `--fundstellen` | **läuft** |
 | `hk-erwaehnungen <ziel>` | macht unverlinkte Erwähnungen einer Notiz zu qualifizierten Verweisen | **läuft** |
+| `hk-verweise [--setzen]` | macht kurze Wikilinks zu qualifizierten (§3.6); Mehrdeutiges wird gemeldet, nicht geraten | **läuft** |
 | `hk-kontext [--stimme]` | gibt aus, was in dieser Ablage gilt: Lage, Kanon, Stimme, Hinweise | **läuft** |
 | `hk-publikation <notiz>` | führt die Lesereihenfolge einer Publikation: `--aufnehmen`, `--vor`, `--check`, `--richten` | **läuft** |
 | `hk-buch <publikation>` | schreibt die Texte einer Publikation als ein Manuskript heraus, außerhalb der Ablage | **läuft** |
@@ -190,7 +191,7 @@ lib/hkf/hennibock/ die Übertragung an eine HenniBock-Instanz
 rules/       deutsch.json, der Basissatz der Schreibregeln
 bin/         hk-init, hk-lint, hk-import, hk-export, hk-ingest,
              hk-tranchen, hk-types, hk-ablage, hk-text, hk-install,
-             hk-suche, hk-erwaehnungen, hk-kontext, hk-publikation,
+             hk-suche, hk-erwaehnungen, hk-kontext, hk-publikation, hk-verweise,
              hk-buch, hk-epub, hk-kontinuitaet, hk-publish, hk-kapitel
 py           das Python des Harness — baut die venv und startet sie
 tools/       spec.py hält die Kopie unter spec/ auf Stand,

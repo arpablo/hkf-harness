@@ -94,3 +94,24 @@ die verwendeten Typen liegen bei oder stehen in `required_bundles`.
 
 **`--fix` gilt dort nicht.** Eine Lieferung wird gelesen, nicht geändert. Was
 an ihr falsch ist, berichtigt der Absender.
+
+## Eine fremde Ablage übernehmen
+
+Ein Vault, der bisher ohne HKF geführt wurde, trägt kurze Wikilinks:
+`[[Ada Lovelace]]` statt `[[40-Wiki/Persons/ada-lovelace|Ada Lovelace]]`.
+Obsidian kommt damit zurecht, HKF §3.6 nicht.
+
+```bash
+hk-verweise            # zählt, was zu qualifizieren wäre
+hk-verweise --setzen   # schreibt es
+```
+
+**Fang mit dem Bericht an.** Er nennt drei Zahlen: was sich eindeutig auflösen
+lässt, was mehrdeutig ist, und was auf gar keine Datei zeigt. Nur das erste
+schreibt das Werkzeug. Ein Name, der zwei Dateien nennt, bleibt stehen, weil
+niemand außer einem Menschen weiß, welche gemeint ist. Ein Ziel ohne Datei
+bleibt ebenfalls stehen: In einer Wissensbasis ist das eine Vormerkung und
+kein Fehler.
+
+Der Anzeigetext bleibt, was dastand. Wer ihn verbessern will, tut das danach
+und von Hand.

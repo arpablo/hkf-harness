@@ -703,6 +703,114 @@ Hier steht [[40-Wiki/Persons/ada-lovelace|Ada Lovelace]] schon verlinkt.
         for d in ("Persons", "Events"):
             os.rmdir(os.path.join(ziel, WIKI, d))
 
+        print("hk-verweise: aus einem kurzen Verweis wird ein qualifizierter")
+        vw = os.path.join(tempfile.mkdtemp(prefix="hkb-vw-"), "ablage")
+        lauf(os.path.join(BIN, "hk-init"), vw)
+        for name, typ in (("ada-lovelace", "person"), ("babbage", "person")):
+            _schreib(os.path.join(vw, WIKI, "Persons", name + ".md"), """---
+type: %s
+name: %s
+created: 2026-01-01
+modified: 2026-01-01T00:00:00
+---
+
+# Zweck
+
+Da.
+""" % (typ, name))
+        bild = os.path.join(vw, MEDIEN, "Images", "portraet.png")
+        os.makedirs(os.path.dirname(bild), exist_ok=True)
+        open(bild, "w").close()
+        _schreib(os.path.join(vw, WIKI, "Notes", "probe.md"), """---
+type: note
+name: Probe
+related:
+  - "[[ada-lovelace]]"
+created: 2026-01-01
+modified: 2026-01-01T00:00:00
+---
+
+# Zweck
+
+Ein Verweis auf [[ada-lovelace]] und einer mit Alias auf [[babbage|Babbage]].
+
+Ein Bild: ![[portraet.png]]
+
+Ins Leere: [[gibt-es-nicht]].
+
+| Person | Rolle |
+|---|---|
+| [[ada-lovelace]] | Erste |
+
+In Backticks bleibt `[[ada-lovelace]]` stehen.
+""")
+        vorher = _abbild(vw)
+        r = lauf(os.path.join(BIN, "hk-verweise"), vw)
+        probe("der Bericht zählt die kurzen Verweise",
+              "5 Verweise" in r.stdout, r.stdout[-300:])
+        probe("ohne --setzen ändert sich nichts", _abbild(vw) == vorher)
+        probe("ein Ziel ohne Datei bleibt eine Vormerkung",
+              "Vormerkungen" in r.stdout, r.stdout[-300:])
+        r = lauf(os.path.join(BIN, "hk-verweise"), vw, "--setzen")
+        probe("--setzen schreibt", r.returncode == 0, (r.stdout + r.stderr)[-200:])
+        text_vw = io.open(os.path.join(vw, WIKI, "Notes", "probe.md"),
+                          encoding="utf-8").read()
+        probe("der Verweis trägt jetzt Pfad und Alias",
+              "[[40-Wiki/Persons/ada-lovelace|ada-lovelace]]" in text_vw,
+              text_vw[-500:])
+        probe("ein vorhandener Alias bleibt stehen",
+              "[[40-Wiki/Persons/babbage|Babbage]]" in text_vw, text_vw[-500:])
+        probe("das Bild bekommt den Medienbereich",
+              "![[80-Media/Images/portraet.png|portraet.png]]" in text_vw,
+              text_vw[-500:])
+        probe("in einer Tabellenzelle ist der Trenner maskiert (§3.6)",
+              "[[40-Wiki/Persons/ada-lovelace\\|ada-lovelace]] | Erste" in text_vw,
+              text_vw[-400:])
+        probe("was in Backticks steht, bleibt unangetastet",
+              "`[[ada-lovelace]]`" in text_vw, text_vw[-300:])
+        probe("das Ziel ohne Datei steht noch da",
+              "[[gibt-es-nicht]]" in text_vw, text_vw[-400:])
+        probe("das Frontmatter bleibt in Anführungszeichen",
+              '- "[[40-Wiki/Persons/ada-lovelace|ada-lovelace]]"' in text_vw,
+              text_vw[:400])
+        r = lauf(os.path.join(BIN, "hk-lint"), vw)
+        probe("die Ablage ist danach ohne Befund", r.returncode == 0,
+              (r.stdout + r.stderr)[-400:])
+        # Zwei Dateien gleichen Namens: geraten wird nicht.
+        _schreib(os.path.join(vw, WIKI, "Terms", "babbage.md"), """---
+type: term
+name: Babbage
+lang: de
+created: 2026-01-01
+modified: 2026-01-01T00:00:00
+---
+
+# Zweck
+
+Ein Begriff.
+""")
+        _schreib(os.path.join(vw, WIKI, "Notes", "zweite.md"), """---
+type: note
+name: Zweite
+created: 2026-01-01
+modified: 2026-01-01T00:00:00
+---
+
+# Zweck
+
+Ein Verweis auf [[babbage]].
+""")
+        vorher = _abbild(vw)
+        r = lauf(os.path.join(BIN, "hk-verweise"), vw, "--setzen")
+        probe("bei zwei gleichnamigen Dateien wird nicht geraten",
+              "Mehrdeutig" in r.stdout and "Terms/babbage" in r.stdout,
+              r.stdout[-400:])
+        probe("und der Verweis bleibt stehen",
+              "[[babbage]]" in io.open(os.path.join(vw, WIKI, "Notes",
+                                                    "zweite.md"),
+                                       encoding="utf-8").read())
+        shutil.rmtree(os.path.dirname(vw), ignore_errors=True)
+
         print("hkf-publikation: zwei Typen als Lieferung, nicht als Grundausstattung")
         # Auf einer Kopie. `hk-import` schreibt einen Nachweis in die
         # Lieferung zurueck, und eine Probe fasst das Repository nicht an.
