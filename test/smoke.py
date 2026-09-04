@@ -535,6 +535,33 @@ Ein Satz mit einem Gedankenstrich \u2014 der ist verboten.
         r = lauf(os.path.join(BIN, "hk-text"), "--gate", muster)
         probe("--gate endet mit 1", r.returncode == 1, r.stdout + r.stderr)
         os.remove(muster)
+        # Ein `ai-`-Callout traegt einen englischen Bildprompt und bleibt
+        # ungeprueft. Sein `alt:`-Feld ist deutsche Prosa. Ohne die Ausnahme
+        # von der Ausnahme faellt es durch jedes Netz, denn der Hook springt
+        # zwar bei jedem Schreibzugriff an, ueberspringt aber den Callout.
+        _schreib(muster, """---
+type: note
+name: Probe
+created: 2026-01-01
+---
+
+# Zweck
+
+> [!ai-image]
+> alt: "Ein Blick ueber die Kueste."
+> project: Hennibock
+>
+> A coastal view — an English prompt with an em-dash and a semicolon; both fine.
+
+Ein gewoehnlicher Satz.
+""")
+        r = lauf(os.path.join(BIN, "hk-text"), muster)
+        probe("die Ersatzform im Alt-Text ist ein Fehler",
+              "umlaut_replacements" in r.stdout, r.stdout)
+        probe("der Bildprompt darunter bleibt ungeprueft",
+              "Em-Dash" not in r.stdout
+              and "forbidden_punctuation" not in r.stdout, r.stdout)
+        os.remove(muster)
         # Die Grundausstattung wandert in jede neue Ablage. Was hier
         # steht, steht ueberall, und darum steht es unter derselben Regel.
         r = lauf(os.path.join(BIN, "hk-text"), "--gate", ziel)

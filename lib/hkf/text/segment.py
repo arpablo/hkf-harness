@@ -12,7 +12,9 @@ Ignoriert werden:
   eingerückt in einem Listenpunkt.
 * Inline-Code, auch mit mehrfachen Backticks.
 * Callouts, deren Typ mit ``ai-`` beginnt, samt aller Folgezeilen. Sie tragen
-  englische Bildprompts. Jeder andere Callout wird geprüft.
+  englische Bildprompts. Jeder andere Callout wird geprüft. Ausgenommen von
+  dieser Ausnahme ist der Wert einer ``alt:``-Zeile in ihrem Kopf: er ist
+  deutsche Prosa und wird geprüft.
 * Der Callout-Marker ``[!typ]`` selbst, denn er ist Syntax und keine Prosa.
 * Ziele von Markdown-Links und Bildern.
 * Wikilink-Ziele, sofern sie kebab-case sind oder wie ein Pfad aussehen. Ein
@@ -31,6 +33,8 @@ import re
 
 # Callout-Typen mit diesem Präfix werden nicht geprüft.
 AI_CALLOUT_PREFIX = "ai-"
+# Die einzige Zeile in einem solchen Callout, deren Wert doch geprüft wird.
+ALT_ZEILE = re.compile(r"^alt:[ \t]*(\S.*?)[ \t]*$")
 
 # Frontmatter-Schlüssel, deren Wert ein Bezeichner und keine Prosa ist.
 IDENTIFIER_KEYS = {
@@ -78,6 +82,7 @@ def mask(text: str) -> str:
     fence: str | None = None          # offener Fence, sonst None
     stack: list[tuple[int, str]] = []  # aktive Callouts als (Tiefe, Typ)
     siehe_auch = False                 # innerhalb des Abschnitts `# Siehe auch`
+    ai_kopf = False                    # im Metadatenkopf eines `ai-`-Callouts
 
     for index, (start, end) in enumerate(lines):
         line = text[start:end]
@@ -99,6 +104,7 @@ def mask(text: str) -> str:
 
         if depth == 0:
             stack.clear()
+            ai_kopf = False
         else:
             while stack and stack[-1][0] > depth:
                 stack.pop()
@@ -110,9 +116,15 @@ def mask(text: str) -> str:
             stack.append((depth, head.group(2).lower()))
             # Der Marker ist Syntax, nie Prosa.
             _blank(chars, body, body + len(head.group(1)))
+            ai_kopf = head.group(2).lower().startswith(AI_CALLOUT_PREFIX)
 
         if any(typ.startswith(AI_CALLOUT_PREFIX) for _, typ in stack):
             _blank(chars, start, end)
+            if ai_kopf:
+                _alt_wert(chars, text, body, content)
+                # Die leere `>`-Zeile trennt den Kopf vom Prompt.
+                if not content.strip():
+                    ai_kopf = False
             continue
 
         if UEBERSCHRIFT.match(content):
@@ -126,6 +138,25 @@ def mask(text: str) -> str:
         _mask_line(chars, text, body, content, in_frontmatter)
 
     return "".join(chars)
+
+
+def _alt_wert(chars: list[str], text: str, body: int, content: str) -> None:
+    """Nimmt den Wert einer `alt:`-Zeile von der Maskierung wieder aus.
+
+    Ein `ai-`-Callout trägt einen englischen Bildprompt und bleibt deshalb
+    ungeprüft. Sein `alt:`-Feld trägt aber deutsche Prosa, und ohne diese
+    Rücknahme fiele es durch jedes Netz: der Schreibregel-Hook springt bei
+    jedem Schreibzugriff an, überspringt jedoch den ganzen Callout. Genau so
+    sind am 04.09.2026 die Ersatzformen eines Agenten unbemerkt durchgekommen.
+
+    Geprüft wird nur der Kopf des Callouts, also die Zeilen vor der leeren
+    `>`-Trennzeile. Was dahinter steht, ist der Prompt.
+    """
+    treffer = ALT_ZEILE.match(content)
+    if not treffer:
+        return
+    for pos in range(body + treffer.start(1), min(body + treffer.end(1), len(chars))):
+        chars[pos] = text[pos]
 
 
 def _trenner(chars: list[str], body: int, content: str) -> None:

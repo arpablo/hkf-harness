@@ -27,6 +27,10 @@ Nicht geprueft werden Code, Linkziele, nackte Adressen, Bezeichner im
 Frontmatter und Callouts mit dem Praefix `ai-`. Ebenso wenig der Em-Dash dort,
 wo HKF Core ihn verlangt: als Trenner in `# Siehe auch` (§5.6) und als leere
 Vorgabe in einer Property-Tabelle (§3.7).
+
+Eine Ausnahme hat selbst eine Ausnahme. Der Wert einer `alt:`-Zeile im Kopf
+eines `ai-`-Callouts ist deutsche Prosa und wird geprueft, der Bildprompt
+darunter nicht.
 """
 import os, sys
 
