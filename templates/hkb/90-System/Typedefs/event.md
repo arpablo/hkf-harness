@@ -19,7 +19,7 @@ modified_by: claude-opus-5
 | participants | hkf-link-list:person,organisation | nein | — | Beteiligte |
 | cancelled | checkbox | nein | false | Abgesagt |
 | homepage | hkf-url | nein | — | Ankündigung |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen
 

@@ -569,15 +569,16 @@ def ensure_identity(path: Path, fm_lines, title: str, redate: bool = False):
 # ---------------------------------------------------------------------------
 
 # Die Ueberschrift, ab der der Verweisapparat einer Notiz beginnt. HKF Core
-# §5.6 nennt ihn `# Siehe auch`. Ein gewachsener Obsidian-Vault nennt ihn
-# `## Verbindungen`, und das sind hier 376 von 376 Texten. Der Publisher hat
-# den Apparat abzuschneiden, wie immer er heisst: was dahinter steht, sind
-# Quellen, MOCs und Kapitelketten, also Vault-Gerüst und kein Lesertext.
-# Nur die Notation zu kennen, die die Spezifikation vorschreibt, hiesse den
-# ganzen Bestand ungeprueft nach draussen zu geben.
-VERWEISUEBERSCHRIFT = re.compile(r"#{1,2}\s+(?:Siehe auch|Verbindungen)\b")
+# §5.6 nennt ihn `# Verbindungen`, und so heisst er auch in den gewachsenen
+# Obsidian-Vaults. `Siehe auch` ist die Altform: so hiess der Abschnitt in der
+# Spezifikation bis zum 05.09.2026, und eine Wissensbasis, die noch nicht
+# umgestellt ist, traegt ihn so. Der Publisher hat den Apparat abzuschneiden,
+# wie immer er heisst: was dahinter steht, sind Quellen, MOCs und
+# Kapitelketten, also Vault-Geruest und kein Lesertext. Nur den einen Namen zu
+# kennen hiesse den halben Bestand ungeprueft nach draussen zu geben.
+VERWEISUEBERSCHRIFT = re.compile(r"#{1,2}\s+(?:Verbindungen|Siehe auch)\b")
 VERWEISUEBERSCHRIFT_ZEILE = re.compile(
-    r"^#{1,2}\s+(?:Siehe auch|Verbindungen)\s*$", re.M)
+    r"^#{1,2}\s+(?:Verbindungen|Siehe auch)\s*$", re.M)
 
 def strip_callouts_and_verbindungen(body: str) -> str:
     """Schneidet alles ab der Verweisueberschrift ab und behandelt die

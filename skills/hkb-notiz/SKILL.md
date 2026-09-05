@@ -83,7 +83,7 @@ Zwei Folgen hat es über die Lesbarkeit hinaus:
   findet sie ihn nicht und meldet einen Hinweis, der keiner ist.
 
 Umbrochen bleibt nur, was ohnehin zeilenweise steht: Frontmatter, Tabellen,
-Codeblöcke und die Einträge unter `# Siehe auch`.
+Codeblöcke und die Einträge unter `# Verbindungen`.
 
 ## Verweise
 
@@ -100,11 +100,11 @@ der Vault-Wurzel liegt. In `hkb.md` steht er nie — die Wurzeldatei verweist
 relativ zu sich selbst.
 
 **Im Body verlinkst du beim Schreiben**, wo der Text es hergibt. Was nicht
-aus dem Text hervorgeht, kommt unter `# Siehe auch` — als letzter Abschnitt,
+aus dem Text hervorgeht, kommt unter `# Verbindungen` — als letzter Abschnitt,
 alphabetisch, jede Zeile mit ` — ` und einem Grund:
 
 ```markdown
-# Siehe auch
+# Verbindungen
 
 - [[Maschines/analytical-engine|Analytical Engine]] — beide Notizen nennen einander
 ```
@@ -119,7 +119,7 @@ steht. Und: hinzufügen ja, entfernen nein.
   und Herkunft. Aus Uneinigkeit einen Konsens zu machen ist der teuerste
   Fehler, den ein Modell in einer Wissensbasis machen kann: Eine saubere
   Notiz strahlt Autorität aus, die ihr Inhalt nicht deckt.
-- **`# Siehe auch` bleibt vollständig.** Du darfst Zeilen hinzufügen — mit
+- **`# Verbindungen` bleibt vollständig.** Du darfst Zeilen hinzufügen — mit
   Grund —, aber keine entfernen. Ein Ziel in `rejected_links` verlinkst du
   nicht.
 - **`Typedefs/` und `Proptypes/` fasst du nicht an.**

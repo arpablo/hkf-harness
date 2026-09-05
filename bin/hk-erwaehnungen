@@ -20,7 +20,7 @@ traegt. Der Zweck ist, fehlende Verweise zu ergaenzen, nicht vorhandene zu
 verdoppeln.
 
 Nicht angefasst werden das Frontmatter, Code, Ueberschriften, Tabellen, was
-schon in einem Verweis steht, und der Abschnitt `# Siehe auch` — dort steht
+schon in einem Verweis steht, und der Abschnitt `# Verbindungen` — dort steht
 ein Verweis mit Grund, und der ist eine Entscheidung und keine Fundstelle.
 Ebenso wenig `Typedefs/` und `Proptypes/`: Sie sind tabu (Regel 6) und nennen
 Namen als Beispiel.
@@ -38,7 +38,7 @@ KURZ = 4                       # kuerzere Begriffe werden nur gemeldet
 ZAUN = re.compile(r"^\s*(```|~~~)")
 UEBERSCHRIFT = re.compile(r"^\s*#{1,6}\s")
 TABELLE = re.compile(r"^\s*\|")
-SIEHE_AUCH = re.compile(r"^\s*#{1,6}\s+Siehe auch\s*$")
+SIEHE_AUCH = re.compile(r"^\s*#{1,6}\s+Verbindungen\s*$")
 INLINE = re.compile(r"`[^`\n]*`")
 VERWEIS = re.compile(r"\[\[[^\]\n]*\]\]")
 

@@ -18,7 +18,7 @@ modified_by: claude-opus-5
 | part_of | hkf-link:place,city,country | nein | — | Übergeordneter Ort |
 | image | hkf-file:image / hkf-url | nein | — | Ansicht, als Datei in der Ablage oder als Adresse im Netz |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen
 

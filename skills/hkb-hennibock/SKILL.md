@@ -45,7 +45,7 @@ der Instanz und bleiben gleich, aus welcher Ablage ein Text kommt.
 
 ## Was das Werkzeug am Body tut
 
-Es entfernt die `ai-image`-Callouts und den Abschnitt `# Siehe auch`, löst
+Es entfernt die `ai-image`-Callouts und den Abschnitt `# Verbindungen`, löst
 Wikilinks auf und schreibt Bild-Einbettungen auf `image/<slug>` um. Ein
 Verweis auf eine publizierte Notiz wird ein Link, ein Verweis auf eine noch
 nicht publizierte bleibt Anzeigetext und wächst beim nächsten Publish nach.

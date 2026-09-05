@@ -19,7 +19,7 @@ modified_by: claude-opus-5
 | cover | hkf-file:image | nein | — | Das Titelbild |
 | contents | hkf-link-list:text | nein | — | Die Texte in ihrer Lesereihenfolge. Wird von `hk-publikation` geführt |
 | status | text | nein | — | Stand, etwa `offen`, `fertig`, `veröffentlicht` |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen
 

@@ -18,7 +18,7 @@ Ein Manuskript ist jederzeit neu baubar und traegt nichts, was nicht schon in
 den Notizen steht. Wer es loescht, verliert nichts.
 
 Was dabei wegfaellt: das Frontmatter jedes Textes, sein Abschnitt
-`# Siehe auch` und der `# Inhalt` der Publikation. Was bleibt, ist der Text.
+`# Verbindungen` und der `# Inhalt` der Publikation. Was bleibt, ist der Text.
 Ueberschriften darin ruecken eine Ebene tiefer, damit der Titel des Textes die
 oberste bleibt.
 
@@ -80,7 +80,7 @@ def _bilder(b, hkb, text):
 
 
 def _ohne_abschnitte(body):
-    for name in ("Siehe auch", "Inhalt"):
+    for name in ("Verbindungen", "Inhalt"):
         body = notiz.ohne_abschnitt(body, name)
     return body
 

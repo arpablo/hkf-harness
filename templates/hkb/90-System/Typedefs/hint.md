@@ -12,7 +12,7 @@ modified_by: claude-opus-5
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
 | applies_to | hkf-link-list | nein | — | Worauf sich der Hinweis bezieht, meist eine Typdefinition |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen
 

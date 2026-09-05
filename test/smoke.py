@@ -259,6 +259,28 @@ def main():
         r = lauf(os.path.join(BIN, "hk-lint"), ziel, "--strict")
         probe("--strict fasst je Typ zusammen",
               "ding: menge" not in r.stdout, r.stdout)
+        # Der Abschnitt hiess bis zum 05.09.2026 `Siehe auch`. `--fix` ist der
+        # Weg, auf dem eine Ablage aus jener Zeit den neuen Namen bekommt.
+        alt = os.path.join(ziel, WIKI, "dinge", "alt.md")
+        _schreib(alt, """---
+type: ding
+name: Alt
+created: 2026-01-01
+modified: 2026-01-01T00:00:00
+---
+
+Eine Notiz aus der Zeit vor der Umbenennung.
+
+# Siehe auch
+
+- [[40-Wiki/dinge/eins|Das Erste]] — steht hier als Muster.
+""")
+        lauf(os.path.join(BIN, "hk-lint"), ziel, "--fix")
+        inhalt = io.open(alt, encoding="utf-8").read()
+        probe("`--fix` benennt `# Siehe auch` in `# Verbindungen` um",
+              "# Verbindungen" in inhalt and "# Siehe auch" not in inhalt, inhalt)
+        probe("und die Leerzeile hinter der Ueberschrift bleibt",
+              "# Verbindungen\n\n- [[" in inhalt, repr(inhalt[-120:]))
         shutil.rmtree(ziel)
         lauf(os.path.join(BIN, "hk-init"), ziel, "--name", "Probe")
 
@@ -310,10 +332,10 @@ def main():
         eins = io.open(os.path.join(ziel, WIKI, "dinge", "eins.md"), encoding="utf-8").read()
         probe("trägt die Zugehörigkeit ein", "Bundles/probe|Probe" in eins, eins)
         probe("schreibt den Verweis, den der Body hergibt",
-              "# Siehe auch" in eins and "dinge/zwei|Das Zweite" in eins, eins)
+              "# Verbindungen" in eins and "dinge/zwei|Das Zweite" in eins, eins)
         probe("führt ihn auch in related", "related:" in eins, eins)
         zwei = io.open(os.path.join(ziel, WIKI, "dinge", "zwei.md"), encoding="utf-8").read()
-        probe("und keinen Gegeneintrag (§5.6)", "# Siehe auch" not in zwei, zwei)
+        probe("und keinen Gegeneintrag (§5.6)", "# Verbindungen" not in zwei, zwei)
         probe("schreibt den Wikilink auf den Pfad der HKB um",
               "[[80-Media/Images/bilder/bild.png|" in eins, eins)
         probe("Typtabelle in hkb.md ergänzt",
@@ -519,7 +541,7 @@ Ein Satz mit einem Gedankenstrich \u2014 der ist verboten.
 |---|---|---|
 | `name` | \u2014 | Der Name; mit Strichpunkt. |
 
-# Siehe auch
+# Verbindungen
 
 - [[40-Wiki/Notes/anderes|Anderes]] \u2014 der Grund steht hier.
 """)
@@ -531,7 +553,7 @@ Ein Satz mit einem Gedankenstrich \u2014 der ist verboten.
               "forbidden_punctuation" in r.stdout, r.stdout)
         probe("die leere Vorgabe `\u2014` ist keiner (§3.7)",
               r.stdout.count("Em-Dash") == 1, r.stdout)
-        probe("der Trenner in `# Siehe auch` auch nicht (§5.6)",
+        probe("der Trenner in `# Verbindungen` auch nicht (§5.6)",
               r.stdout.count("Em-Dash") == 1, r.stdout)
         r = lauf(os.path.join(BIN, "hk-text"), "--gate", muster)
         probe("--gate endet mit 1", r.returncode == 1, r.stdout + r.stderr)
@@ -1277,7 +1299,7 @@ created: 2026-01-01
 
 Ein kurzer Text.
 
-# Siehe auch
+# Verbindungen
 
 - [[40-Wiki/Texts/probe|Eine Probe]] — steht hier nur als Muster.
 """)
@@ -1567,7 +1589,7 @@ Verweis auf [[Notes/gibt-es-nicht|etwas]].
         probe("streift bundles ab (§4.2)", "bundles:" not in eins_aus, eins_aus)
         probe("behaelt die Zeitangaben", "modified:" in eins_aus, eins_aus)
         probe("behaelt den Verweis innerhalb der Lieferung",
-              "# Siehe auch" in eins_aus and "[[dinge/zwei|" in eins_aus, eins_aus)
+              "# Verbindungen" in eins_aus and "[[dinge/zwei|" in eins_aus, eins_aus)
         probe("verweist auf die Mediendatei ohne Ablagepfad",
               "[[Media/Images/bilder/bild.png|" in eins_aus, eins_aus)
 
@@ -1598,7 +1620,7 @@ Verweis auf [[Notes/gibt-es-nicht|etwas]].
         print("hk-import: eine zweite Lieferung derselben Notiz")
         # §6.1 Schritt 5 verlangt danach *beide* Bundles. Und was nur in der
         # Wissensbasis steht — `rejected_links`, eine von Hand geschriebene
-        # Zeile unter `# Siehe auch` — ueberlebt das Aktualisieren (§5.6).
+        # Zeile unter `# Verbindungen` — ueberlebt das Aktualisieren (§5.6).
         p = os.path.join(ziel, WIKI, "dinge", "eins.md")
         vorher_text = io.open(p, encoding="utf-8").read()
         io.open(p, "w", encoding="utf-8").write(
@@ -1686,7 +1708,7 @@ Verweis auf [[Notes/gibt-es-nicht|etwas]].
         io.open(os.path.join(e_b, "dinge", "nachtrag.md"), "w", encoding="utf-8").write(
             "---\ntype: ding\ntitle: Das Erste\nextends: dinge/eins\n"
             "menge: 7\ncreated: 2026-01-01\nmodified: 2026-06-01T00:00:00\n---\n\n"
-            "Ein Satz, der angehängt gehört.\n\n# Siehe auch\n\n"
+            "Ein Satz, der angehängt gehört.\n\n# Verbindungen\n\n"
             "- [[Typedefs/ding|Ding]] — aus dem Nachtrag\n")
         r = lauf(os.path.join(BIN, "hk-lint"), e_b)
         probe("eine Lieferung mit extends ist konform (§7.1)",
@@ -1699,8 +1721,8 @@ Verweis auf [[Notes/gibt-es-nicht|etwas]].
               not os.path.exists(os.path.join(ziel, WIKI, "dinge", "nachtrag.md")))
         probe("der Body ist angehängt",
               "Ein Satz, der angehängt gehört." in eins, eins)
-        probe("und steht vor `# Siehe auch`",
-              eins.index("angehängt gehört") < eins.index("# Siehe auch"), eins)
+        probe("und steht vor `# Verbindungen`",
+              eins.index("angehängt gehört") < eins.index("# Verbindungen"), eins)
         probe("`extends` wird abgestreift (§4.2)", "extends:" not in eins, eins)
         probe("die Zeile aus der Ergänzung kommt dazu (§5.6)",
               "aus dem Nachtrag" in eins, eins)

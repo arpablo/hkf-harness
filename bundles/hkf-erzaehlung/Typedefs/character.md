@@ -15,7 +15,7 @@ modified_by: claude-opus-5
 | portrait | hkf-file:image / hkf-url | nein | — | Ein Bild, das den Kanon festhält |
 | born_year | hkf-year | nein | — | Geburtsjahr, wenn es für die Rechnung gebraucht wird |
 | based_on | hkf-link-or-text | nein | — | Wenn sie einer wirklichen Person nachgebildet ist |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen
 

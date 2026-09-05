@@ -54,12 +54,12 @@ Typtabelle neu erzeugen · fehlende Standard-Property-Typen anlegen · einen
 verzeichnislosen Wikilink qualifizieren, **wenn genau ein Ziel existiert** ·
 einen fehlenden Alias aus dem `title` ergänzen · den Trenner ` / `
 ausschreiben · ein `datetime` ohne Uhrzeit auf den Tagesbeginn bringen ·
-`created` und `modified` ergänzen · `# Siehe auch` ordnen und ans Ende
+`created` und `modified` ergänzen · `# Verbindungen` ordnen und ans Ende
 stellen · `related` daraus ergänzen · leere Properties entfernen.
 
 ## Was `--fix` nicht darf — und du auch nicht
 
-- **Keinen Eintrag unter `# Siehe auch` ergänzen oder entfernen.**
+- **Keinen Eintrag unter `# Verbindungen` ergänzen oder entfernen.**
   Verknüpfen ist Sache des Imports (§6.1 Schritt 9), Entfernen Sache eines
   Menschen (§5.6). Soll ein Verweis dauerhaft weg, kommt sein Ziel in
   `rejected_links` — und das schreibt ein Mensch.
@@ -74,7 +74,7 @@ stellen · `related` daraus ergänzen · leere Properties entfernen.
 |---|---|
 | `[[…]] lässt sich nicht auflösen` | Die Notiz gibt es nicht (mehr). Ziel suchen, Verweis berichtigen oder mit dem Menschen klären — nicht raten. |
 | `modified liegt vor created` | Eine der beiden Angaben ist falsch. Welche, weiß nur, wer die Notiz kennt. |
-| `X steht zugleich unter # Siehe auch und in rejected_links` | Ein Widerspruch. Ein Mensch entscheidet, welche der beiden Absichten gilt. |
+| `X steht zugleich unter # Verbindungen und in rejected_links` | Ein Widerspruch. Ein Mensch entscheidet, welche der beiden Absichten gilt. |
 | `Der Typ X ist vorläufig` | Das Bundle nachladen, das ihn definiert. Bis dahin bleibt es so. |
 | `X und Y tragen dieselbe Kennung Q…` | Zusammenführungskandidat. Die beiden Notizen gehören zusammengelegt, nicht verlinkt — und das ist eine inhaltliche Arbeit. |
 | `Auf diese Notiz zeigt kein Verweis` | Sie ist nicht erreichbar. Wo gehört sie hin? Ein Verweis von der passenden Notiz aus, mit Grund. |

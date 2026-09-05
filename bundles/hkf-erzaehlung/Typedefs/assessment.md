@@ -13,7 +13,7 @@ modified_by: claude-opus-5
 |---|---|---|---|---|
 | assesses | hkf-link:text | ja | — | Der Text, über den geurteilt wird |
 | reviewed | date | nein | — | Wann zuletzt gelesen wurde |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen
 

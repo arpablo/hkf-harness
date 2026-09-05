@@ -99,13 +99,13 @@ def _inhalt_block(b, reihe):
 
 
 def einsetzen(body, block):
-    """Den Abschnitt ersetzen oder ihn vor `# Siehe auch` einhaengen (§5.6)."""
+    """Den Abschnitt ersetzen oder ihn vor `# Verbindungen` einhaengen (§5.6)."""
     m = re.search(r"^# %s$" % UEBERSCHRIFT, body, re.M)
     if m:
         body = notiz.ohne_abschnitt(body, UEBERSCHRIFT)
         vorher, nachher = body[:m.start()], body[m.start():]
     else:
-        m = re.search(r"^# Siehe auch$", body, re.M)
+        m = re.search(r"^# Verbindungen$", body, re.M)
         vorher = body[:m.start()] if m else body
         nachher = body[m.start():] if m else ""
     vorher = vorher.rstrip("\n")

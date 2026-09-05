@@ -17,7 +17,7 @@ modified_by: claude-opus-5
 | supersedes | hkf-link:specification | nein | — | Abgelöste Fassung |
 | lang | hkf-lang | nein | — | Sprache des Dokuments |
 | file | hkf-file:document / hkf-url | nein | — | Volltext: als Datei in der Ablage oder als Adresse |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen
 

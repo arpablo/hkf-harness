@@ -92,7 +92,7 @@ Wurzel des Vaults sein.
    dasselbe meinen (§5.5). Wie entschieden wurde, hält die Bundle-Notiz fest,
    damit die nächste Fassung nicht dieselbe Frage auslöst (§5.7).
 9. **Der Import verknüpft die Lieferung mit dem Bestand.** Was ankommt, wird
-   in einem Abschnitt `# Siehe auch` mit dem verbunden, was schon da ist —
+   in einem Abschnitt `# Verbindungen` mit dem verbunden, was schon da ist —
    je Verweis ein Grund, und nur in der Notiz, deren Body den anderen nennt.
    Die Gegenrichtung ist die Backlink-Ansicht (§5.6).
 
@@ -116,7 +116,7 @@ Mehr Kontext ist für das Lesen und Schreiben nicht nötig.
 | **Notiz-ID** | Pfad der Notiz relativ zu ihrem Bereich, ohne `.md` — also Typverzeichnis und Dateiname. |
 | **Vorläufige Typdefinition** | Beim Import erzeugte Typdefinition für einen Typ, den niemand mitgeliefert hat; trägt `provisional: true` (§5.4). |
 | **Bedeutungsprüfung** | Entscheidung, ob zwei gleichnamige Typen dasselbe meinen (§5.5). |
-| **Siehe auch** | Maschinell gepflegter Abschnitt am Ende einer Notiz; hält Verweise mit ihrem Grund (§5.6). |
+| **Verbindungen** | Maschinell gepflegter Abschnitt am Ende einer Notiz; hält Verweise mit ihrem Grund (§5.6). |
 | **Entscheidungsnachweis** | Abschnitt `# Entscheidungen` einer Bundle-Notiz; hält fest, was ein Mensch geurteilt hat und woran es hängt (§5.7). |
 
 ---
@@ -492,7 +492,7 @@ jüngere ist (§6.1).
 
 Der Body ist gewöhnliches Markdown. HKF leitet aus dem Body nichts ab,
 ausgenommen die fünf ausdrücklich normativen Strukturen: `# Typen` (§3.1),
-`# Properties` (§3.7), `# Siehe auch` (§5.6) sowie Entscheidungsnachweis
+`# Properties` (§3.7), `# Verbindungen` (§5.6) sowie Entscheidungsnachweis
 (§5.7) und Importnachweis (§5.1) einer Bundle-Notiz. Werkzeuge MÜSSEN
 unbekannte Properties unverändert erhalten.
 
@@ -501,7 +501,7 @@ unbekannte Properties unverändert erhalten.
 **Der Fließtext des Body wird nicht umbrochen.** Ein Absatz steht in einer
 Zeile, so lang sie wird; Absätze trennt eine Leerzeile. Umbrochen bleibt nur,
 was ohnehin zeilenweise steht: Frontmatter, Tabellen, Codeblöcke, Listenpunkte
-und die Einträge unter `# Siehe auch`.
+und die Einträge unter `# Verbindungen`.
 
 Der Grund ist die Anzeige. Eine Notiz wird in einem Markdown-Editor gelesen,
 der einen einzelnen Umbruch als Zeilenumbruch darstellt — ein auf achtzig
@@ -1808,20 +1808,20 @@ zwei Beständen einen macht — und der einzige, der eine Notiz anfasst, die gar
 nicht zur Lieferung gehört. Darum ist sie hier ausführlicher beschrieben als
 das Schreiben der Notizen selbst.
 
-### Der Abschnitt `# Siehe auch`
+### Der Abschnitt `# Verbindungen`
 
 Verweise, die nicht aus dem Text hervorgehen, stehen am Ende des Body in einem
 eigenen Abschnitt:
 
 ```markdown
-# Siehe auch
+# Verbindungen
 
 - [[Organisations/analytical-society|Analytical Society]] — beide Notizen nennen einander
 - [[Persons/charles-babbage|Charles Babbage]] — im Body dieser Notiz genannt
 - [[Places/london|London]] — mit der Lieferung biografie-2026 als Wirkungsort gekommen
 ```
 
-- Der Abschnitt heißt `# Siehe auch` und ist der **letzte** der Notiz.
+- Der Abschnitt heißt `# Verbindungen` und ist der **letzte** der Notiz.
 - Jede Zeile ist ein Listenpunkt aus einem qualifizierten Wikilink nach §3.6,
   dann ` — `, dann **der Grund**: ein Halbsatz, warum der Verweis dasteht.
 - **Der Grund ist Pflicht.** Ohne ihn wäre der Abschnitt nur eine zweite,
@@ -1859,7 +1859,7 @@ rejected_links:
 
 `rejected_links` hat den Typ `hkf-link-list` und ist in jeder Notiz erlaubt
 (A.2). Ein Ziel, das dort steht, wird nie wieder selbsttätig verlinkt — weder
-in `# Siehe auch` noch in einer Property. Die Property hält die **Absicht**
+in `# Verbindungen` noch in einer Property. Die Property hält die **Absicht**
 fest, nicht den Textunterschied: Dass dieser Verweis nicht gewollt ist, gilt
 weiter, auch wenn beide Notizen sich seither geändert haben.
 
@@ -1878,7 +1878,7 @@ Grundausstattung oder zu einer Lieferung, die man nicht anfassen will, und ein
 Vermerk dort verließe die Wissensbasis beim nächsten Export ohnehin (§6.2).
 Wer sie dennoch auf beiden Seiten notiert, schadet nichts.
 
-**Verknüpfen ändert `modified` nicht.** Ein Eintrag unter `# Siehe auch` sagt
+**Verknüpfen ändert `modified` nicht.** Ein Eintrag unter `# Verbindungen` sagt
 nichts über den Gegenstand der Notiz, sondern darüber, wie die Wissensbasis
 verdrahtet ist. Zählte er als Änderung, wäre jede gelieferte Notiz gleich nach
 ihrer Ankunft jünger als die Lieferung, aus der sie stammt — und der Vergleich
@@ -1902,14 +1902,14 @@ related:
   - https://example.org/analytical-engine
 ```
 
-**Die Regel.** Jeder Eintrag unter `# Siehe auch` steht auch in `related` —
+**Die Regel.** Jeder Eintrag unter `# Verbindungen` steht auch in `related` —
 **es sei denn, sein Ziel steht bereits in einer anderen Property derselben
 Notiz.** Wer als `employer` auf eine Körperschaft zeigt, sagt damit Genaueres,
 als `related` je sagen könnte; denselben Verweis ein zweites Mal und unschärfer
 zu führen, verwirrt nur. Die genauere Property gewinnt, und `related` bleibt
 für alles, wofür es keine gibt.
 
-**Welche Seite gilt.** `# Siehe auch` ist die Quelle, `related` ist daraus
+**Welche Seite gilt.** `# Verbindungen` ist die Quelle, `related` ist daraus
 **abgeleitet** — dasselbe Verhältnis wie zwischen den Typdefinitionen und der
 Typtabelle der Wurzeldatei (§3.1). Bei Abweichung gewinnt der Abschnitt, weil
 nur er den Grund trägt. `hk-lint --fix` erzeugt `related` daraus neu.
@@ -1917,7 +1917,7 @@ nur er den Grund trägt. `hk-lint --fix` erzeugt `related` daraus neu.
 **Nur in dieser Richtung.** `related` darf **mehr** enthalten, als der
 Abschnitt hergibt, und das ist kein Befund:
 
-- **Adressen.** Unter `# Siehe auch` steht je Zeile ein qualifizierter
+- **Adressen.** Unter `# Verbindungen` steht je Zeile ein qualifizierter
   Wikilink; eine URL kann dort nicht stehen. In `related` schon — dafür lässt
   `hkf-link-or-url` beides zu.
 - **Von Hand gesetzte Verweise.** Wer einen Zusammenhang kennt, trägt ihn ein,
@@ -1966,7 +1966,7 @@ andere Stelle, an der eine Verknüpfung landet:
 Steht `employer` leer und liegt im Bestand eine `organisation`, die in Frage
 kommt, ist das ein Kandidat. **Gesetzt wird er nie selbsttätig.** Eine Property
 behauptet eine bestimmte Beziehung — dass diese Person dort gearbeitet hat —,
-ein Eintrag unter `# Siehe auch` nur, dass zwei Notizen miteinander zu tun
+ein Eintrag unter `# Verbindungen` nur, dass zwei Notizen miteinander zu tun
 haben. Das erste ist eine Tatsachenbehauptung und verlangt ein Urteil; das
 zweite ist ein Fingerzeig und kommt mit einem Namensvergleich aus.
 
@@ -1977,7 +1977,7 @@ besserer Kandidat auftaucht.
 
 Erwähnungen im laufenden Text werden **nicht** zu Wikilinks gemacht. Gewachsener
 Text ist die Stelle, an der Handarbeit am ehesten verlorengeht, und der Gewinn
-wäre klein: Derselbe Verweis steht bereits unter `# Siehe auch`, dort mit
+wäre klein: Derselbe Verweis steht bereits unter `# Verbindungen`, dort mit
 seinem Grund und an einem Ort, den man gefahrlos neu schreiben kann.
 
 ## 5.7 Entscheidungen
@@ -2011,7 +2011,7 @@ den Importnachweisen:
   Sprachmodell mit seinem Modellnamen. Dieselbe Selbstauskunft wie bei
   `modified_by` (A.2), und aus demselben Grund: Sie sagt verlässlich, *dass*
   eine Maschine geurteilt hat.
-- **Grund** ist ein Halbsatz. Er ist Pflicht, wie bei `# Siehe auch`: Eine
+- **Grund** ist ein Halbsatz. Er ist Pflicht, wie bei `# Verbindungen`: Eine
   Entscheidung ohne Grund lässt sich später weder prüfen noch aufheben.
 
 ### Woran eine Entscheidung hängt
@@ -2177,7 +2177,7 @@ Schnittstelle. Ein Bundle stellt keine Methoden bereit.
    | Lage | Folge |
    |---|---|
    | Die genannte Notiz-ID gibt es nicht | Die Notiz entsteht dort als neue Notiz, Zustand `neu`; `extends` entfällt dabei. |
-   | Es gibt sie | Der Body der Lieferung wird **vor** dem Abschnitt `# Siehe auch` angehängt, unverändert. Zustand `ergänzt`. |
+   | Es gibt sie | Der Body der Lieferung wird **vor** dem Abschnitt `# Verbindungen` angehängt, unverändert. Zustand `ergänzt`. |
 
    Listen-Properties werden dabei vereinigt. Einen Skalar, den beide tragen
    und der abweicht, überschreibt der Import **nicht**: Die Fassung der
@@ -2258,9 +2258,9 @@ Schnittstelle. Ein Bundle stellt keine Methoden bereit.
 
    **Was nur in der Wissensbasis steht, überlebt.** Eine Lieferung kennt den
    `bundles`-Eintrag einer früheren Lieferreihe nicht, kennt `rejected_links`
-   nicht und kennt die von Hand geschriebenen Zeilen unter `# Siehe auch`
+   nicht und kennt die von Hand geschriebenen Zeilen unter `# Verbindungen`
    nicht. Sie dürfen nicht verschwinden, nur weil die Lieferung sie nicht
-   mitbringt: Listen-Properties werden vereinigt, der Abschnitt `# Siehe auch`
+   mitbringt: Listen-Properties werden vereinigt, der Abschnitt `# Verbindungen`
    ebenso, und eine Property, die allein die Wissensbasis führt, bleibt
    stehen. Skalare der Lieferung gelten — das ist, was `aktualisiert` heißt.
    Eine Maschine fügt hinzu und entfernt nie (§5.6).
@@ -2292,7 +2292,7 @@ Schnittstelle. Ein Bundle stellt keine Methoden bereit.
 
    | Beobachtung | Folge |
    |---|---|
-   | `title` oder ein `aliases`-Eintrag der einen Notiz kommt im Body der anderen wörtlich vor | Eintrag in `# Siehe auch` **der nennenden Notiz**, mit dem Grund „im Body dieser Notiz genannt"; nennen beide einander, bekommen beide einen, mit „beide nennen einander" (§5.6) |
+   | `title` oder ein `aliases`-Eintrag der einen Notiz kommt im Body der anderen wörtlich vor | Eintrag in `# Verbindungen` **der nennenden Notiz**, mit dem Grund „im Body dieser Notiz genannt"; nennen beide einander, bekommen beide einen, mit „beide nennen einander" (§5.6) |
    | Beide tragen dieselbe `hkf-wikidata`-Kennung | **kein** Verweis, sondern ein Zusammenführungskandidat: Sie meinen denselben Gegenstand, und zwei Notizen darüber gehören zusammengelegt, nicht verlinkt (§6.3) |
    | Eine leere Property fordert einen Zieltyp, und im Bestand liegt eine Notiz dieses Typs | Vorschlag; nie selbsttätig gesetzt (§5.6) |
 
@@ -2429,7 +2429,7 @@ lesen als eines, das jede erlaubte Form annehmen dürfte.
    Typtabelle. `imported`, die Importnachweise und der Entscheidungsnachweis
    entfallen — sie beschreiben, wie die abgebende HKB die Lieferung
    eingeordnet und beurteilt hat, nicht die Lieferung selbst.
-7. Aus jedem Abschnitt `# Siehe auch` die Einträge entfernen, die aus dem
+7. Aus jedem Abschnitt `# Verbindungen` die Einträge entfernen, die aus dem
    Bundle hinausweisen (§5.6). Sie zeigten beim Empfänger ins Leere, und der
    Abschnitt ist maschinell gepflegt — was hier wegfällt, entsteht dort beim
    Import neu. Bleibt kein Eintrag übrig, entfällt der Abschnitt.
@@ -2443,7 +2443,7 @@ Stand erfordert ein Archiv der jeweiligen Fassung.
 **Der Rundlauf ist damit nicht mehr buchstäblich.** Ein Bundle, das importiert
 und sofort wieder exportiert wird, kommt nicht byte-gleich zurück: Verweise
 zwischen zwei Notizen **derselben** Lieferung überstehen Schritt 7 und stehen
-im Ergebnis unter `# Siehe auch`. Das ist gewollt — der Import hat etwas
+im Ergebnis unter `# Verbindungen`. Das ist gewollt — der Import hat etwas
 erkannt, was in der Lieferung nicht stand, und ein Export, der es wieder
 wegwürfe, verlöre Arbeit. Verweise in den Bestand hinein fallen dagegen weg,
 denn sie gelten nur hier.
@@ -2527,17 +2527,17 @@ Bundle; die letzten vier Punkte gelten nur für eine HKB.
 - keine zwei Notizen tragen denselben Wert in einer Property vom Typ
   `hkf-wikidata` — sie bezeichnen dann denselben Gegenstand und sind ein
   Zusammenführungskandidat; das ist ein Hinweis, kein Fehler,
-- jeder Abschnitt `# Siehe auch` hat die Form aus §5.6: ein Listenpunkt je
+- jeder Abschnitt `# Verbindungen` hat die Form aus §5.6: ein Listenpunkt je
   Zeile aus qualifiziertem Wikilink, ` — ` und einem Grund. Ein fehlender
   Grund ist ein Fehler; eine gestörte alphabetische Ordnung und ein Abschnitt,
   der nicht der letzte ist, sind Hinweise,
-- kein Ziel steht zugleich unter `# Siehe auch` und in `rejected_links` —
+- kein Ziel steht zugleich unter `# Verbindungen` und in `rejected_links` —
   das ist ein Fehler, weil beide einander widersprechen,
-- kein Eintrag unter `# Siehe auch` ist ein bloßer Rückverweis: Zeigt die
+- kein Eintrag unter `# Verbindungen` ist ein bloßer Rückverweis: Zeigt die
   Zielnotiz bereits hierher und nennt der eigene Body sie nicht, ist der
   Eintrag ein Hinweis — die Auskunft steht schon in der Backlink-Ansicht
   (§5.6),
-- jeder Eintrag unter `# Siehe auch` steht auch in `related`, es sei denn, sein
+- jeder Eintrag unter `# Verbindungen` steht auch in `related`, es sei denn, sein
   Ziel steht in einer anderen Property derselben Notiz; fehlt er, ist das ein
   Hinweis. Die Umkehrung wird nicht geprüft — `related` darf Adressen und von
   Hand gesetzte Verweise enthalten (§5.6),
@@ -2546,7 +2546,7 @@ Bundle; die letzten vier Punkte gelten nur für eine HKB.
 - kein Absatz des Fließtextes steht über mehr als eine Zeile, und kein
   Wikilink reicht über einen Umbruch (§3.3). Beides sind Hinweise, keine
   Fehler; Frontmatter, Tabellen, Codeblöcke, Listenpunkte und die Einträge
-  unter `# Siehe auch` bleiben davon unberührt,
+  unter `# Verbindungen` bleiben davon unberührt,
 - keine Notiz trägt `bundles` oder `rejected_links` mit leerer Liste.
 
 Jeder Befund nennt Datei, Zeile soweit bestimmbar, Schweregrad und eine
@@ -2566,9 +2566,9 @@ verständliche Meldung.
   hat — aber er selbst hat sie soeben geändert, und §3.3 verlangt beide
   Felder von jedem, der das tut. Ein leeres `modified_by` neben einem frisch
   gesetzten `modified` wäre die Behauptung, niemand sei es gewesen,
-- die Einträge eines Abschnitts `# Siehe auch` alphabetisch ordnen und den
+- die Einträge eines Abschnitts `# Verbindungen` alphabetisch ordnen und den
   Abschnitt ans Ende der Notiz stellen,
-- `related` um die Ziele aus `# Siehe auch` ergänzen, die dort fehlen und in
+- `related` um die Ziele aus `# Verbindungen` ergänzen, die dort fehlen und in
   keiner anderen Property stehen; entfernt wird daraus nichts,
 - leere Properties und `null`-Werte entfernen,
 - den Fließtext des Body entfalten: Zeilen eines Absatzes zu einer Zeile
@@ -2579,7 +2579,7 @@ verständliche Meldung.
 Bei mehrdeutigen oder unbekannten Zielen wird nicht geraten. Nach einem
 Korrekturlauf wird erneut geprüft.
 
-`--fix` ergänzt keinen Eintrag unter `# Siehe auch` und entfernt keinen. Es
+`--fix` ergänzt keinen Eintrag unter `# Verbindungen` und entfernt keinen. Es
 ordnet nur, was dasteht: Verknüpfen ist Sache des Imports (§6.1 Schritt 9),
 Entfernen Sache eines Menschen (§5.6).
 
@@ -2673,7 +2673,7 @@ nicht als Befund.
    Property-Tabellen ihrer Typen erfüllen,
 7. alle internen Verweise qualifizierte Wikilinks nach §3.6 sind, jeder
    `hkf-file`-Wert auf eine vorhandene Mediendatei der geforderten Art zeigt
-   und jeder Abschnitt `# Siehe auch` §5.6 erfüllt, und
+   und jeder Abschnitt `# Verbindungen` §5.6 erfüllt, und
 8. jede Bundle-Notiz §5.1 samt Import- und Entscheidungsnachweis erfüllt und
    jeder `bundles`-Eintrag auflösbar ist.
 

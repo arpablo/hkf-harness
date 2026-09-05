@@ -507,7 +507,7 @@ description: Ein Mensch.
 | phone | hkf-phone | nein | — | Telefonnummer |
 | portrait | hkf-file:image / hkf-url | nein | — | Bild der Person, als Datei in der Ablage oder als Adresse im Netz |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen
 
@@ -540,7 +540,7 @@ description: 'Eine Körperschaft: Unternehmen, Institut, Verein, Behörde.'
 | phone | hkf-phone | nein | — | Telefonnummer |
 | logo | hkf-file:image / hkf-url | nein | — | Bildmarke, als Datei in der Ablage oder als Adresse im Netz |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen
 
@@ -567,7 +567,7 @@ description: Ein geographischer Ort.
 | part_of | hkf-link:place,city,country | nein | — | Übergeordneter Ort |
 | image | hkf-file:image / hkf-url | nein | — | Ansicht, als Datei in der Ablage oder als Adresse im Netz |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen
 
@@ -602,7 +602,7 @@ description: Ein Geschehen zu einer bestimmten Zeit.
 | participants | hkf-link-list:person,organisation | nein | — | Beteiligte |
 | cancelled | checkbox | nein | false | Abgesagt |
 | homepage | hkf-url | nein | — | Ankündigung |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen
 
@@ -633,7 +633,7 @@ description: Ein Werk, auf das sich die Wissensbasis beruft.
 | accessed | date | nein | — | Datum des Abrufs |
 | checksum | text | nein | — | `sha256:<hex>` über die Ausfertigung. Sagt beim nächsten Einlesen, ob sich die Quelle geändert hat |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Werks in Wikidata |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen
 
@@ -702,7 +702,7 @@ description: Ein definierter Begriff.
 | lang | hkf-lang | ja | — | Sprache des Begriffs |
 | broader | hkf-link:term | nein | — | Übergeordneter Begriff |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen
 
@@ -738,7 +738,7 @@ description: Eine Sache und der Stand des Wissens über sie.
 | terms | hkf-link-list:term | nein | — | Die Begriffe, unter denen die Wissensbasis die Sache führt |
 | broader | hkf-link:concept | nein | — | Übergeordnetes Konzept |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen
 
@@ -769,7 +769,7 @@ description: Eine Gegenüberstellung mehrerer Gegenstände entlang benannter Dim
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
 | compares | hkf-link-list | ja | — | Die verglichenen Gegenstände, mindestens zwei |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen
 
@@ -798,7 +798,7 @@ description: Ein Themengebiet als Einstiegspunkt.
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
 | parent | hkf-link:topic | nein | — | Übergeordnetes Thema |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen
 
@@ -821,7 +821,7 @@ description: Eine Notiz ohne spezifischeren Typ.
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
 | about | hkf-link-list | nein | — | Worauf sich die Notiz bezieht |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen
 
@@ -853,7 +853,7 @@ description: Ein normatives Dokument, an das sich die Wissensbasis hält.
 | supersedes | hkf-link:specification | nein | — | Abgelöste Fassung |
 | lang | hkf-lang | nein | — | Sprache des Dokuments |
 | file | hkf-file:document / hkf-url | nein | — | Volltext: als Datei in der Ablage oder als Adresse |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen
 
@@ -884,7 +884,7 @@ description: Eine Festlegung, wie diese Wissensbasis geführt wird.
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
 | applies_to | hkf-link-list | nein | — | Worauf sich der Hinweis bezieht, meist eine Typdefinition |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen
 
@@ -929,7 +929,7 @@ dir: Cities
 | founded_year | hkf-year | nein | — | Jahr der Gründung, soweit überliefert |
 | image | hkf-file:image / hkf-url | nein | — | Ansicht, als Datei in der Ablage oder als Adresse im Netz |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen
 
@@ -968,7 +968,7 @@ dir: Countries
 | dissolved_year | hkf-year | nein | — | Jahr des Untergangs, wenn der Staat nicht mehr besteht |
 | flag | hkf-file:image / hkf-url | nein | — | Flagge, als Datei in der Ablage oder als Adresse im Netz |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen
 

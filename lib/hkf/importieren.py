@@ -678,8 +678,8 @@ def _identitaet(plan, e, ziel, bundle_id, entscheidungen, force):
         # §5.6: Was die Verknuepfung angelegt hat, ist kein Inhaltsunterschied
         # — sonst meldete jeder zweite Lauf die Notizen des ersten.
         hier = notiz.ohne_abschnitt(
-            notiz.teilen(io.open(ziel, encoding="utf-8").read())[1], "Siehe auch")
-        dort = notiz.ohne_abschnitt(e["body"], "Siehe auch")
+            notiz.teilen(io.open(ziel, encoding="utf-8").read())[1], "Verbindungen")
+        dort = notiz.ohne_abschnitt(e["body"], "Verbindungen")
         if hier.strip() != dort.strip():
             plan.melde("hinweis",
                        "%s: gleiche `modified`, aber abweichender Inhalt." % id_link)
@@ -908,7 +908,7 @@ def _wert_aus_datei(pfad, prop):
 
 
 def _eintragen(plan, bestand, von, nach, grund):
-    """Einen Eintrag in `# Siehe auch` von `von` auf `nach` vormerken."""
+    """Einen Eintrag in `# Verbindungen` von `von` auf `nach` vormerken."""
     link_nach = plan.link(nach, bestand[nach]["titel"])
     link_von = plan.link(von, bestand[von]["titel"])
     pre = plan.praefix(nach)
@@ -929,16 +929,16 @@ def _eintragen(plan, bestand, von, nach, grund):
 
 def _siehe_auch_schreiben(body, kopf, link, grund):
     """Eintrag alphabetisch einfuegen; `related` daraus ableiten (§5.6)."""
-    teil = notiz.abschnitt(body, "Siehe auch")
+    teil = notiz.abschnitt(body, "Verbindungen")
     zeile = "- %s — %s" % (link, grund)
     if teil is None:
-        body = body.rstrip("\n") + "\n\n# Siehe auch\n\n" + zeile + "\n"
+        body = body.rstrip("\n") + "\n\n# Verbindungen\n\n" + zeile + "\n"
     else:
         zeilen = [z for z in teil.strip("\n").splitlines() if z.startswith("- ")]
         zeilen.append(zeile)
         zeilen.sort(key=lambda z: z.split("|", 1)[-1].split("]]")[0].lower())
-        body = notiz.ohne_abschnitt(body, "Siehe auch").rstrip("\n") + \
-            "\n\n# Siehe auch\n\n" + "\n".join(zeilen) + "\n"
+        body = notiz.ohne_abschnitt(body, "Verbindungen").rstrip("\n") + \
+            "\n\n# Verbindungen\n\n" + "\n".join(zeilen) + "\n"
     ziel = link.split("|", 1)[0][2:]
     andere = notiz.entfernen(notiz.entfernen(kopf, "related"), "rejected_links")
     if ziel not in andere:
@@ -1227,10 +1227,10 @@ def ausfuehren(plan):
                     zusatz_body = body
                     body = _anhaengen(alt_body, body)
                     kopf = _kopf_vereinen(kopf, alt_kopf)   # die HKB gewinnt
-                    # Was die Ergaenzung unter `# Siehe auch` fuehrt, kommt
+                    # Was die Ergaenzung unter `# Verbindungen` fuehrt, kommt
                     # dazu — samt `related`, das §5.6 daran bindet.
-                    vorhanden = notiz.abschnitt(body, "Siehe auch") or ""
-                    for zeile in (notiz.abschnitt(zusatz_body, "Siehe auch")
+                    vorhanden = notiz.abschnitt(body, "Verbindungen") or ""
+                    for zeile in (notiz.abschnitt(zusatz_body, "Verbindungen")
                                   or "").strip("\n").splitlines():
                         m = re.match(r"^- (\[\[[^\]]+\]\])(?: — (.*))?$", zeile)
                         if not m or m.group(1).split("|", 1)[0] in vorhanden:
@@ -1321,18 +1321,18 @@ def _skalarzeile(kopf, key):
 
 
 def _anhaengen(alt_body, neuer_body):
-    """Den gelieferten Body vor `# Siehe auch` anhaengen (§6.1 Schritt 5).
+    """Den gelieferten Body vor `# Verbindungen` anhaengen (§6.1 Schritt 5).
 
     Angehaengt wird, nicht verschmolzen: Zwei Darstellungen derselben Sache zu
     einer zu machen hiesse deuten, und das ist keine Sache eines Werkzeugs.
     """
-    zusatz = notiz.ohne_abschnitt(neuer_body, "Siehe auch").strip("\n")
-    teil = notiz.abschnitt(alt_body, "Siehe auch")
+    zusatz = notiz.ohne_abschnitt(neuer_body, "Verbindungen").strip("\n")
+    teil = notiz.abschnitt(alt_body, "Verbindungen")
     if teil is None:
         vorn, hinten = alt_body.rstrip("\n"), ""
     else:
-        vorn = notiz.ohne_abschnitt(alt_body, "Siehe auch").rstrip("\n")
-        hinten = "\n\n# Siehe auch\n" + teil.rstrip("\n") + "\n"
+        vorn = notiz.ohne_abschnitt(alt_body, "Verbindungen").rstrip("\n")
+        hinten = "\n\n# Verbindungen\n" + teil.rstrip("\n") + "\n"
     if zusatz:
         vorn = vorn + "\n\n" + zusatz
     return vorn + hinten + ("\n" if not hinten else "")
@@ -1364,17 +1364,17 @@ def _kopf_vereinen(nachrangig, vorrangig):
 
 
 def _siehe_auch_vereinen(alt_body, neu_body):
-    """Zeilen unter `# Siehe auch`, die nur in der Wissensbasis stehen, bleiben.
+    """Zeilen unter `# Verbindungen`, die nur in der Wissensbasis stehen, bleiben.
 
     Der Abschnitt wird von Hand gepflegt und von Schritt 9 ergaenzt; beides
     steht nicht in der Lieferung (§5.6). Verglichen wird das Ziel, nicht die
     ganze Zeile — sonst stuende derselbe Verweis zweimal da, nur mit einem
     anderen Grund.
     """
-    alt = notiz.abschnitt(alt_body, "Siehe auch")
+    alt = notiz.abschnitt(alt_body, "Verbindungen")
     if alt is None:
         return neu_body
-    neu = notiz.abschnitt(neu_body, "Siehe auch")
+    neu = notiz.abschnitt(neu_body, "Verbindungen")
     vorhanden = [z for z in (neu or "").strip("\n").splitlines() if z.startswith("- ")]
     ziele = set(z.split("|", 1)[0] for z in vorhanden)
     fehlend = [z for z in alt.strip("\n").splitlines()
@@ -1383,8 +1383,8 @@ def _siehe_auch_vereinen(alt_body, neu_body):
         return neu_body
     alle = vorhanden + fehlend
     alle.sort(key=lambda z: z.split("|", 1)[-1].split("]]")[0].lower())
-    return notiz.ohne_abschnitt(neu_body, "Siehe auch").rstrip("\n") + \
-        "\n\n# Siehe auch\n\n" + "\n".join(alle) + "\n"
+    return notiz.ohne_abschnitt(neu_body, "Verbindungen").rstrip("\n") + \
+        "\n\n# Verbindungen\n\n" + "\n".join(alle) + "\n"
 
 
 def _zusammenfuehren(ziel, neuer_body):

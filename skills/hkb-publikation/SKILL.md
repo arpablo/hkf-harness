@@ -84,7 +84,7 @@ hk-epub <publikation> --neu    # daraus ein EPUB, mit vorherigem Neubau
 `hk-buch` schreibt die Texte in der Reihenfolge aus `contents` in eine Datei
 **außerhalb der Ablage**, unter `$HKF_ARTEFAKTE/<name der ablage>/`, Vorgabe
 `~/hkf-artefakte`. Mit einem Kopf, den `pandoc` liest. Das
-Frontmatter der Texte, ihr `# Siehe auch` und der `# Inhalt` der Publikation
+Frontmatter der Texte, ihr `# Verbindungen` und der `# Inhalt` der Publikation
 fallen weg, die Überschriften rücken eine Ebene tiefer. Eingebettete Bilder
 werden zu Pfaden, die `pandoc` auflöst.
 

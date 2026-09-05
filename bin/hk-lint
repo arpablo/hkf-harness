@@ -16,7 +16,7 @@ Typverzeichnisse, seine Notizen liegen, wo sie wollen, und `bundles` und
 Gemeldet wird in drei Gruppen: das Frontmatter gegen das Schema aus Anhang
 B.4, die Grammatik der Wikilinks und Typangaben aus Anhang B, und was sich
 erst aus dem Zusammenhang ergibt — Typ gegen Verzeichnis, Verweise, die
-abgeleiteten Tabellen, `# Siehe auch`, die Nachweise der Bundle-Notizen.
+abgeleiteten Tabellen, `# Verbindungen`, die Nachweise der Bundle-Notizen.
 
 `fehler` heisst: Die Ablage ist nicht konform (§7.2). `hinweis` heisst: Es
 faellt auf, macht sie aber nicht ungueltig.

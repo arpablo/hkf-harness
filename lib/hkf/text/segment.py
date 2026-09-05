@@ -59,7 +59,7 @@ WIKILINK = re.compile(r"!?\[\[([^\]\n|]*)(\|[^\]\n]*)?\]\]")
 BACKTICK_RUN = re.compile(r"`+")
 
 # Der Em-Dash ist in HKF Core an zwei Stellen Formatzeichen und nicht
-# Gedankenstrich: als Trenner in `# Siehe auch` (§5.6) und als leere Vorgabe in
+# Gedankenstrich: als Trenner in `# Verbindungen` (§5.6) und als leere Vorgabe in
 # einer Property-Tabelle (§3.7). Beides schreibt die Spezifikation vor, und die
 # Werkzeuge setzen es selbst. Ein Regelsatz kann das nicht auffangen, weil
 # `forbidden_characters` sich nicht senken laesst und `scope` nur Pfade kennt,
@@ -69,7 +69,7 @@ EM_DASH = "\u2014"
 # dahinter kommt, ist der Grund, und der ist Prosa.
 TRENNER = re.compile(r"\]\]\s*(\u2014)")
 UEBERSCHRIFT = re.compile(r"^#{1,6}\s+\S")
-SIEHE_AUCH = re.compile(r"^#{1,6}\s+Siehe auch\s*$")
+SIEHE_AUCH = re.compile(r"^#{1,6}\s+Verbindungen\s*$")
 TABELLENZEILE = re.compile(r"^\s*\|")
 
 
@@ -81,7 +81,7 @@ def mask(text: str) -> str:
 
     fence: str | None = None          # offener Fence, sonst None
     stack: list[tuple[int, str]] = []  # aktive Callouts als (Tiefe, Typ)
-    siehe_auch = False                 # innerhalb des Abschnitts `# Siehe auch`
+    siehe_auch = False                 # innerhalb des Abschnitts `# Verbindungen`
     ai_kopf = False                    # im Metadatenkopf eines `ai-`-Callouts
 
     for index, (start, end) in enumerate(lines):
@@ -160,7 +160,7 @@ def _alt_wert(chars: list[str], text: str, body: int, content: str) -> None:
 
 
 def _trenner(chars: list[str], body: int, content: str) -> None:
-    """Der Trenner in `# Siehe auch` (§5.6), und nur er.
+    """Der Trenner in `# Verbindungen` (§5.6), und nur er.
 
     Er folgt dem Wikilink und kommt je Eintrag einmal vor. Der Grund dahinter
     ist deutsche Prosa und bleibt geprüft.

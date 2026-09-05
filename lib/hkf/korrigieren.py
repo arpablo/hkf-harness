@@ -5,7 +5,7 @@ Elf Handgriffe, alle mechanisch. Bei mehrdeutigen oder unbekannten Zielen wird
 nicht geraten.
 
 Zwei Grenzen nennt §6.3 ausdruecklich, und sie sind der Grund, warum diese
-Datei kurz bleibt: `--fix` ergaenzt keinen Eintrag unter `# Siehe auch` und
+Datei kurz bleibt: `--fix` ergaenzt keinen Eintrag unter `# Verbindungen` und
 entfernt keinen — Verknuepfen ist Sache des Imports, Entfernen Sache eines
 Menschen. Und es legt keine vorlaeufige Typdefinition an und entfernt keine:
 Dazwischen liegt eine Entscheidung ueber Bedeutung, und die trifft kein
@@ -170,10 +170,28 @@ def _leere_properties(b, getan):
                      % (e["rel"], ", ".join(sorted(leer))))
 
 
+# Der Abschnitt hiess bis zum 05.09.2026 `Siehe auch`. Eine Wissensbasis aus
+# jener Zeit traegt ihn noch so, und `--fix` ist die Stelle, an der sie den
+# neuen Namen bekommt: die Umbenennung ist mechanisch, verlustfrei und braucht
+# kein Urteil. Ohne sie meldete `hk-lint` jeden alten Abschnitt und niemand
+# haette ein Werkzeug, das ihn schliesst.
+ALTNAME = "Siehe auch"
+
+
 def _siehe_auch(b, getan):
     """Ordnen und ans Ende stellen; `related` daraus ergaenzen (§5.6)."""
     for rel, e in sorted(b.notizen.items()):
-        teil = notiz.abschnitt(e["body"], "Siehe auch")
+        if notiz.abschnitt(e["body"], ALTNAME) is not None \
+                and notiz.abschnitt(e["body"], "Verbindungen") is None:
+            # `[ \t]` und nicht `\s`: `\s` deckt den Zeilenumbruch mit ab
+            # und frisst die Leerzeile hinter der Ueberschrift.
+            e["body"] = re.sub(
+                r"^(#{1,6})[ \t]+" + re.escape(ALTNAME) + r"[ \t]*$",
+                r"\1 Verbindungen", e["body"], flags=re.M)
+            _schreiben(e, e["kopf"], e["body"])
+            getan.append("%s: `# %s` heißt jetzt `# Verbindungen` (§5.6)"
+                         % (e["rel"], ALTNAME))
+        teil = notiz.abschnitt(e["body"], "Verbindungen")
         if teil is None:
             continue
         zeilen = [z for z in teil.strip("\n").splitlines() if z.startswith("- ")]
@@ -181,11 +199,11 @@ def _siehe_auch(b, getan):
             continue
         geordnet = sorted(zeilen, key=lambda z: (
             re.sub(r"^- \[\[[^\]|]*\|?", "", z).split("]]")[0] or z).lower())
-        rest = notiz.ohne_abschnitt(e["body"], "Siehe auch").rstrip("\n")
-        body = rest + "\n\n# Siehe auch\n\n" + "\n".join(geordnet) + "\n"
+        rest = notiz.ohne_abschnitt(e["body"], "Verbindungen").rstrip("\n")
+        body = rest + "\n\n# Verbindungen\n\n" + "\n".join(geordnet) + "\n"
         geaendert = []
         if body.rstrip("\n") != e["body"].rstrip("\n"):
-            geaendert.append("`# Siehe auch` geordnet und ans Ende gestellt")
+            geaendert.append("`# Verbindungen` geordnet und ans Ende gestellt")
 
         kopf = e["kopf"]
         verwandt = notiz.lies_liste(kopf, "related")

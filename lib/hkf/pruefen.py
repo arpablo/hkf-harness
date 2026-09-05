@@ -523,12 +523,12 @@ def _typtabelle(b, befunde):
 
 def _siehe_auch(b, befunde):
     for rel, e in sorted(b.notizen.items()):
-        teil = notiz.abschnitt(e["body"], "Siehe auch")
+        teil = notiz.abschnitt(e["body"], "Verbindungen")
         if teil is None:
             continue
         ueberschriften = re.findall(r"^# (.+)$", e["body"], re.M)
-        if ueberschriften and ueberschriften[-1] != "Siehe auch":
-            befunde.append(Befund(e["rel"], "`# Siehe auch` ist nicht der letzte "
+        if ueberschriften and ueberschriften[-1] != "Verbindungen":
+            befunde.append(Befund(e["rel"], "`# Verbindungen` ist nicht der letzte "
                                             "Abschnitt (§5.6).", HINWEIS))
         abgelehnt = [str(x) for x in (e["daten"].get("rejected_links") or [])]
         verwandt = [str(x) for x in (e["daten"].get("related") or [])]
@@ -538,13 +538,13 @@ def _siehe_auch(b, befunde):
                 continue
             m = re.match(r"^- (\[\[([^\]|\\]+)(?:\|([^\]]*))?\]\])(.*)$", zeile)
             if not m:
-                befunde.append(Befund(e["rel"], "Zeile unter `# Siehe auch` ist kein "
+                befunde.append(Befund(e["rel"], "Zeile unter `# Verbindungen` ist kein "
                                       "qualifizierter Wikilink: %r" % zeile.strip()))
                 continue
             link, ziel, alias, rest = m.group(1), m.group(2), m.group(3), m.group(4)
             if not rest.startswith(" — ") or not rest[3:].strip():
                 befunde.append(Befund(e["rel"], "%s steht ohne Grund unter "
-                                      "`# Siehe auch` (§5.6)." % link))
+                                      "`# Verbindungen` (§5.6)." % link))
             aliase.append((alias or ziel).lower())
             ziele.append((ziel, link))
             if any(ziel in x for x in abgelehnt):
@@ -557,18 +557,18 @@ def _siehe_auch(b, befunde):
                     befunde.append(Befund(e["rel"], "%s fehlt in `related` (§5.6)."
                                           % link, HINWEIS))
         if aliase != sorted(aliase):
-            befunde.append(Befund(e["rel"], "Die Einträge unter `# Siehe auch` stehen "
+            befunde.append(Befund(e["rel"], "Die Einträge unter `# Verbindungen` stehen "
                                             "nicht alphabetisch (§5.6).", HINWEIS))
         for ziel, link in (ziele if b.art == "hkb" else []):
             art, rest = b.aufloesen(ziel)
             if art != "notiz":
                 continue
             gegen = b.notizen[rest]
-            eigener = notiz.ohne_abschnitt(e["body"], "Siehe auch")
+            eigener = notiz.ohne_abschnitt(e["body"], "Verbindungen")
             titel = [str(gegen["daten"].get("title") or "")] + \
                     [str(a) for a in (gegen["daten"].get("aliases") or [])]
             zurueck = re.findall(r"\[\[([^\]|\\]+)",
-                                 notiz.abschnitt(gegen["body"], "Siehe auch") or "")
+                                 notiz.abschnitt(gegen["body"], "Verbindungen") or "")
             if any(rel == b.aufloesen(z)[1] for z in zurueck) and \
                not any(t and t in eigener for t in titel):
                 befunde.append(Befund(e["rel"], "%s ist ein bloßer Rückverweis; die "

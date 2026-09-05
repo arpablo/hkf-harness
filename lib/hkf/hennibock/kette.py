@@ -336,7 +336,7 @@ def bestellt_text(block: str):
 
 def body_ohne_verbindungen(body: str):
     """Der Prosa-Teil, den hennibock-publish spaeter auch sendet."""
-    m = re.search(r"^#{1,2}\s+Siehe auch\s*$", body, re.M)
+    m = re.search(r"^#{1,2}\s+Verbindungen\s*$", body, re.M)
     return body[: m.start()] if m else body
 
 

@@ -21,7 +21,7 @@ modified_by: claude-opus-5
 | accessed | date | nein | — | Datum des Abrufs |
 | checksum | text | nein | — | `sha256:<hex>` über die Ausfertigung. Sagt beim nächsten Einlesen, ob sich die Quelle geändert hat |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Werks in Wikidata |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen
 

@@ -13,7 +13,7 @@ Praefix der Wissensbasis faellt trotzdem, wie bei jedem anderen Verweis auch
 (Schritt 5). Ein Ziel, das den Ablagepfad des Absenders mitfuehrt, waere beim
 Empfaenger nicht nur unaufloesbar, sondern irrefuehrend.
 
-Und `related`: §5.6 fuehrt die Property als aus `# Siehe auch` abgeleitet. Was
+Und `related`: §5.6 fuehrt die Property als aus `# Verbindungen` abgeleitet. Was
 Schritt 7 aus dem Abschnitt nimmt, wird darum auch aus `related` genommen. Was
 dort nie aus dem Abschnitt kam — eine Adresse, ein von Hand gesetzter Verweis
 —, bleibt und wird nach Schritt 8 gemeldet.
@@ -270,7 +270,7 @@ def _medienziel(plan, ziel):
 
 
 def _umschreiben(plan, e, drin):
-    """Praefix entfernen, Mediendateien einsammeln, `# Siehe auch` filtern."""
+    """Praefix entfernen, Mediendateien einsammeln, `# Verbindungen` filtern."""
     pre_m = plan.praefix_medien()
     entfernt = []
 
@@ -306,7 +306,7 @@ def _umschreiben(plan, e, drin):
         return roh.replace("[[" + ziel, "[[" + neu, 1)
 
     body = e["body"]
-    teil = notiz.abschnitt(body, "Siehe auch")
+    teil = notiz.abschnitt(body, "Verbindungen")
     if teil is not None:
         bleiben = []
         for zeile in teil.strip("\n").splitlines():
@@ -318,8 +318,8 @@ def _umschreiben(plan, e, drin):
                 bleiben.append(zeile.replace("[[" + m.group(1), "[[" + neu, 1))
             else:
                 entfernt.append("[[%s|" % neu)
-        rest = notiz.ohne_abschnitt(body, "Siehe auch").rstrip("\n")
-        body = rest + ("\n\n# Siehe auch\n\n" + "\n".join(bleiben) + "\n"
+        rest = notiz.ohne_abschnitt(body, "Verbindungen").rstrip("\n")
+        body = rest + ("\n\n# Verbindungen\n\n" + "\n".join(bleiben) + "\n"
                        if bleiben else "\n")
 
     kopf = notiz.entfernen(notiz.entfernen(e["kopf"], "bundles"), "rejected_links")

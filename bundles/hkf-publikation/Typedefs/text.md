@@ -17,7 +17,7 @@ modified_by: claude-opus-5
 | publications | hkf-link-list:publication | nein | — | In welchen Publikationen er steht. Wird von `hk-publikation` geführt |
 | status | text | nein | — | Stand der Arbeit, etwa `entwurf`, `lektorat`, `fertig` |
 | words | number | nein | — | Wortzahl des Body, ohne Frontmatter |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen
 

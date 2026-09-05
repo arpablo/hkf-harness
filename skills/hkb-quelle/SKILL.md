@@ -107,7 +107,7 @@ unten. Für jeden, der eine Notiz wird:
 - `sources` auf die Quellennotiz setzen — das ist die Verbindung, an der der
   Bestand später hängt.
 - Untereinander verlinken, wo der Body es hergibt; einen Verweis unter
-  `# Siehe auch` auch in `related` führen (§5.6).
+  `# Verbindungen` auch in `related` führen (§5.6).
 - Der Inhalt kommt **allein aus dem Destillat**. Was Wilma nicht belegt hat,
   steht nicht drin.
 

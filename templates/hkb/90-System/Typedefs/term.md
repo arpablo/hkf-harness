@@ -14,7 +14,7 @@ modified_by: claude-opus-5
 | lang | hkf-lang | ja | — | Sprache des Begriffs |
 | broader | hkf-link:term | nein | — | Übergeordneter Begriff |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen
 

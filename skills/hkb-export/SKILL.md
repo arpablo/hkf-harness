@@ -47,7 +47,7 @@ das Bundle ist dann in seinen Typen, aber nicht in allen Verweisen
 geschlossen. Nenne sie beim Namen, damit der Absender entscheiden kann, ob er
 die fehlenden Notizen mitliefert oder die Verweise streicht.
 
-Einträge unter `# Siehe auch`, die hinauszeigen, entfernt der Export von
+Einträge unter `# Verbindungen`, die hinauszeigen, entfernt der Export von
 selbst: Sie gelten nur hier, und beim Empfänger entstehen sie beim Import neu.
 
 ### Mediendateien, die zurückbleiben (§6.2 Schritt 4)
@@ -72,6 +72,6 @@ Sag es dazu, wenn der Empfänger es wissen muss:
 
 Ein Bundle, das importiert und sofort wieder exportiert wird, kommt nicht
 byte-gleich zurück: Verweise zwischen zwei Notizen **derselben** Lieferung
-überstehen den Export und stehen im Ergebnis unter `# Siehe auch`. Das ist
+überstehen den Export und stehen im Ergebnis unter `# Verbindungen`. Das ist
 gewollt — der Import hat etwas erkannt, was in der Lieferung nicht stand.
 Erkläre es, wenn jemand den Unterschied bemerkt; es ist kein Fehler.

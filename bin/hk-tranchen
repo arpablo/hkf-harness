@@ -92,9 +92,9 @@ def bauen(reihen):
 
 
 def einsetzen(body, block):
-    """Den Abschnitt ersetzen oder ihn vor `# Siehe auch` einhaengen.
+    """Den Abschnitt ersetzen oder ihn vor `# Verbindungen` einhaengen.
 
-    Der Abschnitt `# Siehe auch` ist der letzte einer Notiz (Core §5.6); alles
+    Der Abschnitt `# Verbindungen` ist der letzte einer Notiz (Core §5.6); alles
     andere darf davor.
     """
     m = re.search(r"^# %s$" % UEBERSCHRIFT, body, re.M)
@@ -104,7 +104,7 @@ def einsetzen(body, block):
         body = notiz.ohne_abschnitt(body, UEBERSCHRIFT)
         vorher, nachher = body[:m.start()], body[m.start():]
     else:
-        m = re.search(r"^# Siehe auch$", body, re.M)
+        m = re.search(r"^# Verbindungen$", body, re.M)
         vorher = body[:m.start()] if m else body
         nachher = body[m.start():] if m else ""
     vorher = vorher.rstrip("\n")

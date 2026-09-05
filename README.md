@@ -116,11 +116,11 @@ erzeugen, fehlende Standard-Property-Typen anlegen, einen verzeichnislosen
 Wikilink qualifizieren (nur bei genau einem Ziel), einen fehlenden Alias aus
 dem `title` ergänzen, den Trenner ` / ` ausschreiben, ein `datetime` ohne
 Uhrzeit auf den Tagesbeginn bringen, `created` und `modified` ergänzen,
-`# Siehe auch` ordnen und ans Ende stellen, `related` daraus ergänzen, leere
+`# Verbindungen` ordnen und ans Ende stellen, `related` daraus ergänzen, leere
 Properties entfernen. Danach wird erneut geprüft.
 
 **Was `--fix` nicht tut**, und beides steht so in §6.3: Es ergänzt keinen
-Eintrag unter `# Siehe auch` und entfernt keinen — Verknüpfen ist Sache des
+Eintrag unter `# Verbindungen` und entfernt keinen — Verknüpfen ist Sache des
 Imports (§6.1 Schritt 9), Entfernen Sache eines Menschen (§5.6). Und es legt
 keine vorläufige Typdefinition an und entfernt keine: Dazwischen liegt eine
 Entscheidung über Bedeutung, und die trifft kein Linter (§5.4).
@@ -148,7 +148,7 @@ Ein Bundle, das importiert und wieder exportiert wird, kommt bis auf zwei
 Stellen zurück, wie es kam. Beide sind gewollt:
 
 - **Verweise, die der Import erkannt hat, bleiben.** Nennen sich zwei Notizen
-  derselben Lieferung gegenseitig, steht das danach unter `# Siehe auch` und
+  derselben Lieferung gegenseitig, steht das danach unter `# Verbindungen` und
   geht mit hinaus. Was in den Bestand zeigt, fällt weg — es gilt nur hier
   (§6.2 Schritt 7).
 - **Mediendateien folgen den Verweisen.** Der Import nimmt jede Datei der
@@ -176,7 +176,7 @@ geurteilt hat, also eines Menschen oder eines Skills.
 Selbsttätig verknüpft wird nur die erste der drei Beobachtungen aus §6.1
 Schritt 9: Nennt der Body einer Notiz den Titel oder einen Alias einer anderen
 wörtlich und verlinkt ihn nicht ohnehin schon, entsteht ein Eintrag unter
-`# Siehe auch`. Gleiche `hkf-wikidata`-Kennungen werden als
+`# Verbindungen`. Gleiche `hkf-wikidata`-Kennungen werden als
 Zusammenführungskandidat vorgelegt; unbelegte Properties mit Zieltyp noch
 nicht.
 

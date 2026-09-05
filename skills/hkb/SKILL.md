@@ -81,7 +81,7 @@ hk-text --gate <datei>            # endet mit 1, sobald ein Fehler auftritt
 **Prüf, was du geschrieben hast, bevor du es stehen lässt.** Ein Fehler
 blockiert, eine Warnung nicht. Nicht geprüft werden Code, Linkziele und
 Bezeichner. Ebenso wenig der Em-Dash dort, wo das Format ihn verlangt: als
-Trenner in `# Siehe auch` (§5.6) und als leere Vorgabe in einer
+Trenner in `# Verbindungen` (§5.6) und als leere Vorgabe in einer
 Property-Tabelle (§3.7).
 
 Was **diese** Ablage darüber hinaus festgelegt hat, steht in ihren
@@ -104,7 +104,7 @@ Sie stehen hier und nirgends sonst — du brauchst sie ständig:
 6. **`Typedefs/` und `Proptypes/` sind tabu** — sie liegen unter
    `config_base` —, außer du legst ausdrücklich
    einen neuen Typ an (dafür gibt es `hkb-typ`).
-7. **`# Siehe auch` wird ergänzt, nicht gekürzt.** Entfernen ist Sache eines
+7. **`# Verbindungen` wird ergänzt, nicht gekürzt.** Entfernen ist Sache eines
    Menschen; was weg soll, kommt in `rejected_links`.
 
 ## Git

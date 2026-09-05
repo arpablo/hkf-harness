@@ -13,7 +13,7 @@ modified_by: claude-opus-5
 |---|---|---|---|---|
 | part_of | hkf-link:location | nein | — | Wo er liegt, wenn das für die Kontinuität zählt |
 | based_on | hkf-link-or-text | nein | — | Wenn er einem wirklichen Ort nachgebildet ist |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen
 

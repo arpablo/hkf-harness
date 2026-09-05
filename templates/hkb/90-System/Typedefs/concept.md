@@ -14,7 +14,7 @@ modified_by: claude-opus-5
 | terms | hkf-link-list:term | nein | — | Die Begriffe, unter denen die Wissensbasis die Sache führt |
 | broader | hkf-link:concept | nein | — | Übergeordnetes Konzept |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen
 

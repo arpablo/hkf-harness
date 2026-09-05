@@ -13,7 +13,7 @@ modified_by: claude-opus-5
 |---|---|---|---|---|
 | owner | hkf-link:character | nein | — | Wem er gehört |
 | first_seen | hkf-link:text | nein | — | Wo er zum ersten Mal vorkam |
-| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Siehe auch“ steht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen
 

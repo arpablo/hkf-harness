@@ -74,7 +74,7 @@ darf dieselbe Notiz aus mehreren Lieferungen beziehen.
 
 Was mechanisch sicher ist, setzt `hk-import` selbst: Nennt der Body einer
 Notiz den Titel einer anderen wörtlich und verlinkt ihn nicht ohnehin schon,
-entsteht ein Eintrag unter `# Siehe auch`. Vorgelegt wird der Rest — etwa
+entsteht ein Eintrag unter `# Verbindungen`. Vorgelegt wird der Rest — etwa
 zwei Notizen mit derselben `hkf-wikidata`-Kennung. Die gehören
 **zusammengelegt, nicht verlinkt**, und das entscheidet ein Mensch.
 
