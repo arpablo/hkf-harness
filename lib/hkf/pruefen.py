@@ -307,6 +307,37 @@ def _wurzeldatei(b, befunde):
         if not os.path.isdir(os.path.join(wo, verz)):
             befunde.append(Befund("hkb.md",
                                   "%s/ fehlt im Basispfad (§7.2)." % verz))
+    _bereiche_ueberschneiden(b, befunde)
+
+
+def _bereiche_ueberschneiden(b, befunde):
+    """§3.1: kein Bereich liegt unter einem anderen, keine zwei teilen sich einen.
+
+    Der leere Bereich ist davon ausgenommen. §3.1 erlaubt ihn ausdruecklich —
+    er faellt dann mit der Wurzel zusammen, und die anderen sind aus ihr
+    herausgeschnitten. Die Spezifikation weiss, was das kostet ("das hebt die
+    Trennung auf, fuer die es die Bereiche gibt"), und nennt es trotzdem
+    erlaubt, nur nicht die Vorgabe. Wer hier auch das meldete, machte aus einer
+    Ermessensfrage einen Fehler.
+
+    Geprueft wird also die Schachtelung zweier **benannter** Bereiche und der
+    Fall, dass zwei denselben Pfad tragen — auch zwei leere.
+    """
+    orte = [(k, (b.bereiche.get(k) or "").strip("/")) for k in ablage.BEREICHE]
+    for i, (a_name, a) in enumerate(orte):
+        for b_name, c in orte[i + 1:]:
+            if a == c:
+                befunde.append(Befund("hkb.md",
+                    "`%s` und `%s` tragen denselben Pfad `%s` (§3.1)."
+                    % (a_name, b_name, a or "<Wurzel>")))
+            elif a and c.startswith(a + "/"):
+                befunde.append(Befund("hkb.md",
+                    "`%s` (`%s`) liegt unter `%s` (`%s`) (§3.1)."
+                    % (b_name, c, a_name, a)))
+            elif c and a.startswith(c + "/"):
+                befunde.append(Befund("hkb.md",
+                    "`%s` (`%s`) liegt unter `%s` (`%s`) (§3.1)."
+                    % (a_name, a, b_name, c)))
 
 
 def _typen(b, befunde):

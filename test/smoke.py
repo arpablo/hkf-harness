@@ -259,6 +259,22 @@ def main():
         r = lauf(os.path.join(BIN, "hk-lint"), ziel, "--strict")
         probe("--strict fasst je Typ zusammen",
               "ding: menge" not in r.stdout, r.stdout)
+        # §3.1: zwei benannte Bereiche duerfen nicht ineinander liegen. Der
+        # leere Bereich ist ausgenommen, ihn erlaubt dieselbe Stelle
+        # ausdruecklich.
+        wurzel = os.path.join(ziel, "hkb.md")
+        vorher_wurzel = io.open(wurzel, encoding="utf-8").read()
+        _schreib(wurzel, vorher_wurzel.replace(
+            'source_base: "%s"' % QUELLEN, 'source_base: "%s/Quellen"' % WIKI))
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        probe("ein Bereich im anderen ist ein Befund (§3.1)",
+              "liegt unter `wiki_base`" in r.stdout, r.stdout[-400:])
+        _schreib(wurzel, vorher_wurzel.replace('wiki_base: "%s"' % WIKI,
+                                               'wiki_base: ""'))
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        probe("ein leerer Bereich ist keiner, den erlaubt §3.1",
+              "liegt unter" not in r.stdout, r.stdout[-400:])
+        _schreib(wurzel, vorher_wurzel)
         # Der Abschnitt hiess bis zum 05.09.2026 `Siehe auch`. `--fix` ist der
         # Weg, auf dem eine Ablage aus jener Zeit den neuen Namen bekommt.
         alt = os.path.join(ziel, WIKI, "dinge", "alt.md")
