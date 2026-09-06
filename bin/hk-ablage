@@ -4,6 +4,7 @@
 
     hk-ablage                nennt die aktive Ablage und woher der Pfad kommt
     hk-ablage --liste        zeigt, was danebenliegt und was bekannt ist
+    hk-ablage --bereiche     nennt die fuenf Bereiche als absolute Pfade
     hk-ablage <pfad>         merkt die Wahl fuer dieses Arbeitsverzeichnis
     hk-ablage --loeschen     nimmt die Wahl zurueck
 
@@ -50,6 +51,26 @@ def liste():
     return 0
 
 
+def bereiche(wo=None):
+    """Die fuenf Bereiche als absolute Pfade, eine Zeile je Bereich.
+
+    Ein Skill, der etwas ablegt, muss wissen wohin, und der Ordnername steht
+    nur in der Wurzeldatei. Ihn im Skilltext festzuschreiben hiesse, den Skill
+    an eine Ablage zu binden — genau daran ist die vorige Fassung dieses
+    Harness gescheitert. Also fragt er hier nach.
+    """
+    try:
+        pfad, _woher = ablage.aufloesen(wo)
+    except ablage.KeineAblage as e:
+        sys.stderr.write(str(e) + "\n"); return 2
+    if not ablage.art_von(pfad):
+        sys.stderr.write("%s: dort liegt keine Ablage.\n" % pfad); return 2
+    b = ablage.bereiche(pfad)
+    for name in ablage.BEREICHE:
+        print("%-12s %s" % (name, os.path.join(pfad, b[name]).rstrip("/")))
+    return 0
+
+
 def zeigen():
     pfad, woher = ablage.aufloesen()
     art = ablage.art_von(pfad)
@@ -74,6 +95,10 @@ def main(argv):
         print(__doc__.strip()); return 0
     if "--liste" in argv:
         return liste()
+    if "--bereiche" in argv:
+        # Ein Pfad daneben fragt nach dieser Ablage und aendert die Wahl nicht.
+        mit = [a for a in argv if not a.startswith("-")]
+        return bereiche(mit[0] if mit else None)
     if "--loeschen" in argv:
         weg = ablage.vergessen()
         print("Wahl zurückgenommen: %s" % weg if weg else "Keine Wahl gemerkt.")

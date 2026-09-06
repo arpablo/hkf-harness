@@ -5,6 +5,7 @@
     hk-text [pfad...]            Bericht, endet immer mit 0
     hk-text --gate [pfad...]     endet mit 1, sobald ein Fehler auftritt
     hk-text --rhythm [pfad...]   Rhythmus-Signale statt Regelbefunde
+    hk-text --rhythm --mode locker|sachlich|formal [pfad...]
 
 Ohne Pfad gilt die aktive Ablage (siehe `hk-ablage`). Ein Pfad ist eine Datei
 oder ein Verzeichnis; Verzeichnisse werden rekursiv nach `.md` durchsucht.
@@ -46,6 +47,14 @@ def main(argv):
         print(__doc__.strip()); return 0
     gate = "--gate" in argv
     rhythmus = "--rhythm" in argv
+    # `--mode locker` traegt seinen Wert als eigenes Argument, und das sieht
+    # aus wie ein Pfad. Ohne diesen Schnitt landete `locker` in der Dateiliste.
+    modus = []
+    if "--mode" in argv:
+        i = argv.index("--mode")
+        if i + 1 < len(argv):
+            modus = ["--mode", argv[i + 1]]
+            argv = argv[:i] + argv[i + 2:]
     pfade = [a for a in argv if not a.startswith("-")]
 
     if not pfade:
@@ -61,8 +70,11 @@ def main(argv):
         pfade = [pfad]
 
     if rhythmus:
+        # `--mode` kennt `rhythm_lint` seit jeher, erreichbar war es hier
+        # nicht: Nur die Pfade gingen weiter, und `locker` oder `formal`
+        # liessen sich ueber das Werkzeug nicht waehlen.
         from hkf.text import rhythm_lint
-        return rhythm_lint.main(pfade)
+        return rhythm_lint.main(modus + pfade)
 
     try:
         dateien = textmodul.sammeln(pfade)

@@ -17,6 +17,7 @@ WURZEL = os.path.dirname(os.path.dirname(os.path.dirname(
 KANON = ("identitaet.md", "zusammenarbeit.md", "deutsche-sprache.md",
          "schreibregeln.md", "yaml.md")
 VORGABE_STIMME = "henni-knowledge"
+VORGABE_BILDSTIL = "henni-default"
 # Eine Hinweisnotiz ist so lang, wie sie sein muss. Der Sitzungskontext ist es
 # nicht: Was hier steht, kostet in jeder Sitzung, auch wenn es nie gebraucht
 # wird. Der Kanon ist bekannt und begrenzt, die Hinweise sind es nicht — also
@@ -57,6 +58,25 @@ def stimme(pfad):
     if not re.fullmatch(r"[a-z][a-z0-9-]*", kennung):
         return "", kennung
     datei = os.path.join(WURZEL, "profiles", "voices", kennung + ".md")
+    return _ohne_frontmatter(_lies(datei)), kennung
+
+
+def bildstil(pfad):
+    """Der Text des Bildprofils, das die Wurzeldatei nennt.
+
+    Dasselbe Verfahren wie bei der Stimme, nur ein anderes Verzeichnis. **Der
+    Sitzungskontext traegt es nicht.** Ein Bildprofil ist lang, und es wird in
+    den meisten Sitzungen nie gebraucht; wer ein Bild erzeugt, holt es sich mit
+    `hk-kontext --bild`.
+    """
+    try:
+        daten, _ = frontmatter.lesen(ablage.wurzeldatei(pfad))
+    except Exception:
+        daten = {}
+    kennung = str(daten.get("image_style") or VORGABE_BILDSTIL).strip()
+    if not re.fullmatch(r"[a-z][a-z0-9-]*", kennung):
+        return "", kennung
+    datei = os.path.join(WURZEL, "profiles", "images", kennung + ".md")
     return _ohne_frontmatter(_lies(datei)), kennung
 
 

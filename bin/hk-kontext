@@ -4,6 +4,7 @@
 
     hk-kontext [pfad]        alles: Lage, Kanon, Stimme, Hinweise
     hk-kontext --stimme      nur das Stimmprofil
+    hk-kontext --bild        nur das Bildprofil
     hk-kontext --hinweise    nur die `hint`-Notizen der Ablage
     hk-kontext --lage        nur, welche Ablage aktiv ist und woher
 
@@ -22,6 +23,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..
 from hkf import ablage, kontext   # noqa: E402
 
 TEILE = ("lage", "kanon", "stimme", "hinweise")
+# `bild` steht nicht in TEILE: Es gehoert nicht in den Sitzungskontext,
+# sondern wird geholt, wenn ein Bild entsteht.
 
 
 def main(argv):
@@ -29,6 +32,20 @@ def main(argv):
         print(__doc__.strip()); return 0
     gewaehlt = tuple(t for t in TEILE if "--" + t in argv) or TEILE
     args = [a for a in argv if not a.startswith("-")]
+    if "--bild" in argv:
+        try:
+            pfad, _woher = ablage.aufloesen(wo=args[0] if args else None)
+        except ablage.KeineAblage as e:
+            sys.stderr.write(str(e) + "\n"); return 2
+        text, kennung = kontext.bildstil(pfad)
+        if not text:
+            sys.stderr.write("Die Wurzeldatei nennt das Bildprofil `%s`, der "
+                             "Harness führt kein solches.\n" % kennung)
+            return 1
+        # Das Profil traegt seine eigene Ueberschrift. Eine zweite
+        # davorzusetzen ergaebe sie doppelt.
+        print(text)
+        return 0
     try:
         text, _pfad, art = kontext.zusammensetzen(args[0] if args else None,
                                                   gewaehlt)

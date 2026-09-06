@@ -32,6 +32,29 @@ einen gebrochenen Wikilink immer, ein Modell meistens.
 | [`hkb-erzaehlung`](hkb-erzaehlung/SKILL.md) | Einen Erzählbestand führen: Kanon, Kontinuität, Beurteilung |
 | [`hkb-hennibock`](hkb-hennibock/SKILL.md) | Eine Notiz an eine HenniBock-Instanz übertragen und die Kapitelkette führen |
 
+Was auf jeden Vault passt und keine Wissensbasis voraussetzt, trägt kein
+Präfix:
+
+| Skill | Wofür |
+|---|---|
+| [`humanize`](humanize/SKILL.md) | Einen Text auf KI-Schreibmuster prüfen und die betroffenen Stellen heben |
+| [`artefakt-pruefen`](artefakt-pruefen/SKILL.md) | Ein Artefakt gegen Mechanik, Stimme und Kanon prüfen und übergeben |
+| [`git-sicherheit`](git-sicherheit/SKILL.md) | Sicher mit Git in einer Ablage arbeiten |
+| [`vault-pflege`](vault-pflege/SKILL.md) | Einen Obsidian-Vault pflegen, ohne ihn zu beschädigen |
+| [`memory`](memory/SKILL.md) | Festhalten, was über die Sitzung hinaus gilt |
+| [`skill-bauen`](skill-bauen/SKILL.md) | Einen neuen Skill für dieses Plugin anlegen |
+
+Die Bildkette hängt am Magnific-Connector, den ein Plugin nicht mitliefern
+kann. Ohne ihn brechen die vier oberen ab und sagen warum:
+
+| Skill | Wofür |
+|---|---|
+| [`bild-callout`](bild-callout/SKILL.md) | Die `ai-image`-Callouts in eine Notiz schreiben, ohne Bilder zu erzeugen |
+| [`bild`](bild/SKILL.md) | Ein einzelnes Bild erzeugen und ablegen. Der Motor der Kette |
+| [`bild-notiz`](bild-notiz/SKILL.md) | Alle Callouts einer Notiz umsetzen und die Bilder einbetten |
+| [`bild-cover`](bild-cover/SKILL.md) | Das Hochformat-Cover einer Publikation für `hk-epub` |
+| [`bild-sidecars`](bild-sidecars/SKILL.md) | Die Metadaten-JSONs neben die Bilder eines Verzeichnisses schreiben |
+
 **Ein Skill ruft einen Agenten.** `hkb-quelle` liest eine Quelle nie
 selbst, sondern schickt [`wilma`](../agents/wilma.md) — sie liest in ihrem
 eigenen Kontext und gibt ein belegtes Destillat zurück. Für die Regel oben

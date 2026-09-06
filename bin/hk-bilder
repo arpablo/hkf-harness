@@ -1,0 +1,111 @@
+#!/usr/bin/env bash
+# hk-bilder — Bilddateien ohne Sidecar sammeln und als Batch-Dateien ablegen.
+# Gibt nur eine kurze Zusammenfassung aus, nie die Bildliste selbst.
+set -euo pipefail
+
+usage() {
+  cat >&2 <<'EOF'
+Aufruf: hk-bilder <verzeichnis> [--no-recursive] [--force] [--batch-size N]
+
+  --no-recursive   nur die oberste Ebene, keine Unterordner
+  --force          auch Bilder aufnehmen, die bereits eine Sidecar haben
+  --batch-size N   Bilder je Batch-Datei (Vorgabe 5)
+EOF
+  exit 2
+}
+
+DIR=""
+RECURSIVE=1
+FORCE=0
+BATCH=5
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --no-recursive) RECURSIVE=0 ;;
+    --force) FORCE=1 ;;
+    --batch-size) shift; BATCH="${1:-5}" ;;
+    -h|--help) usage ;;
+    -*) echo "Unbekannte Option: $1" >&2; usage ;;
+    *) if [ -z "$DIR" ]; then DIR="$1"; else usage; fi ;;
+  esac
+  shift
+done
+
+[ -n "$DIR" ] || usage
+[ -d "$DIR" ] || { echo "Kein Verzeichnis: $DIR" >&2; exit 1; }
+case "$BATCH" in ''|*[!0-9]*) echo "--batch-size braucht eine Zahl" >&2; exit 2 ;; esac
+[ "$BATCH" -gt 0 ] || { echo "--batch-size muss groesser 0 sein" >&2; exit 2; }
+
+DIR="$(cd "$DIR" && pwd)"
+
+find_images() {
+  if [ "$RECURSIVE" -eq 1 ]; then set -- "$DIR"; else set -- "$DIR" -maxdepth 1; fi
+  find "$@" -type f \
+    \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \
+       -o -iname '*.avif' -o -iname '*.gif' -o -iname '*.tif' -o -iname '*.tiff' \)
+}
+
+OUT="$(mktemp -d "${TMPDIR:-/tmp}/hk-bilder-XXXXXX")"
+ALL="$OUT/alle.txt"
+TODO="$OUT/offen.txt"
+CONFLICT="$OUT/namenskonflikte.txt"
+
+find_images | LC_ALL=C sort > "$ALL"
+
+# Zwei Bilddateien mit gleichem Basename im selben Ordner teilten sich eine
+# Sidecar. Solche Paare werden ausgeschlossen und gemeldet.
+: > "$CONFLICT"
+if [ -s "$ALL" ]; then
+  while IFS= read -r base; do
+    grep -F -x -e "$base.jpg" -e "$base.jpeg" -e "$base.JPG" -e "$base.JPEG" \
+            -e "$base.png" -e "$base.PNG" -e "$base.webp" -e "$base.WEBP" \
+            -e "$base.avif" -e "$base.AVIF" -e "$base.gif" -e "$base.GIF" \
+            -e "$base.tif" -e "$base.TIF" -e "$base.tiff" -e "$base.TIFF" \
+            "$ALL" >> "$CONFLICT" || true
+  done < <(sed 's/\.[^.\/]*$//' "$ALL" | LC_ALL=C sort | uniq -d)
+fi
+
+: > "$TODO"
+total=0
+have=0
+skipped=0
+while IFS= read -r img; do
+  total=$((total + 1))
+  if [ -s "$CONFLICT" ] && grep -qxF "$img" "$CONFLICT"; then
+    skipped=$((skipped + 1))
+    continue
+  fi
+  sidecar="${img%.*}.json"
+  if [ -f "$sidecar" ]; then
+    have=$((have + 1))
+    [ "$FORCE" -eq 1 ] || continue
+  fi
+  printf '%s\n' "$img" >> "$TODO"
+done < "$ALL"
+
+n=0
+b=0
+BF=""
+while IFS= read -r img; do
+  if [ $((n % BATCH)) -eq 0 ]; then
+    b=$((b + 1))
+    BF="$(printf '%s/batch-%02d.txt' "$OUT" "$b")"
+    : > "$BF"
+  fi
+  printf '%s\n' "$img" >> "$BF"
+  n=$((n + 1))
+done < "$TODO"
+
+echo "verzeichnis:  $DIR"
+echo "bilddateien:  $total"
+echo "mit sidecar:  $have"
+echo "namenskonflikt (uebersprungen): $skipped"
+echo "zu erzeugen:  $n"
+echo "batches:      $b (je $BATCH)"
+if [ "$skipped" -gt 0 ]; then
+  echo "konfliktliste: $CONFLICT"
+fi
+if [ "$b" -gt 0 ]; then
+  echo "--- batch-dateien ---"
+  ls -1 "$OUT"/batch-*.txt
+fi

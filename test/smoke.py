@@ -516,8 +516,15 @@ Eine Notiz aus der Zeit vor der Umbenennung.
         for name in namen:
             t_sk = io.open(os.path.join(skills, name, "SKILL.md"),
                            encoding="utf-8").read()
-            gerufen |= set(re.findall(r"(?:Subagenten|Agenten)\s+`?([a-z][a-z0-9-]*)`?",
-                                      t_sk))
+            # Die Rueckversicherung sind die Backticks, nicht das naechste
+            # Wort. Ohne sie las die Probe aus "je Batch einen Agenten
+            # starten" den Agentennamen `starten` und meldete ihn als
+            # unbekannt. Ein Agentenname steht in diesen Texten immer als
+            # Code, entweder hinter "Agent" oder als `subagent_type`.
+            gerufen |= set(re.findall(
+                r"(?:Subagenten?|Agenten?(?:typ)?)\s+`([a-z][a-z0-9-]*)`", t_sk))
+            gerufen |= set(re.findall(
+                r"`subagent_type`\s*:\s*`([a-z][a-z0-9-]*)`", t_sk))
         unbekannt = sorted(g for g in gerufen if g not in agenten)
         probe("jeder von einem Skill gerufene Agent liegt in agents/",
               not unbekannt, ", ".join(unbekannt))
