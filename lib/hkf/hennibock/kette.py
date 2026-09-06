@@ -539,11 +539,14 @@ def kapitel_pfad(name: str):
 
 
 def server_url():
-    url = (os.environ.get("HENNIBOCK_URL") or "").rstrip("/")
+    # Dieselbe Aufloesung wie beim Senden. Zwei Wege zum selben Ziel liefen
+    # auseinander, sobald einer davon eine Stufe mehr kennt.
+    from . import kern
+    url, _woher = kern.ziel()
     if not url:
         raise SystemExit(
-            "FEHLER: HENNIBOCK_URL nicht gesetzt. Ob ein Kapitel publiziert ist, "
-            "steht auf dem Server, nicht im Vault."
+            kern.KEIN_ZIEL + "\nOb ein Kapitel publiziert ist, steht auf dem "
+            "Server, nicht in der Ablage."
         )
     return url
 

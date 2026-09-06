@@ -1361,13 +1361,37 @@ def _summarize(payload) -> str:
     return "\n".join(zeilen)
 
 
+def ziel() -> tuple[str, str]:
+    """(url, woher) der HenniBock-Instanz, in zwei Stufen.
+
+    Erst `HENNIBOCK_URL`, dann die gemerkte Wahl aus `hk-publish --ziel`.
+    **Geraten wird nie.** Es gibt keinen Standardwert: Ein falsch geratenes
+    Ziel schriebe in eine fremde Instanz, und das faellt erst dort auf.
+
+    Das Token bleibt in der Umgebung und wird nicht gemerkt. Eine Adresse ist
+    Konfiguration, ein Token ist ein Geheimnis, und die gemerkte Wahl liegt
+    unverschluesselt im Cache.
+    """
+    from .. import ablage
+    url = (os.environ.get("HENNIBOCK_URL") or "").strip().rstrip("/")
+    if url:
+        return url, "HENNIBOCK_URL"
+    url = str(ablage.gemerkt("hennibock_url") or "").strip().rstrip("/")
+    if url:
+        return url, "der gemerkten Wahl (hk-publish --ziel)"
+    return "", ""
+
+
+KEIN_ZIEL = ("FEHLER: kein HenniBock-Ziel. Kein Default, das Ziel wird nie "
+             "geraten.\n  hk-publish --ziel <url>   merkt es für dieses Gerät\n"
+             "  HENNIBOCK_URL=<url>       gilt für den einzelnen Aufruf und "
+             "geht vor")
+
+
 def send_bundle(bundle_path: Path, validate_only: bool = False) -> int:
-    url = (os.environ.get("HENNIBOCK_URL") or "").rstrip("/")
+    url, _woher = ziel()
     if not url:
-        print("FEHLER: HENNIBOCK_URL nicht gesetzt, Bundle nicht gesendet. "
-              "Kein Default, das Ziel wird nie geraten. Produktiv ist bignas:3333, "
-              "wet-henni ist nur die Testinstanz. Setze HENNIBOCK_URL in ~/.zshenv.",
-              file=sys.stderr)
+        print(KEIN_ZIEL + "\nBundle nicht gesendet.", file=sys.stderr)
         return 1
     token = os.environ.get("HENNIBOCK_IMPORT_TOKEN")
     if not token:

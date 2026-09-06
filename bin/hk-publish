@@ -7,11 +7,23 @@
     hk-publish build <notiz> [--send]       baut das Bundle, mit --send auch senden
     hk-publish attached <notiz>             prueft die Einhaengung in die Publikationen
 
+    hk-publish --ziel                       nennt das Ziel und woher es kommt
+    hk-publish --ziel <url>                 merkt es fuer dieses Geraet
+    hk-publish --ziel-loeschen              nimmt die Wahl zurueck
+
     --ablage <pfad>   eine andere Wissensbasis als die aktive
 
-Ziel und Zugang stehen in der Umgebung: `HENNIBOCK_URL` und
-`HENNIBOCK_IMPORT_TOKEN`. Es gibt keinen Standardwert fuer das Ziel. Gesendet
-wird erst an `/import/validate` und dann an `/import`.
+**Das Ziel wird nie geraten**, es gibt keinen Standardwert. Aufgeloest wird in
+zwei Stufen: `HENNIBOCK_URL` aus der Umgebung, sonst die gemerkte Wahl unter
+`~/.cache/hkf-harness/`. Die Umgebung geht vor, damit ein einzelner Aufruf
+gegen eine Testinstanz laufen kann, ohne die Wahl umzustellen.
+
+**Das Zugangstoken steht ausschliesslich in der Umgebung**, in
+`HENNIBOCK_IMPORT_TOKEN`. Es wird nicht gemerkt: Die gemerkte Wahl liegt
+unverschluesselt im Cache, und eine Adresse ist Konfiguration, ein Token ist
+ein Geheimnis.
+
+Gesendet wird erst an `/import/validate` und dann an `/import`.
 
 Vor jedem Bundle laeuft `hk-text --gate` ueber die enthaltenen Texte. Ein
 Befund der Severity `error` haelt an, und es entsteht kein Bundle. **Ein Gate,
@@ -29,7 +41,42 @@ import os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
 from hkf.hennibock import kern   # noqa: E402
 
+def ziel_verwalten(argv):
+    """--ziel und --ziel-loeschen. Gibt None zurueck, wenn nichts davon gemeint war."""
+    from hkf import ablage
+    if "--ziel-loeschen" in argv:
+        weg = ablage.gemerkt("hennibock_url", loeschen=True)
+        print("Wahl zurückgenommen: %s" % weg if weg else "Keine Wahl gemerkt.")
+        return 0
+    if "--ziel" not in argv:
+        return None
+    i = argv.index("--ziel")
+    wert = argv[i + 1] if i + 1 < len(argv) else None
+    if wert and not wert.startswith("-"):
+        if not wert.startswith(("http://", "https://")):
+            sys.stderr.write("Das Ziel ist eine Adresse mit Schema: "
+                             "http://… oder https://…\n")
+            return 2
+        ablage.gemerkt("hennibock_url", wert.rstrip("/"))
+        print("Gemerkt für dieses Gerät.")
+    url, woher = kern.ziel()
+    if not url:
+        sys.stderr.write(kern.KEIN_ZIEL + "\n")
+        return 1
+    print("Ziel:     %s" % url)
+    print("Herkunft: %s" % woher)
+    # Ob das Token da ist, gehoert hierher. Sein Wert nicht: Was einmal auf
+    # einem Bildschirm stand, steht spaeter in einem Protokoll.
+    print("Token:    %s"
+          % ("gesetzt" if os.environ.get("HENNIBOCK_IMPORT_TOKEN")
+             else "FEHLT, HENNIBOCK_IMPORT_TOKEN gehört in ~/.zshenv"))
+    return 0
+
+
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] in ("--help", "-h"):
         print(__doc__.strip()); sys.exit(0)
+    rueck = ziel_verwalten(sys.argv[1:])
+    if rueck is not None:
+        sys.exit(rueck)
     sys.exit(kern.main(["hk-publish"] + sys.argv[1:]))

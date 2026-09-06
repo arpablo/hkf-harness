@@ -1465,6 +1465,37 @@ created: 2026-01-01
                       _hbkette.strip_praefix("Der erste Text"))
             os.remove(pubdatei)
 
+        print("Das HenniBock-Ziel: gemerkt statt geraten")
+        pub = os.path.join(BIN, "hk-publish")
+        umg_z = dict(os.environ, HKF_WAHL=os.path.join(ziel, "ziel.json"))
+        umg_z.pop("HENNIBOCK_URL", None)
+        umg_z.pop("HENNIBOCK_IMPORT_TOKEN", None)
+        r = lauf(pub, "--ziel", env=umg_z)
+        probe("ohne Umgebung und ohne Wahl gibt es kein Ziel",
+              r.returncode == 1 and "nie geraten" in r.stderr, r.stderr)
+        r = lauf(pub, "--ziel", "bignas:3333", env=umg_z)
+        probe("eine Adresse ohne Schema wird abgewiesen",
+              r.returncode == 2, "%d %s" % (r.returncode, r.stderr))
+        r = lauf(pub, "--ziel", "http://probe.example:3333/", env=umg_z)
+        probe("mit Schema wird sie gemerkt",
+              r.returncode == 0 and "gemerkten Wahl" in r.stdout, r.stdout)
+        r = lauf(pub, "--ziel", env=umg_z)
+        probe("und beim nächsten Aufruf wiedergefunden",
+              "probe.example:3333" in r.stdout, r.stdout)
+        probe("der abschließende Schrägstrich fällt weg",
+              "probe.example:3333\n" in r.stdout.replace("Ziel:     ", ""), r.stdout)
+        probe("das fehlende Token wird gemeldet, ohne einen Wert zu nennen",
+              "Token:    FEHLT" in r.stdout, r.stdout)
+        r = lauf(pub, "--ziel", env=dict(umg_z, HENNIBOCK_URL="http://umgebung.example:1",
+                                         HENNIBOCK_IMPORT_TOKEN="geheim"))
+        probe("die Umgebung geht der gemerkten Wahl vor",
+              "umgebung.example" in r.stdout and "HENNIBOCK_URL" in r.stdout, r.stdout)
+        probe("und das gesetzte Token wird bestätigt, nicht ausgegeben",
+              "Token:    gesetzt" in r.stdout and "geheim" not in r.stdout, r.stdout)
+        r = lauf(pub, "--ziel-loeschen", env=umg_z)
+        probe("die Wahl lässt sich zurücknehmen",
+              "zurückgenommen" in r.stdout, r.stdout)
+
         print("Die Hooks: der Kanon kommt aus der Sitzung, nicht aus der Ablage")
         p_hooks = os.path.join(WURZEL, "hooks", "hooks.json")
         try:

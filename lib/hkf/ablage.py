@@ -103,6 +103,32 @@ def _sichern(daten):
         f.write("\n")
 
 
+def gemerkt(schluessel, wert=None, loeschen=False):
+    """Einen Wert neben der Ablagewahl merken, in derselben Datei.
+
+    Dieselbe Not wie bei der Ablage: Ein `export` ueberlebt einen
+    Werkzeugaufruf nicht, und `userConfig` erreicht nur Hooks und
+    MCP-Subprozesse, kein Werkzeug in `bin/`. Was ein Werkzeug zwischen zwei
+    Aufrufen wissen soll, muss auf der Platte stehen.
+
+    Ohne `wert` und ohne `loeschen` wird nur gelesen. **Nichts hiervon ist ein
+    Ort fuer ein Geheimnis:** Die Datei liegt unverschluesselt im Cache. Ein
+    Zugangstoken bleibt in der Umgebung.
+    """
+    if loeschen:
+        daten = _stand()
+        weg = daten.get("gemerkt", {}).pop(schluessel, None)
+        if weg is not None:
+            _sichern(daten)
+        return weg
+    if wert is None:
+        return _stand().get("gemerkt", {}).get(schluessel)
+    daten = _stand()
+    daten.setdefault("gemerkt", {})[schluessel] = wert
+    _sichern(daten)
+    return wert
+
+
 def gewaehlt(wo=None):
     """Der Pfad, der fuer dieses Arbeitsverzeichnis gemerkt ist."""
     wo = os.path.abspath(wo or os.getcwd())
