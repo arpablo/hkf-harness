@@ -113,6 +113,33 @@ def _kaputt(ziel):
         "Es zeigt auf [[zwei]].\n")
 
 
+def _obsidian_kaputt(ziel):
+    """Eine Vorlage und eine Base, wie Obsidian sie fuehrt, beide fehlerhaft.
+
+    Nachgestellt sind die drei Faelle vom 06.09.2026: eine Vorlage mit einem
+    `type`, das auf keine Typseite zeigt, eine Vorlage mit einer Property, die
+    ihr Typ nicht kennt, und eine Base, die ueber ein Feld rechnet, das es
+    nicht gibt, plus eine Einbettung, deren Alias keine Ansicht benennt.
+    """
+    v = os.path.join(ziel, KONFIG, "Templates")
+    os.makedirs(v, exist_ok=True)
+    _schreib(os.path.join(v, "Template Ding.md"),
+             '---\ntype: "[[%s/Types/Kiste|Kiste]]"\nfarbe:\n---\n\nEin Ding.\n'
+             % KONFIG)
+    _schreib(os.path.join(v, "Template Note.md"),
+             "---\ntype: note\nunfug: ja\n---\n\nEine Notiz.\n")
+    bs = os.path.join(ziel, KONFIG, "Bases")
+    os.makedirs(bs, exist_ok=True)
+    _schreib(os.path.join(bs, "Note.base"),
+             "filters:\n  and:\n    - type == link(\"note\")\n"
+             "formulas:\n  wo: note.gibtsnicht\n"
+             "views:\n  - type: table\n    name: Alle\n")
+    _schreib(os.path.join(ziel, WIKI, "Notes", "schaufenster.md"),
+             "---\ntype: note\ntitle: Schaufenster\ncreated: 2026-01-01\n"
+             "modified: 2026-01-01T00:00:00\n---\n\n"
+             "![[%s/Bases/Note.base|Note]]\n" % KONFIG)
+
+
 def hkf_venv():
     return os.environ.get("HKF_VENV") or os.path.join(
         os.path.expanduser("~"), ".cache", "hkf-harness", "venv")
@@ -327,6 +354,28 @@ Eine Notiz aus der Zeit vor der Umbenennung.
               "menge" not in lauf(os.path.join(BIN, "hk-lint"), ziel,
                                   "--fix").stdout.split("Korrigiert")[-1]
               .split("Dateien geprüft")[0])
+        shutil.rmtree(ziel)
+        lauf(os.path.join(BIN, "hk-init"), ziel, "--name", "Probe")
+
+        print("Vorlagen und Bases: was Obsidian gehört, aber Notizen macht")
+        _obsidian_kaputt(ziel)
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        for was, muster in (
+                ("eine Vorlage, deren `type` auf keine Typseite zeigt",
+                 "dort liegt keine Typseite mit Typdefinition"),
+                ("eine Vorlage mit einer Property, die ihr Typ nicht führt",
+                 "nennt Properties, die `note` nicht führt: unfug"),
+                ("eine Base, die über ein unbekanntes Feld rechnet",
+                 "rechnet über Properties, die keine Typdefinition führt: "
+                 "`gibtsnicht`"),
+                ("eine Einbettung, deren Alias keine Ansicht benennt",
+                 "führt keine Ansicht `Note`, sondern `Alle`")):
+            probe("meldet %s" % was, muster in r.stdout, r.stdout)
+        probe("und `--fix` rät keine Ansicht",
+              "Alle]]" not in io.open(
+                  os.path.join(ziel, WIKI, "Notes", "schaufenster.md"),
+                  encoding="utf-8").read()
+              if lauf(os.path.join(BIN, "hk-lint"), ziel, "--fix") else True)
         shutil.rmtree(ziel)
         lauf(os.path.join(BIN, "hk-init"), ziel, "--name", "Probe")
 

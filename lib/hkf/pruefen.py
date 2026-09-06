@@ -21,6 +21,18 @@ from .importieren import (ARTVERZEICHNIS, KERN_TYPEN, OHNE,
 FEHLER, HINWEIS = "fehler", "hinweis"
 LINK = re.compile(r"\[\[([^\]|\\]+)(?:\\?\|([^\]]*))?\]\]")
 
+# Was Anhang A.2 jeder Notiz gibt, gleich welchen Typs.
+A2 = frozenset(("type", "title", "description", "tags", "aliases", "cssclasses",
+                "status", "created", "modified", "modified_by", "bundles",
+                "related", "rejected_links", "extends", "sources"))
+
+# Zwei Verzeichnisse unter `config_base`, die Obsidian gehoeren und nicht HKF.
+# Das Format kennt sie nicht und verlangt sie nicht. Wer sie fuehrt, laesst sie
+# aber bestimmen, wie eine neue Notiz zur Welt kommt und was eine Notiz
+# anzeigt — und genau das entzieht sich jeder anderen Pruefung, weil dort keine
+# Notizen liegen.
+VORLAGEN, BASEN = "Templates", "Bases"
+
 
 def ohne_code(text):
     """Was in Backticks steht, ist ein Beispiel und kein Verweis.
@@ -707,9 +719,7 @@ def _verwaist(b, befunde):
 
 def undeklariert(b):
     """--strict: je Typ und Property-Name, mit der Zahl der Notizen (§6.3)."""
-    allgemein = {"type", "title", "description", "tags", "aliases", "cssclasses",
-                 "status", "created", "modified", "modified_by", "bundles",
-                 "related", "rejected_links", "extends", "sources"}
+    allgemein = A2
     je_typ, gesamt = {}, {}
     for rel, e in sorted(b.notizen.items()):
         typ = e["typ"]
@@ -1076,6 +1086,135 @@ def _typseiten(b, befunde):
                                   % (typ, ", ".join(ids))))
 
 
+def _vorlagen(b, befunde):
+    """Die Vorlagen unter `<config_base>/Templates/` (§6.3).
+
+    Eine Vorlage ist keine Notiz und liegt in keinem Typverzeichnis, also sieht
+    sie keine andere Pruefung: `hk-verweise` qualifiziert ihre Verweise nicht,
+    `hk-lint` nennt ihre Properties nicht. Sie bestimmt trotzdem, womit jede
+    neue Notiz anfaengt.
+
+    Am 06.09.2026 trugen in HenrietteEinstein alle sieben Vorlagen noch
+    unqualifizierte `type`-Verweise und eine ein Feld, das seit dem Umbau anders
+    hiess. Die naechste Notiz daraus waere mit genau den Fehlern entstanden, die
+    der Umbau beseitigt hatte.
+    """
+    verz = os.path.join(b.konfig, VORLAGEN)
+    if b.art != "hkb" or not os.path.isdir(verz):
+        return
+    for f in sorted(os.listdir(verz)):
+        if not f.endswith(".md"):
+            continue
+        rel = "%s/%s" % (VORLAGEN, f)
+        daten = frontmatter.lesen(os.path.join(verz, f))[0] or {}
+        wert = daten.get("type")
+        if not wert:
+            befunde.append(Befund(rel, "trägt kein `type`; eine Notiz aus dieser "
+                                       "Vorlage hätte keinen (§3.3)."))
+            continue
+        ziel = notiz.linkziel(wert)
+        if ziel is None:
+            name = str(wert)                      # Textform, §3.3
+        else:
+            _, rest = b.aufloesen(ziel)
+            ts = b.typseiten.get(rest)
+            if ts is None or not ts.get("typ"):
+                befunde.append(Befund(rel, "`type` zeigt auf %s; dort liegt keine "
+                                      "Typseite mit Typdefinition. Jede Notiz aus "
+                                      "dieser Vorlage träte mit diesem Verweis an "
+                                      "(§3.3)." % wert))
+                continue
+            name = ts["typ"]
+        if name not in b.typdefs:
+            befunde.append(Befund(rel, "`type` nennt `%s`, wofür keine "
+                                  "Typdefinition vorliegt (§3.7)." % name))
+            continue
+        erlaubt = set(_property_tabelle(b.typdefs[name]["body"])) | A2
+        fremd = sorted(k for k in daten if k not in erlaubt)
+        if fremd:
+            befunde.append(Befund(rel, "nennt Properties, die `%s` nicht führt: "
+                                  "%s (§3.7)." % (name, ", ".join(fremd))))
+
+
+# Was in einer `.base` einen Property-Namen nennt. `note.x` liest die Property
+# der Notiz, `….properties.x` die einer anderen, ueber `asFile()` erreichten.
+BASE_PROPERTY = re.compile(r"\bnote\.([a-z][a-z0-9_-]*)"
+                           r"|\.properties\.([a-z][a-z0-9_-]*)")
+BASE_EINBETTUNG = re.compile(r"!\[\[([^\]|\n]*?([^/\]|\n]+)\.base)"
+                             r"(?:\|([^\]\n]*))?\]\]")
+
+
+def _basen(b, befunde):
+    """Die Bases unter `<config_base>/Bases/` und ihre Einbettungen (§6.3).
+
+    Eine `.base` rechnet ueber Property-Namen, und sie sagt nicht, wenn einer
+    davon nirgends mehr vorkommt: Die Spalte bleibt leer, die Tabelle steht da
+    wie immer. In HenrietteEinstein rechneten am 06.09.2026 fuenf von sechs
+    Spalten ueber ein Feld, das eine Stunde zuvor umbenannt worden war.
+
+    Der Teil hinter dem senkrechten Strich einer Einbettung ist bei einer
+    `.base` **kein Anzeigename, sondern der Name einer Ansicht.** Wer dort den
+    Alias einsetzt, den §3.6 fuer Notizen verlangt, waehlt eine Ansicht, die es
+    nicht gibt.
+    """
+    verz = os.path.join(b.konfig, BASEN)
+    if b.art != "hkb" or not os.path.isdir(verz):
+        return
+    bekannt = set(A2)
+    for e in b.typdefs.values():
+        bekannt |= set(_property_tabelle(e["body"] or ""))
+    ansichten = {}
+    for f in sorted(os.listdir(verz)):
+        if not f.endswith(".base"):
+            continue
+        rel = "%s/%s" % (BASEN, f)
+        text = io.open(os.path.join(verz, f), encoding="utf-8").read()
+        try:
+            daten = yaml.safe_load(text) or {}
+        except yaml.YAMLError as x:
+            befunde.append(Befund(rel, "ist kein lesbares YAML: %s"
+                                  % str(x).split("\n")[0]))
+            continue
+        ansichten[f[:-5]] = [str(v.get("name")) for v in (daten.get("views") or [])
+                             if isinstance(v, dict) and v.get("name")]
+        genannt = set()
+        for a, c in BASE_PROPERTY.findall(text):
+            genannt.add(a or c)
+        fremd = sorted(x for x in genannt if x not in bekannt)
+        if fremd:
+            befunde.append(Befund(rel, "rechnet über Properties, die keine "
+                                  "Typdefinition führt: %s. Die Spalte bleibt "
+                                  "leer, und die Tabelle sieht aus wie immer "
+                                  "(§3.7)." % ", ".join("`%s`" % x for x in fremd)))
+    if not ansichten:
+        return
+    # Notizen und Typseiten. Letztere haelt der Bestand ohne Body, weil sie
+    # keine Notizen sind — sie betten aber genauso eine Base ein, und in
+    # HenrietteEinstein taten es vier von neun.
+    stellen = [(e["rel"], notiz.bauen(e["kopf"], e["body"]))
+               for _rel, e in sorted(b.notizen.items())]
+    typverz = os.path.join(b.konfig, ablage.TYPES)
+    if os.path.isdir(typverz):
+        for f in sorted(os.listdir(typverz)):
+            if f.endswith(".md"):
+                stellen.append(("%s/%s" % (ablage.TYPES, f),
+                                io.open(os.path.join(typverz, f),
+                                        encoding="utf-8").read()))
+    for wo, text in stellen:
+        for ganz, name, alias in BASE_EINBETTUNG.findall(text):
+            if name not in ansichten:
+                continue                          # `_verweise` meldet das Ziel
+            if alias and alias not in ansichten[name]:
+                befunde.append(Befund(wo, "`![[%s|%s]]`: %s führt keine "
+                                      "Ansicht `%s`, sondern %s. Der Teil hinter "
+                                      "dem Strich wählt bei einer Base die "
+                                      "Ansicht und ist kein Alias (§3.6)."
+                                      % (ganz, alias, name, alias,
+                                         ", ".join("`%s`" % v
+                                                   for v in ansichten[name])
+                                         or "keine")))
+
+
 def _grundtypen_der_angabe(angabe):
     """Die Typen einer Typangabe ohne ihre Argumente (§3.7.3).
 
@@ -1110,7 +1249,8 @@ def _ein_name_eine_angabe(b, befunde):
 
 PRUEFUNGEN = PRUEFUNGEN + (_typangaben, _werte, _vorgaben,
                            _medienverzeichnisse, _quellenverzeichnisse,
-                           _typseiten, _ein_name_eine_angabe)
+                           _typseiten, _ein_name_eine_angabe,
+                           _vorlagen, _basen)
 
 
 # ── Was nur für ein Bundle gilt (§4, §7.1) ──────────────────────────────
