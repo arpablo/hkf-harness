@@ -194,8 +194,20 @@ def _siehe_auch(b, getan):
         teil = notiz.abschnitt(e["body"], "Verbindungen")
         if teil is None:
             continue
-        zeilen = [z for z in teil.strip("\n").splitlines() if z.startswith("- ")]
+        roh = teil.strip("\n").splitlines()
+        zeilen = [z for z in roh if z.startswith("- ")]
         if not zeilen:
+            continue
+        # Alles, was keine Listenzeile ist, hat dieses Werkzeug bis zum
+        # 06.09.2026 weggeworfen: Unterueberschriften, ein einleitender Satz,
+        # eine Zwischenbemerkung. In einer Ablage, die den Abschnitt nach
+        # Figuren, Orten und Motiven gliedert, loeschte ein einziger Lauf die
+        # Gliederung aus 53 Texten, und `--fix` meldete es als "geordnet".
+        #
+        # Umordnen darf nur, wer den Abschnitt vollstaendig versteht. Traegt er
+        # mehr als Listenzeilen, bleibt er stehen; `hk-lint` nennt ihn
+        # weiterhin, und ein Mensch entscheidet.
+        if any(z.strip() for z in roh if not z.startswith("- ")):
             continue
         geordnet = sorted(zeilen, key=lambda z: (
             re.sub(r"^- \[\[[^\]|]*\|?", "", z).split("]]")[0] or z).lower())
