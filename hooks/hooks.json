@@ -1,5 +1,5 @@
 {
-  "description": "HKF: sagt zu Sitzungsbeginn, wo gearbeitet wird und welche Regeln gelten, und hält einen Schreibvorgang an, der gegen die harten Schreibregeln verstößt",
+  "description": "HKF: sagt zu Sitzungsbeginn, wo gearbeitet wird und welche Regeln gelten, meldet einen Rückstand gegenüber dem Remote und hält einen Schreibvorgang an, der gegen die harten Schreibregeln verstößt",
   "hooks": {
     "SessionStart": [
       {
@@ -7,6 +7,15 @@
           {
             "type": "command",
             "command": "\"${CLAUDE_PLUGIN_ROOT}/py\" \"${CLAUDE_PLUGIN_ROOT}/hooks/sitzung.py\"",
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/py\" \"${CLAUDE_PLUGIN_ROOT}/hooks/abgleich.py\"",
             "timeout": 15
           }
         ]

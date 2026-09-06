@@ -1482,6 +1482,40 @@ created: 2026-01-01
         probe("jede genannte Datei liegt im Repository", not fehlend,
               ", ".join(fehlend))
 
+        # Der Abgleich mit dem Remote: Er schweigt, solange nichts auseinander
+        # laeuft, und er blockiert nie. Beides wird geprueft, denn ein Hook,
+        # der bei jedem Start etwas sagt, wird nach dem dritten Mal nicht mehr
+        # gelesen, und einer, der haengt, kostet jede Sitzung.
+        abgleich = os.path.join(WURZEL, "hooks", "abgleich.py")
+        probe_repo = os.path.join(os.path.dirname(ziel), "abgleich-probe")
+        shutil.rmtree(probe_repo, ignore_errors=True)
+        os.makedirs(os.path.join(probe_repo, "fern"))
+        lauf("git", "init", "-q", "--bare", os.path.join(probe_repo, "fern"))
+        lauf("git", "clone", "-q", os.path.join(probe_repo, "fern"),
+             os.path.join(probe_repo, "nah"))
+        nah = os.path.join(probe_repo, "nah")
+        for k, v in (("user.email", "p@p"), ("user.name", "Probe")):
+            lauf("git", "-C", nah, "config", k, v)
+        _schreib(os.path.join(nah, "hkb.md"), '---\nhkf: "1.0"\nname: Probe\n---\n')
+        lauf("git", "-C", nah, "add", "-A")
+        lauf("git", "-C", nah, "commit", "-qm", "eins")
+        zweig = lauf("git", "-C", nah, "rev-parse", "--abbrev-ref",
+                     "HEAD").stdout.strip()
+        lauf("git", "-C", nah, "push", "-q", "origin", zweig)
+        r = lauf(os.path.join(WURZEL, "py"), abgleich,
+                 input=json.dumps({"cwd": nah}))
+        probe("der Abgleich schweigt, solange nichts auseinanderläuft",
+              not r.stdout.strip() and r.returncode == 0, r.stdout)
+        _schreib(os.path.join(nah, "zwei.md"), "zwei\n")
+        lauf("git", "-C", nah, "add", "-A")
+        lauf("git", "-C", nah, "commit", "-qm", "zwei")
+        r = lauf(os.path.join(WURZEL, "py"), abgleich,
+                 input=json.dumps({"cwd": nah}))
+        probe("und meldet einen Commit, der noch nicht auf dem Remote liegt",
+              "noch nicht auf origin/%s" % zweig in r.stdout, r.stdout)
+        probe("ohne zu blockieren", r.returncode == 0, str(r.returncode))
+        shutil.rmtree(probe_repo, ignore_errors=True)
+
         umg = dict(os.environ, HKF_WAHL=os.path.join(ziel, "wahl.json"))
         umg.pop("HKB_PATH", None)
         sitzung = os.path.join(WURZEL, "hooks", "sitzung.py")
