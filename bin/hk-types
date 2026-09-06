@@ -33,13 +33,20 @@ from hkf import ablage, frontmatter, notiz                   # noqa: E402
 
 BASES = "Bases"
 
+# Der Name der Ansicht, die `BASE` anlegt. Er steht hier und nicht zweimal im
+# Text: Die Typseite bettet die Base mit genau diesem Namen hinter dem
+# senkrechten Strich ein, und dort ist er **kein Alias, sondern die Wahl der
+# Ansicht.** Bis zum 06.09.2026 stand dort der Kurzname des Typs, und jede von
+# `hk-types` erzeugte Typseite waehlte damit eine Ansicht, die es nicht gab.
+ANSICHT = "Tabelle"
+
 SEITE = """---
 definition: "[[%(pfad)s/Typedefs/%(typ)s|%(typ)s]]"
 aliases: %(kurz)s
 ---
 ## Notizen
 
-![[%(pfad)s/%(bases)s/%(kurz)s.base|%(kurz)s]]
+![[%(pfad)s/%(bases)s/%(kurz)s.base|%(ansicht)s]]
 """
 
 SEITE_OHNE_BASE = """---
@@ -54,7 +61,7 @@ BASE = """filters:
     - '!file.path.startsWith("%(konfig)s/Templates")'
 views:
   - type: table
-    name: Tabelle
+    name: %(ansicht)s
 """
 
 
@@ -102,7 +109,7 @@ def main(argv):
     for typ in typen:
         kurz = kurzname(typ)
         felder = {"pfad": pfad, "konfig": konfig, "typ": typ, "kurz": kurz,
-                  "bases": BASES}
+                  "bases": BASES, "ansicht": ANSICHT}
         ziel = os.path.join(konfigverz, ablage.TYPES, "Type %s.md" % kurz)
         if typ in schon and not force:
             uebergangen.append("%s → %s" % (typ, schon[typ]))
