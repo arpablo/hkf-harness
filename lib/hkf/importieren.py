@@ -390,7 +390,12 @@ def _typen_abgleichen(plan, kandidaten, vorliegende_bundles, fehlende_bundles,
         gel = geliefert.get(name)
         if name not in vorhanden:
             # ── neu, aus der Lieferung oder vorlaeufig (§5.4)
-            verz = _verzeichnis(name, gel[0]) if gel else name + "s"
+            # `_verzeichnis` auch fuer den vorlaeufigen Fall: Hier stand
+            # `name + "s"`, und ein vorlaeufiger Typ bekam sein Verzeichnis
+            # damit kleingeschrieben. Bei `typedef` hiess es `typedefs`, und
+            # die Verweise des Importberichts zeigten auf ein Verzeichnis,
+            # das es nicht gibt — acht tote Links je Lieferung.
+            verz = _verzeichnis(name, gel[0] if gel else None)
             if verz in belegt and belegt[verz] != name:
                 plan.abweisen(
                     "Verzeichnis %s gehoert schon dem Typ %s; %s kann dort nicht "
