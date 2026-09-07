@@ -13,18 +13,22 @@ from . import frontmatter, notiz
 
 VORGABE = "~/hkb"
 
-# Die fuenf Bereiche einer Ablage (§3.1) mit ihren Vorgaben. Die Zahlenpraefixe
-# ordnen sie in der Anzeige jedes Dateibrowsers.
-BEREICHE = ("wiki_base", "source_base", "output_base", "media_base",
-            "config_base")
-VORGABEN = {"wiki_base": "40-Wiki", "source_base": "50-Sources",
+# Die sieben Bereiche einer Ablage (§3.1) mit ihren Vorgaben. Die
+# Zahlenpraefixe ordnen sie in der Anzeige jedes Dateibrowsers.
+BEREICHE = ("inbox_base", "journal_base", "wiki_base", "source_base",
+            "output_base", "media_base", "config_base")
+VORGABEN = {"inbox_base": "00-Inbox", "journal_base": "10-Journal",
+            "wiki_base": "40-Wiki", "source_base": "50-Sources",
             "output_base": "60-Output", "media_base": "80-Media",
             "config_base": "90-System"}
 
 # Unter welchen Bereichen Notizen liegen (§3.2). `media_base` fehlt: Dort
-# liegen Dateien. Die Liste stand an sieben Stellen einzeln, und beim fuenften
-# Bereich waere sie an sechsen unvollstaendig geblieben.
-NOTIZBEREICHE = ("wiki_base", "source_base", "output_base", "config_base")
+# liegen Dateien. `inbox_base` fehlt aus einem anderen Grund: Dort liegt, was
+# noch keine Notiz ist, und HKF prueft es nicht (§3.2.6). Die Liste stand an
+# sieben Stellen einzeln, und beim fuenften Bereich waere sie an sechsen
+# unvollstaendig geblieben.
+NOTIZBEREICHE = ("wiki_base", "source_base", "output_base", "config_base",
+                 "journal_base")
 
 # Unter `config_base` liegen genau zwei Typen: `typedef` und `proptype`
 # (§3.2). Ihre Verzeichnisse stehen hier als Namen und nicht als `dir` der
@@ -367,7 +371,7 @@ def typen(pfad):
 def bereich_von(bereiche, rel):
     """(Bereich, Pfad ab dem Bereich) fuer eine Datei unter der Wurzel.
 
-    Liegt sie unter keinem der vier, kommt (None, rel) zurueck. Bereiche
+    Liegt sie unter keinem der sieben, kommt (None, rel) zurueck. Bereiche
     liegen nicht ineinander (§3.1); der laengste Treffer gewinnt trotzdem,
     damit ein leerer Bereich, der mit der Wurzel zusammenfaellt, keinen
     benannten verdeckt.
@@ -389,7 +393,7 @@ def bereich_von(bereiche, rel):
 def konfigfremd(bereich, rel):
     """Liegt unter `config_base`, aber in keinem seiner Typverzeichnisse.
 
-    Zur Ablage gehoeren die Wurzeldatei und die vier Bereiche (§3.2), und
+    Zur Ablage gehoeren die Wurzeldatei und die sieben Bereiche (§3.2), und
     unter `config_base` liegen genau zwei Typen. Ein anderes Verzeichnis dort
     gehoert nicht dazu und wird weder geprueft noch verwaltet — ein
     Vorlagenordner etwa, dessen Dateien `type` tragen, weil sie den Typ

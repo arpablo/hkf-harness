@@ -86,12 +86,14 @@ class Bestand(object):
             self.ablagepfad = ablage.ablagepfad(hkb)
             self.media_basis = self.bereiche["media_base"]
             self.quellbasis = self.bereiche["source_base"]
+            self.journalbasis = self.bereiche["journal_base"]
             self.base = self.bereiche["wiki_base"]
             self._hkb_lesen()
         else:
             self.basis, self.konfig, self.ablagepfad = hkb, hkb, ""
             self.bereiche = dict((k, "") for k in ablage.BEREICHE)
             self.media_basis, self.base, self.quellbasis = "", "", ""
+            self.journalbasis = ""
             self._bundle_lesen()
         self.nach_namen = {}
         for rel in self.notizen:
@@ -144,8 +146,13 @@ class Bestand(object):
                     if anderer is not None and anderer != schluessel:
                         continue
                 # Eine Notiz liegt in ihrem Typverzeichnis — ausser der
-                # Quellennotiz: `source` fuehrt keines (§3.2.2).
-                if "/" not in rel and schluessel != "source_base":
+                # Quellennotiz und dem Tageseintrag: `source` fuehrt keines
+                # (§3.2.2), `daily` auch nicht (§3.2.5). Beim Journal wird die
+                # Datei trotzdem gelesen, wenn sie flach darunter liegt: Sie
+                # gehoert dann in ein Jahr und einen Monat, und das sagt
+                # `_journal` und nicht das Schweigen dieser Schleife.
+                if "/" not in rel and schluessel not in ("source_base",
+                                                         "journal_base"):
                     continue
                 if ablage.konfigfremd(schluessel, rel):
                     continue
@@ -357,7 +364,11 @@ def _typen(b, befunde):
         return
     verz = b.verzeichnisse()
     for d, namen in sorted(verz.items()):
-        if len(namen) > 1:
+        # Der leere Schluessel sammelt die Typen ohne Typverzeichnis, heute
+        # `source` und `daily`. Sie kollidieren nicht miteinander, sondern
+        # liegen unmittelbar unter je einem Bereich, und dass zwei Bereiche
+        # nicht denselben Pfad tragen, prueft `_bereiche_ueberschneiden`.
+        if len(namen) > 1 and d:
             befunde.append(Befund("Typedefs/", "Das Verzeichnis %s beanspruchen "
                                   "%s (§6.3)." % (d, " und ".join(sorted(namen)))))
         if d.startswith("/") or d.endswith("/") or ".." in d.split("/"):
@@ -713,6 +724,11 @@ def _verwaist(b, befunde):
     for rel, e in sorted(b.notizen.items()):
         if rel in zeigt_auf or e["typ"] in KERN_TYPEN or rel.startswith("Proptypes/"):
             continue
+        # Ein Tageseintrag ist nicht ueber Verweise erreichbar, sondern ueber
+        # sein Datum, und das steht im Pfad (§3.2.5). Der Hinweis traefe hier
+        # jeden Eintrag und jeden Tag einen mehr, bis ihn niemand mehr liest.
+        if e["typ"] == "daily" or e.get("bereich") == "journal_base":
+            continue
         befunde.append(Befund(e["rel"], "Auf diese Notiz zeigt kein Verweis; sie ist "
                               "über die Wissensbasis nicht erreichbar (§6.3).", HINWEIS))
 
@@ -1048,6 +1064,44 @@ def _quellenverzeichnisse(b, befunde):
                                             "Verzeichnis (§3.2.2)."))
 
 
+TAGESEINTRAG = re.compile(r"^(\d{4})/(\d{2})/(\d{4})-(\d{2})-(\d{2})$")
+
+
+def _journalverzeichnis(b, befunde):
+    """Unter journal_base liegen Jahr, Monat, Tageseintrag (§3.2.5).
+
+    Die Gliederung ist hier vorgeschrieben und nicht freigestellt wie sonst
+    ein Unterverzeichnis: Der Pfad nennt denselben Tag wie der Dateiname, und
+    zwei Angaben derselben Tatsache muessen uebereinstimmen, sonst sagt der
+    Pfad zweierlei. Geprueft wird beides, die Form und die Uebereinstimmung.
+    """
+    if b.art != "hkb" or not b.journalbasis:
+        return
+    for name, e in sorted(b.typdefs.items()):
+        d = str(e["daten"].get("dir") or "")
+        if d and (d == b.journalbasis or d.startswith(b.journalbasis + "/")):
+            befunde.append(Befund(e["rel"], "`dir` liegt unter `journal_base`; "
+                                            "dort liegen die Tageseinträge, "
+                                            "und `daily` führt kein "
+                                            "Verzeichnis (§3.2.5)."))
+    for _, e in sorted(b.notizen.items()):
+        if e.get("bereich") != "journal_base":
+            continue
+        # `rel` ist der Pfad ab dem Bereich (§3.2 Regel 4), traegt ihn also
+        # nicht vorn. Er ist zugleich die Notiz-ID, wenn man `.md` abzieht.
+        rel = e["rel"]
+        m = TAGESEINTRAG.match(rel[:-3] if rel.endswith(".md") else rel)
+        if m is None:
+            befunde.append(Befund(rel, "liegt nicht als `<jjjj>/<mm>/"
+                                       "<jjjj-mm-tt>.md` unter `journal_base` "
+                                       "(§3.2.5)."))
+            continue
+        jahr, monat, dj, dm, _dt = m.groups()
+        if (jahr, monat) != (dj, dm):
+            befunde.append(Befund(rel, "liegt in %s/%s, der Dateiname nennt "
+                                       "%s-%s (§3.2.5)." % (jahr, monat, dj, dm)))
+
+
 def _typseiten(b, befunde):
     """Die Typseiten unter `<config_base>/Types/` (§3.3).
 
@@ -1249,8 +1303,8 @@ def _ein_name_eine_angabe(b, befunde):
 
 PRUEFUNGEN = PRUEFUNGEN + (_typangaben, _werte, _vorgaben,
                            _medienverzeichnisse, _quellenverzeichnisse,
-                           _typseiten, _ein_name_eine_angabe,
-                           _vorlagen, _basen)
+                           _journalverzeichnis, _typseiten,
+                           _ein_name_eine_angabe, _vorlagen, _basen)
 
 
 # ── Was nur für ein Bundle gilt (§4, §7.1) ──────────────────────────────

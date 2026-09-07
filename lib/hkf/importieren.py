@@ -341,10 +341,11 @@ def _verzeichnis(name, daten=None):
     nicht (§3.2 Regel 4): Typverzeichnisse sind eindeutig, also ist die ID es
     auch, und ein Umzug des Bereichs laesst sie unberuehrt.
 
-    `source` fuehrt als einziger Typ keines. Er liegt unmittelbar unter
-    `source_base` (§3.2.2), und seine Notiz-ID ist der blosse Dateiname.
+    Zwei Typen fuehren keines: `source` liegt unmittelbar unter
+    `source_base` (§3.2.2), `daily` unter `journal_base` in Jahr und Monat
+    (§3.2.5). Die Notiz-ID ist dort der Pfad ab dem Bereich.
     """
-    if name == "source":
+    if name in ("source", "daily"):
         return ""
     daten = daten or {}
     return str(daten.get("dir") or (name[:1].upper() + name[1:] + "s"))
@@ -353,13 +354,14 @@ def _verzeichnis(name, daten=None):
 # Was `base` in einer Typdefinition heissen darf (§3.2). `media` steht nicht
 # dabei: Dort liegen Dateien und keine Notizen.
 BEREICHSNAMEN = {"wiki": "wiki_base", "source": "source_base",
-                 "output": "output_base", "config": "config_base"}
+                 "output": "output_base", "config": "config_base",
+                 "journal": "journal_base"}
 
 
 def _bereich(name, daten=None):
     """Unter welchem Bereich der Typ liegt (§3.2).
 
-    Es sagt die Typdefinition mit `base`. Drei Typnamen tragen ihren Bereich
+    Es sagt die Typdefinition mit `base`. Vier Typnamen tragen ihren Bereich
     schon im Namen und brauchen die Angabe nicht.
     """
     wert = str((daten or {}).get("base") or "").strip()
@@ -369,6 +371,8 @@ def _bereich(name, daten=None):
         return "config_base"
     if name == "source":
         return "source_base"
+    if name == "daily":
+        return "journal_base"
     return "wiki_base"
 
 

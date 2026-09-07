@@ -194,7 +194,7 @@ def main():
         print("hk-init")
         r = lauf(os.path.join(BIN, "hk-init"), ziel, "--name", "Probe")
         probe("legt an", r.returncode == 0, r.stderr.strip())
-        probe("35 Notizen", "35 Notizen" in r.stdout, r.stdout.strip())
+        probe("36 Notizen", "36 Notizen" in r.stdout, r.stdout.strip())
         wurzel = io.open(os.path.join(ziel, "hkb.md"), encoding="utf-8").read()
         probe("Wurzeldatei traegt den Namen", "name: Probe" in wurzel)
         probe("und die vier Bereiche (§3.1)",
@@ -960,7 +960,7 @@ Ein Verweis auf [[Persons/ada|Ada]].
                         % (os.path.join(WURZEL, "lib"), leer)],
                        capture_output=True, text=True).stdout.strip()
         probe("jede Notiz steht genau einmal im Bestand",
-              zahl == "37", "%s statt 37" % zahl)
+              zahl == "38", "%s statt 38" % zahl)
         shutil.rmtree(os.path.dirname(leer), ignore_errors=True)
 
         print("hk-verweise: aus einem kurzen Verweis wird ein qualifizierter")
@@ -2250,6 +2250,49 @@ Verweis auf [[Notes/gibt-es-nicht|etwas]].
         r = lauf(os.path.join(BIN, "hk-lint"), ziel)
         probe("und die Grundausstattung selbst ist frei davon",
               "verschiedene Typangaben" not in r.stdout, r.stdout)
+
+        print("Journal und Inbox (§3.2.5, §3.2.6)")
+        jb = os.path.join(ziel, "10-Journal", "2026", "09")
+        eintrag = """---
+type: daily
+title: 7. September 2026
+created: 2026-09-07
+modified: 2026-09-07T15:00:00
+---
+
+Was an diesem Tag anfiel.
+"""
+        _schreib(os.path.join(jb, "2026-09-07.md"), eintrag)
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        probe("ein Tageseintrag in Jahr und Monat ist ohne Befund",
+              "§3.2.5" not in r.stdout, r.stdout[-400:])
+        probe("und er bekommt keinen Verwaist-Hinweis",
+              "2026/09/2026-09-07.md: Auf diese Notiz" not in r.stdout,
+              r.stdout[-400:])
+
+        flach = os.path.join(ziel, "10-Journal", "2026-09-08.md")
+        _schreib(flach, eintrag)
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        probe("flach unter dem Bereich ist ein Befund",
+              "liegt nicht als `<jjjj>/<mm>/<jjjj-mm-tt>.md`" in r.stdout,
+              r.stdout[-400:])
+        os.remove(flach)
+
+        falsch = os.path.join(ziel, "10-Journal", "2026", "08", "2026-09-09.md")
+        _schreib(falsch, eintrag)
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        probe("Monat und Dateiname müssen übereinstimmen",
+              "der Dateiname nennt 2026-09" in r.stdout, r.stdout[-400:])
+        shutil.rmtree(os.path.dirname(falsch), ignore_errors=True)
+
+        # Die Inbox ist der einzige Ort, an dem etwas liegen darf, das die
+        # Regeln nicht erfuellt (§3.2.6). Wer sie prueft, macht sie kaputt.
+        _schreib(os.path.join(ziel, "00-Inbox", "fragment.md"),
+                 "kaputt: [\nkein Frontmatter, kein Typ\n")
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        probe("die Inbox wird nicht geprüft",
+              r.returncode == 0 and "fragment" not in r.stdout,
+              r.stdout[-400:])
 
         print("Das Inventar: Prosa, Schema und Grundausstattung")
         # Die Pruefung braucht keine Ablage — sie haelt den Harness gegen die

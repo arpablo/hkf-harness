@@ -32,12 +32,14 @@ Der Satz, aus dem alles Übrige folgt:
 
 Was eine der beiden Proben nicht besteht, liegt am falschen Ort.
 
-## Die fünf Bereiche einer Ablage
+## Die sieben Bereiche einer Ablage
 
-Seit Core §3.1 gliedert sich eine Wissensbasis in fünf Bereiche, jeder mit
+Seit Core §3.1 gliedert sich eine Wissensbasis in sieben Bereiche, jeder mit
 eigenem Basispfad in der Wurzeldatei:
 
 ```text
+00-Inbox/     Unsortiertes, von HKF nicht geprüft
+10-Journal/   die Tageseinträge, nach Jahr und Monat
 40-Wiki/      der Inhalt — Persons, Terms, Concepts, Bundles …
 50-Sources/   die Quellennotizen, ohne Typverzeichnis darunter
 60-Output/    die Erzeugnisse — Essays, Texts, Publications
@@ -46,12 +48,17 @@ eigenem Basispfad in der Wurzeldatei:
 ```
 
 Wer den Vault öffnet, sieht in `40-Wiki/` die Sachen und nicht das Gerüst. Die
-Zahlenpräfixe ordnen die fünf in jedem Dateibrowser; die Namen sind Vorgaben
+Zahlenpräfixe ordnen die sieben in jedem Dateibrowser; die Namen sind Vorgaben
 und lassen sich in `hkb.md` ändern.
 
 **Welcher Bereich für einen Typ gilt, sagt seine Typdefinition** mit `base`
-(Core §3.2). Ohne die Angabe gilt `wiki`. Drei Typnamen brauchen sie nicht,
-weil ihr Bereich im Namen steht: `typedef`, `proptype`, `source`.
+(Core §3.2). Ohne die Angabe gilt `wiki`. Vier Typnamen brauchen sie nicht,
+weil ihr Bereich im Namen steht: `typedef`, `proptype`, `source`, `daily`.
+
+**Die Inbox ist der einzige ungeprüfte Ort.** Dort darf liegen, was die
+Regeln nicht erfüllt: ein Ausschnitt, ein Fragment, eine Datei ohne
+Frontmatter. `hk-lint` sieht nicht hinein (Core §3.2.6). Sie steht trotzdem in
+der Wurzeldatei, damit ein Werkzeug den Pfad nicht raten muss.
 
 **Was aus einem Erzeugnis gebaut wird, liegt außerhalb.** Ein Manuskript, ein
 EPUB, ein Cover sind jederzeit neu baubar und tragen nichts, was nicht schon

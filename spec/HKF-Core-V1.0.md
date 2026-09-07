@@ -28,7 +28,7 @@ Das Format ist auf zwei Dokumente verteilt, weil es zwei Fragen beantwortet:
 - **HKF Core** — dieses Dokument. Wie eine Ablage funktioniert: Verzeichnisse,
   Wertformen, Verweise, Typdefinitionen als Bauform, das Bundle-Format und die
   drei Methoden. Es nennt **keine einzige konkrete Definition**.
-- **[HKF Config](HKF-Config-V1.0.md)** — das Inventar: siebzehn
+- **[HKF Config](HKF-Config-V1.0.md)** — das Inventar: achtzehn
   Typdefinitionen und achtzehn Property-Typen. Sie bilden zusammen die
   **Grundausstattung** jeder Ablage und entstehen mit ihr; geliefert wird
   keine davon.
@@ -66,7 +66,7 @@ einer Wissensbasis beginnt im Verzeichnis ihrer Wurzeldatei und muss nicht die
 Wurzel des Vaults sein.
 
 1. **Lies die Wurzeldatei** — `hkb.md` oder `hbundle.md`. Bei einer
-   Wissensbasis nennt sie die vier Bereiche und alle Typen mit Verzeichnis und
+   Wissensbasis nennt sie die sieben Bereiche und alle Typen mit Verzeichnis und
    Zweck; danach ist die ganze Ablage bekannt. Eine Bundle-Notiz braucht nur
    `id` und `description` (§4.1).
 2. **Brauchst du einen Typ genauer, lies genau eine Datei:**
@@ -140,6 +140,8 @@ Ihr Frontmatter trägt mindestens:
 
 ```yaml
 hkf: "1.0"
+inbox_base: "00-Inbox"
+journal_base: "10-Journal"
 wiki_base: "40-Wiki"
 source_base: "50-Sources"
 output_base: "60-Output"
@@ -147,26 +149,29 @@ media_base: "80-Media"
 config_base: "90-System"
 ```
 
-Eine Ablage gliedert sich in **fünf Bereiche**. Jeder hat einen Basispfad
+Eine Ablage gliedert sich in **sieben Bereiche**. Jeder hat einen Basispfad
 relativ zur Wurzel, ohne führenden und ohne abschließenden `/`, und jeder ist
 optional — fehlt er, gilt die Vorgabe:
 
 | Property | Vorgabe | Was darunter liegt |
 |---|---|---|
+| `inbox_base` | `00-Inbox` | Unsortiertes, von HKF nicht geprüft (§3.2.6) |
+| `journal_base` | `10-Journal` | die Tageseinträge, nach Jahr und Monat (§3.2.5) |
 | `wiki_base` | `40-Wiki` | die Typverzeichnisse des Inhalts (§3.2) |
 | `source_base` | `50-Sources` | die Verzeichnisse der Quelltypen (§3.2.2) |
 | `output_base` | `60-Output` | die Typverzeichnisse der Erzeugnisse (§3.2.4) |
 | `media_base` | `80-Media` | die fünf Medienverzeichnisse (§3.2.1) |
 | `config_base` | `90-System` | `Typedefs` und `Proptypes` (§3.2.3) |
 
-**Warum fünf und nicht einer.** Die vier außerhalb von `wiki_base` tragen
+**Warum sieben und nicht einer.** Die sechs außerhalb von `wiki_base` tragen
 nichts, worüber die Wissensbasis handelt: Medien sind Anhang, Quellen sind
-Apparat, Typdefinitionen und Property-Typen sind die Grammatik, und ein
-Erzeugnis ist gemacht statt gewusst. Wer den Vault öffnet, will die Sachen
-sehen und nicht das Gerüst. Die Zahlenpräfixe der Vorgaben ordnen die fünf in
-der Anzeige jedes Dateibrowsers.
+Apparat, Typdefinitionen und Property-Typen sind die Grammatik, ein Erzeugnis
+ist gemacht statt gewusst, ein Tageseintrag hält den Tag fest und nicht die
+Sache, und in der Inbox liegt, was noch nichts davon ist. Wer den Vault
+öffnet, will die Sachen sehen und nicht das Gerüst. Die Zahlenpräfixe der
+Vorgaben ordnen die sieben in der Anzeige jedes Dateibrowsers.
 
-**In einem Bundle bleiben alle fünf ohne Wirkung.** Dort gibt es keine
+**In einem Bundle bleiben alle sieben ohne Wirkung.** Dort gibt es keine
 Bereiche, unter denen ein Basispfad etwas zu verschieben hätte; wo eine Notiz
 liegt, ist gleichgültig, und wohin sie kommt, entscheidet erst der Import
 (§4.3).
@@ -233,14 +238,19 @@ gehört:
 <source_base>/<dateiname>.md                          die Quellen (§3.2.2)
 <output_base>/<verzeichnis des typs>/<dateiname>.md   die Erzeugnisse (§3.2.4)
 <config_base>/<verzeichnis des typs>/<dateiname>.md   Typedefs, Proptypes (§3.2.3)
+<journal_base>/<jjjj>/<mm>/<dateiname>.md             die Tageseinträge (§3.2.5)
 ```
 
 Welcher Bereich gilt, sagt die **Typdefinition** mit der Property `base`. Sie
-nimmt `wiki`, `source`, `output` oder `config` und ist freigestellt; ohne sie
-gilt `wiki`. Drei Typnamen tragen ihren Bereich schon im Namen und brauchen
-die Angabe nicht: `typedef` und `proptype` liegen unter `config_base`,
-`source` unter `source_base`. Unterverzeichnisse innerhalb eines
-Typverzeichnisses sind erlaubt.
+nimmt `wiki`, `source`, `output`, `config` oder `journal` und ist
+freigestellt; ohne sie gilt `wiki`. Vier Typnamen tragen ihren Bereich schon
+im Namen und brauchen die Angabe nicht: `typedef` und `proptype` liegen unter
+`config_base`, `source` unter `source_base`, `daily` unter `journal_base`.
+Unterverzeichnisse innerhalb eines Typverzeichnisses sind erlaubt.
+
+`inbox_base` steht in dieser Aufzählung nicht. Dort liegen keine Notizen im
+Sinne dieses Abschnitts, sondern was noch keine ist (§3.2.6); keine
+Typdefinition darf ihn beanspruchen.
 
 **Der Bereich gehört zum Typ und nicht zur einzelnen Notiz.** Wo eine Notiz
 liegt, folgt aus ihrem Typ (Regel 4 unten). Eine Property an der Notiz, die
@@ -257,9 +267,13 @@ still. Ein Werkzeug legt ein fehlendes Verzeichnis an, sobald es etwas
 hineinschreibt, und meldet sein Fehlen nicht.
 
 **Zur Ablage gehört**, was unter ihrem Wurzelverzeichnis liegt: die
-Wurzeldatei und die vier Bereiche aus §3.1. Alles andere im Vault ist
+Wurzeldatei und die sieben Bereiche aus §3.1. Alles andere im Vault ist
 außerhalb von HKF und wird weder geprüft noch verwaltet — eine
 Spezifikation, ein README, Notizen, die zu keiner Wissensbasis gehören.
+
+**`inbox_base` gehört dazu und wird dennoch nicht geprüft.** Die Wurzeldatei
+nennt ihn, damit ein Werkzeug weiß, wohin mit Unsortiertem; was dort liegt,
+bleibt außerhalb jeder Regel dieses Abschnitts (§3.2.6).
 
 Innerhalb eines Bereichs entscheidet der Typ. Eine Notiz in einem
 Verzeichnis, das keinem gehört, ist unter `wiki_base` verlegt und wird nach
@@ -361,11 +375,13 @@ mit ihresgleichen unter `source_base`:
 <source_base>/<dateiname>.md
 ```
 
-**Der Typ `source` ist der einzige ohne Typverzeichnis.** Er liegt unmittelbar
-unter seinem Bereich, und seine Notiz-ID ist damit der bloße Dateiname
-(Regel 4). Ein Verzeichnis wäre reine Verdopplung: `source_base` trägt genau
-diesen einen Typ, und `50-Sources/Sources/` sagt nichts, was `50-Sources/`
-nicht schon sagt.
+**Der Typ `source` führt kein Typverzeichnis.** Er liegt unmittelbar unter
+seinem Bereich, und seine Notiz-ID ist damit der bloße Dateiname (Regel 4).
+Ein Verzeichnis wäre reine Verdopplung: `source_base` trägt genau diesen einen
+Typ, und `50-Sources/Sources/` sagt nichts, was `50-Sources/` nicht schon
+sagt. Dasselbe gilt aus demselben Grund für `daily` unter `journal_base`
+(§3.2.5); ein dritter solcher Fall entsteht nur mit einem weiteren Bereich,
+der genau einen Typ trägt.
 
 Ein Quelltyp ist darum auch nichts, was eine Ablage selbst anlegt. Was ein
 Werk voneinander unterscheidet — Buch, Aufsatz, Video, Webseite —, trägt die
@@ -465,6 +481,84 @@ außerhalb. Eine Ablage führt, woraus etwas wird, und nicht, was daraus wurde.
 
 Der Bereich ist freigestellt. Eine Wissensbasis, die nichts hervorbringt,
 lässt ihn leer oder weg.
+
+### 3.2.5 Journalverzeichnis
+
+**Auch dieser Abschnitt gilt für eine HKB.** In einem Bundle liegt ein
+Tageseintrag, wo er will (§4.3).
+
+Ein Tageseintrag hält fest, was an einem Tag anfiel. Sein Gegenstand ist der
+Tag und nicht die Sache: Was den Tag überdauert, gehört in eine Notiz, auf die
+er verweist. Darum liegt er nicht zwischen den Notizen des Inhalts, sondern
+mit seinesgleichen unter `journal_base`, nach Jahr und Monat geteilt:
+
+```text
+<journal_base>/<jjjj>/<mm>/<dateiname>.md
+```
+
+`<jjjj>` ist die vierstellige Jahreszahl, `<mm>` der zweistellige Monat mit
+führender Null. Beide sind Pflicht, auch im ersten Jahr und im ersten Monat.
+
+```text
+10-Journal/2026/09/2026-09-07.md
+```
+
+**Warum nach Jahr und Monat und nicht flach.** Ein Journal wächst um einen
+Eintrag pro Tag, und das ist die einzige Menge in einer Ablage, deren Umfang
+von vornherein feststeht: nach fünf Jahren liegen dort rund tausendachthundert
+Dateien. Jede andere Gliederung wäre eine Ermessensfrage und liefe darum
+auseinander. Jahr und Monat folgen aus dem Gegenstand selbst und verlangen
+keine Entscheidung.
+
+**Der Typ `daily` führt kein Typverzeichnis**, aus demselben Grund wie
+`source` (§3.2.2): `journal_base` trägt genau diesen einen Typ. Die Notiz-ID
+ist der Pfad ab dem Bereich und trägt die beiden Ebenen mit (Regel 4), also
+`2026/09/2026-09-07`.
+
+- Vorgabe für `journal_base` ist `10-Journal` (A.1).
+- Unter `journal_base` liegen ausschließlich Jahresverzeichnisse, darunter
+  ausschließlich Monatsverzeichnisse, darin die Tageseinträge.
+- `journal_base` selbst darf von keiner Typdefinition als `dir` beansprucht
+  werden, und kein `dir` darf darunter liegen.
+- Der Dateiname eines Tageseintrags ist `jjjj-mm-tt` und stimmt mit den beiden
+  Verzeichnissen über ihm überein. Er ist damit `kebab-case` nach Regel 3.
+- Weitere Unterverzeichnisse sind nicht erlaubt. Anders als bei den übrigen
+  Typen ist die Gliederung hier vorgeschrieben, sonst sagte der Pfad zweierlei.
+
+Der Bereich ist freigestellt. Eine Wissensbasis, die kein Journal führt, lässt
+ihn leer oder weg; der Typ `daily` ist dann keiner ihrer Typen.
+
+### 3.2.6 Die Inbox
+
+**Auch dieser Abschnitt gilt für eine HKB.** Ein Bundle hat keine Inbox.
+
+Unter `inbox_base` liegt, was noch keine Notiz ist: ein Ausschnitt, ein
+Fragment, eine Datei, die jemand hineingelegt hat und deren Typ noch niemand
+entschieden hat.
+
+```text
+<inbox_base>/<beliebig>
+```
+
+**HKF prüft dort nichts.** Kein Frontmatter, kein Typ, kein Dateiname, keine
+Verweise. Was in der Inbox liegt, darf eine leere Datei sein, ein PDF oder ein
+Absatz ohne Kopf. `hk-lint` sieht nicht hinein, und ein fehlendes
+Inbox-Verzeichnis ist kein Befund.
+
+**Warum die Wurzeldatei ihn dann nennt.** Damit ein Werkzeug weiß, wohin mit
+Unsortiertem, ohne einen Pfad zu raten oder ihn sich sagen zu lassen. Der
+Bereich ist die einzige Stelle einer Ablage, an der etwas liegen darf, das die
+Regeln dieser Spezifikation nicht erfüllt. Ohne ihn entstünde derselbe Ort
+trotzdem, nur unbenannt und außerhalb der Ablage.
+
+- Vorgabe für `inbox_base` ist `00-Inbox` (A.1).
+- Keine Typdefinition darf ihn als `dir` beanspruchen, und kein `dir` darf
+  darunter liegen.
+- Was dort liegt, ist keine Notiz und hat keine Notiz-ID. Ein Verweis darauf
+  ist unauflösbar (§3.6).
+- Ein Werkzeug, das etwas von dort übernimmt, legt die entstehende Notiz an
+  ihrem Ort nach §3.2 ab und räumt das Stück weg. Wann und wie, sagt diese
+  Spezifikation nicht.
 
 ## 3.3 Notizen
 
@@ -1182,7 +1276,7 @@ in Anhang A.
 Mehr definiert dieses Dokument nicht. Welche Typen es sonst noch gibt, sagt
 **HKF Config**; jede Ablage ergänzt darüber hinaus, was sie braucht.
 
-Alles, was in HKF Config steht — siebzehn Typdefinitionen und achtzehn
+Alles, was in HKF Config steht — achtzehn Typdefinitionen und achtzehn
 Property-Typen —, bildet die **Grundausstattung** einer HKB. Sie entsteht mit
 der Wissensbasis und wird nicht geliefert. Für die drei Kern-Typen ist das
 zwingend: Ohne den Typ `typedef` ließe sich keine Typdefinition ablegen, ohne
@@ -1291,7 +1385,7 @@ Alles Weitere ist Zugabe:
 | `hkf` | Die Lieferung erhebt keinen Anspruch auf eine Formatfassung. Die aufnehmende Wissensbasis liest sie nach ihrer eigenen und meldet es als Hinweis (§8). |
 | `required_bundles` | Die Lieferung setzt nichts voraus. |
 | `title`, `source` | Kein Anzeigename, keine Herkunftsangabe. |
-| `wiki_base`, `source_base`, `media_base`, `config_base` | Nichts. Die vier Bereiche werden in einem Bundle **nicht ausgewertet** (§4). Wo eine Datei liegt, ist gleichgültig; was sie ist, sagt ihr Inhalt (§4.3). Ein Bundle darf sie tragen, aber niemand liest sie. |
+| `inbox_base`, `journal_base`, `wiki_base`, `source_base`, `output_base`, `media_base`, `config_base` | Nichts. Die sieben Bereiche werden in einem Bundle **nicht ausgewertet** (§4). Wo eine Datei liegt, ist gleichgültig; was sie ist, sagt ihr Inhalt (§4.3). Ein Bundle darf sie tragen, aber niemand liest sie. |
 
 Der Body ist frei. Der Abschnitt `# Typen` aus §3.1 darf darin stehen und ist
 dann **erläuternd, nicht normativ**: Die Spalte „Verzeichnis" hat in einem
@@ -1521,15 +1615,15 @@ wissen/Persons/ada-lovelace.md
 Media/Images/portraet-ada.png
 ```
 
-Die vier Bereiche sind voneinander unabhängig und liegen nebeneinander, nicht
-ineinander (§3.1).
+Die sieben Bereiche sind voneinander unabhängig und liegen nebeneinander,
+nicht ineinander (§3.1).
 
 ## 5.1 Bundle-Notizen in der HKB
 
 Ein importiertes Bundle wird als `<wiki_base>/Bundles/<id>.md` abgelegt. Es ist
 dieselbe Notiz wie `hbundle.md` im Bundle, mit zwei Unterschieden:
 
-- Die Wurzeldatei-Properties `hkf` und die vier Bereiche sowie die
+- Die Wurzeldatei-Properties `hkf` und die sieben Bereiche sowie die
   Typtabelle im Body entfallen, weil sie in der HKB von `hkb.md` kommen.
 - `imported` (datetime) hält den Zeitpunkt der Übernahme fest.
 
@@ -1629,7 +1723,7 @@ gepflegt oder geparst werden muss.
 ## 5.3 Grundausstattung und Zuladung
 
 Eine HKB entsteht mit ihrer **Grundausstattung**: allem, was in **HKF Config**
-steht — siebzehn Typdefinitionen und achtzehn Property-Typen. Sie wird nicht
+steht — achtzehn Typdefinitionen und achtzehn Property-Typen. Sie wird nicht
 geliefert, sondern angelegt, denn ein Import setzt sie voraus: Er muss
 Typdefinitionen ablegen, Property-Typen einordnen und die Lieferung verbuchen
 können, bevor er irgendetwas anderes tut. Damit ist die Wissensbasis konform,
@@ -2453,7 +2547,7 @@ denn sie gelten nur hier.
 Prüft eine Ablage, ohne sie zu verändern. Anwendbar auf eine HKB und auf ein
 Bundle; die letzten vier Punkte gelten nur für eine HKB.
 
-- Wurzeldatei vorhanden, `hkf` gesetzt, die vier Bereiche auflösbar,
+- Wurzeldatei vorhanden, `hkf` gesetzt, die sieben Bereiche auflösbar,
 - `Typedefs`, `Proptypes` und `Bundles` im Basispfad vorhanden — **nur in
   einer HKB**; ein Bundle hat keine Typverzeichnisse (§4),
 - jede Notiz hat `type`, und in einer HKB passt der Typ zu ihrem Verzeichnis.
@@ -2723,6 +2817,8 @@ diese Properties:
 |---|---|---|---|---|
 | `hkf` | text | Pflicht | optional | Formatversion, in dieser Fassung `"1.0"` |
 | `name` | text | Pflicht | — | Anzeigename der HKB |
+| `inbox_base` | text | optional | ohne Wirkung | Bereich des Unsortierten (§3.2.6); Vorgabe `00-Inbox` |
+| `journal_base` | text | optional | ohne Wirkung | Bereich der Tageseinträge (§3.2.5); Vorgabe `10-Journal` |
 | `wiki_base` | text | optional | ohne Wirkung | Bereich des Inhalts (§3.2); Vorgabe `40-Wiki` |
 | `source_base` | text | optional | ohne Wirkung | Bereich der Quellennotizen (§3.2.2); Vorgabe `50-Sources` |
 | `output_base` | text | optional | ohne Wirkung | Bereich der Erzeugnisse (§3.2.4); Vorgabe `60-Output` |

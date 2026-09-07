@@ -212,7 +212,8 @@
             "wiki",
             "source",
             "output",
-            "config"
+            "config",
+            "journal"
           ]
         },
         "dir": {
@@ -314,6 +315,12 @@
           "minLength": 1
         },
         "wiki_base": {
+          "type": "string"
+        },
+        "inbox_base": {
+          "type": "string"
+        },
+        "journal_base": {
           "type": "string"
         }
       },

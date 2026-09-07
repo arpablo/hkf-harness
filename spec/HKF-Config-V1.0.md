@@ -1,14 +1,14 @@
 ---
 type: specification
 title: HKF Config V1.0 — Typen und Property-Typen
-description: Siebzehn Typdefinitionen und achtzehn Property-Typen an einem Ort: die Grundausstattung jeder Wissensbasis und das Vokabular, das als Bundle dazukommt.
+description: Achtzehn Typdefinitionen und achtzehn Property-Typen an einem Ort: die Grundausstattung jeder Wissensbasis und das Vokabular, das als Bundle dazukommt.
 status: draft
 ---
 
 # HKF Config V1.0
 
 Dieses Dokument enthält alles, was HKF konkret festlegt: **jede Typdefinition
-und jeden Property-Typ** — siebzehn und siebzehn. HKF Core beschreibt daneben nur noch, wie eine
+und jeden Property-Typ** — achtzehn und achtzehn. HKF Core beschreibt daneben nur noch, wie eine
 Ablage funktioniert — Verzeichnisse, Wertformen, Verweise, Typdefinitionen als
 Bauform, das Bundle-Format, die drei Methoden — und verweist für jede einzelne
 Definition hierher.
@@ -210,7 +210,7 @@ entfernen darf sie keine, weil das vorhandene Notizen ungültig machte.
 
 ## 2.3 Die Properties des Vokabulars
 
-Die 70 Property-Namen, die die siebzehn Typdefinitionen aus §3 zusichern —
+Die 70 Property-Namen, die die achtzehn Typdefinitionen aus §3 zusichern —
 an einer Stelle, damit sich nachschlagen lässt, was ein Name bedeutet, ohne
 jede Typdefinition zu öffnen. Die notizübergreifenden Properties aus Core A.2
 stehen nicht darin; sie gelten ohnehin für jede Notiz.
@@ -984,6 +984,44 @@ nicht gelöscht und nicht durch seinen Nachfolger ersetzt.
 
 Ein Staat ist kein `organisation`. Die Regierung eines Staates ist eine
 Körperschaft und bekommt eine eigene Notiz.
+```
+
+## 3.18 `daily`
+
+```markdown
+---
+type: typedef
+title: Tageseintrag
+description: Was an einem Tag anfiel.
+base: journal
+---
+
+# Properties
+
+| Property | Typ | Pflicht | Vorgabe | Beschreibung |
+|---|---|---|---|---|
+| about | hkf-link-list | nein | — | Worauf sich der Eintrag bezieht |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
+
+# Konventionen
+
+Der Gegenstand ist der Tag und nicht die Sache. Was den Tag überdauert,
+bekommt eine eigene Notiz, und der Eintrag verweist per `about` dorthin.
+Derselbe Schnitt wie bei `note`, nur vom Datum her: `note` hält einen Anlass
+fest, `daily` einen Tag.
+
+Der Eintrag liegt unter `journal_base`, nach Jahr und Monat geteilt, und trägt
+kein Typverzeichnis (Core §3.2.5). Der Dateiname ist `jjjj-mm-tt` und stimmt
+mit den Verzeichnissen über ihm überein.
+
+**Es gibt keine Property `date`.** Der Pfad und der Dateiname sagen den Tag
+schon, und eine Property daneben wäre die zweite Wahrheit über dieselbe
+Tatsache, die Core §3.2 für den Ort ausschließt. Wer nach Datum sucht, sucht
+nach dem Dateinamen.
+
+Ein Tageseintrag ist keine Wissensnotiz und wird nicht zu einer. Er darf roh
+bleiben, unvollständig und ohne Verbindungen. Geprüft wird an ihm dasselbe wie
+an jeder Notiz, nicht mehr.
 ```
 
 ---

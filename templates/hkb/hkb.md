@@ -1,6 +1,8 @@
 ---
 hkf: "1.0"
 name: Meine Wissensbasis
+inbox_base: "00-Inbox"
+journal_base: "10-Journal"
 wiki_base: "40-Wiki"
 source_base: "50-Sources"
 output_base: "60-Output"
@@ -19,6 +21,7 @@ spec: https://github.com/arpablo/hkf-harness/blob/main/spec/HKF-Core-V1.0.md
 | comparison | 40-Wiki/Comparisons | Eine Gegenüberstellung mehrerer Gegenstände entlang benannter Dimensionen. |
 | concept | 40-Wiki/Concepts | Eine Sache und der Stand des Wissens über sie. |
 | country | 40-Wiki/Countries | Ein Staat. |
+| daily | 10-Journal | Was an einem Tag anfiel. |
 | event | 40-Wiki/Events | Ein Geschehen zu einer bestimmten Zeit. |
 | hint | 40-Wiki/Hints | Eine Festlegung, wie diese Wissensbasis geführt wird. |
 | note | 40-Wiki/Notes | Eine Notiz ohne spezifischeren Typ. |
