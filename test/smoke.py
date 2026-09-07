@@ -507,10 +507,15 @@ Eine Notiz aus der Zeit vor der Umbenennung.
             t_ag = io.open(os.path.join(ordner, name + ".md"),
                            encoding="utf-8").read()
             kopf = t_ag.split("---")[1] if t_ag.startswith("---") else ""
-            for feld in ("name: %s" % name, "description:", "tools:", "model:"):
+            # `tools` steht nicht dabei. Es ist freigestellt, seit `bebildern`
+            # es am 07.09.2026 verloren hat: Eine Allowlist muesste den
+            # Magnific-Connector beim Namen nennen, und der ist eine UUID, die
+            # auf einem anderen Rechner anders lautet. Wer die Zeile weglaesst,
+            # erbt den vollen Satz und traegt die Grenze im Text.
+            for feld in ("name: %s" % name, "description:", "model:"):
                 if feld not in kopf:
                     maengel.append("%s: %s" % (name, feld.rstrip(":")))
-        probe("jeder hat Frontmatter mit name, description, tools, model",
+        probe("jeder hat Frontmatter mit name, description, model",
               not maengel, ", ".join(maengel))
         gerufen = set()
         for name in namen:
