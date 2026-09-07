@@ -391,16 +391,22 @@ Pflicht führen, obwohl §4.1 eine Lieferung ohne Fassung ausdrücklich zulässt
 Gefunden hat das erst die Prüfung der Property-Tabellen gegen die Werte — an
 einer Bundle-Notiz, die in Ordnung war. Die Rauchprobe ruft es jetzt mit auf.
 
-## Woher `templates/hkb` kommt
+## `templates/hkb` ist die Grundausstattung
 
-Die Grundausstattung wird nicht hier gepflegt, sondern aus der
-Beispiel-Wissensbasis der Werkbank abgeleitet — alle Notizen in
-`90-System/Typedefs/` und `90-System/Proptypes/`, die keine
-`bundles`-Property tragen (§5.3):
+Sie wird hier gepflegt und nirgends sonst. `tools/grundausstattung.py` hält sie
+gegen Anhang A und §3.5.1, `tools/inventar.py` gegen die Prosa und das Schema,
+und die Rauchprobe ruft beide auf.
+
+Bis zum 07.09.2026 wurde sie aus der Beispiel-Wissensbasis der Werkbank
+abgeleitet, und die veröffentlichte Vorlage `hkf-kb-template` ebenso. Zwei
+Ableitungen aus derselben Quelle liefen auseinander, sobald jemand nur eine
+nachzog. Genau das war über siebenundzwanzig Dateien hinweg passiert, ohne dass
+eine Probe es sah: Geprüft wurde immer nur diese Fassung. Jetzt leitet die
+Werkbank die Vorlage aus dieser Fassung ab:
 
 ```
 cd ../HenniHKF-Lab
-python3 tools/make-hkb-template.py ../HenniHKF-Harness/templates/hkb --nackt --force
+python3 tools/make-hkb-template.py ../HenniHKF-Core --force
 ```
 
 Umgekehrt prüft und erzeugt die Werkbank mit dieser Bibliothek, statt eigene
