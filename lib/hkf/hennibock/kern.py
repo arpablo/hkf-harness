@@ -738,6 +738,16 @@ def resolve_links(body: str, root: Path, index, beruehrt=None,
     Verweis auf eine geplante, aber ungeschriebene Notiz ging dabei verloren,
     und niemand merkte es, weil der Anzeigetext ja stehen blieb.
 
+    Der Zielname wird vor dem Nachschlagen durch `strip_wikilink` geschickt.
+    Der Notiz-Index ist ueber Stems gefuehrt, ein qualifizierter Verweis traegt
+    aber den ganzen Pfad, und ohne den Schnitt schlaegt jedes `index.get` fehl.
+    Bis zum 07.09.2026 fehlte er hier als einziger Stelle: In einer HKB, wo HKF
+    Core §3.6 den qualifizierten Verweis zur Pflicht macht, wurde damit jeder
+    Wikilink zu reinem Anzeigetext. Kein Kapitel eines Inhaltsverzeichnisses
+    war je verlinkt, und keine Publikation zeigte je ein Kapitel an. Aufgefallen
+    ist es an einer Publikationsseite, die "Noch kein Kapitel veroeffentlicht"
+    meldete, obwohl neununddreissig Kapitel auf der Instanz lagen.
+
     `pflicht_refs` enthaelt die Ziel-Stems, die eine UUID auch dann bekommen,
     wenn die Zielnotiz noch kein `hennibock_type` traegt. Das sind die Punkte
     des Inhaltsverzeichnisses einer Publikation. Ohne sie kannte ein einmal
@@ -760,10 +770,11 @@ def resolve_links(body: str, root: Path, index, beruehrt=None,
         target = parts[0].strip()
         display = (parts[1].strip() if len(parts) > 1
                    else strip_vault_prefix(target))
-        note = index.get(nfc(target))
+        stem = nfc(strip_wikilink(target))
+        note = index.get(stem)
         if note and note.is_file():
             fm, _ = split_frontmatter(note.read_text(encoding="utf-8"))
-            if frontmatter_value(fm, "hennibock_type") or nfc(target) in pflicht:
+            if frontmatter_value(fm, "hennibock_type") or stem in pflicht:
                 ref, geschrieben = ensure_ref(note, fm)
                 if geschrieben and beruehrt is not None:
                     beruehrt.append(rel_to_root(note, root))
