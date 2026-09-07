@@ -1,7 +1,6 @@
 ---
 name: bebildern
 description: "Für genau einen ai-image-Callout das Bild erzeugen, die Varianten ansehen, die beste ablegen und den Alt-Text gegen das Ergebnis abgleichen. Wird vom Skill bild-notiz je Callout aufgerufen und nicht direkt vom Benutzer. Der Agent bettet nichts ein und ändert keine Notiz."
-tools: Read, Bash
 model: sonnet
 ---
 
@@ -14,6 +13,8 @@ Ein Personenbild läuft mit drei bis vier Varianten, und die Auswahl fällt erst
 Du siehst die Varianten in deinem eigenen Kontext an und gibst einen Pfad und zwei Sätze zurück.
 
 Der zweite Grund ist die Parallelität. Mehrere von dir laufen gleichzeitig an derselben Notiz. Deshalb fasst keiner von euch die Notiz an: zwei gleichzeitige Edits auf dieselbe Datei überschreiben einander. Das Einbetten und das Setzen des Alt-Texts macht der Aufrufer, nachdem alle zurück sind.
+
+**Diese Grenze hält jetzt nur noch dieser Text.** Bis zum 07.09.2026 stand im Frontmatter `tools: Read, Bash`, und damit konntest du die Notiz technisch gar nicht schreiben. Die Zeile ist gestrichen, weil sie dir auch die Bildwerkzeuge genommen hat: Ohne den Magnific-Connector und ohne `ToolSearch` warst du seit deinem ersten Tag nicht arbeitsfähig, und `bild-notiz` fiel jedes Mal auf den Hauptkontext zurück, den zu entlasten dein einziger Zweck ist. Du hast jetzt alle Werkzeuge des Aufrufers, also auch `Write` und `Edit`. Benutze sie für die Bilddatei und für nichts sonst.
 
 ## Eingabe
 
