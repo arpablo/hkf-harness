@@ -79,6 +79,7 @@ class Bestand(object):
         self.notizen, self.typdefs, self.proptypes = {}, {}, {}
         self.typseiten = {}
         self.medien = set()
+        self.bases = set()
         if art == "hkb":
             self.bereiche = ablage.bereiche(hkb)
             self.basis = os.path.join(hkb, self.bereiche["wiki_base"])
@@ -88,6 +89,7 @@ class Bestand(object):
             self.quellbasis = self.bereiche["source_base"]
             self.journalbasis = self.bereiche["journal_base"]
             self.base = self.bereiche["wiki_base"]
+            self._bases_lesen()
             self._hkb_lesen()
         else:
             self.basis, self.konfig, self.ablagepfad = hkb, hkb, ""
@@ -261,6 +263,35 @@ class Bestand(object):
             aus.setdefault(_verzeichnis(name, e["daten"]), []).append(name)
         return aus
 
+    def _bases_lesen(self):
+        """Die `.base`-Dateien unter `config_base`, relativ zu diesem Bereich.
+
+        Eine Base ist eine Obsidian-Abfragedatei. Sie ist keine Notiz, sie
+        traegt kein Frontmatter nach HKF Core und wird von keiner Pruefung
+        beurteilt. Sie ist aber ein gueltiges Verweisziel: Typseiten und MOCs
+        betten sie ein, und §3.3 macht die Typseite zur empfohlenen Form.
+
+        Ohne diese Menge kannte `aufloesen` nur Notizen, Typseiten und Medien,
+        und jeder Verweis auf eine Base fiel auf None. Gemeldet wurde das als
+        "zeigt auf keine Datei", obwohl die Datei danebenlag. Aufgefallen ist
+        es am 07.09.2026 an acht solchen Meldungen in zwei MOCs, deren Ziele
+        alle existierten. Die Typseiten desselben Vaults betteten dieselben
+        Bases ein und wurden nicht gemeldet, weil `config_base` nicht auf
+        Verweise geprueft wird. Diese Asymmetrie war der Hinweis.
+
+        Gesammelt wird ohne Rueckgriff auf einen festen Verzeichnisnamen. Wo
+        eine Ablage ihre Bases ablegt, geht das Format nichts an.
+        """
+        if not os.path.isdir(self.konfig):
+            return
+        for wurzel, _, dateien in os.walk(self.konfig):
+            for name in dateien:
+                if not name.endswith(".base"):
+                    continue
+                voll = os.path.join(wurzel, name)
+                rel = os.path.relpath(voll, self.konfig).replace(os.sep, "/")
+                self.bases.add(rel)
+
     def aufloesen(self, ziel, aus_wurzeldatei=False):
         """(art, rest) — art ist 'notiz', 'medium' oder None."""
         if self.art == "bundle":
@@ -305,6 +336,8 @@ class Bestand(object):
             return ("notiz", rest)
         if rest in self.typseiten:
             return ("typseite", rest)
+        if rest in self.bases:
+            return ("base", rest)
         if rest in self.medien or rest.split("/")[0] == self.media_basis:
             return ("medium", rest)
         return (None, rest)
