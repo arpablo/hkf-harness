@@ -71,7 +71,7 @@ import urllib.parse
 import urllib.request
 import uuid
 import zipfile
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 
@@ -513,6 +513,18 @@ def resolve_alts(images, overrides: dict) -> dict:
 # Identitaet
 # ---------------------------------------------------------------------------
 
+def jetzt_datetime() -> str:
+    """Der Zeitstempel fuer `modified`, mit Uhrzeit.
+
+    HKF Core §3.4 fuehrt `modified` als datetime, `hennibock_published` dagegen
+    als reines Datum. Bis zum 07.09.2026 schrieben `ensure_ref` und
+    `ensure_identity` beide mit `date.today()`, und jede Notiz, der dieser Lauf
+    eine Kennung gab, verliess ihn mit einem Verstoss gegen §3.4. `hk-lint`
+    meldete ihn danach, und jemand zog ihn von Hand nach.
+    """
+    return datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+
+
 def ensure_ref(path: Path, fm_lines):
     """Stellt sicher, dass eine Notiz ein hennibock_ref traegt, und gibt es
     zurueck. Zweiter Rueckgabewert sagt, ob geschrieben wurde.
@@ -529,7 +541,7 @@ def ensure_ref(path: Path, fm_lines):
     path.write_text(
         set_frontmatter_fields(raw, {
             "hennibock_ref": ref,
-            "modified": '"' + date.today().isoformat() + '"',
+            "modified": '"' + jetzt_datetime() + '"',
         }),
         encoding="utf-8",
     )
@@ -557,7 +569,7 @@ def ensure_identity(path: Path, fm_lines, title: str, redate: bool = False):
         published = today.isoformat()
         updates["hennibock_published"] = '"' + published + '"'
         changed = True
-        updates["modified"] = '"' + today.isoformat() + '"'
+        updates["modified"] = '"' + jetzt_datetime() + '"'
         raw = path.read_text(encoding="utf-8")
         path.write_text(set_frontmatter_fields(raw, updates), encoding="utf-8")
 
