@@ -823,6 +823,17 @@ Hinweis und `hk-lint --fix` ergänzt ihn.
 Ein abweichender Alias ist erlaubt, wo der Satzbau ihn verlangt, etwa eine
 gebeugte Form oder eine Kurzform.
 
+**Für eine Einbettung gilt die Empfehlung nicht.** Die Begründung oben trägt
+dort nicht: Bei `![[Bilder/hof.jpg]]` steht kein Pfad im Satz, der Leser sieht
+das Bild. Der Teil hinter `|` ist bei einer Einbettung auch kein Anzeigetext,
+sondern ein Darstellungsparameter der Anwendung — in Obsidian eine Breite in
+Pixeln. Wer dort einen Alias nach der Regel für Verweise setzt, schreibt keinen
+Namen hin, sondern eine kaputte Breitenangabe. `hk-lint` meldet eine Einbettung
+ohne Alias deshalb nicht, und `hk-lint --fix` ergänzt dort keinen.
+
+Der Alt-Text eines Bildes gehört damit nicht in den Alias. Wo eine Ablage ihn
+führt, ist ihre Sache.
+
 **In einer Markdown-Tabelle wird der senkrechte Strich maskiert.** Er trennt
 dort die Spalten, und ein unmaskierter Alias-Strich zerlegt die Zelle und
 zerstört den Link:
@@ -2994,6 +3005,9 @@ bevor es das Ziel auflöst.
 3. In einer HKB beginnt `ziel` mit Ablagepfad und dem Bereich der Notiz; in einem Bundle ist
    es der Pfad in der Lieferung (§3.6, §4.3).
 4. `einbettung` steht nur im Body, nie in einer Property (§3.5.1).
+5. Der `alias` einer `einbettung` ist kein Anzeigetext, sondern ein
+   Darstellungsparameter der Anwendung (§3.6). Die Alias-Empfehlung für
+   Verweise gilt dort nicht.
 
 ## B.3 Typangaben
 

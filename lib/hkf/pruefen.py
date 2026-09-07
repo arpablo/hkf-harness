@@ -564,7 +564,17 @@ def _verweise(b, befunde):
             elif art == "medium" and rest not in b.medien:
                 befunde.append(Befund(e["rel"], "[[%s]] zeigt auf keine vorhandene "
                                                 "Mediendatei (§3.2.1)." % ziel))
-            if alias is None:
+            # §3.6: Die Alias-Empfehlung gilt fuer Verweise, nicht fuer
+            # Einbettungen. Bei `![[...]]` steht kein Pfad im Satz, und der
+            # Teil hinter `|` ist dort kein Anzeigetext, sondern eine
+            # Breitenangabe der Anwendung. Bis zum 07.09.2026 meldete diese
+            # Stelle beides gleich, und in einem bebilderten Bestand waren die
+            # Bild-Embeds die grosse Mehrheit aller Alias-Hinweise: 286 von 296
+            # im Vault HenrietteEinstein. Ein Hinweis, den niemand befolgen
+            # kann, ohne die Darstellung zu zerstoeren, verdeckt die zehn, die
+            # gemeint waren.
+            einbettung = m.start() > 0 and text[m.start() - 1] == "!"
+            if alias is None and not einbettung:
                 befunde.append(Befund(e["rel"], "[[%s]] trägt keinen Alias (§3.6)."
                                       % ziel, HINWEIS))
         if b.art != "hkb" or rel.split("/", 1)[0] == "Bundles":
