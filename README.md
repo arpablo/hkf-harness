@@ -34,6 +34,64 @@ sie zu tun.
 | [`hkf-spec`](https://github.com/arpablo/hkf-spec) | Stillgelegt — die Spezifikation steht seit dem 07.09.2026 unter [`spec/`](spec/) |
 | [`hkf-harness`](https://github.com/arpablo/hkf-harness) | Dieses Repository |
 
+## Installieren
+
+Zuerst `uv`, auf jedem Rechner. Der Harness bringt sein eigenes Python mit und
+baut es damit; ohne `uv` bricht `bootstrap-python.sh` ab und sagt es.
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Das Skript legt `uv` nach `~/.local/bin` und trägt das Verzeichnis in die
+Shell-Konfiguration ein. Danach die Shell neu öffnen, sonst findet der
+Bootstrap es nicht. Über Homebrew ginge es auch, dann liegt es unter
+`/opt/homebrew/bin` und wird mit `brew upgrade` gepflegt. Python selbst kommt
+nicht von Hand dazu: `uv` holt die Fassung aus
+[`.python-version`](.python-version) und baut die venv beim ersten Aufruf.
+
+### Benutzen: über den Marktplatz
+
+Das Repository ist selbst der Marktplatz, das Manifest liegt in
+`.claude-plugin/marketplace.json`.
+
+```bash
+claude plugin marketplace add arpablo/hkf-harness
+claude plugin install hkf@hkf-harness
+```
+
+Danach Claude Code neu starten, `claude plugin list` zeigt den Stand. Ein
+neuer Stand kommt später mit `claude plugin update hkf`. Weil `plugin.json`
+auf `1.0.0` steht und es weder Tag noch Release gibt, ist das jeweils `main`;
+`claude plugin tag` macht daraus einen festen Stand.
+
+### Daran arbeiten: klonen und einhängen
+
+Der Marktplatz kopiert in den Plugin-Cache. Für die Verteilung ist das
+richtig, für die Entwicklung falsch: Eine Änderung am Repository käme dort nie
+an. Auf der Maschine, auf der das Repository liegt, hängt `hk-install` es
+stattdessen unter `~/.claude/skills/hkf` ein. Claude Code lädt jedes
+Verzeichnis dort, das ein `.claude-plugin/plugin.json` trägt, als Plugin, und
+ein Symlink genügt: Das Repository bleibt die gelesene Fassung.
+
+```bash
+git clone https://github.com/arpablo/hkf-harness.git HenniHKF-Harness
+cd HenniHKF-Harness && bin/hk-install
+```
+
+`hk-install --check` sagt vorher, was fehlt.
+
+### Was nicht mitkommt
+
+**Die Ablage.** Hier liegen Werkzeug und Regelwerk, die Wissensbasen liegen
+woanders. Auf einem neuen Rechner braucht es sie ebenfalls und danach einmal
+`hk-ablage <pfad>`, damit die Wahl gemerkt ist. `hooks/sitzung.py` liest sie
+beim Sitzungsstart.
+
+**Der `post-commit`-Hook.** Er liegt unter `.git/hooks/` und ist damit nicht
+versioniert; ein frischer Klon hat ihn nicht. Das betrifft nur den zweiten
+Weg. Warum er so gebaut ist, steht in ihm selbst.
+
 ## Die Ablage wird nicht geraten
 
 Kein Werkzeug hier kennt einen festen Pfad. Es fragt in fünf Stufen und bricht
@@ -296,17 +354,8 @@ in `.claude-plugin/`, die Bausteine liegen an der Wurzel: `skills/`, `agents/`,
 Namensraum davor, also `hkf:hkb-quelle` und `hkf:wilma`. Die Werkzeuge aus
 `bin/` liegen dabei auf dem Pfad, ohne dass jemand ihn pflegt.
 
-```bash
-hk-install --check     # was fehlt
-hk-install             # einhängen
-```
-
-Auf der Maschine, auf der das Repository selbst liegt, hängt `hk-install` es
-unter `~/.claude/skills/hkf` ein. Claude Code lädt jedes Verzeichnis dort, das
-ein `.claude-plugin/plugin.json` trägt, als Plugin. Ein Symlink genügt, und das
-Repository bleibt die gelesene Fassung. Der Weg über den Marktplatz kopiert
-dagegen in einen Cache, was für die Verteilung an andere richtig ist und für
-die Entwicklung falsch.
+Wie beides auf einen Rechner kommt, steht oben unter
+[Installieren](#installieren).
 
 `hk-install` räumt dabei weg, was früher von Hand gesetzt wurde: je ein Symlink
 unter `~/.claude/skills/` und `~/.claude/agents/`. Solche Einträge verdrängen
