@@ -23,14 +23,15 @@ Was ein Harness ist und wo die Grenze zur Wissensbasis verläuft, steht in
 benutzt; jene sagt, was er ist.
 ## Wo der Rest liegt
 
-Der Harness ist eine **Umsetzung**, nicht die Spezifikation. Was gilt, steht
-nebenan; was hier liegt, ist eine Art, es zu tun.
+Der Harness ist eine **Umsetzung**, und er führt die Spezifikation mit, die er
+umsetzt. Sie liegt unter [`spec/`](spec/) und gilt; alles daneben ist eine Art,
+sie zu tun.
 
 | Repository | Inhalt |
 |---|---|
-| [`hkf-spec`](https://github.com/arpablo/hkf-spec) | Die Spezifikation: HKF Core 1.0 und HKF Config 1.0 |
 | [`hkf-kb-template`](https://github.com/arpablo/hkf-kb-template) | Vorlage für eine neue Wissensbasis; `hk-init` schöpft aus derselben Grundausstattung |
 | [`hkf-base`](https://github.com/arpablo/hkf-base) | Stillgelegt — das Vokabular gehört seit Config 1.0 zur Grundausstattung |
+| [`hkf-spec`](https://github.com/arpablo/hkf-spec) | Stillgelegt — die Spezifikation steht seit dem 07.09.2026 unter [`spec/`](spec/) |
 | [`hkf-harness`](https://github.com/arpablo/hkf-harness) | Dieses Repository |
 
 ## Die Ablage wird nicht geraten
@@ -183,7 +184,7 @@ nicht.
 ## Was wo liegt
 
 ```
-spec/        die Fassung, die dieser Harness umsetzt
+spec/        HKF Core und Config: die Spezifikation selbst, siehe spec/README.md
 lib/hkf/     ablage, frontmatter, schema, grammatik, pruefen, korrigieren,
              importieren, exportieren, einlesen, notiz, vorlage, fassung
 lib/hkf/text/ der Schreibregelprüfer: segment, engine, rules, rhythm_lint
@@ -194,7 +195,7 @@ bin/         hk-init, hk-lint, hk-import, hk-export, hk-ingest,
              hk-suche, hk-erwaehnungen, hk-kontext, hk-publikation, hk-verweise,
              hk-buch, hk-epub, hk-kontinuitaet, hk-publish, hk-kapitel
 py           das Python des Harness — baut die venv und startet sie
-tools/       spec.py hält die Kopie unter spec/ auf Stand,
+tools/       inventar.py hält Prosa, Schema und Grundausstattung gegeneinander,
              grundausstattung.py die Vorlage gegen Anhang A und §3.5.1
 templates/   die Grundausstattung, aus der hk-init schöpft
 bundles/     Typen, die nicht jede Ablage braucht, als Lieferung zum Import
@@ -209,13 +210,15 @@ profiles/    die Stimmen, aus denen eine Ablage eine wählt
 test/        Rauchprobe: python3 test/smoke.py
 ```
 
-**Die Spezifikation liegt als Kopie unter `spec/`, nicht als Submodul.** Ein
-Harness setzt genau eine Fassung um; welche, muss aus seiner Auslieferung
-hervorgehen und nicht aus dem Zustand eines fremden Repositorys. Die Nummer
-steht in `lib/hkf/__init__.py` und nirgends sonst.
+**Die Spezifikation liegt unter `spec/`, und zwar im Original.** Bis zum
+07.09.2026 stand sie in einem eigenen Repository und hier nur als Kopie, die
+ein Skript gleich hielt. Die Trennung trug, solange HKF für Dritte zitierbar
+sein sollte. Der Anspruch ist aufgegeben, und damit blieb von ihr nur der
+Preis: zwei Orte und die Möglichkeit, dass der eine zurückfällt.
 
-Die Spezifikation selbst wird in [`hkf-spec`](https://github.com/arpablo/hkf-spec)
-fortgeschrieben, das Inventar daneben in `HKF-Config-V1.0.md`.
+Ein Harness setzt genau eine Fassung um, und welche, geht jetzt unmittelbar
+aus seiner Auslieferung hervor. Die Nummer steht in `lib/hkf/__init__.py` und
+nirgends sonst. Fortgeschrieben wird die Spezifikation hier.
 
 ## Kein Werkzeug legt eine Anleitung daneben
 
@@ -351,27 +354,19 @@ diesen Eintrag stellt der nächste Lauf dieselbe Frage neu.
 ## Welche Fassung gilt
 
 `CORE` in [`lib/hkf/__init__.py`](lib/hkf/__init__.py) nennt die Fassung, die
-dieser Harness umsetzt; unter `spec/` liegt sie im Wortlaut. Beides gehört
-zusammen, und beides veraltet, sobald die Spezifikation fortgeschrieben wird.
+dieser Harness umsetzt; unter [`spec/`](spec/) liegt sie im Wortlaut. Beides
+gehört zusammen und wird zusammen fortgeschrieben, in einem Commit.
+
+Wer Core oder Config ändert, prüft, ob die Werkzeuge noch dasselbe Inventar
+kennen wie die Prosa:
 
 ```
-python3 tools/spec.py            berichtet, ob die Kopie noch stimmt
-python3 tools/spec.py --update   holt den Stand des Spec-Repositorys
+python3 tools/inventar.py          Prosa, Schema und Grundausstattung gegeneinander
+python3 tools/grundausstattung.py  die Vorlage gegen Anhang A und §3.5.1
 ```
 
-Der Kopf des Berichts nennt beides, woran ein Harness hängt — die Fassung, die
-er umsetzt, und den Interpreter, unter dem er läuft:
-
-```
-Quelle:  …/HenniHKF-Spec (Core 1.0)
-Harness: Core 1.0, Python 3.12.13 aus ~/.cache/hkf-harness/venv
-```
-
-Das Skript findet die Quelle über `HKF_SPEC`, sonst neben diesem Repository;
-ohne Quelle endet es mit 0 und sagt es, damit ein Klon sich nicht daran stört.
-Kommt eine neue Fassung, nennt es sie und fordert, `CORE` nachzuziehen. Die
-Rauchprobe ruft es mit auf: Ein Rückstand fällt beim nächsten Testlauf auf,
-nicht erst beim nächsten Import.
+Die Rauchprobe ruft beide mit auf. Eine Abweichung fällt beim nächsten
+Testlauf auf, nicht erst beim nächsten Import.
 
 **Was der Harness liest** (§8): jede Fassung mit derselben Major-Nummer, deren
 Minor nicht größer ist als die eigene. Minor-Fassungen ergänzen Regeln, ohne

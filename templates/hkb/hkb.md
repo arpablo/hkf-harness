@@ -7,7 +7,7 @@ output_base: "60-Output"
 media_base: "80-Media"
 config_base: "90-System"
 timezone: Europe/Berlin
-spec: https://github.com/arpablo/hkf-spec/blob/main/HKF-Core-V1.0.md
+spec: https://github.com/arpablo/hkf-harness/blob/main/spec/HKF-Core-V1.0.md
 ---
 
 # Typen

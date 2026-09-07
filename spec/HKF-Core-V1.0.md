@@ -2951,7 +2951,7 @@ unzulässig, obwohl §3.7.1 es ausdrücklich erlaubt.
 ## B.4 Das Frontmatter-Schema
 
 Für das Frontmatter gibt es keine ABNF, sondern ein **JSON Schema**:
-`schema/hkf-core-1.0.schema.json` im Repository dieser Spezifikation. Es ist
+`spec/hkf-core-1.0.schema.json` im Repository dieser Spezifikation. Es ist
 normativ, und es deckt ab, was sich ohne Kenntnis der Typdefinitionen prüfen
 lässt:
 

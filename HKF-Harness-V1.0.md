@@ -21,7 +21,7 @@ Der Satz, aus dem alles Übrige folgt:
 
 | | Was es ist | Wo |
 |---|---|---|
-| **HKF** | die Spezifikation: wie ein Bundle und eine konforme HKB aufgebaut sind. Sonst nichts. | `hkf-spec` |
+| **HKF** | die Spezifikation: wie ein Bundle und eine konforme HKB aufgebaut sind. Sonst nichts. | `hkf-harness/spec` |
 | **Harness** | Werkzeuge und die Spezifikation, die sie umsetzen | `hkf-harness` |
 | **Wissensbasis** | Inhalt | ein Vault, irgendwo |
 
@@ -71,26 +71,28 @@ wohin sie kommt, entscheidet erst der Import (Core §4.3).
 ```
 hkf-harness/
   HKF-Harness-V1.0.md   dieses Dokument
-  spec/                 die Fassung von HKF Core und Config, die er umsetzt
+  spec/                 HKF Core und Config: die Spezifikation selbst
   bin/                  hk-init, hk-lint, hk-import, hk-export, hk-ingest,
                         hk-tranchen, hk-types
   lib/hkf/              Ablage, Frontmatter, Schema, Grammatik, Vorlage,
                         Fassung, Einlesen
   py                    das Python des Harness
-  tools/                spec.py — hält die Kopie unter spec/ auf Stand,
-                        inventar.py — hält Prosa, Schema und
-                        Grundausstattung gegeneinander
+  tools/                inventar.py — hält Prosa, Schema und
+                        Grundausstattung gegeneinander,
+                        grundausstattung.py — die Vorlage gegen Anhang A
   templates/            die Grundausstattung für hk-init
   skills/               die KI-Schicht: hkb und sieben Operationen
   agents/               die Subagenten, die für einen Skill lesen
   test/                 die Rauchprobe
 ```
 
-**Die Spezifikation liegt als Kopie im Harness, nicht als Submodul.** Ein
-Harness setzt genau eine Fassung um; welche, muss aus seiner Auslieferung
-hervorgehen und nicht aus dem Zustand eines fremden Repositorys. Die Kopie
-trägt die Nummer, gegen die `hk-lint` prüft, und `tools/spec.py` hält sie
-gleich mit dem Spec-Repository.
+**Die Spezifikation liegt im Harness, und zwar im Original.** Ein Harness
+setzt genau eine Fassung um; welche, muss aus seiner Auslieferung hervorgehen
+und nicht aus dem Zustand eines fremden Repositorys. Bis zum 07.09.2026 stand
+sie in `hkf-spec` und hier als Kopie, die ein Skript gleich hielt. Seit HKF
+nicht mehr für Dritte zitierbar sein muss, trägt die Trennung nicht mehr, was
+sie kostet. Was unter `spec/` steht, trägt die Nummer, gegen die `hk-lint`
+prüft, und wird hier fortgeschrieben.
 
 **Der Harness bringt sein eigenes Python mit.** Er nimmt nicht, was im PATH
 steht: Zwei Interpreter mit zwei Fassungen derselben Bibliothek liegen auf
@@ -101,11 +103,11 @@ Repositoriums, und die Werkzeuge finden sie von selbst. Das ist dieselbe
 Trennung wie bei `HKB_PATH`, nur nach unten: Was der Harness zum Laufen
 braucht, gehört ihm und nicht der Maschine.
 
-**Dieses Dokument liegt nicht unter `spec/`.** Dort steht allein, was aus
-`hkf-spec` kommt; `tools/spec.py --update` räumt dort auf, was die Quelle
-nicht mehr führt. Die Harness-Spezifikation gehört dem Harness und steht
-darum in seiner Wurzel, neben der `README.md` — die sagt, wie man ihn
-benutzt, dieses Dokument sagt, was er ist.
+**Dieses Dokument liegt nicht unter `spec/`.** Dort steht allein HKF: Core,
+Config und das Frontmatter-Schema, die drei Dateien, die auch ohne diesen
+Harness gelten. Die Harness-Spezifikation gehört dem Harness und steht darum
+in seiner Wurzel, neben der `README.md` — die sagt, wie man ihn benutzt,
+dieses Dokument sagt, was er ist.
 
 ## 2. Die KI-Schicht liegt obenauf und kann nichts allein
 
@@ -490,8 +492,9 @@ deckt.
 
 ## Offen
 
-- **Name und Ort des Repositorys** — `hkf-harness` neben `hkf-spec` und
-  `hkf-base`, und was aus `HenniHKF-Lab` wird.
+- **Name und Ort des Repositorys** — `hkf-harness` neben `hkf-kb-template`,
+  und was aus `HenniHKF-Lab` wird. `hkf-spec` und `hkf-base` sind stillgelegt,
+  die Spezifikation liegt seit dem 07.09.2026 unter `spec/`.
 - **`HKF_BUNDLE_PATH`** — erledigt: Eine Lieferung bekommt ihren Pfad im
   Aufruf. `HKF_INBOX` deckt den einen Fall ab, in dem ein Vorgabeverzeichnis
   trägt — dort wartet etwas, das noch keinen Namen hat.

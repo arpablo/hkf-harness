@@ -1651,13 +1651,6 @@ Eine Person bekommt hier erst ab dem zweiten Auftritt ein Blatt.
         r = lauf(sys.executable, os.path.join(WURZEL, "tools", "grundausstattung.py"))
         probe("Grundausstattung entspricht Anhang A und §3.5.1",
               r.returncode == 0, r.stdout + r.stderr)
-        r = lauf(sys.executable, os.path.join(WURZEL, "tools", "spec.py"))
-        probe("spec.py meldet keinen Rueckstand",
-              r.returncode == 0, r.stdout + r.stderr)
-        soll = io.open(os.path.join(WURZEL, ".python-version"),
-                       encoding="utf-8").read().strip()
-        probe("spec.py sagt, unter welchem Python der Harness steht",
-              ("Python %s aus %s" % (soll, hkf_venv())) in r.stdout, r.stdout)
 
         print("hk-lint auf einer Lieferung")
         r = lauf(os.path.join(BIN, "hk-lint"), bundle)

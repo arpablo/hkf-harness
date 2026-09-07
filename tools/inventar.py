@@ -10,9 +10,9 @@ nichts die Stellen gegeneinander hielt.
 
     python3 tools/inventar.py
 
-Geprueft wird gegen die Fassung unter `spec/` — die, die dieser Harness
-umsetzt. `HKF_SPEC` zeigt auf eine andere; `tools/spec.py` sagt, ob die Kopie
-noch stimmt.
+Geprueft wird gegen die Fassung unter `spec/`. Sie ist die Spezifikation und
+zugleich das, was dieser Harness umsetzt; eine zweite Fassung, gegen die sie
+zurueckfallen koennte, gibt es seit dem 07.09.2026 nicht mehr.
 
 - Config §2.1 gegen `#/$defs/standard-proptypes` im Schema (Core §3.5.1),
 - jeder aufgezaehlte Name hat auch ein `$defs` mit seinem Muster (Anhang B.4),
@@ -49,7 +49,7 @@ def main(argv=()):
     if "--help" in argv or "-h" in argv:
         print(__doc__.strip())
         return 0
-    spec = os.environ.get("HKF_SPEC") or SPEC
+    spec = SPEC
     befunde = []
 
     def melde(text):
