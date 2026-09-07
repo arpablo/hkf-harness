@@ -30,8 +30,6 @@ sie zu tun.
 | Repository | Inhalt |
 |---|---|
 | [`hkf-kb-template`](https://github.com/arpablo/hkf-kb-template) | Vorlage für eine neue Wissensbasis; `hk-init` schöpft aus derselben Grundausstattung |
-| [`hkf-base`](https://github.com/arpablo/hkf-base) | Stillgelegt — das Vokabular gehört seit Config 1.0 zur Grundausstattung |
-| [`hkf-spec`](https://github.com/arpablo/hkf-spec) | Stillgelegt — die Spezifikation steht seit dem 07.09.2026 unter [`spec/`](spec/) |
 | [`hkf-harness`](https://github.com/arpablo/hkf-harness) | Dieses Repository |
 
 ## Installieren

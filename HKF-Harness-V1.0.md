@@ -500,8 +500,9 @@ deckt.
 ## Offen
 
 - **Name und Ort des Repositorys** — `hkf-harness` neben `hkf-kb-template`,
-  und was aus `HenniHKF-Lab` wird. `hkf-spec` und `hkf-base` sind stillgelegt,
-  die Spezifikation liegt seit dem 07.09.2026 unter `spec/`.
+  und was aus `HenniHKF-Lab` wird. `hkf-spec` und `hkf-base` sind am
+  07.09.2026 gelöscht worden; die Spezifikation liegt seither unter `spec/`,
+  das Vokabular seit Config 1.0 in der Grundausstattung.
 - **`HKF_BUNDLE_PATH`** — erledigt: Eine Lieferung bekommt ihren Pfad im
   Aufruf. `HKF_INBOX` deckt den einen Fall ab, in dem ein Vorgabeverzeichnis
   trägt — dort wartet etwas, das noch keinen Namen hat.
