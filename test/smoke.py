@@ -305,6 +305,11 @@ def main():
         r = lauf(os.path.join(BIN, "hk-lint"), ziel, "--strict")
         probe("--strict fasst je Typ zusammen",
               "ding: menge" not in r.stdout, r.stdout)
+        # Die Gegenprobe: was der Typ zusichert und keine Notiz fuehrt.
+        probe("--strict nennt die unbelegten Properties",
+              "Unbelegte Properties" in r.stdout, r.stdout)
+        probe("die Grundausstattung selbst hat keine",
+              "Unbelegte Properties       0" in r.stdout, r.stdout)
         # §3.1: zwei benannte Bereiche duerfen nicht ineinander liegen. Der
         # leere Bereich ist ausgenommen, ihn erlaubt dieselbe Stelle
         # ausdruecklich.

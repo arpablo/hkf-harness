@@ -789,6 +789,54 @@ def _verwaist(b, befunde):
                               "über die Wissensbasis nicht erreichbar (§6.3).", HINWEIS))
 
 
+def _tabelle_von(b, typ):
+    """Die Property-Tabelle einer Typdefinition, notfalls aus der Vorlage.
+
+    Eine Lieferung liefert keinen Typ der Grundausstattung mit (§7.1 Punkt 2).
+    Ohne die Vorlage zu befragen hielte die Pruefung jede Property einer
+    solchen Notiz fuer undeklariert.
+    """
+    tabelle = b.typdefs.get(typ, {}).get("body", "")
+    if not tabelle and typ in grundtypen():
+        p = os.path.join(TEMPLATES, "hkb", ablage.VORGABEN["config_base"],
+                         "Typedefs", typ + ".md")
+        if os.path.isfile(p):
+            tabelle = frontmatter.lesen(p)[1]
+    return tabelle
+
+
+def unbelegt(b):
+    """--strict: zugesicherte Properties, die keine Notiz ihres Typs fuehrt.
+
+    Die Gegenprobe zu `undeklariert`. Eine Typdefinition sagt, was eine Notiz
+    dieses Typs ueber ihren Gegenstand sagen kann. Fuehrt keine einzige, ist
+    der Bestand nach etwas anderem gebaut als nach seinen Typen. Pflicht ist
+    keine dieser Properties, ein Befund entsteht also nirgends sonst.
+
+    Kein Fehler und kein Hinweis, sondern eine Zahl: Was fehlt, muss belegt
+    werden koennen, und ob es sich lohnt, entscheidet kein Werkzeug.
+    """
+    gesamt, belegt = {}, {}
+    for rel, e in sorted(b.notizen.items()):
+        typ = e["typ"]
+        if typ in KERN_TYPEN:
+            continue
+        gesamt[typ] = gesamt.get(typ, 0) + 1
+        for k, v in e["daten"].items():
+            if v is None or (isinstance(v, (list, dict, str)) and len(v) == 0):
+                continue
+            belegt[(typ, k)] = belegt.get((typ, k), 0) + 1
+    aus = []
+    for typ in sorted(gesamt):
+        offen = [k for k in _property_tabelle(_tabelle_von(b, typ))
+                 if not belegt.get((typ, k))]
+        if offen:
+            aus.append("%s: %d Notiz%s, keine mit %s"
+                       % (typ, gesamt[typ], "" if gesamt[typ] == 1 else "en",
+                          ", ".join(offen)))
+    return aus
+
+
 def undeklariert(b):
     """--strict: je Typ und Property-Name, mit der Zahl der Notizen (§6.3)."""
     allgemein = A2
@@ -798,17 +846,7 @@ def undeklariert(b):
         gesamt[typ] = gesamt.get(typ, 0) + 1
         if typ in KERN_TYPEN:
             continue
-        tabelle = b.typdefs.get(typ, {}).get("body", "")
-        if not tabelle and typ in grundtypen():
-            # Eine Lieferung liefert keinen Typ der Grundausstattung mit
-            # (§7.1 Punkt 2). Ohne die Vorlage zu befragen hielte die Pruefung
-            # jede Property einer solchen Notiz fuer undeklariert.
-            p = os.path.join(TEMPLATES, "hkb",
-                             ablage.VORGABEN["config_base"], "Typedefs",
-                             typ + ".md")
-            if os.path.isfile(p):
-                tabelle = frontmatter.lesen(p)[1]
-        erlaubt = set(_property_tabelle(tabelle)) | allgemein
+        erlaubt = set(_property_tabelle(_tabelle_von(b, typ))) | allgemein
         for k in e["daten"]:
             if k not in erlaubt:
                 je_typ.setdefault((typ, k), []).append(e["rel"])

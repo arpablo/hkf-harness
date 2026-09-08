@@ -11,7 +11,8 @@ Typverzeichnisse, seine Notizen liegen, wo sie wollen, und `bundles` und
 `rejected_links` stehen dort nicht.
 
     --fix      die zwoelf Handgriffe aus §6.3 ausfuehren und danach erneut pruefen
-    --strict   zusaetzlich undeklarierte Properties melden, je Typ zusammengefasst
+    --strict   zusaetzlich melden, welche Properties eine Notiz fuehrt, die ihr
+               Typ nicht kennt, und welche ihr Typ zusichert, die keine fuehrt
 
 Gemeldet wird in drei Gruppen: das Frontmatter gegen das Schema aus Anhang
 B.4, die Grammatik der Wikilinks und Typangaben aus Anhang B, und was sich
@@ -112,6 +113,10 @@ def main(argv):
     if strict:
         zeilen = pruefmodul.undeklariert(bestand)
         print("  %-26s %d" % ("Undeklarierte Properties", len(zeilen)))
+        for z in zeilen:
+            print("    ·", z)
+        zeilen = pruefmodul.unbelegt(bestand)
+        print("  %-26s %d" % ("Unbelegte Properties", len(zeilen)))
         for z in zeilen:
             print("    ·", z)
 
