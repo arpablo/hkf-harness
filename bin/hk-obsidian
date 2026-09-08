@@ -1,0 +1,274 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""hk-obsidian — die schnelle Auskunft aus der laufenden App.
+
+    hk-obsidian --check                     sagt, ob und womit es laeuft
+    hk-obsidian suche <muster>              Volltext ueber die Ablage
+    hk-obsidian verweise <notiz>            was auf die Notiz zeigt
+    hk-obsidian erwaehnungen <notiz>        wo sie genannt, aber nicht verlinkt ist
+    hk-obsidian bases                       die `.base`-Dateien der Ablage
+    hk-obsidian base <pfad> [--view <name>] die Zeilen einer Base
+
+    --ablage <pfad>   eine andere Wissensbasis als die aktive
+    --in <ordner>     die Suche auf einen Teilbaum begrenzen
+    --grenze <n>      hoechstens n Treffer
+    --kontext         die Fundstelle mitgeben, nicht nur die Datei
+
+**Dieser Befehl fragt Obsidian und rechnet nicht selbst.** Das ist sein Zweck
+und seine Grenze. Die App haelt den Vault im Speicher; eine Volltextsuche
+ueber 2874 Notizen dauert dort 0,04 Sekunden statt 1,4. Dafuer braucht er die
+laufende App und **scheitert ohne sie klar**, statt still etwas anderes zu
+tun.
+
+Er ersetzt nichts. `hk-suche` bleibt die Suche, die ohne Obsidian auskommt —
+auf dem NAS, in der Rauchprobe, auf einem frischen Klon. Zwei Umsetzungen
+derselben Regel waeren ein Fehler; zwei Wege zu derselben Auskunft, von denen
+einer schneller und einer immer da ist, sind keiner. Wer sich nicht sicher
+ist, nimmt `hk-suche`.
+
+**Geschrieben wird nie.** `erwaehnungen` berichtet, was Obsidian unter
+„Unlinked mentions" zeigt: die Notizen, die den Titel nennen, ohne zu
+verweisen. Wer daraus Verweise machen will, nimmt `hk-erwaehnungen` — dort
+liegen die Regeln aus §3.6 und die Schutzregeln, die Obsidian fehlen.
+
+Alle Pfade sind **ablagerelativ**. Liegt die Wissensbasis in einem
+Unterverzeichnis ihres Vaults, wird die Anfrage auf sie begrenzt und der
+Ablagepfad aus der Antwort gestrichen: Wer eine HKB fragt, will keine Treffer
+aus dem Rest des Vaults.
+"""
+import json, os, sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
+from hkf import ablage, frontmatter, obsidian                    # noqa: E402
+
+
+def _wert(argv, name, vorgabe=None):
+    """--name <wert> herausziehen; veraendert argv."""
+    if name in argv:
+        i = argv.index(name)
+        if i + 1 < len(argv):
+            wert = argv[i + 1]
+            del argv[i:i + 2]
+            return wert
+        del argv[i]
+    return vorgabe
+
+
+class Lage(object):
+    """Ablage, Vault und der Praefix dazwischen."""
+
+    def __init__(self, hkb):
+        self.hkb = hkb
+        self.vault, self.praefix = obsidian.vault_fuer(hkb)
+        if not self.vault:
+            raise obsidian.Fehlschlag(
+                "Obsidian kennt %s nicht als Vault oder als Teil eines "
+                "Vaults.\nEinmal dort öffnen, dann steht die Ablage in "
+                "`obsidian-cli vaults`." % hkb)
+
+    def hinein(self, rel):
+        """Ablagerelativ → vaultrelativ."""
+        return "%s/%s" % (self.praefix, rel) if self.praefix else rel
+
+    def heraus(self, pfad):
+        """Vaultrelativ → ablagerelativ, oder None ausserhalb der Ablage."""
+        pfad = pfad.replace(os.sep, "/")
+        if not self.praefix:
+            return pfad
+        if pfad == self.praefix:
+            return ""
+        if pfad.startswith(self.praefix + "/"):
+            return pfad[len(self.praefix) + 1:]
+        return None
+
+    def zielparameter(self, notiz):
+        """`path=` wenn ein Pfad gemeint ist, sonst `file=` wie ein Wikilink."""
+        if "/" in notiz or notiz.endswith(".md"):
+            rel = notiz if notiz.endswith(".md") else notiz + ".md"
+            return "path=%s" % self.hinein(rel)
+        return "file=%s" % notiz
+
+    def zieldatei(self, notiz):
+        """Der Pfad der gemeinten Notiz auf der Platte, oder None."""
+        if "/" in notiz or notiz.endswith(".md"):
+            rel = notiz if notiz.endswith(".md") else notiz + ".md"
+            p = os.path.join(self.hkb, rel)
+            return p if os.path.isfile(p) else None
+        for wurzel, _, namen in os.walk(self.hkb):
+            if os.path.basename(wurzel).startswith("."):
+                continue
+            for name in namen:
+                if name in (notiz, notiz + ".md"):
+                    return os.path.join(wurzel, name)
+        return None
+
+
+def _pfade(rohtext):
+    """Die Pfadliste aus einer JSON-Antwort, gleich welcher Bauform."""
+    if not rohtext.strip():
+        return []
+    daten = json.loads(rohtext)
+    aus = []
+    for e in daten:
+        if isinstance(e, str):
+            aus.append(e)
+        elif isinstance(e, dict):
+            for k in ("file", "path"):
+                if e.get(k):
+                    aus.append(e[k])
+                    break
+    return aus
+
+
+def suchen(lage, muster, ordner=None, grenze=None, kontext=False):
+    argv = ["query=%s" % muster]
+    teil = lage.hinein(ordner) if ordner else lage.praefix
+    if teil:
+        argv.append("path=%s" % teil)
+    if grenze:
+        argv.append("limit=%s" % grenze)
+    if kontext:
+        return obsidian.ruf("search:context", *argv, vault=lage.vault)
+    argv.append("format=json")
+    treffer = _pfade(obsidian.ruf("search", *argv, vault=lage.vault))
+    return [r for r in (lage.heraus(p) for p in treffer) if r]
+
+
+def verweise(lage, notiz):
+    aus = obsidian.ruf("backlinks", lage.zielparameter(notiz), "format=json",
+                       vault=lage.vault)
+    return [r for r in (lage.heraus(p) for p in _pfade(aus)) if r]
+
+
+def erwaehnungen(lage, notiz):
+    """Notizen, die die Notiz nennen, ohne auf sie zu verweisen.
+
+    Das ist Obsidians „Unlinked mentions", aus zwei Fragen gebildet: alles,
+    was den Titel nennt, minus alles, was schon verweist, minus die Notiz
+    selbst. Gesucht wird nach `title` und `aliases`, wie `hk-erwaehnungen` es
+    tut — sonst faende dieser Befund andere Stellen als das Werkzeug, das ihn
+    beheben soll.
+    """
+    datei = lage.zieldatei(notiz)
+    if not datei:
+        raise obsidian.Fehlschlag("Unter %s liegt keine Notiz %s."
+                                  % (lage.hkb, notiz))
+    daten, _ = frontmatter.lesen(datei)
+    selbst = os.path.relpath(datei, lage.hkb).replace(os.sep, "/")
+    begriffe = [str(daten.get("title") or "").strip()] + \
+               [str(a).strip() for a in (daten.get("aliases") or [])]
+    begriffe = [b for b in begriffe if len(b) >= 4]
+    if not begriffe:
+        raise obsidian.Fehlschlag(
+            "%s trägt weder `title` noch `aliases` mit vier Zeichen. "
+            "Ein kürzerer Begriff findet mehr Unsinn als Erwähnungen."
+            % selbst)
+    schon = set(verweise(lage, notiz)) | {selbst}
+    aus = {}
+    for b in begriffe:
+        for p in suchen(lage, b):
+            if p not in schon:
+                aus.setdefault(p, []).append(b)
+    return begriffe, aus
+
+
+def main(argv):
+    check = "--check" in argv
+    if check:
+        argv.remove("--check")
+    hkbarg = _wert(argv, "--ablage")
+    ordner = _wert(argv, "--in")
+    grenze = _wert(argv, "--grenze")
+    view = _wert(argv, "--view")
+    kontext = "--kontext" in argv
+    if kontext:
+        argv.remove("--kontext")
+    rest = [a for a in argv if not a.startswith("--")]
+
+    try:
+        hkb = ablage.finde(hkbarg)
+    except ablage.KeineAblage as e:
+        sys.stderr.write(str(e) + "\n")
+        return 2
+
+    try:
+        if check:
+            prog = obsidian.programm()
+            print("Programm: %s" % (prog or "— keine Obsidian-CLI gefunden"))
+            print("App läuft: %s" % ("ja" if obsidian.laeuft() else "nein"))
+            print("Ablage:    %s" % hkb)
+            lage = Lage(hkb)
+            print("Vault:     %s" % lage.vault)
+            print("Präfix:    %s" % (lage.praefix or "— die Ablage ist der Vault"))
+            return 0
+
+        if not rest:
+            sys.stderr.write(__doc__)
+            return 2
+        befehl, args = rest[0], rest[1:]
+        lage = Lage(hkb)
+
+        if befehl == "suche":
+            if not args:
+                sys.stderr.write("Aufruf: hk-obsidian suche <muster>\n")
+                return 2
+            if kontext:
+                print(suchen(lage, args[0], ordner, grenze, True))
+                return 0
+            treffer = suchen(lage, args[0], ordner, grenze)
+            for p in treffer:
+                print(p)
+            print("\n%d Treffer" % len(treffer))
+            return 0
+
+        if befehl == "verweise":
+            if not args:
+                sys.stderr.write("Aufruf: hk-obsidian verweise <notiz>\n")
+                return 2
+            treffer = verweise(lage, args[0])
+            for p in treffer:
+                print(p)
+            print("\n%d Rückverweise" % len(treffer))
+            return 0
+
+        if befehl == "erwaehnungen":
+            if not args:
+                sys.stderr.write("Aufruf: hk-obsidian erwaehnungen <notiz>\n")
+                return 2
+            begriffe, gefunden = erwaehnungen(lage, args[0])
+            print("Gesucht nach: %s\n" % ", ".join(begriffe))
+            for p in sorted(gefunden):
+                print("%-60s %s" % (p, ", ".join(gefunden[p])))
+            print("\n%d unverlinkte Erwähnungen" % len(gefunden))
+            if gefunden:
+                print("Verweise daraus macht `hk-erwaehnungen %s --setzen`."
+                      % args[0])
+            return 0
+
+        if befehl == "bases":
+            aus = [r for r in (lage.heraus(p)
+                               for p in obsidian.bases(lage.vault)) if r]
+            for p in aus:
+                print(p)
+            print("\n%d Bases" % len(aus))
+            return 0
+
+        if befehl == "base":
+            if not args:
+                sys.stderr.write("Aufruf: hk-obsidian base <pfad>\n")
+                return 2
+            zeilen = obsidian.base_query(lage.vault, lage.hinein(args[0]), view)
+            print(json.dumps(zeilen, ensure_ascii=False, indent=2))
+            print("\n%d Zeilen" % len(zeilen), file=sys.stderr)
+            return 0
+
+        sys.stderr.write("Unbekannt: %s\n\n%s" % (befehl, __doc__))
+        return 2
+
+    except obsidian.Fehlschlag as e:
+        sys.stderr.write("%s\n" % e)
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

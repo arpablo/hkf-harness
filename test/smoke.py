@@ -2395,7 +2395,36 @@ Was an diesem Tag anfiel.
               "gibt-es-nicht" in r.stdout, r.stdout + r.stderr)
         probe("aber keinen Wikilink aus einem Code-Span",
               "auch-nicht" not in r.stdout, r.stdout)
+        # --bases ueberspringt nicht still. Die Probeablage ist kein
+        # angemeldeter Vault, also muss der Lauf abbrechen -- gleich, ob
+        # Obsidian laeuft oder nicht. Eine Lieferung, der die Tabellen
+        # unbemerkt fehlen, waere der schlechtere Ausgang.
+        wbase = os.path.join(os.path.dirname(wablage), "mit-bases")
+        r = lauf(os.path.join(BIN, "hk-export-wiki"), wbase, wablage, "--bases")
+        probe("--bases bricht ohne Vault ab, statt zu überspringen",
+              r.returncode == 1 and "--bases:" in (r.stdout + r.stderr),
+              (r.stdout + r.stderr)[:200])
+        probe("und legt dabei keine halbe Lieferung an",
+              not os.path.exists(os.path.join(wbase, "hkweb.json")))
         shutil.rmtree(os.path.dirname(wablage), ignore_errors=True)
+
+        print("hk-obsidian")
+        oablage = os.path.join(tempfile.mkdtemp(prefix="hkb-obs-"), "ablage")
+        lauf(os.path.join(BIN, "hk-init"), oablage, "--name", "Obs-Probe")
+        # Eine frische Ablage kennt Obsidian nicht. Der Befehl muss das sagen
+        # und scheitern -- nicht klaglos den zuletzt benutzten Vault fragen
+        # und Treffer aus einer fremden Ablage liefern.
+        r = lauf(os.path.join(BIN, "hk-obsidian"), "--check", "--ablage", oablage)
+        probe("--check scheitert an einer unbekannten Ablage",
+              r.returncode == 1, (r.stdout + r.stderr)[:200])
+        probe("und sagt, dass Obsidian sie nicht kennt",
+              "Obsidian" in (r.stdout + r.stderr), (r.stdout + r.stderr)[:200])
+        r = lauf(os.path.join(BIN, "hk-obsidian"), "suche", "egal",
+                 "--ablage", oablage)
+        probe("die Suche liefert dort keine fremden Treffer",
+              r.returncode == 1 and "Treffer" not in r.stdout,
+              (r.stdout + r.stderr)[:200])
+        shutil.rmtree(os.path.dirname(oablage), ignore_errors=True)
 
         print("Der Adapter zur Obsidian-CLI")
         sys.path.insert(0, os.path.join(WURZEL, "lib"))

@@ -145,6 +145,7 @@ Python 3 und PyYAML.
 | `hk-ablage [<pfad>]` | sagt, welche Ablage bearbeitet wird, und merkt eine Wahl für dieses Arbeitsverzeichnis. `--liste` zeigt, was zur Wahl steht | **läuft** |
 | `hk-text [--gate] [--rhythm]` | prüft deutschsprachige Texte gegen die Schreibregeln. `--gate` blockiert, der Bericht nicht | **läuft** |
 | `hk-install [--check]` | hängt den Harness als Plugin unter `~/.claude/skills/hkf` ein und räumt die alten Zeiger weg | **läuft** |
+| `hk-obsidian <befehl>` | die schnelle Auskunft aus der laufenden App: `suche`, `verweise`, `erwaehnungen`, `bases`, `base`. Rund dreißigfach schneller als der eigene Weg, dafür ohne Obsidian gar nicht. Schreibt nie | **läuft** |
 | `hk-suche <muster>` | findet Notizen: Volltext, `--typ`, `--hat`, `--verweist-auf`, `--fundstellen` | **läuft** |
 | `hk-erwaehnungen <ziel>` | macht unverlinkte Erwähnungen einer Notiz zu qualifizierten Verweisen | **läuft** |
 | `hk-verweise [--setzen]` | macht kurze Wikilinks zu qualifizierten (§3.6); Mehrdeutiges wird gemeldet, nicht geraten | **läuft** |
@@ -251,7 +252,7 @@ lib/hkf/hennibock/ die Übertragung an eine HenniBock-Instanz
 rules/       deutsch.json, der Basissatz der Schreibregeln
 bin/         hk-init, hk-lint, hk-import, hk-export, hk-export-wiki, hk-ingest,
              hk-tranchen, hk-types, hk-ablage, hk-text, hk-install,
-             hk-suche, hk-erwaehnungen, hk-kontext, hk-publikation, hk-verweise,
+             hk-suche, hk-obsidian, hk-erwaehnungen, hk-kontext, hk-publikation, hk-verweise,
              hk-wikidata,
              hk-buch, hk-epub, hk-kontinuitaet, hk-publish, hk-kapitel
 py           das Python des Harness — baut die venv und startet sie

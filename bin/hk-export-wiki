@@ -8,6 +8,7 @@ Ohne `hkb-pfad` gilt $HKB_PATH, sonst ~/hkb.
 
     --force        in ein nicht leeres Zielverzeichnis schreiben
     --mit-journal  den Journalbereich mitliefern
+    --bases        die `.base`-Ansichten auswerten und mitliefern
     --check        nur berichten, nichts schreiben
 
 Das ist nicht `hk-export`. Eine Lieferung nach §6.2 ist eine Auswahl, die sich
@@ -31,6 +32,14 @@ andere geht mit, auch `90-System`: Typdefinitionen, Typseiten und Bases sind
 Verweisziele, und eine Lieferung mit gebrochenen Verweisen ist schlechter als
 eine grosse.
 
+**`--bases` wertet die Ansichten aus.** Eine `.base` traegt eine
+Abfragesprache von Obsidian, und niemand ausser Obsidian kann sie lesen. Mit
+dem Schalter fragt der Lauf die laufende App und legt das Ergebnis als
+`<name>.base.json` daneben; der Leser zeigt dann die Tabelle statt einer
+Ersatzliste. Ohne den Schalter laeuft alles wie bisher ohne App. Der Schalter
+ueberspringt nicht still, wenn Obsidian fehlt — er bricht ab: Eine Lieferung,
+der die Tabellen unbemerkt fehlen, ist schlechter als keine.
+
 **Medien nur, worauf verwiesen wird**, samt ihrer `henni-image`-Sidecar. Der
 Alt-Text steht dort und nicht im Alias einer Einbettung (§3.6); ein Bild ohne
 Sidecar wird gemeldet, nicht erfunden.
@@ -38,7 +47,7 @@ Sidecar wird gemeldet, nicht erfunden.
 import datetime, io, json, os, re, shutil, sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
-from hkf import CORE, ablage, frontmatter, grammatik             # noqa: E402
+from hkf import CORE, ablage, frontmatter, grammatik, obsidian   # noqa: E402
 
 WERKZEUG = "hk-export-wiki"
 MANIFEST = "hkweb.json"
@@ -76,6 +85,7 @@ class Lauf(object):
         self.dateien = []       # rel unter der Wurzel, Notizen und Konfig
         self.medien = []        # rel unter der Wurzel
         self.sidecars = []      # rel unter der Wurzel
+        self.baseszeilen = {}   # rel der .base → ausgewertete Zeilen
         self.befunde = []       # (art, text, hinweis)
         self.abgebrochen = None
 
@@ -220,6 +230,28 @@ def sammeln(lauf):
     return lauf
 
 
+def bases_auswerten(lauf):
+    """Jede `.base` der Lieferung ueber die laufende App auswerten.
+
+    Der Vault wird aus dem Pfad der Ablage bestimmt, nicht geraten: `vault=`
+    wirkt in der CLI nur an erster Stelle, und wer sich vertut, bekommt
+    klaglos die Bases einer anderen Ablage. `vault_fuer` liefert nebenbei den
+    Ablagepfad, und der stimmt mit `ablage.ablagepfad` ueberein — zwei Wege,
+    ein Ergebnis.
+    """
+    vault, praefix = obsidian.vault_fuer(lauf.hkb)
+    if not vault:
+        raise obsidian.Fehlschlag(
+            "Obsidian kennt %s nicht als Vault oder als Teil eines Vaults. "
+            "Ohne ihn lässt sich keine Base auswerten." % lauf.hkb)
+    for rel in lauf.dateien:
+        if not rel.endswith(".base"):
+            continue
+        voll = "%s/%s" % (praefix, rel) if praefix else rel
+        lauf.baseszeilen[rel] = obsidian.base_query(vault, voll)
+    return lauf
+
+
 def _manifest(lauf):
     jetzt = datetime.datetime.now().replace(microsecond=0).isoformat()
     return {
@@ -236,6 +268,7 @@ def _manifest(lauf):
         "notizen": sum(1 for r in lauf.dateien if r.endswith(".md")),
         "dateien": len(lauf.dateien),
         "medien": len(lauf.medien),
+        "bases": len(lauf.baseszeilen),
     }
 
 
@@ -247,6 +280,10 @@ def ausfuehren(lauf):
         ziel = os.path.join(lauf.ziel, rel)
         os.makedirs(os.path.dirname(ziel), exist_ok=True)
         shutil.copy2(os.path.join(lauf.hkb, rel), ziel)
+    for rel, zeilen in sorted(lauf.baseszeilen.items()):
+        ziel = os.path.join(lauf.ziel, rel + ".json")
+        io.open(ziel, "w", encoding="utf-8").write(
+            json.dumps(zeilen, ensure_ascii=False, indent=2) + "\n")
     wurzeldatei = ablage.wurzeldatei(lauf.hkb)
     shutil.copy2(wurzeldatei, os.path.join(lauf.ziel,
                                            os.path.basename(wurzeldatei)))
@@ -260,6 +297,7 @@ def main(argv):
     force = "--force" in argv
     check = "--check" in argv
     mit_journal = "--mit-journal" in argv
+    mit_bases = "--bases" in argv
     rest = [a for a in argv if not a.startswith("--")]
     if not rest:
         sys.stderr.write(__doc__)
@@ -281,6 +319,15 @@ def main(argv):
     if lauf.abgebrochen:
         sys.stderr.write(lauf.abgebrochen + "\n")
         return 1
+    if mit_bases:
+        # Kein stilles Ueberspringen: Wer --bases sagt, bekommt die Tabellen
+        # oder eine Fehlermeldung, nie eine Lieferung, der sie unbemerkt
+        # fehlen.
+        try:
+            bases_auswerten(lauf)
+        except obsidian.Fehlschlag as e:
+            sys.stderr.write("--bases: %s\n" % e)
+            return 1
     if not check:
         ausfuehren(lauf)
 
@@ -288,6 +335,11 @@ def main(argv):
     print("%s → %s" % (lauf.hkb, "(nur geprüft)" if check else lauf.ziel))
     print("  %d Notizen, %d Dateien, %d Medien, %d Sidecars"
           % (m["notizen"], m["dateien"], m["medien"], len(lauf.sidecars)))
+    if mit_bases:
+        leer = sum(1 for z in lauf.baseszeilen.values() if not z)
+        print("  %d Bases ausgewertet%s"
+              % (len(lauf.baseszeilen),
+                 ", davon %d ohne Treffer" % leer if leer else ""))
     if lauf.ablagepfad:
         print("  Präfix der Verweise: %s" % lauf.ablagepfad)
     fehler = 0
