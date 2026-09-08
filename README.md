@@ -138,6 +138,7 @@ Python 3 und PyYAML.
 | `hk-lint [--fix] [--strict]` | prüft eine Wissensbasis **oder eine Lieferung** (§6.3): Frontmatter gegen Anhang B.4, Grammatik gegen Anhang B, dazu die strukturellen Prüfungen; `--fix` führt die zwölf erlaubten Handgriffe aus | **läuft** |
 | `hk-import <bundle>` | übernimmt eine Lieferung (§6.1): Typen abgleichen, Notizen und Mediendateien einsortieren, Verweise umschreiben, verknüpfen, Bundle-Notiz und Typtabelle fortschreiben | **läuft** |
 | `hk-export <id> <ziel>` | schreibt eine Lieferung heraus (§6.2): Notizen, Typdefinitionen und Mediendateien der Lieferung in den typbezogenen Baum, Verweise ohne Ablagepfad | **läuft** |
+| `hk-export-wiki <ziel>` | schreibt die ganze Ablage als Lieferung für einen Leser heraus: Notizen zeichengleich mit ihren Verweisen, die verwiesenen Medien samt Sidecar, dazu `hkweb.json` mit dem Präfix. Inbox und Journal bleiben zu Hause | **läuft** |
 | `hk-ingest [<stück>]` | liest eine Quelle ein: Typ feststellen, Ausfertigung ablegen oder verzeichnen, `sha256` bilden, Quellennotiz und `hbundle.md` schreiben, die Lücken melden. Mit `--hkb` gleich importieren | **läuft** |
 | `hk-tranchen <quellennotiz>` | führt die Tranchen einer großen Quelle im Abschnitt `# Tranchen` der Quellennotiz: `--anlegen` legt die Liste an, `--naechste` sagt, welche dran ist, `--abhaken` schreibt eine fest | **läuft** |
 | `hk-types [--umstellen]` | legt Typseiten und Bases an, damit `type` ein Verweis sein darf (§3.3) | **läuft** |

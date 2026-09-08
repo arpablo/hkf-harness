@@ -1,0 +1,304 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""hk-export-wiki — die Ablage als Lieferung fuer HenniWiki herausschreiben.
+
+    hk-export-wiki <zielpfad> [hkb-pfad]
+
+Ohne `hkb-pfad` gilt $HKB_PATH, sonst ~/hkb.
+
+    --force        in ein nicht leeres Zielverzeichnis schreiben
+    --mit-journal  den Journalbereich mitliefern
+    --check        nur berichten, nichts schreiben
+
+Das ist nicht `hk-export`. Eine Lieferung nach §6.2 ist eine Auswahl, die sich
+ueber `bundles` selbst zusammenstellt, und sie wird in einer fremden
+Wissensbasis ausgepackt. Hier geht die ganze Ablage an einen Leser, der sie
+nur anzeigt. Beide teilen sich das Wort Lieferung und sonst wenig: Die
+Auswahl ist eine andere, und was §6.2 unterwegs veraendert — die Linkform von
+`type`, die vorlaeufigen Typdefinitionen, der gefilterte Abschnitt
+`# Verbindungen` — waere hier falsch oder wirkungslos.
+
+**Nichts wird umgeschrieben.** Die Notizen gehen zeichengleich hinaus, mit
+ihren qualifizierten Wikilinks (§3.6) genau so, wie sie in der Ablage stehen.
+Der Grund ist keine Faulheit: Wer Verweise hier aufloest, hat die Regeln aus
+§3.6 zweimal umgesetzt, einmal in Python und einmal im Leser, und ab dem
+naechsten Sonderfall verhalten sie sich verschieden. Der Praefix, den der
+Leser dafuer braucht, steht in `hkweb.json`.
+
+**Was zu Hause bleibt.** Die Inbox ist keine Notizsammlung (§3.2.6) und der
+Journalbereich ist ein Arbeitstagebuch — beides geht nicht hinaus. Alles
+andere geht mit, auch `90-System`: Typdefinitionen, Typseiten und Bases sind
+Verweisziele, und eine Lieferung mit gebrochenen Verweisen ist schlechter als
+eine grosse.
+
+**Medien nur, worauf verwiesen wird**, samt ihrer `henni-image`-Sidecar. Der
+Alt-Text steht dort und nicht im Alias einer Einbettung (§3.6); ein Bild ohne
+Sidecar wird gemeldet, nicht erfunden.
+"""
+import datetime, io, json, os, re, shutil, sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
+from hkf import CORE, ablage, frontmatter, grammatik             # noqa: E402
+
+WERKZEUG = "hk-export-wiki"
+MANIFEST = "hkweb.json"
+FORMAT, FASSUNG = "hkweb", 1
+
+# Bereiche, die nicht hinausgehen. `inbox_base` haelt, was noch keine Notiz
+# ist; `journal_base` das Arbeitstagebuch. Der Journalbereich laesst sich mit
+# --mit-journal zuschalten, die Inbox nicht: Dort liegen leere Dateien, PDFs
+# und Halbfertiges, und nichts davon ist fuer einen Leser gedacht.
+ZUHAUSE = ("inbox_base",)
+ZUHAUSE_OHNE_SCHALTER = ("journal_base",)
+
+BILD = (".jpg", ".jpeg", ".png", ".webp", ".avif", ".gif", ".tif", ".tiff")
+
+# Was unter `config_base` mitgeht. `ablage.KONFIGVERZEICHNISSE` sind die drei,
+# die HKF dort kennt; `Bases` kommt hinzu, obwohl es keines davon ist. Der
+# Grund steht in hk-types: Eine `.base` ist Obsidian und nicht HKF, und darum
+# prueft sie niemand — aber jede Typseite bettet ihre Base ein
+# (`![[90-System/Bases/Person.base|Tabelle]]`), und eine Lieferung ohne sie
+# haette so viele gebrochene Einbettungen wie Typen. Alles Uebrige dort bleibt
+# zurueck: Ein Vorlagenordner traegt `type`, weil seine Dateien den Typ
+# nennen, den sie anlegen sollen, und ist darum keine Notiz (§3.2).
+BASES = "Bases"
+MIT_KONFIG = ablage.KONFIGVERZEICHNISSE + (BASES,)
+
+class Lauf(object):
+    def __init__(self, hkb, ziel, mit_journal=False):
+        self.hkb = os.path.abspath(hkb)
+        self.ziel = os.path.abspath(ziel)
+        self.mit_journal = mit_journal
+        self.bereiche = ablage.bereiche(self.hkb)
+        self.ablagepfad = ablage.ablagepfad(self.hkb)
+        daten, _ = frontmatter.lesen(ablage.wurzeldatei(self.hkb))
+        self.kopf = daten or {}
+        self.dateien = []       # rel unter der Wurzel, Notizen und Konfig
+        self.medien = []        # rel unter der Wurzel
+        self.sidecars = []      # rel unter der Wurzel
+        self.befunde = []       # (art, text, hinweis)
+        self.abgebrochen = None
+
+    def melde(self, art, text, hinweis=None):
+        self.befunde.append((art, text, hinweis))
+
+    def praefix(self):
+        """Was in jedem Verweis vor dem Bereich steht (§3.1)."""
+        return self.ablagepfad
+
+    def ziel_von(self, rel):
+        """Der Verweis, unter dem eine Datei der Ablage angesprochen wird."""
+        rel = rel[:-3] if rel.endswith(".md") else rel
+        return "%s/%s" % (self.praefix(), rel) if self.praefix() else rel
+
+
+def _verweise(pfad):
+    """Alle Wikilink-Ziele einer Notiz, aus Frontmatter und Body.
+
+    Gelesen wird mit `grammatik`, der woertlichen Uebersetzung der ABNF aus
+    Anhang B.2. Ein eigener Ausdruck daneben waere ein zweiter Ort fuer
+    dieselbe Regel — und ein loser, der kein schliessendes `]]` verlangt,
+    findet Dinge, die keine Verweise sind.
+
+    **Code bleibt aussen vor, fenced wie inline.** Beim Umschreiben entscheidet
+    `notiz.ausserhalb_code` bewusst anders, weil ein Wikilink in einem
+    Backtick-Span dort umzuschreiben ist. Beim Pruefen ist er ein Beispiel:
+    `Proptypes/hkf-url.md` erklaert eine Wertform mit einem regulaeren
+    Ausdruck, und der sieht einem Verweis aehnlich genug, um als gebrochener
+    gemeldet zu werden.
+
+    Was B.2 nicht entspricht, wird uebergangen. Die Grammatik zu ruegen ist
+    Sache von `hk-lint`; hier zaehlt allein, ob ein Ziel mitgeht.
+    """
+    kopf, body = frontmatter.roh(pfad)
+    if kopf is None:
+        return []
+    ohne_code = re.sub(r"```.*?```", "", body, flags=re.S)
+    ohne_code = re.sub(r"`[^`\n]*`", "", ohne_code)
+    aus = []
+    for im_body, zeilen in ((False, kopf.splitlines()),
+                            (True, ohne_code.splitlines())):
+        for zeile in zeilen:
+            # In einer Tabellenzelle steht der Alias-Strich maskiert (§3.6).
+            in_tabelle = im_body and zeile.lstrip().startswith("|")
+            regel = grammatik.ZELLE if in_tabelle else grammatik.WIKILINK
+            for treffer in grammatik.ROH.finditer(zeile):
+                m = regel.match(treffer.group(0).lstrip("!"))
+                if m:
+                    aus.append(m.group(1))
+    return aus
+
+
+def sammeln(lauf):
+    zuhause = set(ZUHAUSE)
+    if not lauf.mit_journal:
+        zuhause |= set(ZUHAUSE_OHNE_SCHALTER)
+    medienbereich = lauf.bereiche.get("media_base") or ""
+
+    # 1. Die Dateien der Bereiche, die hinausgehen. Kopiert wird, was da ist —
+    #    auch `.base`, auch eine Vorlage unter `config_base`: Der Leser zeigt
+    #    an, was er bekommt, und ein Verweis darf nirgends ins Leere laufen.
+    for wurzel, verzeichnisse, namen in os.walk(lauf.hkb):
+        verzeichnisse[:] = [d for d in verzeichnisse if not d.startswith(".")]
+        for name in sorted(namen):
+            if name.startswith("."):
+                continue
+            p = os.path.join(wurzel, name)
+            rel = os.path.relpath(p, lauf.hkb).replace(os.sep, "/")
+            if rel == os.path.basename(ablage.wurzeldatei(lauf.hkb)):
+                continue                      # kommt eigens mit
+            bereich, _ = ablage.bereich_von(lauf.bereiche, rel)
+            if bereich in zuhause:
+                continue
+            if bereich == "media_base":
+                continue                      # erst nach den Verweisen
+            if bereich is None:
+                continue                      # gehoert nicht zur Ablage (§3.2)
+            if bereich == "config_base" and \
+                    rel.split("/")[1:2] and rel.split("/")[1] not in MIT_KONFIG:
+                continue
+            lauf.dateien.append(rel)
+
+    if not lauf.dateien:
+        lauf.abgebrochen = ("Unter %s liegt keine Notiz." % lauf.hkb)
+        return lauf
+
+    # 2. Verweise einsammeln: welche Medien mitgehen und was ins Leere zeigt.
+    drin = {lauf.ziel_von(r) for r in lauf.dateien}
+    pre_m = "/".join([t for t in (lauf.praefix(), medienbereich) if t])
+    gewollt, fehlend = [], {}
+    for rel in lauf.dateien:
+        if not rel.endswith(".md"):
+            continue
+        for ziel in _verweise(os.path.join(lauf.hkb, rel)):
+            if pre_m and ziel.startswith(pre_m + "/"):
+                mrel = ziel[len(lauf.praefix()) + 1:] if lauf.praefix() else ziel
+                if os.path.isfile(os.path.join(lauf.hkb, mrel)):
+                    if mrel not in gewollt:
+                        gewollt.append(mrel)
+                else:
+                    fehlend.setdefault(ziel, rel)
+            elif ziel not in drin:
+                fehlend.setdefault(ziel, rel)
+    lauf.medien = gewollt
+
+    # 3. Die Sidecars der mitgehenden Bilder. Ohne sie hat der Leser keinen
+    #    Alt-Text, und erfinden darf er keinen.
+    for mrel in lauf.medien:
+        if not mrel.lower().endswith(BILD):
+            continue
+        side = os.path.splitext(mrel)[0] + ".json"
+        if os.path.isfile(os.path.join(lauf.hkb, side)):
+            lauf.sidecars.append(side)
+        else:
+            lauf.melde("hinweis", "%s hat keine Sidecar und damit keinen "
+                       "Alt-Text." % mrel,
+                       "hkf:bild-sidecars über das Verzeichnis laufen lassen.")
+
+    for ziel in sorted(fehlend):
+        lauf.melde("konflikt", "[[%s]] in %s zeigt auf nichts, was mitgeht."
+                   % (ziel, fehlend[ziel]),
+                   "Den Verweis reparieren oder das Ziel mitliefern.")
+
+    # 4. Medien, die niemand nennt, bleiben zurueck. Das ist richtig so, aber
+    #    still — wer eine Lieferung baut, soll es erfahren.
+    if medienbereich:
+        d = os.path.join(lauf.hkb, medienbereich)
+        zurueck = 0
+        for w, verz, namen in os.walk(d):
+            verz[:] = [x for x in verz if not x.startswith(".")]
+            for name in namen:
+                if name.startswith(".") or name.endswith(".json"):
+                    continue
+                rel = os.path.relpath(os.path.join(w, name),
+                                      lauf.hkb).replace(os.sep, "/")
+                if rel not in lauf.medien:
+                    zurueck += 1
+        if zurueck:
+            lauf.melde("hinweis", "%d Mediendateien hängen an keiner Notiz und "
+                       "bleiben zurück." % zurueck)
+    return lauf
+
+
+def _manifest(lauf):
+    jetzt = datetime.datetime.now().replace(microsecond=0).isoformat()
+    return {
+        "format": FORMAT,
+        "version": FASSUNG,
+        "werkzeug": WERKZEUG,
+        "erzeugt": jetzt,
+        "hkf": str(lauf.kopf.get("hkf") or CORE),
+        "name": lauf.kopf.get("name") or os.path.basename(lauf.hkb),
+        # Der Praefix jedes Verweises (§3.6). Ohne ihn kann der Leser
+        # `40-Wiki/Persons/x` nicht von `test/40-Wiki/Persons/x` unterscheiden.
+        "ablagepfad": lauf.ablagepfad,
+        "bereiche": lauf.bereiche,
+        "notizen": sum(1 for r in lauf.dateien if r.endswith(".md")),
+        "dateien": len(lauf.dateien),
+        "medien": len(lauf.medien),
+    }
+
+
+def ausfuehren(lauf):
+    if lauf.abgebrochen:
+        return lauf
+    os.makedirs(lauf.ziel, exist_ok=True)
+    for rel in lauf.dateien + lauf.medien + lauf.sidecars:
+        ziel = os.path.join(lauf.ziel, rel)
+        os.makedirs(os.path.dirname(ziel), exist_ok=True)
+        shutil.copy2(os.path.join(lauf.hkb, rel), ziel)
+    wurzeldatei = ablage.wurzeldatei(lauf.hkb)
+    shutil.copy2(wurzeldatei, os.path.join(lauf.ziel,
+                                           os.path.basename(wurzeldatei)))
+    io.open(os.path.join(lauf.ziel, MANIFEST), "w", encoding="utf-8").write(
+        json.dumps(_manifest(lauf), ensure_ascii=False, indent=2,
+                   sort_keys=True) + "\n")
+    return lauf
+
+
+def main(argv):
+    force = "--force" in argv
+    check = "--check" in argv
+    mit_journal = "--mit-journal" in argv
+    rest = [a for a in argv if not a.startswith("--")]
+    if not rest:
+        sys.stderr.write(__doc__)
+        return 2
+    ziel = os.path.abspath(os.path.expanduser(rest[0]))
+    try:
+        hkb = ablage.finde(rest[1] if len(rest) > 1 else None)
+    except ablage.KeineAblage as e:
+        sys.stderr.write(str(e) + "\n")
+        return 2
+
+    if not check and os.path.isdir(ziel) and os.listdir(ziel) and not force:
+        sys.stderr.write("%s ist nicht leer. Mit --force hineinschreiben — "
+                         "was dort liegt, bleibt liegen und gehört dann zur "
+                         "Lieferung.\n" % ziel)
+        return 1
+
+    lauf = sammeln(Lauf(hkb, ziel, mit_journal))
+    if lauf.abgebrochen:
+        sys.stderr.write(lauf.abgebrochen + "\n")
+        return 1
+    if not check:
+        ausfuehren(lauf)
+
+    m = _manifest(lauf)
+    print("%s → %s" % (lauf.hkb, "(nur geprüft)" if check else lauf.ziel))
+    print("  %d Notizen, %d Dateien, %d Medien, %d Sidecars"
+          % (m["notizen"], m["dateien"], m["medien"], len(lauf.sidecars)))
+    if lauf.ablagepfad:
+        print("  Präfix der Verweise: %s" % lauf.ablagepfad)
+    fehler = 0
+    for art, text, hinweis in lauf.befunde:
+        print("  %-9s %s" % (art, text))
+        if hinweis:
+            print("            %s" % hinweis)
+        if art in ("fehler", "konflikt"):
+            fehler += 1
+    return 1 if fehler else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

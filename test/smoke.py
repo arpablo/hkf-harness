@@ -2318,6 +2318,85 @@ Was an diesem Tag anfiel.
               (r.stdout + r.stderr)[:300])
         shutil.rmtree(os.path.dirname(frisch), ignore_errors=True)
 
+        print("hk-export-wiki")
+        # Eine eigene Ablage: Der Wiki-Export nimmt die ganze Ablage, und die
+        # Proben oben haben ihre schon mit Sonderfaellen gefuellt.
+        wablage = os.path.join(tempfile.mkdtemp(prefix="hkb-wiki-"), "ablage")
+        lauf(os.path.join(BIN, "hk-init"), wablage, "--name", "Wiki-Probe")
+        _schreib(os.path.join(wablage, WIKI, "dinge", "eins.md"),
+                 "---\ntype: ding\ntitle: Eins\n"
+                 "related:\n  - \"[[40-Wiki/dinge/zwei|Zwei]]\"\n---\n\n"
+                 "Ein Verweis auf [[40-Wiki/dinge/zwei|Zwei]].\n\n"
+                 "![[80-Media/Images/bild.png]]\n")
+        _schreib(os.path.join(wablage, WIKI, "dinge", "zwei.md"),
+                 "---\ntype: ding\ntitle: Zwei\n---\n\nNichts weiter.\n")
+        _schreib(os.path.join(wablage, "10-Journal", "2026-01-01.md"),
+                 "---\ntype: note\ntitle: Tagebuch\n---\n\nPrivat.\n")
+        _schreib(os.path.join(wablage, "00-Inbox", "roh.txt"), "unfertig\n")
+        _schreib(os.path.join(wablage, KONFIG, "Templates", "vorlage.md"),
+                 "---\ntype: ding\n---\n\nEine Vorlage, keine Notiz.\n")
+        _schreib(os.path.join(wablage, KONFIG, "Bases", "Ding.base"),
+                 "views:\n  - type: table\n    name: Tabelle\n")
+        for bild in ("bild.png", "waise.png"):
+            _schreib(os.path.join(wablage, MEDIEN, "Images", bild), "PNG")
+
+        waus = os.path.join(os.path.dirname(wablage), "lieferung")
+        r = lauf(os.path.join(BIN, "hk-export-wiki"), waus, wablage)
+        probe("schreibt heraus", r.returncode == 0, r.stdout + r.stderr)
+        for f in ("hkweb.json", "hkb.md", "40-Wiki/dinge/eins.md",
+                  "90-System/Bases/Ding.base", "80-Media/Images/bild.png"):
+            probe("legt %s an" % f, os.path.exists(os.path.join(waus, f)))
+        probe("laesst das Journal zu Hause",
+              not os.path.exists(os.path.join(waus, "10-Journal")))
+        probe("laesst die Inbox zu Hause",
+              not os.path.exists(os.path.join(waus, "00-Inbox")))
+        probe("laesst Vorlagen zu Hause (§3.2)",
+              not os.path.exists(os.path.join(waus, KONFIG, "Templates")))
+        probe("laesst unverwiesene Medien zu Hause",
+              not os.path.exists(os.path.join(waus, MEDIEN, "Images",
+                                              "waise.png")))
+        probe("und meldet sie", "hängen an keiner Notiz" in r.stdout, r.stdout)
+        vorher = io.open(os.path.join(wablage, WIKI, "dinge", "eins.md"),
+                         encoding="utf-8").read()
+        nachher = io.open(os.path.join(waus, WIKI, "dinge", "eins.md"),
+                          encoding="utf-8").read()
+        probe("schreibt die Notiz zeichengleich heraus", vorher == nachher,
+              nachher)
+        m = json.load(io.open(os.path.join(waus, "hkweb.json"),
+                              encoding="utf-8"))
+        probe("das Manifest nennt Format und Fassung",
+              m.get("format") == "hkweb" and m.get("version") == 1, str(m))
+        probe("das Manifest nennt den Praefix der Verweise",
+              "ablagepfad" in m and m["bereiche"]["wiki_base"] == WIKI, str(m))
+
+        r = lauf(os.path.join(BIN, "hk-export-wiki"), waus, wablage)
+        probe("schreibt nicht in ein volles Verzeichnis", r.returncode == 1,
+              r.stdout + r.stderr)
+
+        wmit = os.path.join(os.path.dirname(wablage), "mit-journal")
+        r = lauf(os.path.join(BIN, "hk-export-wiki"), wmit, wablage,
+                 "--mit-journal")
+        probe("--mit-journal nimmt das Journal mit",
+              os.path.exists(os.path.join(wmit, "10-Journal", "2026-01-01.md")),
+              r.stdout + r.stderr)
+        probe("die Inbox aber nie",
+              not os.path.exists(os.path.join(wmit, "00-Inbox")))
+
+        # Ein gebrochener Verweis wird gemeldet, ein Wikilink in Backticks
+        # nicht: Der steht in `Proptypes/hkf-url.md` als Beispiel und hat den
+        # Lauf am 08.09.2026 faelschlich rot gemacht.
+        _schreib(os.path.join(wablage, WIKI, "dinge", "drei.md"),
+                 "---\ntype: ding\ntitle: Drei\n---\n\n"
+                 "Kaputt: [[40-Wiki/dinge/gibt-es-nicht|Nichts]].\n\n"
+                 "Ein Beispiel in Backticks: `[[40-Wiki/dinge/auch-nicht]]`.\n")
+        wneu = os.path.join(os.path.dirname(wablage), "mit-fehler")
+        r = lauf(os.path.join(BIN, "hk-export-wiki"), wneu, wablage)
+        probe("meldet einen Verweis ins Leere", r.returncode == 1 and
+              "gibt-es-nicht" in r.stdout, r.stdout + r.stderr)
+        probe("aber keinen Wikilink aus einem Code-Span",
+              "auch-nicht" not in r.stdout, r.stdout)
+        shutil.rmtree(os.path.dirname(wablage), ignore_errors=True)
+
         print("Das Inventar: Prosa, Schema und Grundausstattung")
         # Die Pruefung braucht keine Ablage — sie haelt den Harness gegen die
         # Fassung unter spec/, die er umsetzt.
