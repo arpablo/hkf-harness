@@ -26,6 +26,7 @@ einen gebrochenen Wikilink immer, ein Modell meistens.
 | [`hkb-lint`](hkb-lint/SKILL.md) | Prüfen, korrigieren lassen, und die Befunde abarbeiten, die kein Werkzeug beheben darf |
 | [`hkb-quelle`](hkb-quelle/SKILL.md) | Aus einer Quelle eine Lieferung machen — und wahlweise gleich importieren |
 | [`hkb-suche`](hkb-suche/SKILL.md) | Eine Frage gegen die Wissensbasis beantworten und mit Verweisen belegen |
+| [`hkb-wikidata`](hkb-wikidata/SKILL.md) | Unter den Kandidaten von `hk-wikidata` den richtigen Gegenstand wählen und eintragen |
 | [`hkb-text`](hkb-text/SKILL.md) | Einen Text messen, seine Muster beurteilen und ihn heben |
 | [`hkb-hinweis`](hkb-hinweis/SKILL.md) | Festhalten, was für diese eine Ablage gilt |
 | [`hkb-publikation`](hkb-publikation/SKILL.md) | Texte zu einer Publikation ordnen und die Reihenfolge führen |
