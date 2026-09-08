@@ -2407,6 +2407,16 @@ Was an diesem Tag anfiel.
             # Uebergriff: Sie soll pruefen, nicht Programme oeffnen.
             print("  %-52s %s" % ("übersprungen, Obsidian läuft nicht", "--"))
         else:
+            # Im App-Bundle liegen zwei Programme nebeneinander. `obsidian`
+            # fuehrt einen Teil der Befehle stillschweigend nicht aus --
+            # `search` liefert dort null Zeilen statt Treffern. Wer hier das
+            # falsche waehlt, merkt es an einem leeren Ergebnis und nicht an
+            # einem Fehler.
+            probe("obsidian-cli geht vor obsidian",
+                  os.path.basename(ob.programm()) == "obsidian-cli"
+                  or not any(os.path.isfile(x) for x in ob.ORTE
+                             if x.endswith("obsidian-cli")),
+                  ob.programm())
             try:
                 ob.ruf("gibtesnichtxyz")
                 probe("ein unbekannter Befehl ist ein Fehlschlag", False,

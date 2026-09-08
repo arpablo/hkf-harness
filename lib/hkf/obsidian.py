@@ -31,9 +31,19 @@ ist, und macht aus dem stillen Nichts einen Fehlschlag.
 """
 import json, os, shutil, subprocess
 
-# Auf dem Mac liegt die CLI im Programm selbst und ist oft nicht auf dem PATH.
-ORTE = ("/Applications/Obsidian.app/Contents/MacOS/obsidian",
-        os.path.expanduser("~/Applications/Obsidian.app/Contents/MacOS/obsidian"))
+# **Es sind zwei Programme, und nur eines taugt.** Im App-Bundle liegen
+# `obsidian-cli` und `obsidian` nebeneinander. Sie fuehren dieselben 105
+# Befehle und antworten auf viele gleich — aber `obsidian` fuehrt einen Teil
+# davon stillschweigend nicht aus: `search` liefert dort fuer jede Anfrage
+# null Zeilen, waehrend `obsidian-cli` in derselben Ablage 125 findet. Kein
+# Fehler, keine Meldung, Exit 0. Darum steht `obsidian-cli` hier zuerst, und
+# `obsidian` bleibt nur der Rueckfall.
+NAMEN = ("obsidian-cli", "obsidian")
+RUMPF = "%s/Contents/MacOS/%%s"
+ORTE = tuple(RUMPF % b % n
+             for n in NAMEN
+             for b in ("/Applications/Obsidian.app",
+                       os.path.expanduser("~/Applications/Obsidian.app")))
 
 # Ein Aufruf gegen die laufende App ist eine Sache von Millisekunden. Das
 # Limit faengt den Fall ab, dass sie gerade startet oder haengt.
@@ -47,9 +57,12 @@ class Fehlschlag(Exception):
 
 
 def programm():
-    """Pfad zur CLI, oder None."""
-    return shutil.which("obsidian") or next((p for p in ORTE
-                                             if os.path.isfile(p)), None)
+    """Pfad zur CLI, oder None. `obsidian-cli` geht vor (siehe NAMEN)."""
+    for name in NAMEN:
+        gefunden = shutil.which(name)
+        if gefunden:
+            return gefunden
+    return next((p for p in ORTE if os.path.isfile(p)), None)
 
 
 def laeuft():
