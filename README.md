@@ -506,9 +506,7 @@ Kopien zu führen. Sie findet den Harness über `HKF_HARNESS`, sonst nebenan.
 - **Regeln ohne Durchsetzung** — `hooks/hooks.json` referenziert
   `${CLAUDE_PLUGIN_ROOT}` und greift damit nur, wo der Harness als Plugin
   liegt. Unter `~/.claude/skills/` lädt ihn niemand, und die harten
-  Schreibregeln gelten dort nur auf Zuruf. Dasselbe Muster bei „Der Body wird
-  nicht umbrochen": Die Regel steht in `hkb-quelle` und `hkb-notiz`, geprüft
-  wird sie von keinem Werkzeug. In derselben Wissensbasis fanden sich vierzig
-  Absätze, die mitten im Satz umbrochen waren und deren Folgezeile mit einer
-  Tageszahl begann, für Markdown also eine nummerierte Liste. Weder `hk-text`
-  noch `hk-lint` meldet das.
+  Schreibregeln gelten dort nur auf Zuruf. Die Regel „Der Body wird nicht umbrochen" prüft
+  `hk-lint` dagegen sehr wohl, sie übersah nur einen Fall: einen Umbruch vor
+  einer Tageszahl, den Markdown als nummerierte Liste liest. Einundvierzig
+  solcher Absätze standen in derselben Wissensbasis. Behoben in b96b3ab.
