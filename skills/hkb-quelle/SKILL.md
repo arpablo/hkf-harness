@@ -102,6 +102,11 @@ Zusammenfassung. `hk-ingest` legt beides an.
 Notiz, Abschnitt in einer anderen Notiz, oder nichts. Die Schwelle steht
 unten. Für jeden, der eine Notiz wird:
 
+- **Der erste Absatz bestimmt den Gegenstand.** Er beantwortet, worum es in
+  dieser Notiz geht, und steht vor allem, was die Quelle erzählt. Wilmas Zeile
+  `Ist:` ist das Material dafür, und was du ohnehin in `description` schreibst,
+  gehört ausformuliert auch in den Text: Eine Notiz, deren Gegenstand nur im
+  Frontmatter steht, sagt ihn dem Leser nirgends.
 - Typ wählen (`concept`, `term`, `person`, `comparison`, `note` …) und die
   Property-Tabelle des Typs lesen, bevor du ein Feld setzt.
 - `aliases` aus den Benennungen setzen, die Wilma mitliefert, soweit sie vom
@@ -121,6 +126,8 @@ sein. Dann sag:
 - was in der Lieferung liegt, nach Typ,
 - **welche Kandidaten du verworfen hast und warum** — nicht die Zahl, die
   Gruppen,
+- **welche Notizen ohne Bestimmungssatz blieben**, weil die Quelle ihn nicht
+  hergibt — sie warten auf eine zweite Quelle,
 - welche Zitationsangaben offen blieben.
 
 **Liefert der Lauf nur die Quellennotiz**, ist das ein Ergebnis, das begründet

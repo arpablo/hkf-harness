@@ -112,10 +112,18 @@ Werkart: <article | book | paper | podcast | transcript | video | web>
 
 ## Notiz-Kandidaten
 - <Name> — <warum> — genannt als: <Benennungen der Quelle>
+  Ist: <was der Gegenstand ist, mit Beleg — oder „steht nicht in der Quelle">
 
 ## Lücken und Widersprüche
 - <Befund>
 ```
+
+**Die Zeile `Ist:` sagt, was der Gegenstand ist.** Nicht, wobei die Quelle ihn
+zuerst erwähnt: was für ein Ding er ist, wann und wo er bestand, wofür er
+einsteht. Ein Komitee ist eine Partei mit einem Gründungsjahr, bevor es die
+Gruppe ist, die in einem bestimmten Kapitel das Telegrafenamt besetzt. Findest
+du den Satz in der Quelle nicht, schreib das hin. Er wird nicht aus eigenem
+Wissen gefüllt, und die Lücke ist eine Auskunft.
 
 **Die Benennungen gehören zum Kandidaten.** Ein Werk nennt denselben Menschen
 als „Lord Fisher", als „the retired Admiral of the Fleet" und als „Fisher".
