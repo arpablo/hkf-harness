@@ -2240,6 +2240,23 @@ Verweis auf [[Notes/gibt-es-nicht|etwas]].
         probe("die Grundausstattung selbst ist entfaltet",
               "umbrochen" not in r.stdout, r.stdout)
 
+        # Eine Tageszahl am Zeilenanfang sieht fuer Markdown aus wie der
+        # soundsovielte Listenpunkt. Entschieden wird an der vorigen Zeile.
+        io.open(n, "w", encoding="utf-8").write(
+            vorher.rstrip("\n") + "\n\nDer Befehl erging am\n"
+            "3. August 1914 und erreichte ihn vor Algerien.\n"
+            "\nDrei Punkte:\n\n1. der erste\n2. der zweite\n")
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        probe("ein Umbruch vor einer Tageszahl ist ein Hinweis",
+              "Der Fließtext ist umbrochen" in r.stdout, r.stdout)
+        r = lauf(os.path.join(BIN, "hk-lint"), "--fix", ziel)
+        g = io.open(n, encoding="utf-8").read()
+        probe("`--fix` zieht die Tageszahl an ihren Satz",
+              "Der Befehl erging am 3. August 1914" in g, g)
+        probe("die nummerierte Liste daneben bleibt eine Liste",
+              "\n1. der erste\n2. der zweite\n" in g, g)
+        io.open(n, "w", encoding="utf-8").write(vorher)
+
         print("hk-tranchen: der Stand einer großen Quelle steht in der Notiz")
         q = os.path.join(ziel, QUELLEN, "eine-zitierte-seite.md")
         HK_TR = os.path.join(BIN, "hk-tranchen")

@@ -106,7 +106,30 @@ STRUKTUR = re.compile(r"^(#{1,6} |[-*+] |\d+[.)] |\||>|```|~~~|---\s*$)")
 # Ein Listenpunkt und ein Zitat nehmen eine Fortsetzungszeile auf, eine
 # Ueberschrift oder Tabellenzeile nicht.
 NIMMT_AUF = re.compile(r"^([-*+] |\d+[.)] |>)")
+ZAHLPUNKT = re.compile(r"^\d+[.)] ")
+# Woran ein abgeschlossener Satz endet. Der Gedankenstrich zaehlt dazu: Er
+# kuendigt oefter eine Liste an, als dass er einen Umbruch hinterlaesst.
+ABGESCHLOSSEN = (".", "!", "?", ":", ";", ")", "]", '"', "'", "\u00bb",
+                 "\u201c", "\u201d", "\u2014", "*")
 ZAUN = ("```", "~~~")
+
+
+def _fortsetzung(zeile, vorige):
+    """Ob eine Zahl mit Punkt am Zeilenanfang die vorige Zeile fortsetzt.
+
+    `10. Maerz schlug es um` sieht fuer Markdown aus wie der zehnte Punkt
+    einer Liste und ist doch der Rest eines Satzes, den ein Umbruch
+    zerschnitten hat. In der Anzeige wird daraus eine nummerierte Liste, die
+    bei zehn beginnt. Entschieden wird an der vorigen Zeile: Ein Listenpunkt
+    folgt auf eine Leerzeile, auf eine Struktur oder auf einen abgeschlossenen
+    Satz, eine Fortsetzung auf einen offenen.
+    """
+    if not ZAHLPUNKT.match(zeile.lstrip()):
+        return False
+    vorige = vorige.rstrip()
+    if not vorige or STRUKTUR.match(vorige.lstrip()):
+        return False
+    return not vorige.endswith(ABGESCHLOSSEN)
 
 
 def entfalten(body):
@@ -127,7 +150,7 @@ def entfalten(body):
             aus.append(zeile)
         elif im_code or blank or not aus or aus[-1].strip() == "":
             aus.append(zeile)
-        elif STRUKTUR.match(zeile.lstrip()):
+        elif STRUKTUR.match(zeile.lstrip()) and not _fortsetzung(zeile, aus[-1]):
             aus.append(zeile)
         elif STRUKTUR.match(aus[-1].lstrip()) and not NIMMT_AUF.match(aus[-1].lstrip()):
             aus.append(zeile)
