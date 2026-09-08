@@ -33,6 +33,25 @@ def _schreib(pfad, inhalt):
     io.open(pfad, "w", encoding="utf-8").write(inhalt)
 
 
+def werkzeug(name):
+    """Ein Skript aus bin/ als Modul laden.
+
+    Die meisten Proben rufen ein Werkzeug als Prozess auf, und das bleibt der
+    Normalfall. Reine Funktionen ohne Aussenwelt lassen sich so aber nicht
+    erreichen: `hk-export-wiki --bases` braucht eine laufende Obsidian-App,
+    das Lesen einer `.base` nicht. Der Bindestrich im Dateinamen verbietet den
+    gewoehnlichen Import, darum der Umweg ueber den Loader.
+    """
+    import importlib.machinery, importlib.util
+    modulname = name.replace("-", "_")
+    lader = importlib.machinery.SourceFileLoader(modulname,
+                                                 os.path.join(BIN, name))
+    spec = importlib.util.spec_from_loader(modulname, lader)
+    modul = importlib.util.module_from_spec(spec)
+    lader.exec_module(modul)
+    return modul
+
+
 def probe(name, bedingung, hinweis=""):
     print("  %-52s %s" % (name, "ok" if bedingung else "FEHLT"))
     if not bedingung:
@@ -2407,6 +2426,46 @@ Was an diesem Tag anfiel.
         probe("und legt dabei keine halbe Lieferung an",
               not os.path.exists(os.path.join(wbase, "hkweb.json")))
         shutil.rmtree(os.path.dirname(wablage), ignore_errors=True)
+
+        print("hk-export-wiki: eine .base lesen")
+        # Ohne Obsidian pruefbar: Das Lesen der Ansichten ist reines YAML.
+        hkw = werkzeug("hk-export-wiki")
+        bordner = tempfile.mkdtemp(prefix="hkb-base-")
+        zwei = os.path.join(bordner, "Zwei.base")
+        _schreib(zwei, "properties:\n  file.name:\n    displayName: Name\n"
+                       "views:\n"
+                       "  - type: table\n    name: Alle\n"
+                       "    order:\n      - file.name\n      - categories\n"
+                       "  - type: cards\n    name: Kacheln\n"
+                       "    order:\n      - file.name\n")
+        views = hkw._views(zwei)
+        probe("liest beide Ansichten mit Namen und Art",
+              [(v[0], v[1]) for v in views] == [("Alle", "table"),
+                                                ("Kacheln", "cards")],
+              str(views))
+        probe("und ihre Spaltenreihenfolge",
+              views[0][2] == ["file.name", "categories"], str(views[0]))
+
+        ohne = os.path.join(bordner, "Ohne.base")
+        _schreib(ohne, "filters:\n  and:\n    - type == \"ding\"\n")
+        probe("eine Base ohne views hat genau eine namenlose Ansicht",
+              hkw._views(ohne) == [(None, "table", [])], str(hkw._views(ohne)))
+
+        krumm = os.path.join(bordner, "Krumm.base")
+        _schreib(krumm, "views:\n  - type: table\n   name: schief\n")
+        probe("ungültiges YAML gibt None statt einer Ausnahme",
+              hkw._views(krumm) is None, str(hkw._views(krumm)))
+
+        # Die Zeilen sind massgeblich: ihre Schluessel tragen die
+        # Anzeigenamen, die erklaerte `order` die rohen Bezeichner.
+        zeilen = [{"path": "40-Wiki/x.md", "Name": "X", "categories": None}]
+        probe("die Spalten kommen aus den Zeilen, ohne path",
+              hkw._spalten(zeilen, ["file.name"]) == ["Name", "categories"],
+              str(hkw._spalten(zeilen, ["file.name"])))
+        probe("ohne Zeilen bleibt die erklärte Reihenfolge",
+              hkw._spalten([], ["file.name", "categories"])
+              == ["file.name", "categories"])
+        shutil.rmtree(bordner, ignore_errors=True)
 
         print("hk-obsidian")
         oablage = os.path.join(tempfile.mkdtemp(prefix="hkb-obs-"), "ablage")
