@@ -470,21 +470,39 @@ Kopien zu führen. Sie findet den Harness über `HKF_HARNESS`, sonst nebenan.
   Beobachtung).
 - **`HKF_BUNDLE_PATH`** — Vorgabeverzeichnis für Lieferungen; festlegen, wenn
   eine Lieferung öfter am selben Ort landet.
-- **Eine Notiz kann nur so vollständig werden wie ihre Quelle** — das
-  Datenmodell fragt nach dem Gegenstand, die Prozesse bilden eine Quelle ab,
-  und dazwischen fehlt ein Schritt. `hkb-quelle` ⑥ schreibt vor, dass der
-  Inhalt allein aus dem Destillat kommt. Für sich ist das richtig, es ist aber
-  der einzige Weg, auf dem Inhalt in eine Notiz gelangt: Kein Skill kennt
-  Vervollständigen oder Anreichern, keine Typdefinition legt einen Aufbau für
-  den Body fest, und `hk-lint` prüft Konformität, nicht Vollständigkeit.
-  Beobachtet an einer Wissensbasis aus einer einzigen Quelle: 53
-  Personennotizen, darin 53-mal `p_categories` und 52-mal `wikidata_id`, aber
-  kein einziges `born`, `died` oder `birthplace`. Die Bodies folgen der
-  Dramaturgie des Buchs — `## Der Sturz`, `## Zu spät` — statt ihrem
-  Gegenstand. Zu entscheiden ist dreierlei: ob eine Typdefinition neben
-  `# Properties` einen `# Aufbau` bekommt, woher der Inhalt kommt, den die
-  erste Quelle nicht hergibt, und ob `hk-lint` leere Typ-Properties als
-  Warnung meldet. Berührt den ersten Punkt oben.
+- **Der Ingest destilliert nach Kapiteln, nicht nach Gegenständen** — und
+  verliert dabei, was die Quelle über eine Entity sagt. `hkb-quelle` bindet die
+  Zusammenfassung an den Aufbau der Quelle, was für die Quellennotiz richtig
+  ist. Es prägt aber den ganzen Lauf: Die abgeleiteten Notizen entstehen
+  kapitelweise aus Wilmas `## Aufbau` statt aus allem, was das Werk über einen
+  Gegenstand hergibt. Der Fall, an dem es auffiel: Fromkin nennt John Fisher
+  „the retired Admiral of the Fleet" und „Lord Fisher", und dass die Umstellung
+  der Flotte von Kohle auf Öl auf ihn zurückging. In der Wissensbasis steht der
+  Rang nirgends, der Titel einmal — im Body der Notiz über Churchill, weil das
+  Buch es dort erzählt —, und Fishers eigene Notiz trägt nur die
+  Dardanellen-Episode. Der Anspruch, an dem sich das messen muss, steht in
+  Karpathys Skizze eines LLM-Wikis: Eine Quelle wird gelesen und in die
+  bestehenden Seiten integriert, die über Quellen hinweg wachsen
+  (https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f). Zu tun:
+  - Ein entity-orientierter Durchgang in `wilma`, neben `## Aufbau`: je
+    Kandidat alles, was die Quelle über ihn sagt, quer über die Tranchen, mit
+    Fundstelle.
+  - Bei tranchierten Quellen gehört dieser Durchgang ans Ende, wo alle Tranchen
+    vorliegen. Sonst bleibt jede Person auf das Kapitel beschränkt, in dem sie
+    zuerst auftritt.
+  - `aliases` beim Ingest füllen, wo die Quelle anders benennt als der Titel.
+    Ohne sie greift die Verknüpfung nach §6.1 Schritt 9 nicht: „Lord Fisher"
+    steht als bloßer Text im Bestand, weil der Titel „John Fisher" lautet.
+    Drei von 121 Notizen führen `aliases`.
+  - Eine Sollstruktur je Typ, als Abschnitt `# Aufbau` neben `# Properties` in
+    der Typdefinition, die Ingest und `hkb-notiz` beide lesen.
+  - `hk-lint` um zwei Warnungen erweitern: leere Properties des eigenen Typs,
+    und der Titel oder Alias einer Notiz, der in einem fremden Body ohne
+    Wikilink dasteht.
+  - Was die Quelle gar nicht hergibt, bleibt der kleinere Rest. Dreiundfünfzig
+    Personennotizen tragen keine Lebensdaten, weil Fromkin keine nennt. Dafür
+    braucht es einen Vervollständigungsschritt aus einer zweiten Quelle, und
+    die 52 vorhandenen `wikidata_id` sind der naheliegende Anfang.
 - **Regeln ohne Durchsetzung** — `hooks/hooks.json` referenziert
   `${CLAUDE_PLUGIN_ROOT}` und greift damit nur, wo der Harness als Plugin
   liegt. Unter `~/.claude/skills/` lädt ihn niemand, und die harten
