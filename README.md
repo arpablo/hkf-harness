@@ -484,21 +484,29 @@ Kopien zu führen. Sie findet den Harness über `HKF_HARNESS`, sonst nebenan.
   Karpathys Skizze eines LLM-Wikis: Eine Quelle wird gelesen und in die
   bestehenden Seiten integriert, die über Quellen hinweg wachsen
   (https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f). Zu tun:
+  - **Erledigt (a794727):** Jede Notiz sagt im ersten Absatz, worum es geht.
+    Wilma liefert je Kandidat eine Zeile `Ist:`, der Ingest macht daraus den
+    Anfang des Bodys. Die Notiz „Komitee für Einheit und Fortschritt" begann
+    mit italienischen Geheimbünden, und was das Komitee ist, stand allein in
+    `description`.
+  - **Erledigt (cc1734e):** `aliases` aus den Benennungen der Quelle. Ohne sie
+    greift die Verknüpfung nach §6.1 Schritt 9 nicht: „Lord Fisher" steht als
+    bloßer Text im Bestand, weil der Titel „John Fisher" lautet.
+  - **Erledigt (c6faa71):** `hk-lint --strict` nennt je Typ, was er zusichert
+    und keine Notiz führt. Kein Befund, eine Zahl. Geplant waren hier zwei
+    Warnungen; die eine, die eine unverlinkte Nennung meldet, fiel bei der
+    Messung durch: Sie traf zwei Notizen von 122 und hätte den Fisher-Fall
+    nicht gefunden, weil die Verbindung dort längst besteht.
   - Ein entity-orientierter Durchgang in `wilma`, neben `## Aufbau`: je
     Kandidat alles, was die Quelle über ihn sagt, quer über die Tranchen, mit
-    Fundstelle.
+    Fundstelle. Das ist der eigentliche Eingriff, und er steht noch aus.
   - Bei tranchierten Quellen gehört dieser Durchgang ans Ende, wo alle Tranchen
     vorliegen. Sonst bleibt jede Person auf das Kapitel beschränkt, in dem sie
     zuerst auftritt.
-  - `aliases` beim Ingest füllen, wo die Quelle anders benennt als der Titel.
-    Ohne sie greift die Verknüpfung nach §6.1 Schritt 9 nicht: „Lord Fisher"
-    steht als bloßer Text im Bestand, weil der Titel „John Fisher" lautet.
-    Drei von 121 Notizen führen `aliases`.
   - Eine Sollstruktur je Typ, als Abschnitt `# Aufbau` neben `# Properties` in
-    der Typdefinition, die Ingest und `hkb-notiz` beide lesen.
-  - `hk-lint` um zwei Warnungen erweitern: leere Properties des eigenen Typs,
-    und der Titel oder Alias einer Notiz, der in einem fremden Body ohne
-    Wikilink dasteht.
+    der Typdefinition, die Ingest und `hkb-notiz` beide lesen. Der
+    Bestimmungssatz ist ihr erster Teil, die übrigen Abschnitte hängen an einer
+    Entscheidung über das Datenmodell.
   - Was die Quelle gar nicht hergibt, bleibt der kleinere Rest. Dreiundfünfzig
     Personennotizen tragen keine Lebensdaten, weil Fromkin keine nennt. Dafür
     braucht es einen Vervollständigungsschritt aus einer zweiten Quelle, und
