@@ -244,11 +244,12 @@ nicht.
 ```
 spec/        HKF Core und Config: die Spezifikation selbst, siehe spec/README.md
 lib/hkf/     ablage, frontmatter, schema, grammatik, pruefen, korrigieren,
-             importieren, exportieren, einlesen, notiz, vorlage, fassung
+             importieren, exportieren, einlesen, notiz, vorlage, fassung,
+             obsidian (die Obsidian-CLI, mit ihren Eigenheiten an einer Stelle)
 lib/hkf/text/ der Schreibregelprüfer: segment, engine, rules, rhythm_lint
 lib/hkf/hennibock/ die Übertragung an eine HenniBock-Instanz
 rules/       deutsch.json, der Basissatz der Schreibregeln
-bin/         hk-init, hk-lint, hk-import, hk-export, hk-ingest,
+bin/         hk-init, hk-lint, hk-import, hk-export, hk-export-wiki, hk-ingest,
              hk-tranchen, hk-types, hk-ablage, hk-text, hk-install,
              hk-suche, hk-erwaehnungen, hk-kontext, hk-publikation, hk-verweise,
              hk-wikidata,

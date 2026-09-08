@@ -2397,6 +2397,41 @@ Was an diesem Tag anfiel.
               "auch-nicht" not in r.stdout, r.stdout)
         shutil.rmtree(os.path.dirname(wablage), ignore_errors=True)
 
+        print("Der Adapter zur Obsidian-CLI")
+        sys.path.insert(0, os.path.join(WURZEL, "lib"))
+        from hkf import obsidian as ob
+        if not ob.programm():
+            print("  %-52s %s" % ("übersprungen, keine Obsidian-CLI", "--"))
+        elif not ob.laeuft():
+            # Ein Aufruf startet die App. In einer Rauchprobe waere das ein
+            # Uebergriff: Sie soll pruefen, nicht Programme oeffnen.
+            print("  %-52s %s" % ("übersprungen, Obsidian läuft nicht", "--"))
+        else:
+            try:
+                ob.ruf("gibtesnichtxyz")
+                probe("ein unbekannter Befehl ist ein Fehlschlag", False,
+                      "kein Fehlschlag, obwohl der Exit-Code 0 nichts sagt")
+            except ob.Fehlschlag as e:
+                probe("ein unbekannter Befehl ist ein Fehlschlag",
+                      "not found" in str(e), str(e))
+            try:
+                ob.ruf("vaults", zeitlimit=0.001)
+                probe("das Zeitlimit greift", False)
+            except ob.Fehlschlag as e:
+                probe("das Zeitlimit greift", "nicht geantwortet" in str(e),
+                      str(e))
+            bekannt = ob.vaults()
+            probe("vaults liefert Namen und absolute Pfade",
+                  bool(bekannt) and all(os.path.isabs(p2)
+                                        for p2 in bekannt.values()),
+                  str(bekannt)[:200])
+            # Die Probeablage ist kein angemeldeter Vault. Ein Pfad, den
+            # Obsidian nicht kennt, darf keinen Vault liefern -- sonst liefe
+            # ein Aufruf klaglos gegen den zuletzt benutzten.
+            probe("ein unbekannter Pfad liefert keinen Vault",
+                  ob.vault_fuer(ziel) == (None, None),
+                  str(ob.vault_fuer(ziel)))
+
         print("Das Inventar: Prosa, Schema und Grundausstattung")
         # Die Pruefung braucht keine Ablage — sie haelt den Harness gegen die
         # Fassung unter spec/, die er umsetzt.
