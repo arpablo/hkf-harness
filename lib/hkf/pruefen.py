@@ -656,12 +656,25 @@ def _siehe_auch(b, befunde):
         if aliase != sorted(aliase):
             befunde.append(Befund(e["rel"], "Die Einträge unter `# Verbindungen` stehen "
                                             "nicht alphabetisch (§5.6).", HINWEIS))
+        # Was der Body selbst verlinkt, nennt er. §5.6 verlangt fuer einen
+        # Eintrag, dass der Body den anderen nennt, und ein Wikilink tut das
+        # deutlicher als der ausgeschriebene Name. Wer allein den Titel als
+        # Text suchte, meldete jede Notiz, die ihr Ziel unter dessen
+        # Kurznamen verlinkt — "Balfour" statt "Arthur James Balfour" — als
+        # blossen Rueckverweis. In einer gewachsenen Ablage ist das die
+        # Mehrheit der Faelle, und der Hinweis riet zum Loeschen einer
+        # Verbindung, die belegt ist.
+        eigener = notiz.ohne_abschnitt(e["body"], "Verbindungen")
+        verlinkt = set()
+        for m in LINK.finditer(ohne_code(eigener)):
+            wo, wohin = b.aufloesen(m.group(1))
+            if wo == "notiz":
+                verlinkt.add(wohin)
         for ziel, link in (ziele if b.art == "hkb" else []):
             art, rest = b.aufloesen(ziel)
-            if art != "notiz":
+            if art != "notiz" or rest in verlinkt:
                 continue
             gegen = b.notizen[rest]
-            eigener = notiz.ohne_abschnitt(e["body"], "Verbindungen")
             titel = [str(gegen["daten"].get("title") or "")] + \
                     [str(a) for a in (gegen["daten"].get("aliases") or [])]
             zurueck = re.findall(r"\[\[([^\]|\\]+)",

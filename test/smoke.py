@@ -343,6 +343,69 @@ Eine Notiz aus der Zeit vor der Umbenennung.
               "# Verbindungen" in inhalt and "# Siehe auch" not in inhalt, inhalt)
         probe("und die Leerzeile hinter der Ueberschrift bleibt",
               "# Verbindungen\n\n- [[" in inhalt, repr(inhalt[-120:]))
+
+        # §5.6 verlangt fuer einen Eintrag, dass der Body den anderen nennt.
+        # Ein Wikilink nennt ihn; wie er beschriftet ist, steht frei. Bis zum
+        # 08.09.2026 sah der Linter allein nach Titel und Aliasen als Text und
+        # hielt jede Notiz, die ihr Ziel unter dessen Kurznamen verlinkt, fuer
+        # einen blossen Rueckverweis — in einer gewachsenen Ablage die
+        # Mehrheit der Faelle.
+        _schreib(os.path.join(ziel, WIKI, "dinge", "marke.md"), """---
+type: ding
+name: Marke
+created: 2026-01-01
+related:
+  - "[[40-Wiki/dinge/nennt|Nennt]]"
+  - "[[40-Wiki/dinge/stumm|Stumm]]"
+---
+
+Die Marke steht bei [[40-Wiki/dinge/nennt|Nennt]] und bei [[40-Wiki/dinge/stumm|Stumm]].
+
+# Verbindungen
+
+- [[40-Wiki/dinge/nennt|Nennt]] — im Body dieser Notiz genannt
+- [[40-Wiki/dinge/stumm|Stumm]] — im Body dieser Notiz genannt
+""")
+        _schreib(os.path.join(ziel, WIKI, "dinge", "nennt.md"), """---
+type: ding
+name: Nennt
+created: 2026-01-01
+related:
+  - "[[40-Wiki/dinge/marke|Marke]]"
+---
+
+Hier steht die [[40-Wiki/dinge/marke|Kurzform]] und nicht der Name.
+
+# Verbindungen
+
+- [[40-Wiki/dinge/marke|Marke]] — im Body dieser Notiz verlinkt
+""")
+        _schreib(os.path.join(ziel, WIKI, "dinge", "stumm.md"), """---
+type: ding
+name: Stumm
+created: 2026-01-01
+related:
+  - "[[40-Wiki/dinge/marke|Marke]]"
+---
+
+Diese Notiz nennt das Ziel mit keinem Wort.
+
+# Verbindungen
+
+- [[40-Wiki/dinge/marke|Marke]] — kam mit einer Lieferung
+""")
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        probe("ein Wikilink im Body belegt den Eintrag (§5.6)",
+              "dinge/nennt.md: [[40-Wiki/dinge/marke" not in r.stdout,
+              r.stdout[-400:])
+        probe("ohne jede Nennung bleibt es ein bloßer Rückverweis",
+              "dinge/stumm.md: [[40-Wiki/dinge/marke|Marke]] ist ein bloßer "
+              "Rückverweis" in r.stdout, r.stdout[-400:])
+        probe("und die Gegenrichtung ist durch ihren Body gedeckt",
+              "dinge/marke.md: [[40-Wiki/dinge/" not in r.stdout,
+              r.stdout[-400:])
+        for weg in ("marke.md", "nennt.md", "stumm.md"):
+            os.remove(os.path.join(ziel, WIKI, "dinge", weg))
         shutil.rmtree(ziel)
         lauf(os.path.join(BIN, "hk-init"), ziel, "--name", "Probe")
 
