@@ -2294,6 +2294,21 @@ Was an diesem Tag anfiel.
               r.returncode == 0 and "fragment" not in r.stdout,
               r.stdout[-400:])
 
+        print("hk-wikidata legt vor und schreibt nicht")
+        # Ohne Netz: Beide Proben kommen bis zur ersten Abfrage gar nicht.
+        r = lauf(os.path.join(BIN, "hk-wikidata"), "--help")
+        probe("die Hilfe sagt, dass nichts geschrieben wird",
+              r.returncode == 0 and "schreibt nichts" in r.stdout, r.stdout[:200])
+        # Gegen eine frische Ablage, nicht gegen `ziel`: Dort liegen Notizen,
+        # und die Probe ginge ins Netz. Eine Rauchprobe haengt an keinem Netz.
+        frisch = os.path.join(tempfile.mkdtemp(prefix="hkb-wd-"), "ablage")
+        lauf(os.path.join(BIN, "hk-init"), frisch)
+        r = lauf(os.path.join(BIN, "hk-wikidata"), "--alle", frisch)
+        probe("in einer frischen Ablage gibt es nichts zu suchen",
+              r.returncode == 1 and "Keine Notiz ohne" in r.stdout,
+              (r.stdout + r.stderr)[:300])
+        shutil.rmtree(os.path.dirname(frisch), ignore_errors=True)
+
         print("Das Inventar: Prosa, Schema und Grundausstattung")
         # Die Pruefung braucht keine Ablage — sie haelt den Harness gegen die
         # Fassung unter spec/, die er umsetzt.

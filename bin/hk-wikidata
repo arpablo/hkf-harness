@@ -1,0 +1,369 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""hk-wikidata — Kandidaten fuer die `wikidata_id` einer Notiz vorlegen.
+
+    hk-wikidata <ziel> [pfad]      Kandidaten fuer eine Notiz
+    hk-wikidata --alle [pfad]      fuer jede Notiz ohne `wikidata_id`
+    hk-wikidata --typ person       nur Notizen dieses Typs
+    hk-wikidata --json             maschinenlesbar, fuer einen Skill
+    hk-wikidata --grenze 5         hoechstens so viele Kandidaten je Notiz
+
+**Dieses Werkzeug schreibt nichts.** Es sucht, sammelt Belege und legt vor.
+Welche Kennung die richtige ist, entscheidet ein Mensch oder ein Skill. Der
+Grund steht im Property-Typ `hkf-wikidata`: Verwechselte Kennungen sind der
+haeufigste Fehler, und die Suche liefert zu einem historischen Namen
+regelmaessig mehrere Menschen aus mehreren Jahrhunderten.
+
+Gesucht wird mit `title`, `name` und den `aliases` der Notiz, erst auf Deutsch,
+dann auf Englisch. Zu jedem Kandidaten holt der Lauf `P31` (ist ein), `P569`
+und `P570` (Geburts-, Sterbedatum) und haelt sie gegen das, was die Notiz
+selbst fuehrt.
+
+Aussortiert wird, was kein Gegenstand ist: Begriffsklaerung, Kategorie, Liste,
+Vorlage, Wikimedia-Projektseite. Das ist mechanisch und darum hier richtig.
+
+Das Urteil am Ende ist eine Zaehlung und keine Entscheidung:
+
+    eindeutig    genau ein Kandidat bleibt uebrig, und ein Beleg stuetzt ihn
+    mehrdeutig   mehrere bleiben uebrig
+    nichts       die Suche findet keinen Gegenstand
+
+Acht Typen fuehren die Property (HKF Config): person, organisation, place,
+city, country, term, concept, source. Andere werden uebergangen.
+"""
+import io, json, os, sys, time
+import urllib.parse
+import urllib.request
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
+from hkf import ablage, pruefen   # noqa: E402
+
+WERKZEUG = "hk-wikidata"
+API = "https://www.wikidata.org/w/api.php"
+# Wikidata verlangt einen sprechenden User-Agent und sperrt sonst.
+KOPF = {"User-Agent": "hkf-harness/1.0 (https://github.com/arpablo/hkf-harness)"}
+PAUSE = 0.2
+
+# Die Typen, deren Typdefinition `wikidata_id` zusichert (HKF Config §3).
+TYPEN = ("person", "organisation", "place", "city", "country",
+         "term", "concept", "source")
+
+# Was in Wikidata kein Gegenstand ist, sondern Wikimedia-Inventar. Ein
+# Kandidat mit einem dieser `P31` faellt raus, bevor jemand ihn liest.
+UNDING = {
+    "Q4167410": "Begriffsklärung",
+    "Q22808320": "Begriffsklärung",
+    "Q4167836": "Kategorie",
+    "Q13406463": "Liste",
+    "Q11266439": "Vorlage",
+    "Q14204246": "Wikimedia-Projektseite",
+}
+
+# Wikimedia legt staendig neue Klassen fuer sein eigenes Inventar an, und eine
+# feste Liste haengt ihnen hinterher. Ihre Bezeichnung sagt es aber immer.
+UNDING_WORT = ("Begriffsklärung", "disambiguation", "Wikimedia")
+
+# Wo ein Typ eine harte Erwartung an `P31` hat. Nur dort, wo sie stimmt:
+# `place` und `concept` umfassen zu viel, als dass eine Liste traege.
+ERWARTET = {"person": {"Q5": "Mensch"}}
+
+
+def hole(parameter):
+    url = API + "?" + urllib.parse.urlencode(parameter)
+    anfrage = urllib.request.Request(url, headers=KOPF)
+    with urllib.request.urlopen(anfrage, timeout=30) as antwort:
+        return json.loads(antwort.read().decode("utf-8"))
+
+
+def suchen(begriff, sprache, grenze):
+    """[(id, label, description)] — die Suche von Wikidata, unveraendert."""
+    d = hole({"action": "wbsearchentities", "search": begriff,
+              "language": sprache, "uselang": sprache, "type": "item",
+              "limit": grenze, "format": "json"})
+    return [(x["id"], x.get("label") or "", x.get("description") or "")
+            for x in d.get("search", [])]
+
+
+def entitaeten(ids):
+    """{id: {"p31": [ids], "geboren": jjjj, "gestorben": jjjj}}"""
+    aus = {}
+    for i in range(0, len(ids), 45):
+        teil = ids[i:i + 45]
+        d = hole({"action": "wbgetentities", "ids": "|".join(teil),
+                  "props": "claims", "format": "json"})
+        for kennung, e in (d.get("entities") or {}).items():
+            c = e.get("claims") or {}
+            aus[kennung] = {"p31": _ids(c.get("P31")),
+                            "geboren": _jahr(c.get("P569")),
+                            "gestorben": _jahr(c.get("P570"))}
+        time.sleep(PAUSE)
+    return aus
+
+
+def _ids(aussagen):
+    aus = []
+    for a in aussagen or []:
+        wert = ((a.get("mainsnak") or {}).get("datavalue") or {}).get("value")
+        if isinstance(wert, dict) and wert.get("id"):
+            aus.append(wert["id"])
+    return aus
+
+
+def _jahr(aussagen):
+    for a in aussagen or []:
+        wert = ((a.get("mainsnak") or {}).get("datavalue") or {}).get("value")
+        if isinstance(wert, dict) and wert.get("time"):
+            # "+1854-12-00T00:00:00Z" — das Vorzeichen traegt die Zeitrechnung.
+            zeit = wert["time"]
+            try:
+                jahr = int(zeit[1:5])
+            except ValueError:
+                continue
+            return -jahr if zeit.startswith("-") else jahr
+    return None
+
+
+def bezeichnungen(ids):
+    """{id: label} — fuer die `P31`-Ziele, damit im Bericht Woerter stehen."""
+    aus = {}
+    ids = sorted(set(ids))
+    for i in range(0, len(ids), 45):
+        teil = ids[i:i + 45]
+        d = hole({"action": "wbgetentities", "ids": "|".join(teil),
+                  "props": "labels", "languages": "de|en", "format": "json"})
+        for kennung, e in (d.get("entities") or {}).items():
+            lab = e.get("labels") or {}
+            aus[kennung] = ((lab.get("de") or {}).get("value")
+                            or (lab.get("en") or {}).get("value") or kennung)
+        time.sleep(PAUSE)
+    return aus
+
+
+def begriffe(daten):
+    """Titel, Name und Aliase der Notiz, ohne Doppelte."""
+    aus = []
+    for schluessel in ("title", "name"):
+        wert = daten.get(schluessel)
+        if wert and str(wert) not in aus:
+            aus.append(str(wert))
+    for a in daten.get("aliases") or []:
+        if str(a) not in aus:
+            aus.append(str(a))
+    return aus
+
+
+def jahr_von(daten, *schluessel):
+    """Das Jahr aus `born`/`born_year` und ihresgleichen, wenn es dasteht."""
+    for s in schluessel:
+        wert = daten.get(s)
+        if wert is None or wert == "":
+            continue
+        text = str(wert)
+        if len(text) >= 4 and text[:4].isdigit():
+            return int(text[:4])
+        if text.lstrip("-").isdigit():
+            return int(text)
+    return None
+
+
+def kandidaten(daten, typ, grenze):
+    """[(id, label, description)] aus beiden Sprachen, Reihenfolge erhalten."""
+    gesehen, aus = set(), []
+    for begriff in begriffe(daten):
+        for sprache in ("de", "en"):
+            for k in suchen(begriff, sprache, grenze):
+                if k[0] not in gesehen:
+                    gesehen.add(k[0])
+                    aus.append(k)
+            time.sleep(PAUSE)
+    return aus
+
+
+def belege(typ, daten, e, namen):
+    """Was fuer einen Kandidaten spricht, als Liste von Woertern."""
+    aus = []
+    erwartet = ERWARTET.get(typ) or {}
+    for p in e["p31"]:
+        if p in erwartet:
+            aus.append(erwartet[p])
+            break
+    for feld, schluessel in (("geboren", ("born", "born_year")),
+                             ("gestorben", ("died", "died_year"))):
+        unser = jahr_von(daten, *schluessel)
+        if unser is not None and e[feld] == unser:
+            aus.append("%s %d" % (feld, unser))
+    return aus
+
+
+def pruefen_eine(b, rel, e_notiz, grenze, namen_cache):
+    typ = e_notiz["typ"]
+    daten = e_notiz["daten"]
+    roh = kandidaten(daten, typ, grenze)
+    if not roh:
+        return {"notiz": rel, "typ": typ, "urteil": "nichts", "kandidaten": []}
+
+    einzel = entitaeten([k[0] for k in roh])
+    p31_ids = [p for k in roh for p in einzel.get(k[0], {}).get("p31", [])]
+    fehlend = [p for p in set(p31_ids) if p not in namen_cache]
+    if fehlend:
+        namen_cache.update(bezeichnungen(fehlend))
+
+    liste = []
+    for kennung, label, beschreibung in roh:
+        e = einzel.get(kennung) or {"p31": [], "geboren": None, "gestorben": None}
+        raus = next((UNDING[p] for p in e["p31"] if p in UNDING), None)
+        if raus is None:
+            for p in e["p31"]:
+                name = namen_cache.get(p, "")
+                if any(w.lower() in name.lower() for w in UNDING_WORT):
+                    raus = name
+                    break
+        # Wo der Typ eine harte Erwartung an `P31` hat, faellt raus, was sie
+        # nicht erfuellt. Fehlt `P31` ganz, ist der Kandidat als Gegenstand
+        # nicht bestimmt und taugt fuer diesen Typ ebenso wenig.
+        if raus is None and ERWARTET.get(typ):
+            if not set(e["p31"]) & set(ERWARTET[typ]):
+                raus = "kein %s" % "/".join(sorted(ERWARTET[typ].values()))
+        liste.append({
+            "id": kennung, "label": label, "description": beschreibung,
+            "p31": [namen_cache.get(p, p) for p in e["p31"]],
+            "geboren": e["geboren"], "gestorben": e["gestorben"],
+            "verworfen": raus,
+            "belege": [] if raus else belege(typ, daten, e, namen_cache),
+        })
+
+    uebrig = [k for k in liste if not k["verworfen"]]
+    # Ein Datumsbeleg ist harte Evidenz und keine Vermutung: Die Notiz fuehrt
+    # ein Jahr, Wikidata fuehrt dasselbe. Traegt genau einer der uebrigen
+    # Kandidaten einen, ist die Sache entschieden, auch wenn mehrere
+    # Namensvettern danebenstehen — Lenin und Lenin Moreno sind beide
+    # Menschen, aber nur einer ist 1870 geboren.
+    mit_datum = [k for k in uebrig
+                 if any(x.startswith(("geboren", "gestorben"))
+                        for x in k["belege"])]
+    if not uebrig:
+        urteil = "nichts"
+    elif len(uebrig) == 1 and uebrig[0]["belege"]:
+        urteil = "eindeutig"
+    elif len(mit_datum) == 1:
+        urteil = "eindeutig"
+    else:
+        urteil = "mehrdeutig"
+    # Berichtet wird, worauf das Urteil beruht: jeder uebriggebliebene
+    # Kandidat, und erst danach die verworfenen, soweit `grenze` noch reicht.
+    # Waere hier stumpf abgeschnitten, stuende im Bericht ein Kandidat und
+    # daneben "mehrdeutig", und niemand koennte das nachvollziehen.
+    verworfene = [k for k in liste if k["verworfen"]]
+    aus = uebrig + verworfene[:max(0, grenze - len(uebrig))]
+    return {"notiz": rel, "typ": typ, "urteil": urteil, "kandidaten": aus}
+
+
+def berichten(ergebnis):
+    kopf = "%s  [%s]  %s" % (ergebnis["notiz"], ergebnis["typ"],
+                             ergebnis["urteil"])
+    print(kopf)
+    for k in ergebnis["kandidaten"]:
+        zeile = "    %-11s %-34s %s" % (k["id"], k["label"][:34],
+                                        (k["description"] or "")[:52])
+        print(zeile)
+        anhang = []
+        if k["p31"]:
+            anhang.append("ist: " + ", ".join(k["p31"][:3]))
+        if k["geboren"] or k["gestorben"]:
+            anhang.append("%s–%s" % (k["geboren"] or "?", k["gestorben"] or "?"))
+        if k["verworfen"]:
+            anhang.append("verworfen: " + k["verworfen"])
+        if k["belege"]:
+            anhang.append("Beleg: " + ", ".join(k["belege"]))
+        if anhang:
+            print("                %s" % "  |  ".join(anhang))
+    print()
+
+
+def main(argv):
+    if "--help" in argv or "-h" in argv:
+        print(__doc__.strip()); return 0
+    alle = "--alle" in argv
+    als_json = "--json" in argv
+    grenze = 5
+    typfilter = None
+    args = []
+    i = 0
+    schalter = [a for a in argv]
+    while i < len(schalter):
+        a = schalter[i]
+        if a == "--grenze" and i + 1 < len(schalter):
+            grenze = max(1, min(20, int(schalter[i + 1]))); i += 2; continue
+        if a == "--typ" and i + 1 < len(schalter):
+            typfilter = schalter[i + 1]; i += 2; continue
+        if not a.startswith("-"):
+            args.append(a)
+        i += 1
+
+    pfad_arg = None
+    if args and ablage.art_von(os.path.abspath(os.path.expanduser(args[-1]))):
+        pfad_arg = args.pop()
+    try:
+        hkb, art = ablage.finde_ablage(pfad_arg, arten=("hkb",))
+    except ablage.KeineAblage as e:
+        sys.stderr.write(str(e) + "\n"); return 2
+    b = pruefen.Bestand(hkb, art)
+
+    ziele = []
+    if alle:
+        for rel, e in sorted(b.notizen.items()):
+            if e["typ"] not in TYPEN:
+                continue
+            if typfilter and e["typ"] != typfilter:
+                continue
+            if str(e["daten"].get("wikidata_id") or "").strip():
+                continue
+            ziele.append((rel, e))
+    else:
+        if not args:
+            sys.stderr.write("Kein Ziel angegeben. `hk-wikidata --help`.\n")
+            return 2
+        art_z, rel = b.aufloesen(args[0].rstrip("/"))
+        if art_z != "notiz":
+            sys.stderr.write("%s ist keine Notiz dieser Ablage.\n" % args[0])
+            return 2
+        e = b.notizen[rel]
+        if e["typ"] not in TYPEN:
+            sys.stderr.write("Der Typ `%s` führt keine `wikidata_id`.\n" % e["typ"])
+            return 2
+        ziele.append((rel, e))
+
+    if not ziele:
+        print("Keine Notiz ohne `wikidata_id` gefunden.")
+        return 1
+
+    if not als_json:
+        print("%s — %d Notizen, es wird nichts geschrieben\n"
+              % (hkb, len(ziele)))
+
+    namen_cache, ergebnisse = {}, []
+    for rel, e in ziele:
+        try:
+            r = pruefen_eine(b, rel, e, grenze, namen_cache)
+        except Exception as fehler:                       # noqa: BLE001
+            r = {"notiz": rel, "typ": e["typ"], "urteil": "fehler",
+                 "fehler": str(fehler), "kandidaten": []}
+        ergebnisse.append(r)
+        if not als_json:
+            berichten(r)
+
+    if als_json:
+        print(json.dumps(ergebnisse, ensure_ascii=False, indent=2))
+        return 0
+
+    zaehlung = {}
+    for r in ergebnisse:
+        zaehlung[r["urteil"]] = zaehlung.get(r["urteil"], 0) + 1
+    print("%d Notizen: %s" % (len(ergebnisse), ", ".join(
+        "%d %s" % (zaehlung[k], k) for k in sorted(zaehlung))))
+    print("Geschrieben wurde nichts. Die Wahl trifft ein Skill oder ein Mensch.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
