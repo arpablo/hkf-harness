@@ -497,9 +497,12 @@ Kopien zu führen. Sie findet den Harness über `HKF_HARNESS`, sonst nebenan.
     Warnungen; die eine, die eine unverlinkte Nennung meldet, fiel bei der
     Messung durch: Sie traf zwei Notizen von 122 und hätte den Fisher-Fall
     nicht gefunden, weil die Verbindung dort längst besteht.
-  - Ein entity-orientierter Durchgang in `wilma`, neben `## Aufbau`: je
-    Kandidat alles, was die Quelle über ihn sagt, quer über die Tranchen, mit
-    Fundstelle. Das ist der eigentliche Eingriff, und er steht noch aus.
+  - **Erledigt (bd40fa3):** Der Ingest arbeitet an Entitäten statt an
+    Kapiteln — bestimmen, verknüpfen, behaupten, in dieser Reihenfolge. Wilma
+    sammelt je Kandidat quer durch die Tranche und trennt, was der Gegenstand
+    ist, von dem, was die Quelle über ihn behauptet. Bestehende Notizen werden
+    erweitert, ein Widerspruch zwischen zwei Quellen wird eine `comparison`
+    statt einer Überschreibung.
   - Bei tranchierten Quellen gehört dieser Durchgang ans Ende, wo alle Tranchen
     vorliegen. Sonst bleibt jede Person auf das Kapitel beschränkt, in dem sie
     zuerst auftritt.
