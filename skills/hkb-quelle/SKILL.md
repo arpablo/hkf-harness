@@ -38,15 +38,25 @@ entscheidet erst der Import (§4.3).
 
 ## Die Reihenfolge steht fest
 
-> `hk-ingest` → **Wilma** → du trägst ein.
+> `hk-ingest` → **Wilma** liest → **Marlene** schreibt → du entscheidest und fügst zusammen.
 >
 > Bei einer großen Quelle je Tranche einmal, geführt von `hk-tranchen`.
 
 Erst das Mechanische: kopieren oder nicht, `sha256`, die Quellennotiz mit dem,
 was sicher bekannt ist, und eine Liste der Lücken. Dann liest **Wilma** die
-Quelle und gibt ein belegtes Destillat zurück. Dann trägst du ein, was sie
-liefert. Das ist „erst `bin/`, dann `skills/`" auf einen einzelnen Lauf
+Quelle und gibt ein belegtes Destillat zurück. Dann schreibt **Marlene** die
+Notizen daraus. Das ist „erst `bin/`, dann `skills/`" auf einen einzelnen Lauf
 angewandt.
+
+**Warum das Schreiben ebenso delegiert wird wie das Lesen.** Wilma bekommt
+einen eigenen Kontext, damit die Quelle nicht in deinen wandert. Marlene
+bekommt einen, damit nichts anderes in ihren wandert: Wer eine Notiz nach
+zwanzig Werkzeugläufen, drei Commit-Botschaften und einer Spezifikationsdebatte
+schreibt, holt die Schreibregeln aus dem Gedächtnis statt aus der Ablage und
+schleppt die Gewohnheiten der letzten Aufgabe mit. Marlene liest `hk-kontext`,
+[[hkb-notiz]] und die Typdefinition, bevor sie den ersten Satz schreibt. Deine
+Aufgabe bleibt das Urteil: welcher Kandidat eine Notiz wird, was in die
+Quellennotiz gehört, und ob das Ergebnis trägt.
 
 ## Ablauf
 
@@ -106,8 +116,15 @@ Zusammenfassung. `hk-ingest` legt beides an.
 
 **⑥ Eintragen — dann die Entitäten.** Geh Wilmas `## Notiz-Kandidaten`
 **einzeln** durch und entscheide je Kandidat: eigene Notiz, Abschnitt in einer
-anderen Notiz, oder nichts. Die Schwelle steht unten. Für jeden, der eine Notiz
-wird, gilt diese Reihenfolge, und sie ist keine Empfehlung:
+anderen Notiz, oder nichts. Die Schwelle steht unten. Diese Entscheidung ist
+deine.
+
+**Geschrieben wird von `marlene`, nicht von dir.** Gib ihr je Lauf eine Gruppe
+gleichen Typs, dazu unverändert die Kandidaten-Blöcke aus Wilmas Destillat, den
+Zielpfad in der Lieferung und die Belegkonvention der Quelle. Sie liest die
+Schreibregeln, [[hkb-notiz]] und den `# Aufbau` des Typs selbst und prüft mit
+`hk-text --gate`, bevor sie meldet. Was sie schreiben soll, ist unten
+beschrieben, und sie kennt es aus ihrem eigenen Auftrag:
 
 1. **Bestimmen.** Was *ist* der Gegenstand? Der erste Absatz beantwortet das,
    bevor irgendetwas aus der Quelle erzählt wird: was für ein Ding er ist, wann
