@@ -470,3 +470,27 @@ Kopien zu führen. Sie findet den Harness über `HKF_HARNESS`, sonst nebenan.
   Beobachtung).
 - **`HKF_BUNDLE_PATH`** — Vorgabeverzeichnis für Lieferungen; festlegen, wenn
   eine Lieferung öfter am selben Ort landet.
+- **Eine Notiz kann nur so vollständig werden wie ihre Quelle** — das
+  Datenmodell fragt nach dem Gegenstand, die Prozesse bilden eine Quelle ab,
+  und dazwischen fehlt ein Schritt. `hkb-quelle` ⑥ schreibt vor, dass der
+  Inhalt allein aus dem Destillat kommt. Für sich ist das richtig, es ist aber
+  der einzige Weg, auf dem Inhalt in eine Notiz gelangt: Kein Skill kennt
+  Vervollständigen oder Anreichern, keine Typdefinition legt einen Aufbau für
+  den Body fest, und `hk-lint` prüft Konformität, nicht Vollständigkeit.
+  Beobachtet an einer Wissensbasis aus einer einzigen Quelle: 53
+  Personennotizen, darin 53-mal `p_categories` und 52-mal `wikidata_id`, aber
+  kein einziges `born`, `died` oder `birthplace`. Die Bodies folgen der
+  Dramaturgie des Buchs — `## Der Sturz`, `## Zu spät` — statt ihrem
+  Gegenstand. Zu entscheiden ist dreierlei: ob eine Typdefinition neben
+  `# Properties` einen `# Aufbau` bekommt, woher der Inhalt kommt, den die
+  erste Quelle nicht hergibt, und ob `hk-lint` leere Typ-Properties als
+  Warnung meldet. Berührt den ersten Punkt oben.
+- **Regeln ohne Durchsetzung** — `hooks/hooks.json` referenziert
+  `${CLAUDE_PLUGIN_ROOT}` und greift damit nur, wo der Harness als Plugin
+  liegt. Unter `~/.claude/skills/` lädt ihn niemand, und die harten
+  Schreibregeln gelten dort nur auf Zuruf. Dasselbe Muster bei „Der Body wird
+  nicht umbrochen": Die Regel steht in `hkb-quelle` und `hkb-notiz`, geprüft
+  wird sie von keinem Werkzeug. In derselben Wissensbasis fanden sich vierzig
+  Absätze, die mitten im Satz umbrochen waren und deren Folgezeile mit einer
+  Tageszahl begann, für Markdown also eine nummerierte Liste. Weder `hk-text`
+  noch `hk-lint` meldet das.
