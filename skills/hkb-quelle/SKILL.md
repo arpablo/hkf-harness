@@ -104,6 +104,10 @@ unten. Für jeden, der eine Notiz wird:
 
 - Typ wählen (`concept`, `term`, `person`, `comparison`, `note` …) und die
   Property-Tabelle des Typs lesen, bevor du ein Feld setzt.
+- `aliases` aus den Benennungen setzen, die Wilma mitliefert, soweit sie vom
+  Titel abweichen. Ohne sie bleibt eine Nennung wie „Lord Fisher" im Body
+  einer anderen Notiz unverlinkt, und der Verweis entsteht nie (§6.1
+  Schritt 9).
 - `sources` auf die Quellennotiz setzen — das ist die Verbindung, an der der
   Bestand später hängt.
 - Untereinander verlinken, wo der Body es hergibt; einen Verweis unter

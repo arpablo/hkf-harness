@@ -111,11 +111,19 @@ Werkart: <article | book | paper | podcast | transcript | video | web>
 - <Teil oder Kapitelblock mit seiner Spanne>
 
 ## Notiz-Kandidaten
-- <Name> — <warum>
+- <Name> — <warum> — genannt als: <Benennungen der Quelle>
 
 ## Lücken und Widersprüche
 - <Befund>
 ```
+
+**Die Benennungen gehören zum Kandidaten.** Ein Werk nennt denselben Menschen
+als „Lord Fisher", als „the retired Admiral of the Fleet" und als „Fisher".
+Wer nur den Namen weiterreicht, unter dem die Notiz am Ende steht, wirft weg,
+woran eine spätere Nennung erkannt wird: Die Verknüpfung sucht `title` und
+`aliases` im Body der anderen Notizen (§6.1 Schritt 9), und was dort keinen
+Eintrag hat, findet sie nie. Weicht keine Benennung vom Namen ab, entfällt der
+Zusatz.
 
 Der Tranchenvorschlag wird unverändert weitergereicht. `hk-tranchen
 --anlegen` liest ihn Zeile für Zeile. Schreib darum keine Erklärung zwischen
