@@ -46,6 +46,8 @@ Sidecar wird gemeldet, nicht erfunden.
 """
 import datetime, io, json, os, re, shutil, sys
 
+import yaml
+
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
 from hkf import CORE, ablage, frontmatter, grammatik, obsidian   # noqa: E402
 
@@ -85,7 +87,7 @@ class Lauf(object):
         self.dateien = []       # rel unter der Wurzel, Notizen und Konfig
         self.medien = []        # rel unter der Wurzel
         self.sidecars = []      # rel unter der Wurzel
-        self.baseszeilen = {}   # rel der .base → ausgewertete Zeilen
+        self.basen = {}         # rel der .base → {"views": [...]}
         self.befunde = []       # (art, text, hinweis)
         self.abgebrochen = None
 
@@ -230,14 +232,52 @@ def sammeln(lauf):
     return lauf
 
 
+def _views(basepfad):
+    """[(name, art, spalten)] einer `.base`, aus ihrem YAML.
+
+    Gelesen wird die Datei und nicht `base:views`: Der Befehl sieht auf die
+    aktive Datei und uebergeht `path=` — im Stapelbetrieb also unbrauchbar.
+    Die `.base` traegt ohnehin alles, was gebraucht wird.
+
+    Ohne `views` gibt es genau eine namenlose Ansicht; `base:query` ohne
+    `view=` liefert dann die Standardansicht.
+    """
+    try:
+        doc = yaml.safe_load(io.open(basepfad, encoding="utf-8").read()) or {}
+    except yaml.YAMLError:
+        return None
+    views = doc.get("views")
+    if not isinstance(views, list) or not views:
+        return [(None, "table", [])]
+    aus = []
+    for v in views:
+        if not isinstance(v, dict):
+            continue
+        ordnung = [str(o) for o in (v.get("order") or [])]
+        aus.append((v.get("name"), v.get("type") or "table", ordnung))
+    return aus or [(None, "table", [])]
+
+
+def _spalten(zeilen, ordnung):
+    """Die Spalten einer Ansicht, in ihrer Reihenfolge.
+
+    Die Zeilen sind massgeblich: Ihre Schluessel stehen bereits in der
+    Reihenfolge der View und tragen die Anzeigenamen aus `properties`
+    (`file.name` erscheint als `Name`). Erst wenn keine Zeile da ist, bleibt
+    die erklaerte `order` — dann stehen dort die rohen Bezeichner, aber es
+    gibt auch nichts anzuzeigen.
+    """
+    if zeilen:
+        return [k for k in zeilen[0].keys() if k != "path"]
+    return ordnung
+
+
 def bases_auswerten(lauf):
-    """Jede `.base` der Lieferung ueber die laufende App auswerten.
+    """Jede `.base` der Lieferung auswerten, Ansicht fuer Ansicht.
 
     Der Vault wird aus dem Pfad der Ablage bestimmt, nicht geraten: `vault=`
     wirkt in der CLI nur an erster Stelle, und wer sich vertut, bekommt
-    klaglos die Bases einer anderen Ablage. `vault_fuer` liefert nebenbei den
-    Ablagepfad, und der stimmt mit `ablage.ablagepfad` ueberein — zwei Wege,
-    ein Ergebnis.
+    klaglos die Bases einer anderen Ablage.
     """
     vault, praefix = obsidian.vault_fuer(lauf.hkb)
     if not vault:
@@ -248,7 +288,20 @@ def bases_auswerten(lauf):
         if not rel.endswith(".base"):
             continue
         voll = "%s/%s" % (praefix, rel) if praefix else rel
-        lauf.baseszeilen[rel] = obsidian.base_query(vault, voll)
+        views = _views(os.path.join(lauf.hkb, rel))
+        if views is None:
+            lauf.melde("konflikt", "%s ist kein gültiges YAML und wird nicht "
+                       "ausgewertet." % rel,
+                       "Die Datei in Obsidian öffnen; sie zeigt den Fehler.")
+            continue
+        gebaut = []
+        for name, art, ordnung in views:
+            zeilen = obsidian.base_query(vault, voll, name)
+            gebaut.append({"name": name or "Standard", "art": art,
+                           "spalten": _spalten(zeilen, ordnung),
+                           "zeilen": zeilen})
+        lauf.basen[rel] = {"format": "hkweb-base", "version": 1,
+                           "quelle": rel, "views": gebaut}
     return lauf
 
 
@@ -268,7 +321,7 @@ def _manifest(lauf):
         "notizen": sum(1 for r in lauf.dateien if r.endswith(".md")),
         "dateien": len(lauf.dateien),
         "medien": len(lauf.medien),
-        "bases": len(lauf.baseszeilen),
+        "bases": len(lauf.basen),
     }
 
 
@@ -280,10 +333,10 @@ def ausfuehren(lauf):
         ziel = os.path.join(lauf.ziel, rel)
         os.makedirs(os.path.dirname(ziel), exist_ok=True)
         shutil.copy2(os.path.join(lauf.hkb, rel), ziel)
-    for rel, zeilen in sorted(lauf.baseszeilen.items()):
+    for rel, inhalt in sorted(lauf.basen.items()):
         ziel = os.path.join(lauf.ziel, rel + ".json")
         io.open(ziel, "w", encoding="utf-8").write(
-            json.dumps(zeilen, ensure_ascii=False, indent=2) + "\n")
+            json.dumps(inhalt, ensure_ascii=False, indent=2) + "\n")
     wurzeldatei = ablage.wurzeldatei(lauf.hkb)
     shutil.copy2(wurzeldatei, os.path.join(lauf.ziel,
                                            os.path.basename(wurzeldatei)))
@@ -336,9 +389,11 @@ def main(argv):
     print("  %d Notizen, %d Dateien, %d Medien, %d Sidecars"
           % (m["notizen"], m["dateien"], m["medien"], len(lauf.sidecars)))
     if mit_bases:
-        leer = sum(1 for z in lauf.baseszeilen.values() if not z)
-        print("  %d Bases ausgewertet%s"
-              % (len(lauf.baseszeilen),
+        views = sum(len(b["views"]) for b in lauf.basen.values())
+        leer = sum(1 for b in lauf.basen.values()
+                   for v in b["views"] if not v["zeilen"])
+        print("  %d Bases mit %d Ansichten ausgewertet%s"
+              % (len(lauf.basen), views,
                  ", davon %d ohne Treffer" % leer if leer else ""))
     if lauf.ablagepfad:
         print("  Präfix der Verweise: %s" % lauf.ablagepfad)
