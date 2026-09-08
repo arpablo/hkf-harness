@@ -2,17 +2,26 @@
 # -*- coding: utf-8 -*-
 """hk-wikidata — Kandidaten fuer die `wikidata_id` einer Notiz vorlegen.
 
-    hk-wikidata <ziel> [pfad]      Kandidaten fuer eine Notiz
-    hk-wikidata --alle [pfad]      fuer jede Notiz ohne `wikidata_id`
-    hk-wikidata --typ person       nur Notizen dieses Typs
-    hk-wikidata --json             maschinenlesbar, fuer einen Skill
-    hk-wikidata --grenze 5         hoechstens so viele Kandidaten je Notiz
+    hk-wikidata <ziel> [pfad]         Kandidaten fuer eine Notiz
+    hk-wikidata --alle [pfad]         fuer jede Notiz ohne `wikidata_id`
+    hk-wikidata --typ person          nur Notizen dieses Typs
+    hk-wikidata --json                maschinenlesbar, fuer einen Skill
+    hk-wikidata --grenze 5            hoechstens so viele Kandidaten je Notiz
+    hk-wikidata <ziel> --setzen Q…    traegt eine gewaehlte Kennung ein
 
-**Dieses Werkzeug schreibt nichts.** Es sucht, sammelt Belege und legt vor.
-Welche Kennung die richtige ist, entscheidet ein Mensch oder ein Skill. Der
-Grund steht im Property-Typ `hkf-wikidata`: Verwechselte Kennungen sind der
+**Von selbst schreibt dieses Werkzeug nichts.** Es sucht, sammelt Belege und
+legt vor. Welche Kennung die richtige ist, entscheidet ein Mensch oder ein
+Skill; erst `--setzen` mit einer genannten Kennung traegt sie ein. Der Grund
+steht im Property-Typ `hkf-wikidata`: Verwechselte Kennungen sind der
 haeufigste Fehler, und die Suche liefert zu einem historischen Namen
 regelmaessig mehrere Menschen aus mehreren Jahrhunderten.
+
+`--setzen` prueft, bevor es schreibt: die Form der Kennung, dass es den
+Gegenstand gibt, dass er keine Begriffsklaerung ist, dass er zum Typ passt,
+und dass keine andere Notiz derselben Ablage ihn schon fuehrt. Eine vorhandene
+Kennung wird nie ueberschrieben, dafuer gibt es `--force`. Eine Kennung, die
+auf eine andere weiterleitet, wird als die neue eingetragen: Wikidata fuehrt
+zusammen, und die Weiterleitung ist kein Fehler.
 
 Gesucht wird mit `title`, `name` und den `aliases` der Notiz, erst auf Deutsch,
 dann auf Englisch. Zu jedem Kandidaten holt der Lauf `P31` (ist ein), `P569`
@@ -31,12 +40,14 @@ Das Urteil am Ende ist eine Zaehlung und keine Entscheidung:
 Acht Typen fuehren die Property (HKF Config): person, organisation, place,
 city, country, term, concept, source. Andere werden uebergangen.
 """
-import io, json, os, sys, time
+import io, json, os, re, sys, time
 import urllib.parse
 import urllib.request
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
-from hkf import ablage, pruefen   # noqa: E402
+from hkf import ablage, notiz, pruefen   # noqa: E402
+
+KENNUNG = re.compile(r"^Q[1-9]\d*$")   # das `pattern` von `hkf-wikidata`
 
 WERKZEUG = "hk-wikidata"
 API = "https://www.wikidata.org/w/api.php"
@@ -136,6 +147,49 @@ def bezeichnungen(ids):
             aus[kennung] = ((lab.get("de") or {}).get("value")
                             or (lab.get("en") or {}).get("value") or kennung)
         time.sleep(PAUSE)
+    return aus
+
+
+def kennung_pruefen(kennung):
+    """({...}, None) oder (None, Grund) — gibt es den Gegenstand?
+
+    `wbgetentities` antwortet bei einer Zusammenfuehrung unter der neuen
+    Kennung. Wer die alte eintruege, hinge an einer Weiterleitung, die
+    irgendwann verschwindet.
+    """
+    d = hole({"action": "wbgetentities", "ids": kennung,
+              "props": "labels|descriptions|claims", "languages": "de|en",
+              "redirects": "yes", "format": "json"})
+    entitaeten_d = d.get("entities") or {}
+    if not entitaeten_d:
+        return None, "Wikidata kennt %s nicht." % kennung
+    neu, e = sorted(entitaeten_d.items())[0]
+    if e.get("missing") is not None:
+        return None, "Wikidata kennt %s nicht." % kennung
+    lab = e.get("labels") or {}
+    besch = e.get("descriptions") or {}
+    p31 = _ids((e.get("claims") or {}).get("P31"))
+    return {"id": neu,
+            "label": ((lab.get("de") or {}).get("value")
+                      or (lab.get("en") or {}).get("value") or neu),
+            "description": ((besch.get("de") or {}).get("value")
+                            or (besch.get("en") or {}).get("value") or ""),
+            "p31": p31}, None
+
+
+def schon_vergeben(b, kennung, ausser):
+    """[rel] der Notizen, die diese Kennung bereits fuehren.
+
+    Der Property-Typ sagt: Zwei Notizen mit derselben Kennung meinen denselben
+    Gegenstand. Das ist entweder eine Dublette oder ein Vertipper, und beides
+    faellt hier auf, bevor es in der Ablage steht.
+    """
+    aus = []
+    for rel, e in sorted(b.notizen.items()):
+        if rel == ausser:
+            continue
+        if str(e["daten"].get("wikidata_id") or "").strip() == kennung:
+            aus.append(rel)
     return aus
 
 
@@ -280,11 +334,75 @@ def berichten(ergebnis):
     print()
 
 
+def eintragen(b, hkb, args, kennung, force):
+    """`--setzen`: eine genannte Kennung pruefen und schreiben."""
+    if not args:
+        sys.stderr.write("`--setzen` braucht die Notiz. `hk-wikidata --help`.\n")
+        return 2
+    if not KENNUNG.match(kennung):
+        sys.stderr.write("%r ist keine Kennung. Erwartet wird `Q` und eine "
+                         "Zahl, etwa Q7259.\n" % kennung)
+        return 2
+    art_z, rel = b.aufloesen(args[0].rstrip("/"))
+    if art_z != "notiz":
+        sys.stderr.write("%s ist keine Notiz dieser Ablage.\n" % args[0])
+        return 2
+    e = b.notizen[rel]
+    if e["typ"] not in TYPEN:
+        sys.stderr.write("Der Typ `%s` führt keine `wikidata_id`.\n" % e["typ"])
+        return 2
+
+    vorhanden = str(e["daten"].get("wikidata_id") or "").strip()
+    if vorhanden and not force:
+        sys.stderr.write("%s führt bereits `%s`. `--force` überschreibt.\n"
+                         % (rel, vorhanden))
+        return 2
+
+    gegenstand, grund = kennung_pruefen(kennung)
+    if grund:
+        sys.stderr.write(grund + "\n")
+        return 2
+    raus = next((UNDING[p] for p in gegenstand["p31"] if p in UNDING), None)
+    if raus:
+        sys.stderr.write("%s ist eine %s und kein Gegenstand.\n"
+                         % (gegenstand["id"], raus))
+        return 2
+    erwartet = ERWARTET.get(e["typ"]) or {}
+    if erwartet and not set(gegenstand["p31"]) & set(erwartet):
+        sys.stderr.write("%s ist kein %s; die Notiz ist vom Typ `%s`.\n"
+                         % (gegenstand["id"],
+                            "/".join(sorted(erwartet.values())), e["typ"]))
+        return 2
+    doppelt = schon_vergeben(b, gegenstand["id"], rel)
+    if doppelt and not force:
+        sys.stderr.write("%s führt %s bereits. Zwei Notizen mit derselben "
+                         "Kennung meinen denselben Gegenstand: entweder ist "
+                         "eine davon eine Dublette, oder die Kennung ist "
+                         "falsch. `--force` schreibt trotzdem.\n"
+                         % (", ".join(doppelt), gegenstand["id"]))
+        return 2
+
+    if gegenstand["id"] != kennung:
+        print("%s leitet auf %s weiter, eingetragen wird die neue Kennung."
+              % (kennung, gegenstand["id"]))
+    kopf = notiz.setze_skalar(e["kopf"], "wikidata_id", gegenstand["id"])
+    notiz.sichern(e["pfad"], kopf, e["body"], WERKZEUG)
+    print("%s: wikidata_id: %s — %s%s"
+          % (rel, gegenstand["id"], gegenstand["label"],
+             " (%s)" % gegenstand["description"] if gegenstand["description"]
+             else ""))
+    if vorhanden:
+        print("Überschrieben wurde %s." % vorhanden)
+    return 0
+
+
 def main(argv):
     if "--help" in argv or "-h" in argv:
         print(__doc__.strip()); return 0
     alle = "--alle" in argv
     als_json = "--json" in argv
+    force = "--force" in argv
+    setzen = None
     grenze = 5
     typfilter = None
     args = []
@@ -296,6 +414,8 @@ def main(argv):
             grenze = max(1, min(20, int(schalter[i + 1]))); i += 2; continue
         if a == "--typ" and i + 1 < len(schalter):
             typfilter = schalter[i + 1]; i += 2; continue
+        if a == "--setzen" and i + 1 < len(schalter):
+            setzen = schalter[i + 1]; i += 2; continue
         if not a.startswith("-"):
             args.append(a)
         i += 1
@@ -308,6 +428,9 @@ def main(argv):
     except ablage.KeineAblage as e:
         sys.stderr.write(str(e) + "\n"); return 2
     b = pruefen.Bestand(hkb, art)
+
+    if setzen is not None:
+        return eintragen(b, hkb, args, setzen, force)
 
     ziele = []
     if alle:

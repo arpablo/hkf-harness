@@ -2297,8 +2297,10 @@ Was an diesem Tag anfiel.
         print("hk-wikidata legt vor und schreibt nicht")
         # Ohne Netz: Beide Proben kommen bis zur ersten Abfrage gar nicht.
         r = lauf(os.path.join(BIN, "hk-wikidata"), "--help")
-        probe("die Hilfe sagt, dass nichts geschrieben wird",
-              r.returncode == 0 and "schreibt nichts" in r.stdout, r.stdout[:200])
+        probe("die Hilfe sagt, dass von selbst nichts geschrieben wird",
+              r.returncode == 0
+              and "Von selbst schreibt dieses Werkzeug nichts" in r.stdout
+              and "--setzen" in r.stdout, r.stdout[:200])
         # Gegen eine frische Ablage, nicht gegen `ziel`: Dort liegen Notizen,
         # und die Probe ginge ins Netz. Eine Rauchprobe haengt an keinem Netz.
         frisch = os.path.join(tempfile.mkdtemp(prefix="hkb-wd-"), "ablage")
@@ -2306,6 +2308,13 @@ Was an diesem Tag anfiel.
         r = lauf(os.path.join(BIN, "hk-wikidata"), "--alle", frisch)
         probe("in einer frischen Ablage gibt es nichts zu suchen",
               r.returncode == 1 and "Keine Notiz ohne" in r.stdout,
+              (r.stdout + r.stderr)[:300])
+        # Die Form der Kennung wird vor allem anderen geprueft, also auch vor
+        # der ersten Abfrage. Die Probe bleibt damit ohne Netz.
+        r = lauf(os.path.join(BIN, "hk-wikidata"), "egal", "--setzen", "1394",
+                 frisch)
+        probe("`--setzen` weist eine Kennung ohne Q ab",
+              r.returncode == 2 and "keine Kennung" in r.stderr,
               (r.stdout + r.stderr)[:300])
         shutil.rmtree(os.path.dirname(frisch), ignore_errors=True)
 

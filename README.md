@@ -147,7 +147,7 @@ Python 3 und PyYAML.
 | `hk-suche <muster>` | findet Notizen: Volltext, `--typ`, `--hat`, `--verweist-auf`, `--fundstellen` | **läuft** |
 | `hk-erwaehnungen <ziel>` | macht unverlinkte Erwähnungen einer Notiz zu qualifizierten Verweisen | **läuft** |
 | `hk-verweise [--setzen]` | macht kurze Wikilinks zu qualifizierten (§3.6); Mehrdeutiges wird gemeldet, nicht geraten | **läuft** |
-| `hk-wikidata <ziel>` \| `--alle` | legt Kandidaten für die `wikidata_id` einer Notiz vor, mit `P31` und Lebensdaten als Beleg; schreibt nichts | **läuft** |
+| `hk-wikidata <ziel>` \| `--alle` \| `--setzen Q…` | legt Kandidaten für die `wikidata_id` einer Notiz vor, mit `P31` und Lebensdaten als Beleg. Von selbst schreibt es nichts; `--setzen` trägt eine genannte Kennung ein und prüft sie noch einmal | **läuft** |
 | `hk-kontext [--stimme]` | gibt aus, was in dieser Ablage gilt: Lage, Kanon, Stimme, Hinweise | **läuft** |
 | `hk-publikation <notiz>` | führt die Lesereihenfolge einer Publikation: `--aufnehmen`, `--vor`, `--check`, `--richten` | **läuft** |
 | `hk-buch <publikation>` | schreibt die Texte einer Publikation als ein Manuskript heraus, außerhalb der Ablage | **läuft** |
