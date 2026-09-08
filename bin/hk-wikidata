@@ -339,6 +339,28 @@ def berichten(ergebnis):
     print()
 
 
+def notiz_finden(b, ziel):
+    """(rel, None) oder (None, Grund) — dieselbe Aufloesung wie hk-erwaehnungen.
+
+    `aufloesen` erwartet ein Verweisziel. Wer eine Notiz beim Namen nennt,
+    trifft es nicht immer: Die Notiz-ID einer Quellennotiz ist der blosse
+    Dateiname (§3.2.2), und der ist als Verweisziel nicht eindeutig. Also
+    derselbe zweite Anlauf ueber den Namen wie dort.
+    """
+    art, rel = b.aufloesen(ziel.rstrip("/"))
+    if art == "notiz":
+        return rel, None
+    name = ziel.rstrip("/").rsplit("/", 1)[-1]
+    if name.endswith(".md"):
+        name = name[:-3]
+    treffer = b.nach_namen.get(name) or []
+    if len(treffer) == 1:
+        return treffer[0], None
+    if treffer:
+        return None, "`%s` ist nicht eindeutig: %s" % (ziel, ", ".join(treffer))
+    return None, "%s ist keine Notiz dieser Ablage." % ziel
+
+
 def eintragen(b, hkb, args, kennung, force):
     """`--setzen`: eine genannte Kennung pruefen und schreiben."""
     if not args:
@@ -348,9 +370,9 @@ def eintragen(b, hkb, args, kennung, force):
         sys.stderr.write("%r ist keine Kennung. Erwartet wird `Q` und eine "
                          "Zahl, etwa Q7259.\n" % kennung)
         return 2
-    art_z, rel = b.aufloesen(args[0].rstrip("/"))
-    if art_z != "notiz":
-        sys.stderr.write("%s ist keine Notiz dieser Ablage.\n" % args[0])
+    rel, grund = notiz_finden(b, args[0])
+    if grund:
+        sys.stderr.write(grund + "\n")
         return 2
     e = b.notizen[rel]
     if e["typ"] not in TYPEN:
@@ -451,9 +473,9 @@ def main(argv):
         if not args:
             sys.stderr.write("Kein Ziel angegeben. `hk-wikidata --help`.\n")
             return 2
-        art_z, rel = b.aufloesen(args[0].rstrip("/"))
-        if art_z != "notiz":
-            sys.stderr.write("%s ist keine Notiz dieser Ablage.\n" % args[0])
+        rel, grund = notiz_finden(b, args[0])
+        if grund:
+            sys.stderr.write(grund + "\n")
             return 2
         e = b.notizen[rel]
         if e["typ"] not in TYPEN:
