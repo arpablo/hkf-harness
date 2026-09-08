@@ -26,6 +26,17 @@ modified_by: claude-opus-5
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
+# Aufbau
+
+Was eine Notiz dieses Typs beantwortet, in dieser Reihenfolge. Ein Abschnitt, für den keine Quelle etwas hergibt, bleibt weg und wird nicht leer hingeschrieben. `# Verbindungen` steht immer zuletzt (§5.6).
+
+| Abschnitt | Beantwortet |
+|---|---|
+| ohne Überschrift | Wer der Mensch ist: Lebensdaten, Herkunft, Rolle, wofür sein Name steht. |
+| `## Werdegang` | Welchen Weg er genommen hat, bis er für diese Wissensbasis wichtig wird. |
+| `## Wirken` | Was er getan hat und was daraus folgte. |
+| `## Bedeutung` | Warum er hier steht und wie er beurteilt wird. |
+
 # Konventionen
 
 `born` und `born_year` schließen einander aus, ebenso `died` und `died_year`. Der Dateiname ist `vorname-nachname` in kebab-case.

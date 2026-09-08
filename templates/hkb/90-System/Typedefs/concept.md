@@ -16,6 +16,16 @@ modified_by: claude-opus-5
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
+# Aufbau
+
+Was eine Notiz dieses Typs beantwortet, in dieser Reihenfolge. Ein Abschnitt, für den keine Quelle etwas hergibt, bleibt weg und wird nicht leer hingeschrieben. `# Verbindungen` steht immer zuletzt (§5.6).
+
+| Abschnitt | Beantwortet |
+|---|---|
+| ohne Überschrift | Was die Sache ist, in einem Satz, der ohne die Quellen verständlich bleibt. |
+| `## Stand des Wissens` | Was über sie bekannt ist und worauf das beruht. |
+| `## Strittig` | Was offen ist oder von wem bestritten wird. |
+
 # Konventionen
 
 Ein Begriff definiert einen Ausdruck, ein Konzept sammelt, was über eine Sache bekannt ist. Darum ist eine Begriffsnotiz mit ihrer Definition fertig, während eine Konzeptnotiz mit jeder ausgewerteten Quelle wächst: Der Body trägt den Stand des Wissens und die offenen Fragen.

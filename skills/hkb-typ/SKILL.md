@@ -26,6 +26,14 @@ liegt, lässt sich nur Notiz für Notiz wieder trennen. Drei Fragen vorher:
 `<base>/Typedefs/<typname>.md`. Der Dateiname ist der Typname, `kebab-case`,
 Einzahl.
 
+Neben `# Properties` trägt eine Typdefinition einen Abschnitt `# Aufbau`: die
+Fragen, die eine Notiz dieses Typs beantwortet, in ihrer Reihenfolge. Er ist
+nach Core nichts Normatives, sondern eine Festlegung dieser Ablage, und genau
+darum gehört er hierher und nicht in einen Skill. Ohne ihn entscheidet jeder
+Lauf neu, was in einer Notiz steht, und das Ergebnis folgt der Quelle statt dem
+Gegenstand. Die Grundausstattung zeigt es an `person`, `event` und
+`organisation`.
+
 ```markdown
 ---
 type: typedef

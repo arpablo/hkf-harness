@@ -16,6 +16,16 @@ modified_by: claude-opus-5
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
+# Aufbau
+
+Was eine Notiz dieses Typs beantwortet, in dieser Reihenfolge. Ein Abschnitt, für den keine Quelle etwas hergibt, bleibt weg und wird nicht leer hingeschrieben. `# Verbindungen` steht immer zuletzt (§5.6).
+
+| Abschnitt | Beantwortet |
+|---|---|
+| ohne Überschrift | Die Definition: was der Begriff bezeichnet. |
+| `## Herkunft` | Woher der Begriff kommt und wer ihn geprägt hat. |
+| `## Abgrenzung` | Wovon er zu unterscheiden ist und womit er verwechselt wird. |
+
 # Konventionen
 
 Ein Begriff ist ein Ausdruck in **einer** Sprache, und `lang` nennt sie. Darum ist sie Pflicht und keine Vorgabe. Derselbe Gegenstand heißt in drei Sprachen dreierlei. Welche gemeint ist, darf nicht davon abhängen, in welcher Wissensbasis die Notiz gerade liegt, sonst bliebe ein Bundle nicht für sich lesbar (Core §4).

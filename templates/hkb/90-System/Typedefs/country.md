@@ -20,6 +20,16 @@ modified_by: claude-opus-5
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
+# Aufbau
+
+Was eine Notiz dieses Typs beantwortet, in dieser Reihenfolge. Ein Abschnitt, für den keine Quelle etwas hergibt, bleibt weg und wird nicht leer hingeschrieben. `# Verbindungen` steht immer zuletzt (§5.6).
+
+| Abschnitt | Beantwortet |
+|---|---|
+| ohne Überschrift | Welcher Staat: seit wann, in welchen Grenzen, mit welcher Verfassung. |
+| `## Geschichte` | Was ihn hierher brachte, soweit es hier zählt. |
+| `## Bedeutung` | Warum er hier steht. |
+
 # Konventionen
 
 `code` trägt die Kennung nach ISO 3166-1, mit der sich eine Staatsnotiz gegen fremde Datenbestände abgleichen lässt. Sie ist eine Angabe **über** den Staat und nicht der Weg, auf einen zu verweisen: Wer einen Staat nennt, verweist auf seine Notiz (Core §3.7.3). Führt die Wissensbasis keine, bleibt die Property leer.

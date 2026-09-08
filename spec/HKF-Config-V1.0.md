@@ -509,6 +509,17 @@ description: Ein Mensch.
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
+# Aufbau
+
+Was eine Notiz dieses Typs beantwortet, in dieser Reihenfolge. Ein Abschnitt, für den keine Quelle etwas hergibt, bleibt weg und wird nicht leer hingeschrieben. `# Verbindungen` steht immer zuletzt (§5.6).
+
+| Abschnitt | Beantwortet |
+|---|---|
+| ohne Überschrift | Wer der Mensch ist: Lebensdaten, Herkunft, Rolle, wofür sein Name steht. |
+| `## Werdegang` | Welchen Weg er genommen hat, bis er für diese Wissensbasis wichtig wird. |
+| `## Wirken` | Was er getan hat und was daraus folgte. |
+| `## Bedeutung` | Warum er hier steht und wie er beurteilt wird. |
+
 # Konventionen
 
 `born` und `born_year` schließen einander aus, ebenso `died` und `died_year`.
@@ -542,6 +553,17 @@ description: 'Eine Körperschaft: Unternehmen, Institut, Verein, Behörde.'
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
+# Aufbau
+
+Was eine Notiz dieses Typs beantwortet, in dieser Reihenfolge. Ein Abschnitt, für den keine Quelle etwas hergibt, bleibt weg und wird nicht leer hingeschrieben. `# Verbindungen` steht immer zuletzt (§5.6).
+
+| Abschnitt | Beantwortet |
+|---|---|
+| ohne Überschrift | Was für eine Körperschaft: wann gegründet, wo ansässig, wozu. |
+| `## Verfassung und Träger` | Wer sie trug, wie sie verfasst war, wer für sie sprach. |
+| `## Wirken` | Was sie getan hat und was daraus folgte. |
+| `## Bedeutung` | Warum sie hier steht und wie sie beurteilt wird. |
+
 # Konventionen
 
 Rechtsform und Untergliederungen gehören in den Body, nicht in den Namen.
@@ -568,6 +590,16 @@ description: Ein geographischer Ort.
 | image | hkf-file:image / hkf-url | nein | — | Ansicht, als Datei in der Ablage oder als Adresse im Netz |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
+
+# Aufbau
+
+Was eine Notiz dieses Typs beantwortet, in dieser Reihenfolge. Ein Abschnitt, für den keine Quelle etwas hergibt, bleibt weg und wird nicht leer hingeschrieben. `# Verbindungen` steht immer zuletzt (§5.6).
+
+| Abschnitt | Beantwortet |
+|---|---|
+| ohne Überschrift | Was für ein Ort: wo er liegt, wozu er gehört, wofür er bekannt ist. |
+| `## Geschichte` | Was an ihm geschah, soweit es hier zählt. |
+| `## Bedeutung` | Warum er hier steht. |
 
 # Konventionen
 
@@ -603,6 +635,17 @@ description: Ein Geschehen zu einer bestimmten Zeit.
 | cancelled | checkbox | nein | false | Abgesagt |
 | homepage | hkf-url | nein | — | Ankündigung |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
+
+# Aufbau
+
+Was eine Notiz dieses Typs beantwortet, in dieser Reihenfolge. Ein Abschnitt, für den keine Quelle etwas hergibt, bleibt weg und wird nicht leer hingeschrieben. `# Verbindungen` steht immer zuletzt (§5.6).
+
+| Abschnitt | Beantwortet |
+|---|---|
+| ohne Überschrift | Was geschehen ist: wann, wo, zwischen wem. |
+| `## Vorgeschichte` | Was dahin führte. |
+| `## Verlauf` | Wie es sich abspielte. |
+| `## Folgen` | Was sich danach anders verhielt. |
 
 # Konventionen
 
@@ -704,6 +747,16 @@ description: Ein definierter Begriff.
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
+# Aufbau
+
+Was eine Notiz dieses Typs beantwortet, in dieser Reihenfolge. Ein Abschnitt, für den keine Quelle etwas hergibt, bleibt weg und wird nicht leer hingeschrieben. `# Verbindungen` steht immer zuletzt (§5.6).
+
+| Abschnitt | Beantwortet |
+|---|---|
+| ohne Überschrift | Die Definition: was der Begriff bezeichnet. |
+| `## Herkunft` | Woher der Begriff kommt und wer ihn geprägt hat. |
+| `## Abgrenzung` | Wovon er zu unterscheiden ist und womit er verwechselt wird. |
+
 # Konventionen
 
 Ein Begriff ist ein Ausdruck in **einer** Sprache, und `lang` nennt sie.
@@ -739,6 +792,16 @@ description: Eine Sache und der Stand des Wissens über sie.
 | broader | hkf-link:concept | nein | — | Übergeordnetes Konzept |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
+
+# Aufbau
+
+Was eine Notiz dieses Typs beantwortet, in dieser Reihenfolge. Ein Abschnitt, für den keine Quelle etwas hergibt, bleibt weg und wird nicht leer hingeschrieben. `# Verbindungen` steht immer zuletzt (§5.6).
+
+| Abschnitt | Beantwortet |
+|---|---|
+| ohne Überschrift | Was die Sache ist, in einem Satz, der ohne die Quellen verständlich bleibt. |
+| `## Stand des Wissens` | Was über sie bekannt ist und worauf das beruht. |
+| `## Strittig` | Was offen ist oder von wem bestritten wird. |
 
 # Konventionen
 
@@ -931,6 +994,16 @@ dir: Cities
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
+# Aufbau
+
+Was eine Notiz dieses Typs beantwortet, in dieser Reihenfolge. Ein Abschnitt, für den keine Quelle etwas hergibt, bleibt weg und wird nicht leer hingeschrieben. `# Verbindungen` steht immer zuletzt (§5.6).
+
+| Abschnitt | Beantwortet |
+|---|---|
+| ohne Überschrift | Welche Stadt: wo sie liegt, zu welchem Staat sie gehört, wofür sie steht. |
+| `## Geschichte` | Was in ihr geschah, soweit es hier zählt. |
+| `## Bedeutung` | Warum sie hier steht. |
+
 # Konventionen
 
 Eine Stadt ist ein Ort, aber **HKF kennt keine Untertypen** (Core §3.7.1):
@@ -969,6 +1042,16 @@ dir: Countries
 | flag | hkf-file:image / hkf-url | nein | — | Flagge, als Datei in der Ablage oder als Adresse im Netz |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
+
+# Aufbau
+
+Was eine Notiz dieses Typs beantwortet, in dieser Reihenfolge. Ein Abschnitt, für den keine Quelle etwas hergibt, bleibt weg und wird nicht leer hingeschrieben. `# Verbindungen` steht immer zuletzt (§5.6).
+
+| Abschnitt | Beantwortet |
+|---|---|
+| ohne Überschrift | Welcher Staat: seit wann, in welchen Grenzen, mit welcher Verfassung. |
+| `## Geschichte` | Was ihn hierher brachte, soweit es hier zählt. |
+| `## Bedeutung` | Warum er hier steht. |
 
 # Konventionen
 

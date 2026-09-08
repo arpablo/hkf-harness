@@ -25,6 +25,17 @@ modified_by: claude-opus-5
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
+# Aufbau
+
+Was eine Notiz dieses Typs beantwortet, in dieser Reihenfolge. Ein Abschnitt, für den keine Quelle etwas hergibt, bleibt weg und wird nicht leer hingeschrieben. `# Verbindungen` steht immer zuletzt (§5.6).
+
+| Abschnitt | Beantwortet |
+|---|---|
+| ohne Überschrift | Was für eine Körperschaft: wann gegründet, wo ansässig, wozu. |
+| `## Verfassung und Träger` | Wer sie trug, wie sie verfasst war, wer für sie sprach. |
+| `## Wirken` | Was sie getan hat und was daraus folgte. |
+| `## Bedeutung` | Warum sie hier steht und wie sie beurteilt wird. |
+
 # Konventionen
 
 Rechtsform und Untergliederungen gehören in den Body, nicht in den Namen.

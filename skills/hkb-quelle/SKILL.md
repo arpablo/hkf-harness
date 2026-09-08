@@ -113,8 +113,10 @@ wird, gilt diese Reihenfolge, und sie ist keine Empfehlung:
    bevor irgendetwas aus der Quelle erzählt wird: was für ein Ding er ist, wann
    und wo er bestand, wofür er einsteht. Wilmas Zeile `Ist:` ist das Material,
    und was du ohnehin in `description` schreibst, gehört ausformuliert auch in
-   den Text. Dann Typ wählen und die Property-Tabelle lesen, bevor du ein Feld
-   setzt, dazu `aliases` aus den Benennungen der Quelle.
+   den Text. Dann Typ wählen und die Typdefinition lesen — die
+   Property-Tabelle, bevor du ein Feld setzt, und den `# Aufbau`, der sagt,
+   welche Fragen eine Notiz dieses Typs beantwortet und in welcher Reihenfolge.
+   Dazu `aliases` aus den Benennungen der Quelle.
 2. **Verknüpfen.** Mit welchen anderen Entitäten hängt er zusammen, und wie?
    Die Verweise stehen in der Prosa, wo der Text sie hergibt; was nicht aus dem
    Text hervorgeht, kommt unter `# Verbindungen` und in `related` (§5.6). Eine

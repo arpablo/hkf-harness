@@ -17,7 +17,15 @@ du nebenbei mit einem neuen Verzeichnis beantwortest.
 
 **② Die Typdefinition lesen.** `Typedefs/<typ>.md`. Dort steht der
 vollständige Vertrag: welche Properties es gibt, welchen Typ sie haben, was
-Pflicht ist, und in den Konventionen, was der Typ meint.
+Pflicht ist, unter `# Aufbau`, welche Fragen eine Notiz dieses Typs
+beantwortet, und in den Konventionen, was der Typ meint.
+
+Der `# Aufbau` ist die Antwort auf „worum geht es hier". Sein erster Eintrag
+gilt immer und hat keine Überschrift: Der erste Absatz sagt, was der Gegenstand
+ist, bevor irgendetwas über ihn erzählt wird. Die übrigen Abschnitte stehen in
+der genannten Reihenfolge, und einer, für den nichts belegt ist, bleibt weg
+statt leer dazustehen. Führt die Typdefinition keinen `# Aufbau`, gilt
+wenigstens der erste Absatz.
 
 **③ Prüfen, ob es die Notiz schon gibt.** Suche nach Titel und Aliasen, bevor
 du anlegst. Zwei Notizen über denselben Gegenstand sind teurer als eine
