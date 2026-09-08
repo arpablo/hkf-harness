@@ -169,9 +169,14 @@ def kennung_pruefen(kennung):
     lab = e.get("labels") or {}
     besch = e.get("descriptions") or {}
     p31 = _ids((e.get("claims") or {}).get("P31"))
+    # Nicht jeder Gegenstand traegt ein Label auf Deutsch oder Englisch.
+    # Q27118 heisst nur auf Arabisch, Russisch, Japanisch und in drei weiteren
+    # Schriften, und die deutsche Wikipedia fuehrt ihn trotzdem als Henry
+    # McMahon. Die Kennung als Ersatzlabel auszugeben las sich wie ein Fehler.
     return {"id": neu,
             "label": ((lab.get("de") or {}).get("value")
-                      or (lab.get("en") or {}).get("value") or neu),
+                      or (lab.get("en") or {}).get("value")
+                      or "ohne Label auf Deutsch oder Englisch"),
             "description": ((besch.get("de") or {}).get("value")
                             or (besch.get("en") or {}).get("value") or ""),
             "p31": p31}, None
