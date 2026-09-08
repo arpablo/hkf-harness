@@ -113,17 +113,36 @@ Werkart: <article | book | paper | podcast | transcript | video | web>
 ## Notiz-Kandidaten
 - <Name> — <warum> — genannt als: <Benennungen der Quelle>
   Ist: <was der Gegenstand ist, mit Beleg — oder „steht nicht in der Quelle">
+  Hängt zusammen mit: <anderer Kandidat> — <wie>
+  Behauptet: <was die Quelle über ihn sagt> (<Beleg>)
 
 ## Lücken und Widersprüche
 - <Befund>
 ```
 
-**Die Zeile `Ist:` sagt, was der Gegenstand ist.** Nicht, wobei die Quelle ihn
-zuerst erwähnt: was für ein Ding er ist, wann und wo er bestand, wofür er
-einsteht. Ein Komitee ist eine Partei mit einem Gründungsjahr, bevor es die
-Gruppe ist, die in einem bestimmten Kapitel das Telegrafenamt besetzt. Findest
-du den Satz in der Quelle nicht, schreib das hin. Er wird nicht aus eigenem
-Wissen gefüllt, und die Lücke ist eine Auskunft.
+**Ein Kandidat wird nach dem Gegenstand gesammelt, nicht nach dem Kapitel.**
+`## Aufbau` und `## Substanz` folgen der Quelle, dieser Abschnitt folgt den
+Dingen, von denen sie handelt. Für jeden Kandidaten gehst du die ganze Tranche
+durch und trägst zusammen, was **überall** in ihr über ihn steht. Ein Mensch
+kommt in Kapitel drei vor und noch einmal in Kapitel neun, und wer nur das
+erste Vorkommen nimmt, schreibt eine Notiz über eine Episode und nennt sie nach
+einer Person.
+
+Die drei Zeilen tragen Verschiedenes, und das Trennen ist die Arbeit:
+
+- **`Ist:`** sagt, was der Gegenstand ist, nicht, wobei die Quelle ihn zuerst
+  erwähnt. Ein Komitee ist eine Partei mit einem Gründungsjahr, bevor es die
+  Gruppe ist, die in einem bestimmten Kapitel das Telegrafenamt besetzt. Das
+  gilt unabhängig davon, wer darüber geschrieben hat.
+- **`Hängt zusammen mit:`** nennt die anderen Kandidaten und sagt, wie. Ohne
+  diese Zeile bleibt jede Notiz für sich, und ein Bestand aus Inseln beantwortet
+  keine Frage, die über eine von ihnen hinausgeht.
+- **`Behauptet:`** ist, was **diese** Quelle sagt, und trägt darum immer einen
+  Beleg. Es kann strittig sein, es kann sich als falsch erweisen, und beides
+  schadet nicht, solange es der Quelle zugeschrieben bleibt.
+
+Findest du den Satz für `Ist:` in der Quelle nicht, schreib das hin. Er wird
+nicht aus eigenem Wissen gefüllt, und die Lücke ist eine Auskunft.
 
 **Die Benennungen gehören zum Kandidaten.** Ein Werk nennt denselben Menschen
 als „Lord Fisher", als „the retired Admiral of the Fleet" und als „Fisher".

@@ -25,6 +25,13 @@ und Vergleiche, die daraus in den Bestand wachsen — und die Verweise, mit
 denen sie am Bestand hängen. Wer nur zusammenfasst, hat die Quelle abgelegt,
 nicht eingelesen.
 
+**Wofür aufbereitet wird.** Nicht zum Wiederlesen der Quelle. Später greift
+jemand darauf zu, ein Mensch oder ein Modell, und fragt nach einem Gegenstand
+und nicht nach einem Kapitel. Was dann trägt, ist eine Notiz, die sagt, was ihr
+Gegenstand ist, mit welchen anderen er zusammenhängt und was welche Quelle über
+ihn behauptet. Ein Destillat, das der Gliederung des Werks folgt, beantwortet
+nur Fragen, die schon wissen, in welchem Kapitel die Antwort steht.
+
 Diese Notizen gehören **in die Lieferung**. Dafür braucht es keine
 Wissensbasis: Ein Bundle trägt Notizen jedes Typs, und wohin sie kommen,
 entscheidet erst der Import (§4.3).
@@ -97,28 +104,45 @@ Quelle und darf nicht so aussehen, als stünde es dort.
 unter `<media_base>/Clippings/`, und `file` zeigt darauf; die Notiz trägt die
 Zusammenfassung. `hk-ingest` legt beides an.
 
-**⑥ Eintragen — dann die Notizen, die daraus entstehen.** Geh Wilmas
-`## Notiz-Kandidaten` **einzeln** durch und entscheide je Kandidat: eigene
-Notiz, Abschnitt in einer anderen Notiz, oder nichts. Die Schwelle steht
-unten. Für jeden, der eine Notiz wird:
+**⑥ Eintragen — dann die Entitäten.** Geh Wilmas `## Notiz-Kandidaten`
+**einzeln** durch und entscheide je Kandidat: eigene Notiz, Abschnitt in einer
+anderen Notiz, oder nichts. Die Schwelle steht unten. Für jeden, der eine Notiz
+wird, gilt diese Reihenfolge, und sie ist keine Empfehlung:
 
-- **Der erste Absatz bestimmt den Gegenstand.** Er beantwortet, worum es in
-  dieser Notiz geht, und steht vor allem, was die Quelle erzählt. Wilmas Zeile
-  `Ist:` ist das Material dafür, und was du ohnehin in `description` schreibst,
-  gehört ausformuliert auch in den Text: Eine Notiz, deren Gegenstand nur im
-  Frontmatter steht, sagt ihn dem Leser nirgends.
-- Typ wählen (`concept`, `term`, `person`, `comparison`, `note` …) und die
-  Property-Tabelle des Typs lesen, bevor du ein Feld setzt.
-- `aliases` aus den Benennungen setzen, die Wilma mitliefert, soweit sie vom
-  Titel abweichen. Ohne sie bleibt eine Nennung wie „Lord Fisher" im Body
-  einer anderen Notiz unverlinkt, und der Verweis entsteht nie (§6.1
-  Schritt 9).
-- `sources` auf die Quellennotiz setzen — das ist die Verbindung, an der der
-  Bestand später hängt.
-- Untereinander verlinken, wo der Body es hergibt; einen Verweis unter
-  `# Verbindungen` auch in `related` führen (§5.6).
-- Der Inhalt kommt **allein aus dem Destillat**. Was Wilma nicht belegt hat,
-  steht nicht drin.
+1. **Bestimmen.** Was *ist* der Gegenstand? Der erste Absatz beantwortet das,
+   bevor irgendetwas aus der Quelle erzählt wird: was für ein Ding er ist, wann
+   und wo er bestand, wofür er einsteht. Wilmas Zeile `Ist:` ist das Material,
+   und was du ohnehin in `description` schreibst, gehört ausformuliert auch in
+   den Text. Dann Typ wählen und die Property-Tabelle lesen, bevor du ein Feld
+   setzt, dazu `aliases` aus den Benennungen der Quelle.
+2. **Verknüpfen.** Mit welchen anderen Entitäten hängt er zusammen, und wie?
+   Die Verweise stehen in der Prosa, wo der Text sie hergibt; was nicht aus dem
+   Text hervorgeht, kommt unter `# Verbindungen` und in `related` (§5.6). Eine
+   Entität ohne Verknüpfung ist eine Sackgasse: Wer später sucht, findet sie
+   nur, wenn er ihren Namen schon kennt.
+3. **Behaupten.** Was sagt **diese Quelle** über ihn? Das steht hinter der
+   Bestimmung, mit Fundstelle und der Quelle zugeschrieben. Die Trennung ist
+   der Zweck der Übung: Was der Gegenstand ist, gilt unabhängig davon, wer
+   darüber geschrieben hat. Was ein Werk behauptet, gehört diesem Werk. Wer
+   beides vermischt, schreibt ein Kapitelreferat unter einem Lemma.
+4. **`sources` setzen** — die Verbindung, an der der Bestand später hängt.
+
+Der Inhalt kommt **allein aus dem Destillat**. Was Wilma nicht belegt hat,
+steht nicht drin, auch nicht als plausible Ergänzung aus eigenem Wissen.
+
+**Gibt es die Notiz schon, wird sie erweitert und nicht ersetzt.** Eine zweite
+Quelle über denselben Gegenstand ist der Normalfall, nicht die Ausnahme: Die
+Bestimmung bleibt stehen und wird höchstens genauer, die Verknüpfungen kommen
+hinzu, und die Behauptungen der neuen Quelle treten neben die der alten, jede
+der ihren zugeschrieben. In einer Lieferung leistet das `extends` (siehe
+unten).
+
+**Widerspricht die neue Quelle der alten, gewinnt keine von beiden.** Ein
+Widerspruch zwischen zwei Werken ist eine Auskunft über den Gegenstand und
+kein Fehler, den der Ingest wegräumt. Steht er für sich, wird er eine
+`comparison`, deren `compares` auf beide Quellennotizen zeigt und die die
+strittigen Punkte als Dimensionen führt. Ist er klein, steht er als solcher in
+der Notiz. Überschrieben wird er nie.
 
 **⑦ Berichten.** `hk-lint <ziel>` und `hk-lint --strict <ziel>` müssen grün
 sein. Dann sag:
