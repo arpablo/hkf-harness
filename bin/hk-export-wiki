@@ -88,6 +88,10 @@ class Lauf(object):
         self.medien = []        # rel unter der Wurzel
         self.sidecars = []      # rel unter der Wurzel
         self.basen = {}         # rel der .base → {"views": [...]}
+        # Ob ueberhaupt gefragt wurde. Ohne die Unterscheidung stuende im
+        # Manifest `"bases": 0`, und niemand koennte sehen, ob die Ablage keine
+        # Bases hat oder ob der Schalter fehlte.
+        self.bases_gefragt = False
         self.befunde = []       # (art, text, hinweis)
         self.abgebrochen = None
 
@@ -279,6 +283,7 @@ def bases_auswerten(lauf):
     wirkt in der CLI nur an erster Stelle, und wer sich vertut, bekommt
     klaglos die Bases einer anderen Ablage.
     """
+    lauf.bases_gefragt = True
     vault, praefix = obsidian.vault_fuer(lauf.hkb)
     if not vault:
         raise obsidian.Fehlschlag(
@@ -307,7 +312,7 @@ def bases_auswerten(lauf):
 
 def _manifest(lauf):
     jetzt = datetime.datetime.now().replace(microsecond=0).isoformat()
-    return {
+    aus = {
         "format": FORMAT,
         "version": FASSUNG,
         "werkzeug": WERKZEUG,
@@ -321,8 +326,10 @@ def _manifest(lauf):
         "notizen": sum(1 for r in lauf.dateien if r.endswith(".md")),
         "dateien": len(lauf.dateien),
         "medien": len(lauf.medien),
-        "bases": len(lauf.basen),
     }
+    if lauf.bases_gefragt:
+        aus["bases"] = len(lauf.basen)
+    return aus
 
 
 def ausfuehren(lauf):
