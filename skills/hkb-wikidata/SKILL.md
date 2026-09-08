@@ -56,9 +56,15 @@ Beweis.
 Beschreibungen der Kandidaten. Was der Bestand über den Gegenstand sagt, steht
 in seiner Notiz, nicht in Wikidata.
 
-**`nichts`** heißt meistens: Es gibt den Gegenstand dort nicht. Eigene
-Denkfiguren einer Wissensbasis stehen in keinem Weltverzeichnis. Dann bleibt
-die Property leer, und das ist kein Mangel.
+**`nichts`** heißt nicht „gibt es nicht", sondern „unter diesem Namen nicht
+gefunden". Bevor die Property leer bleibt, sieh zweimal nach: einmal mit dem
+vollen Namen, einmal mit der englischen Transliteration. Die Suche von
+Wikidata trifft eine abweichende Umschrift nicht, und ein Bestand mit
+arabischen, osmanischen oder russischen Namen führt sie in Dutzenden
+Varianten.
+
+Bleibt es dabei, ist das kein Mangel. Eigene Denkfiguren einer Wissensbasis
+stehen in keinem Weltverzeichnis, und die Property ist nirgends Pflicht.
 
 Passt keiner, setzt du keinen. Bist du zwischen zweien unsicher, legst du
 beide vor und fragst. Eine falsche Kennung ist schlimmer als keine: Sie sieht
@@ -110,3 +116,15 @@ Klasse. Wer den Filter erweitert, erweitert beides.
 **Auf Lebensdaten als Unterscheidung bauen.** Sie trennen zuverlässig, wo sie
 dastehen, und in einem frisch aufgebauten Bestand steht `born` fast nie. Der
 Beleg ist ein Gewinn, kein Verlass.
+
+**`nichts` für bare Münze nehmen.** In der ersten Tranche einer Ablage über den
+Nahen Osten waren zwei von drei solchen Meldungen falsch: `Aziz Ali al-Masri`
+steht dort als `'Aziz 'Ali al-Misri`, `David Hogarth` als `David George
+Hogarth`. Beide fand die zweite Suche sofort. Der Fehler liegt nicht in der
+Notiz und nicht in Wikidata, sondern zwischen zwei Umschriften desselben
+Namens.
+
+**Den zweiten Anlauf ins Werkzeug legen.** Erwogen und verworfen: Eine
+automatische Nachsuche über Namensbestandteile bringt bei jedem Namen weitere
+Kandidaten und verwässert die Liste, die gerade deshalb brauchbar ist, weil
+sie kurz bleibt. Die zweite Suche ist Urteilsarbeit und gehört hierher.
