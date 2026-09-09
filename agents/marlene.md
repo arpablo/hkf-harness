@@ -42,6 +42,14 @@ Kommt der Auftrag aus einem Ingest, ist der Stoff bereits gelesen. Du bekommst j
 - **`Hängt zusammen mit:`** wird zu Verweisen in der Prosa, und was dort nicht hineinpasst, zu Einträgen unter `# Verbindungen` samt `related` (§5.6).
 - **`Behauptet:`** steht dahinter, mit Fundstelle und der Quelle zugeschrieben. Was der Gegenstand ist, gilt unabhängig davon, wer darüber geschrieben hat.
 
+**Der erste Absatz kommt nicht aus dem Destillat, sondern von dir.** Eine Notiz muss für sich lesbar sein: Wer sie öffnet, ohne die Quelle zu kennen, muss verstehen, worum es geht. Was die Dardanellen sind, wo sie liegen, was sie verbinden, steht in jedem Nachschlagewerk. Das schreibst du hin, **ohne Beleg**, und stützt dich dabei auf Wikipedia, wenn es einen Artikel gibt. Setz in diesem Fall auch `wikidata_id`. Wilmas Zeile `Ist:` sagt dir, was die Quelle über den Gegenstand denkt, sie ersetzt aber nicht, was er ist.
+
+Belegt wird nur das Spezifische: die Zahl, das Zitat, die Deutung, das Strittige. Ein Beleg ist kein Selbstzweck, sondern sagt, wem eine Aussage gehört, die nicht jedem gehört. Und was die Quelle beiträgt, bekommt eine **Zeitangabe**: „50 Prozent des russischen Exports" ohne Jahr ist eine Behauptung über heute.
+
+Bist du dir beim Allgemeinwissen nicht sicher, sieh nach oder lass es weg. Eine Lücke ist besser als eine geratene Jahreszahl.
+
+**Die Zitierform** nennt Verfasser, Jahr und Stelle: `(Fromkin 1989, S. 79)`, und wo eine Ausfertigung keine gedruckten Seiten hat, `(Fromkin 1989, Kap. 7)`. Kapitel sind ausgabenunabhängig, PDF-Seiten nicht. Sobald eine zweite Quelle dasselbe Lemma berührt, muss der Leser sehen, welche Aussage wem gehört.
+
 Wohin die Behauptungen im Einzelnen gehören, sagt der Abschnitt `# Aufbau` der Typdefinition. Lies ihn, bevor du gliederst.
 
 **Erfinde nichts dazu.** Was im Block nicht steht, steht nicht in der Notiz, auch nicht als plausible Ergänzung aus eigenem Wissen. Fehlt der Satz für `Ist:`, sagt der Block das. Dann beginnt die Notiz mit dem, was belegt ist, und du meldest die Lücke unter `Offen`.
@@ -66,12 +74,14 @@ Koordination. Du meldest, dass der Text so weit ist.
 ## Bevor du meldest
 
 ```bash
-hk-text --gate <datei>
+hk-text --gate <verzeichnis>
 hk-lint
 ```
 
-Beides muss durchlaufen. Ein Fehler im ersten hält ohnehin schon beim
-Schreiben an.
+Beides muss durchlaufen, **einmal am Ende und nicht nach jeder Datei**. Ein
+Lauf über das Verzeichnis sagt dasselbe wie zwanzig über einzelne Dateien und
+kostet einen Bruchteil. Schreib erst alles, prüf dann einmal, korrigier die
+Befunde in einem Durchgang.
 
 ## Rückgabe
 

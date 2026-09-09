@@ -119,9 +119,14 @@ Zusammenfassung. `hk-ingest` legt beides an.
 anderen Notiz, oder nichts. Die Schwelle steht unten. Diese Entscheidung ist
 deine.
 
-**Geschrieben wird von `marlene`, nicht von dir.** Gib ihr je Lauf eine Gruppe
-gleichen Typs, dazu unverändert die Kandidaten-Blöcke aus Wilmas Destillat, den
-Zielpfad in der Lieferung und die Belegkonvention der Quelle. Sie liest die
+**Geschrieben wird von `marlene`, nicht von dir.** Gib ihr **den Pfad zum
+Destillat** statt der abgeschriebenen Blöcke, dazu die Namen ihrer Gruppe, den
+Zielpfad und die Zitierform. Sie liest die Blöcke selbst, und dein Kontext
+bleibt frei.
+
+**Wenige große Läufe statt vieler kleiner.** Ein Lauf trägt eine ganze Gruppe,
+und eine Tranche kommt mit zwei bis drei Läufen aus. Jeder Lauf kostet einen
+eigenen Kontextaufbau, und dreißig Einzelläufe kosten dreißigmal davon. Sie liest die
 Schreibregeln, [[hkb-notiz]] und den `# Aufbau` des Typs selbst und prüft mit
 `hk-text --gate`, bevor sie meldet. Was sie schreiben soll, ist unten
 beschrieben, und sie kennt es aus ihrem eigenen Auftrag:
@@ -146,8 +151,33 @@ beschrieben, und sie kennt es aus ihrem eigenen Auftrag:
    beides vermischt, schreibt ein Kapitelreferat unter einem Lemma.
 4. **`sources` setzen** — die Verbindung, an der der Bestand später hängt.
 
-Der Inhalt kommt **allein aus dem Destillat**. Was Wilma nicht belegt hat,
-steht nicht drin, auch nicht als plausible Ergänzung aus eigenem Wissen.
+### Zwei Schichten, und nur eine davon wird belegt
+
+Eine Notiz muss **für sich lesbar** sein. Wer sie öffnet, ohne die Quelle zu
+kennen, muss verstehen, worum es geht. Dafür trägt sie zwei Schichten:
+
+**Das Allgemeinwissen schreibst du selbst, und zwar unbelegt.** Was die
+Dardanellen sind, wo sie liegen, was sie verbinden: Das steht in jedem
+Nachschlagewerk und braucht keine Fundstelle. Ohne diese Schicht ist die
+zweite unverständlich, und die Notiz hängt an einer einzigen Quelle. Gibt es
+einen Wikipedia-Artikel, nimm ihn als Grundlage und setze `wikidata_id`.
+
+**Belegt wird, was die Quelle beiträgt.** Das Spezifische, das Strittige, die
+Deutung, die Zahl, das Zitat. Dort steht die Fundstelle, und dort gehört sie
+hin.
+
+Die Grenze verläuft nicht zwischen „aus der Quelle" und „nicht aus der
+Quelle", sondern zwischen **allgemein zugänglich** und **spezifisch**. Ein
+Beleg ist kein Selbstzweck. Er sagt, wem eine Aussage gehört, die nicht jedem
+gehört.
+
+**Was die Quelle beiträgt, wird zeitlich verortet.** „Durch die Meerengen
+gingen 50 Prozent des russischen Exports" ist ohne Jahr eine Behauptung über
+die Gegenwart. Sie galt vor 1914. Ein Beleg ersetzt keine Zeitangabe.
+
+**Erfunden wird trotzdem nichts.** Bist du dir beim Allgemeinwissen nicht
+sicher, sieh nach oder lass es weg. Eine Lücke ist besser als eine geratene
+Jahreszahl.
 
 **Gibt es die Notiz schon, wird sie erweitert und nicht ersetzt.** Eine zweite
 Quelle über denselben Gegenstand ist der Normalfall, nicht die Ausnahme: Die
@@ -162,6 +192,18 @@ kein Fehler, den der Ingest wegräumt. Steht er für sich, wird er eine
 `comparison`, deren `compares` auf beide Quellennotizen zeigt und die die
 strittigen Punkte als Dimensionen führt. Ist er klein, steht er als solcher in
 der Notiz. Überschrieben wird er nie.
+
+### Die Zitierform trägt über Quellen hinweg
+
+Ein Beleg nennt **Verfasser, Jahr und Stelle**: `(Fromkin 1989, S. 79)`, und
+wo eine Ausfertigung keine gedruckten Seiten hat, `(Fromkin 1989, Kap. 7)`.
+Kapitel sind ausgabenunabhängig, Seiten eines PDF-Exports nicht.
+
+Der Grund steht in der Zukunft dieser Notiz: Sobald eine zweite Quelle
+dasselbe Lemma berührt, muss der Leser sehen, welche Aussage wem gehört. Ein
+Beleg wie `(Kap. 7, PDF 79)` sagt das nicht und wird beim Zusammenführen
+wertlos. Die vollständigen Angaben stehen in der Quellennotiz, im Text steht
+der Kurzbeleg.
 
 **⑦ Berichten.** `hk-lint <ziel>` und `hk-lint --strict <ziel>` müssen grün
 sein. Dann sag:
@@ -276,6 +318,10 @@ Dann, für genau diese Tranche:
 3. **Eintragen**: die Notizen aus den Kandidaten, den zugehörigen Abschnitt
    der Zusammenfassung, und was Wilma unter Lücken gefunden hat.
 4. **`hk-lint <ziel>`** muss grün sein, bevor die Tranche abgehakt wird.
+   **Einmal je Tranche, nicht je Notiz.** Ein Lauf über die Lieferung sagt
+   dasselbe wie dreißig Läufe über einzelne Dateien und kostet ein
+   Dreißigstel. Dasselbe gilt für `hk-text`: Der Gate gehört ans Ende eines
+   Schreibdurchgangs, nicht zwischen zwei Absätze.
 5. **Abhaken:**
 
 ```bash
