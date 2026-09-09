@@ -922,8 +922,8 @@ Hier steht [[40-Wiki/Persons/ada-lovelace|Ada Lovelace]] schon verlinkt.
         lauf(os.path.join(BIN, "hk-init"), geo)
         tp = os.path.join(geo, KONFIG, "Typedefs", "city.md")
         _schreib(tp, io.open(tp, encoding="utf-8").read().replace(
-            "| latitude |",
-            "| location | hkf-geo | nein | — | Breite und Länge als Paar |\n| latitude |", 1))
+            "| geo |",
+            "| location | hkf-geo | nein | — | Breite und Länge als Paar |\n| geo |", 1))
         for name, ort in (("berlin", '  - "52.5200"\n  - "13.4050"'),
                           ("drei", '  - "52.5"\n  - "13.4"\n  - "99"'),
                           ("text", '  - "Berlin"\n  - "13.4"')):

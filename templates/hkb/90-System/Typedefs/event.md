@@ -19,6 +19,7 @@ modified_by: claude-opus-5
 | participants | hkf-link-list:person,organisation | nein | — | Beteiligte |
 | cancelled | checkbox | nein | false | Abgesagt |
 | homepage | hkf-url | nein | — | Ankündigung |
+| wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Aufbau

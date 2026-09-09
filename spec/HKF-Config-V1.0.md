@@ -239,6 +239,7 @@ beide gegeneinander.
 | `authority` | `hkf-link-or-text:organisation` | specification |
 | `authors` | `hkf-link-or-text-list:person` | source |
 | `base` | `text` | typedef |
+| `geo` | `hkf-geo` | city, country, place |
 | `items` | `number` | proptype |
 | `birthplace` | `hkf-link:place,city,country` | person |
 | `born` | `date` | person |
@@ -271,10 +272,8 @@ beide gegeneinander.
 | `imported` | `datetime` | bundle |
 | `kind` | `hkf-source-kind` | source |
 | `lang` | `hkf-lang` | source, specification, **term** |
-| `latitude` | `hkf-latitude` | city, place |
 | `location` | `hkf-link:place,city,country` | event |
 | `logo` | `hkf-file:image / hkf-url` | organisation |
-| `longitude` | `hkf-longitude` | city, place |
 | `max` | `number` | proptype |
 | `min` | `number` | proptype |
 | `o_categories` | `hkf-organisation-category-list` | organisation |
@@ -300,7 +299,7 @@ beide gegeneinander.
 | `url` | `hkf-url` | source, specification |
 | `values` | `list` | proptype |
 | `version` | `text` | bundle, **specification** |
-| `wikidata_id` | `hkf-wikidata` | city, concept, country, organisation, person, place, source, term |
+| `wikidata_id` | `hkf-wikidata` | city, concept, country, event, organisation, person, place, source, term, topic |
 
 ---
 
@@ -582,8 +581,7 @@ description: Ein geographischer Ort.
 
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
-| latitude | hkf-latitude | nein | — | Geographische Breite |
-| longitude | hkf-longitude | nein | — | Geographische Länge |
+| geo | hkf-geo | nein | — | Koordinate als Paar, erst Breite, dann Länge |
 | country | hkf-link:country | nein | — | Staat, in dem der Ort liegt |
 | address | text | nein | — | Anschrift in einer Zeile |
 | part_of | hkf-link:place,city,country | nein | — | Übergeordneter Ort |
@@ -603,7 +601,7 @@ Was eine Notiz dieses Typs beantwortet, in dieser Reihenfolge. Ein Abschnitt, f�
 
 # Konventionen
 
-`latitude` und `longitude` werden nur gemeinsam gesetzt. `part_of` bildet
+`geo` trägt beide Werte in einer Angabe, erst die Breite, dann die Länge. `part_of` bildet
 die räumliche Schachtelung ab, also Gebäude in Stadt und Stadt in Region.
 
 `country` ist ein Verweis und keine Kennung. Es hieße sonst auf `place`
@@ -634,6 +632,7 @@ description: Ein Geschehen zu einer bestimmten Zeit.
 | participants | hkf-link-list:person,organisation | nein | — | Beteiligte |
 | cancelled | checkbox | nein | false | Abgesagt |
 | homepage | hkf-url | nein | — | Ankündigung |
+| wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Aufbau
@@ -861,6 +860,7 @@ description: Ein Themengebiet als Einstiegspunkt.
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
 | parent | hkf-link:topic | nein | — | Übergeordnetes Thema |
+| wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen
@@ -985,8 +985,7 @@ dir: Cities
 
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
-| latitude | hkf-latitude | nein | — | Geographische Breite |
-| longitude | hkf-longitude | nein | — | Geographische Länge |
+| geo | hkf-geo | nein | — | Koordinate als Paar, erst Breite, dann Länge |
 | country | hkf-link:country | nein | — | Staat, in dem die Stadt liegt |
 | part_of | hkf-link:place,country | nein | — | Übergeordnete Einheit, etwa Region, Provinz oder Staat |
 | founded_year | hkf-year | nein | — | Jahr der Gründung, soweit überliefert |
@@ -1018,7 +1017,7 @@ Wer die Unterscheidung nicht braucht, führt `city` nicht und legt Städte als
 zweimal, einmal als `place` und einmal als `city`, sind für jedes Werkzeug
 zwei Gegenstände.
 
-`latitude` und `longitude` werden nur gemeinsam gesetzt.
+`geo` trägt beide Werte in einer Angabe, erst die Breite, dann die Länge.
 ```
 
 ## 3.17 `country`
@@ -1039,6 +1038,7 @@ dir: Countries
 | capital | hkf-link:city | nein | — | Hauptstadt |
 | founded_year | hkf-year | nein | — | Jahr der Staatsgründung |
 | dissolved_year | hkf-year | nein | — | Jahr des Untergangs, wenn der Staat nicht mehr besteht |
+| geo | hkf-geo | nein | — | Koordinate als Paar, erst Breite, dann Länge |
 | flag | hkf-file:image / hkf-url | nein | — | Flagge, als Datei in der Ablage oder als Adresse im Netz |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |

@@ -11,8 +11,7 @@ modified_by: claude-opus-5
 
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
-| latitude | hkf-latitude | nein | — | Geographische Breite |
-| longitude | hkf-longitude | nein | — | Geographische Länge |
+| geo | hkf-geo | nein | — | Koordinate als Paar, erst Breite, dann Länge |
 | country | hkf-link:country | nein | — | Staat, in dem der Ort liegt |
 | address | text | nein | — | Anschrift in einer Zeile |
 | part_of | hkf-link:place,city,country | nein | — | Übergeordneter Ort |
@@ -32,6 +31,6 @@ Was eine Notiz dieses Typs beantwortet, in dieser Reihenfolge. Ein Abschnitt, f�
 
 # Konventionen
 
-`latitude` und `longitude` werden nur gemeinsam gesetzt. `part_of` bildet die räumliche Schachtelung ab, also Gebäude in Stadt und Stadt in Region.
+`geo` trägt beide Werte in einer Angabe, erst die Breite, dann die Länge. `part_of` bildet die räumliche Schachtelung ab, also Gebäude in Stadt und Stadt in Region.
 
 `country` ist ein Verweis und keine Kennung. Es hieße sonst auf `place` etwas anderes als auf `city`, und ein Property-Name bedeutet überall dasselbe (Core §3.7.3). Der Preis ist, dass ein Ort in einem Staat ohne eigene Notiz seinen Staat nicht nennen kann: Dann bleibt `country` leer, und der Staat steht im Body oder wird als Notiz angelegt.

@@ -16,6 +16,7 @@ modified_by: claude-opus-5
 | capital | hkf-link:city | nein | — | Hauptstadt |
 | founded_year | hkf-year | nein | — | Jahr der Staatsgründung |
 | dissolved_year | hkf-year | nein | — | Jahr des Untergangs, wenn der Staat nicht mehr besteht |
+| geo | hkf-geo | nein | — | Koordinate als Paar, erst Breite, dann Länge |
 | flag | hkf-file:image / hkf-url | nein | — | Flagge, als Datei in der Ablage oder als Adresse im Netz |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |

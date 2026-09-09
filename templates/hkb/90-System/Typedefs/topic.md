@@ -12,6 +12,7 @@ modified_by: claude-opus-5
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
 | parent | hkf-link:topic | nein | — | Übergeordnetes Thema |
+| wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
 # Konventionen

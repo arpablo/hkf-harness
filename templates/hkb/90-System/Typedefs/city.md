@@ -12,8 +12,7 @@ modified_by: claude-opus-5
 
 | Property | Typ | Pflicht | Vorgabe | Beschreibung |
 |---|---|---|---|---|
-| latitude | hkf-latitude | nein | — | Geographische Breite |
-| longitude | hkf-longitude | nein | — | Geographische Länge |
+| geo | hkf-geo | nein | — | Koordinate als Paar, erst Breite, dann Länge |
 | country | hkf-link:country | nein | — | Staat, in dem die Stadt liegt |
 | part_of | hkf-link:place,country | nein | — | Übergeordnete Einheit, etwa Region, Provinz oder Staat |
 | founded_year | hkf-year | nein | — | Jahr der Gründung, soweit überliefert |
@@ -37,4 +36,4 @@ Eine Stadt ist ein Ort, aber **HKF kennt keine Untertypen** (Core §3.7.1): `hkf
 
 Wer die Unterscheidung nicht braucht, führt `city` nicht und legt Städte als `place` ab. Wer sie führt, entscheidet einmal und bleibt dabei: Dieselbe Stadt zweimal, einmal als `place` und einmal als `city`, sind für jedes Werkzeug zwei Gegenstände.
 
-`latitude` und `longitude` werden nur gemeinsam gesetzt.
+`geo` trägt beide Werte in einer Angabe, erst die Breite, dann die Länge.
