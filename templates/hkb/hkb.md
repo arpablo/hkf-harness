@@ -29,6 +29,7 @@ spec: https://github.com/arpablo/hkf-harness/blob/main/spec/HKF-Core-V1.0.md
 | person | 40-Wiki/Persons | Ein Mensch. |
 | place | 40-Wiki/Places | Ein geographischer Ort. |
 | proptype | 90-System/Proptypes | Schränkt eine Wertform ein. |
+| quote | 40-Wiki/Quotes | Ein wörtlich übernommener Satz und seine Herkunft. |
 | source | 50-Sources | Ein Werk, auf das sich die Wissensbasis beruft. |
 | specification | 40-Wiki/Specifications | Ein normatives Dokument, an das sich die Wissensbasis hält. |
 | summary | 40-Wiki/Summaries | Was eine Quelle sagt, auf drei Seiten. |
