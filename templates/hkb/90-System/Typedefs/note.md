@@ -24,7 +24,7 @@ Was eine Notiz dieses Typs beantwortet, in dieser Reihenfolge. Der Typ ist ein A
 | `## Befund` | Was sich gezeigt hat, mit Fundstelle, wo es eine gibt. |
 | `## Was daraus folgt` | Was zu tun, zu prüfen oder weiterzuverfolgen ist. |
 
-**Hält die Notiz eine Lektüre fest, trennt sie drei Dinge sichtbar:** was das Werk behauptet, was über den Gegenstand berichtet wird, und was der Lesende selbst einwendet. Ein Einwand, der aussieht wie eine Aussage des Autors, ist ein Fehler und keine Geschmacksfrage. Die Fundstelle steht bei der Behauptung, nicht beim Einwand.
+**Hält die Notiz eine Lektüre fest, trennt sie die Schichten aus Core §3.3 sichtbar:** was das Werk behauptet, was über den Gegenstand berichtet wird, und was der Lesende selbst einwendet. Ein Einwand, der aussieht wie eine Aussage des Autors, ist ein Fehler und keine Geschmacksfrage. Die Fundstelle steht bei der Behauptung, nicht beim Einwand.
 
 # Konventionen
 

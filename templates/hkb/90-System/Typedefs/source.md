@@ -39,7 +39,7 @@ Was eine Notiz dieses Typs beantwortet, in dieser Reihenfolge. Der mittlere Teil
 
 **`# Kernaussagen` entsteht zuletzt.** Vor der letzten Tranche wüsste man nur, was die ersten Kapitel behaupten.
 
-**`# Was die Quelle offenlässt` steht nicht in der Quelle.** Der Abschnitt sagt das einleitend, sonst liest er sich wie ein Befund des Werks. Was hier steht, ist beobachtet und nicht behauptet: eine Spekulation, die der Autor selbst kennzeichnet, ein Widerspruch zwischen zwei Kapiteln, eine Frage, die er als offen bezeichnet. Ein eigener Einwand gehört nicht hierher, sondern in eine `note`.
+**`# Was die Quelle offenlässt` steht nicht in der Quelle.** Es ist die vierte Schicht aus Core §3.3. Der Abschnitt sagt das einleitend, sonst liest er sich wie ein Befund des Werks. Was hier steht, ist beobachtet und nicht behauptet: eine Spekulation, die der Autor selbst kennzeichnet, ein Widerspruch zwischen zwei Kapiteln, eine Frage, die er als offen bezeichnet. Ein eigener Einwand gehört nicht hierher, sondern in eine `note`.
 
 # Konventionen
 

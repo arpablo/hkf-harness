@@ -26,7 +26,7 @@ Was eine Notiz dieses Typs beantwortet, in dieser Reihenfolge. Hier bleibt kein 
 
 **Der Vergleich spricht in eigenen Worten.** Zwei Werke gebrauchen denselben Begriff selten gleich, und wer die Sprache eines der beiden übernimmt, hat die Frage schon zu dessen Gunsten entschieden. Die Dimensionen werden darum so benannt, dass beide Seiten sich darin wiederfinden, und die Begriffe der Verglichenen stehen als deren Begriffe da.
 
-**Ein Widerspruch wird festgehalten und nicht geglättet.** Dass zwei Quellen dasselbe verschieden sehen, ist eine Auskunft über den Gegenstand. Jede Deutung steht bei ihrer Quelle, und das Urteil sagt, welche von beiden warum weiter trägt. Trägt keine weiter, sagt es das.
+**Ein Widerspruch wird festgehalten und nicht geglättet (Core §3.3).** Dass zwei Quellen dasselbe verschieden sehen, ist eine Auskunft über den Gegenstand. Jede Deutung steht bei ihrer Quelle, und das Urteil sagt, welche von beiden warum weiter trägt. Trägt keine weiter, sagt es das.
 
 # Konventionen
 

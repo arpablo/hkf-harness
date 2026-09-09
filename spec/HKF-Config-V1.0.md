@@ -714,12 +714,13 @@ die Lektüre kommt.
 **`# Kernaussagen` entsteht zuletzt.** Vor der letzten Tranche wüsste
 man nur, was die ersten Kapitel behaupten.
 
-**`# Was die Quelle offenlässt` steht nicht in der Quelle.** Der
-Abschnitt sagt das einleitend, sonst liest er sich wie ein Befund des
-Werks. Was hier steht, ist beobachtet und nicht behauptet: eine
-Spekulation, die der Autor selbst kennzeichnet, ein Widerspruch zwischen
-zwei Kapiteln, eine Frage, die er als offen bezeichnet. Ein eigener
-Einwand gehört nicht hierher, sondern in eine `note`.
+**`# Was die Quelle offenlässt` steht nicht in der Quelle.** Es ist die
+vierte Schicht aus Core §3.3. Der Abschnitt sagt das einleitend, sonst
+liest er sich wie ein Befund des Werks. Was hier steht, ist beobachtet
+und nicht behauptet: eine Spekulation, die der Autor selbst
+kennzeichnet, ein Widerspruch zwischen zwei Kapiteln, eine Frage, die er
+als offen bezeichnet. Ein eigener Einwand gehört nicht hierher, sondern
+in eine `note`.
 
 # Konventionen
 
@@ -902,8 +903,8 @@ Dimensionen werden darum so benannt, dass beide Seiten sich darin
 wiederfinden, und die Begriffe der Verglichenen stehen als deren
 Begriffe da.
 
-**Ein Widerspruch wird festgehalten und nicht geglättet.** Dass zwei
-Quellen dasselbe verschieden sehen, ist eine Auskunft über den
+**Ein Widerspruch wird festgehalten und nicht geglättet (Core §3.3).**
+Dass zwei Quellen dasselbe verschieden sehen, ist eine Auskunft über den
 Gegenstand. Jede Deutung steht bei ihrer Quelle, und das Urteil sagt,
 welche von beiden warum weiter trägt. Trägt keine weiter, sagt es das.
 
@@ -989,11 +990,12 @@ immer zuletzt (§5.6).
 | `## Befund` | Was sich gezeigt hat, mit Fundstelle, wo es eine gibt. |
 | `## Was daraus folgt` | Was zu tun, zu prüfen oder weiterzuverfolgen ist. |
 
-**Hält die Notiz eine Lektüre fest, trennt sie drei Dinge sichtbar:**
-was das Werk behauptet, was über den Gegenstand berichtet wird, und was
-der Lesende selbst einwendet. Ein Einwand, der aussieht wie eine Aussage
-des Autors, ist ein Fehler und keine Geschmacksfrage. Die Fundstelle
-steht bei der Behauptung, nicht beim Einwand.
+**Hält die Notiz eine Lektüre fest, trennt sie die Schichten aus Core
+§3.3 sichtbar:** was das Werk behauptet, was über den Gegenstand
+berichtet wird, und was der Lesende selbst einwendet. Ein Einwand, der
+aussieht wie eine Aussage des Autors, ist ein Fehler und keine
+Geschmacksfrage. Die Fundstelle steht bei der Behauptung, nicht beim
+Einwand.
 
 # Konventionen
 

@@ -614,6 +614,65 @@ Spezifikation. Zwei Folgen sind es:
 Beides sind Hinweise, keine Fehler (§6.3), und beides lässt sich mechanisch
 beheben: `hk-lint --fix` entfaltet den Fließtext.
 
+### Wem eine Aussage gehört
+
+**Eine Notiz MUSS erkennbar machen, wem eine Aussage gehört.** Vier Schichten
+kommen in einem Notiztext vor, und sie werden verschieden behandelt:
+
+| Schicht | Was sie enthält | Beleg | Kennzeichnung |
+|---|---|---|---|
+| 1 Bestimmung | Was allgemein zugänglich ist: was der Gegenstand ist, wann und wo er bestand | nein | keine |
+| 2 Bericht | Was eine Quelle über ihn berichtet | ja | der Quelle zugeschrieben |
+| 3 Deutung | Wie eine Quelle ihn deutet, gewichtet, erklärt | ja | zusätzlich als Deutung kenntlich |
+| 4 Urteil | Was die Wissensbasis selbst dazu meint | nein | als eigenes Urteil kenntlich |
+
+**Schicht 1 trägt keinen Beleg, und ein Beleg dort ist ein Fehler.** Was in
+jedem Nachschlagewerk steht, gehört niemandem. Ein Beleg sagt nicht, dass
+etwas stimmt, sondern wem eine Aussage gehört, die nicht jedem gehört. Wer
+Allgemeinwissen belegt, macht den Beleg wertlos, weil er dann überall steht.
+
+**Ohne Schicht 1 ist eine Notiz nicht für sich lesbar.** Wer sie öffnet, ohne
+die Quelle zu kennen, muss verstehen, wovon sie handelt. Eine Notiz, die mit
+dem beginnt, was ein Werk über ihren Gegenstand sagt, ist ein Kapitelreferat
+unter einem Lemma. Sie hängt an einer einzigen Quelle und lässt sich mit
+keiner zweiten zusammenführen.
+
+**Die Trennung von Bericht und Deutung ist die teuerste, wenn sie fehlt.**
+Ein Bericht bleibt richtig, wenn man vergisst, woher er stammt. Eine Deutung
+wird dann zur Tatsache, und der Fehler fällt nicht auf: Im Text steht ein
+Satz, der aussieht wie jeder andere. Eine Deutung wird darum belegt und
+zusätzlich sprachlich gekennzeichnet, etwa durch „nach X", „X liest darin" oder
+„X hält dafür". Woran man sie erkennt: Eine zweite Quelle könnte derselben
+Tatsache widersprechen, ohne sich zu irren.
+
+**Schicht 4 darf nie wie Schicht 1, 2 oder 3 aussehen.** Ein eigener Einwand,
+der wie eine Aussage des Autors dasteht, verfälscht die Quelle. Ein eigenes
+Urteil, das wie Allgemeinwissen dasteht, verfälscht den Gegenstand. Wo eine
+Wissensbasis urteilt, sagt sie, dass sie es ist.
+
+**Ein Beleg nennt Verfasser, Jahr und Stelle.** Die Stelle wird so gewählt,
+dass sie über Ausfertigungen hinweg trägt: Kapitel sind ausgabenunabhängig,
+Seitenzahlen eines PDF-Exports sind es nicht. Die vollständigen Angaben
+stehen in der Quellennotiz, im Text steht der Kurzbeleg. Ein Beleg, der nur
+zusammen mit einer bestimmten Ausfertigung verständlich ist, wird wertlos,
+sobald eine zweite Quelle dasselbe Lemma berührt.
+
+**Was eine Quelle beiträgt, wird zeitlich verortet.** „Durch die Meerengen
+gingen 50 Prozent des Exports" ist ohne Jahreszahl eine Aussage über die
+Gegenwart. Ein Beleg ersetzt keine Zeitangabe.
+
+**Widerspricht eine zweite Quelle der ersten, gewinnt keine von beiden.** Der
+Widerspruch ist eine Auskunft über den Gegenstand und kein Fehler, den ein
+Ingest wegräumt. Beide Deutungen bleiben stehen, jede bei ihrer Quelle. Steht
+der Widerspruch für sich, wird er ein `comparison` (§3.11).
+
+**HKF prüft diese Regel nicht.** Kein Werkzeug kann einen Bericht von einer
+Deutung unterscheiden, und keines kann sehen, ob ein unbelegter Satz
+Allgemeinwissen ist oder eine unbelegte Behauptung. Die Regel steht hier
+trotzdem, weil ohne sie zwei Quellen über denselben Gegenstand nicht
+zusammengeführt werden können. Sie ist die Bedingung dafür, dass eine
+Wissensbasis wächst, statt sich zu verdoppeln.
+
 ### Zwei Schreibweisen für `type`
 
 `type` trägt entweder den **Typnamen als Text** oder einen **Verweis auf eine
