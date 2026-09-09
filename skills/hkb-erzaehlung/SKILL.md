@@ -53,6 +53,18 @@ Absicht ist, entscheidet ein Mensch.
 Für die Mechanik gilt [[hkb-text]]. Was hier dazukommt, ist die Frage, warum
 ein Stück nicht trägt.
 
+**Zuerst die Frage, ob es die Arbeit wert ist.** Der Grenznutzen fällt steil.
+Ein Stück, das weit unten steht, gewinnt mehrere Notenpunkte, ein fast fertiges
+einen. Wer ein gelungenes Stück weiter poliert, arbeitet an der falschen
+Stelle, und das gehört gesagt, bevor der erste Satz geändert wird. Führt die
+Ablage eine Beurteilung je Text, steht der benannte Abzug dort und sagt, wo der
+Eingriff ansetzt.
+
+**Ein Text, der an einer Kette hängt, ist ein eigener Fall.** Ein Kapitel in
+einer Publikation trägt Voraussetzungen aus dem vorigen und Zusagen an das
+nächste. Was dort geändert wird, wird gegen die Nachbarn geprüft und nicht
+gegen den Text allein.
+
 **Diagnose vor Eingriff.** Fünf Fragen, in dieser Reihenfolge. Die erste, die
 mit Nein oder mit Nichts beantwortet wird, ist die Ursache. Weitersuchen lohnt
 erst danach.
@@ -77,7 +89,19 @@ taugt, nicht die Ergänzung, die fehlt.
 
 Die zweite Achse beginnt vor dem Auftritt des Gegenübers und geht nach ihm
 weiter. Der Preis wird eine Zahl, die ein Leser mitrechnen kann. Die
-Hauptfigur handelt, statt zu reagieren.
+Hauptfigur handelt, statt zu reagieren. Und die Gegenfigur bekommt eine eigene
+Rechnung statt einer Kontrastfunktion.
+
+**Gegen die eigene Arbeit geprüft**, bevor der Text zurückgeht:
+
+- Lässt sich der Preis in einem Satz mit einer Zahl sagen? Wenn nicht, ist die
+  zweite Achse nicht eingezogen.
+- Stand jedes Element der neuen Achse schon im alten Text? Wenn nicht, benenne
+  die Erfindung ausdrücklich.
+- Beginnt der Einsatz der Hauptfigur vor dem Auftritt des Gegenübers?
+- Kommt die Note aus dem Text und nicht aus dem Auftrag?
+- Ist der Umfang gleich geblieben oder gesunken? Eine Überarbeitung, die
+  dreihundert Wörter zulegt, hat meist erklärt statt gezeigt.
 
 ## Der Nachzug
 
@@ -97,7 +121,7 @@ Ein Eingriff endet nicht am Text. Danach:
 ## Die Rollen
 
 Der Agent `frida` schreibt die Erstfassung eines erzählenden Textes, `herta`
-lektoriert sie. Für analytische Texte stehen daneben `marlene` und `astrid`; wer
+lektoriert sie. Für analytische Texte stehen daneben `marlene` und `astrid`. Wer
 den falschen Auftrag bekommt, gibt ihn zurück, statt in der fremden Stimme zu
 arbeiten.
 
