@@ -1,7 +1,7 @@
 ---
 type: specification
 title: HKF Config V1.0 — Typen und Property-Typen
-description: Achtzehn Typdefinitionen und achtzehn Property-Typen an einem Ort: die Grundausstattung jeder Wissensbasis und das Vokabular, das als Bundle dazukommt.
+description: "Achtzehn Typdefinitionen und achtzehn Property-Typen an einem Ort: die Grundausstattung jeder Wissensbasis und das Vokabular, das als Bundle dazukommt."
 status: draft
 ---
 
