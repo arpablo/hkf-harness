@@ -3,7 +3,7 @@ type: typedef
 title: Quelle
 description: Ein Werk, auf das sich die Wissensbasis beruft.
 created: 2026-09-01
-modified: 2026-09-01T17:00:00
+modified: 2026-09-09T11:01:00
 modified_by: claude-opus-5
 ---
 
@@ -26,6 +26,8 @@ modified_by: claude-opus-5
 # Konventionen
 
 Eine Quellennotiz beschreibt das Werk, auf das sich die Wissensbasis beruft, und fasst zusammen, **was es sagt**, gegliedert nach seinem eigenen Aufbau, je Kapitel oder Hauptabschnitt eine Überschrift. Was man daraus **für die eigene Sache schließt**, gehört nicht hierher, sondern in eine `note` oder ein `concept`, das per `sources` auf die Quelle verweist.
+
+**Die Quellennotiz wächst mit dem Werk, eine Zusammenfassung nicht.** Wer die Lektüre verdichtet braucht, legt daneben eine `summary` an: drei Seiten, die Kernaussagen und fünf Vorschläge, was sich daraus schreiben ließe (§3.19). Die Quellennotiz bleibt davon unberührt.
 
 **Die Werkart ist eine Property und kein Typ.** Ein Buch, ein Aufsatz, ein Video und eine Webseite unterscheiden sich in dem, was über sie zu wissen ist, kaum: Wer es gemacht hat, wann es erschien, wo es liegt. Was sie unterscheidet, also Verlag, Auflage und Seitenzahl, ist Zitationsapparat und steht dort, wo er gebraucht wird: im Body oder in einer Property, die eine Wissensbasis selbst anlegt. Als vier Typen kostete die Unterscheidung vier Verzeichnisse und zwanzig Properties, von denen die meisten immer leer blieben. Eine Quelle, deren Art keiner der vier entspricht, hätte gar keinen Ort gehabt. `kind` kennt sieben Werte (§2.2), und eine spätere Fassung darf ergänzen.
 

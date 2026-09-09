@@ -31,6 +31,7 @@ spec: https://github.com/arpablo/hkf-harness/blob/main/spec/HKF-Core-V1.0.md
 | proptype | 90-System/Proptypes | Schränkt eine Wertform ein. |
 | source | 50-Sources | Ein Werk, auf das sich die Wissensbasis beruft. |
 | specification | 40-Wiki/Specifications | Ein normatives Dokument, an das sich die Wissensbasis hält. |
+| summary | 40-Wiki/Summaries | Was eine Quelle sagt, auf drei Seiten. |
 | term | 40-Wiki/Terms | Ein definierter Begriff. |
 | topic | 40-Wiki/Topics | Ein Themengebiet als Einstiegspunkt. |
 | typedef | 90-System/Typedefs | Registriert einen Typ und legt sein Verzeichnis fest. |

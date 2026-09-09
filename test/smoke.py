@@ -213,7 +213,7 @@ def main():
         print("hk-init")
         r = lauf(os.path.join(BIN, "hk-init"), ziel, "--name", "Probe")
         probe("legt an", r.returncode == 0, r.stderr.strip())
-        probe("36 Notizen", "36 Notizen" in r.stdout, r.stdout.strip())
+        probe("37 Notizen", "37 Notizen" in r.stdout, r.stdout.strip())
         wurzel = io.open(os.path.join(ziel, "hkb.md"), encoding="utf-8").read()
         probe("Wurzeldatei traegt den Namen", "name: Probe" in wurzel)
         probe("und die vier Bereiche (§3.1)",
@@ -1047,7 +1047,7 @@ Ein Verweis auf [[Persons/ada|Ada]].
                         % (os.path.join(WURZEL, "lib"), leer)],
                        capture_output=True, text=True).stdout.strip()
         probe("jede Notiz steht genau einmal im Bestand",
-              zahl == "38", "%s statt 38" % zahl)
+              zahl == "39", "%s statt 39" % zahl)
         shutil.rmtree(os.path.dirname(leer), ignore_errors=True)
 
         print("hk-verweise: aus einem kurzen Verweis wird ein qualifizierter")

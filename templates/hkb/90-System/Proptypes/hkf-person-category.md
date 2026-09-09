@@ -6,6 +6,7 @@ values:
   - athlete
   - author
   - cleric
+  - diplomat
   - engineer
   - entrepreneur
   - jurist

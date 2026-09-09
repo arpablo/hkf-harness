@@ -1,14 +1,14 @@
 ---
 type: specification
 title: HKF Config V1.0 — Typen und Property-Typen
-description: "Achtzehn Typdefinitionen und achtzehn Property-Typen an einem Ort: die Grundausstattung jeder Wissensbasis und das Vokabular, das als Bundle dazukommt."
+description: "Neunzehn Typdefinitionen und achtzehn Property-Typen an einem Ort: die Grundausstattung jeder Wissensbasis und das Vokabular, das als Bundle dazukommt."
 status: draft
 ---
 
 # HKF Config V1.0
 
 Dieses Dokument enthält alles, was HKF konkret festlegt: **jede Typdefinition
-und jeden Property-Typ** — achtzehn und achtzehn. HKF Core beschreibt daneben nur noch, wie eine
+und jeden Property-Typ** — neunzehn und achtzehn. HKF Core beschreibt daneben nur noch, wie eine
 Ablage funktioniert — Verzeichnisse, Wertformen, Verweise, Typdefinitionen als
 Bauform, das Bundle-Format, die drei Methoden — und verweist für jede einzelne
 Definition hierher.
@@ -181,7 +181,7 @@ nichts zu tun hätten.
 
 | Property-Typ | Wertform | Einschränkung |
 |---|---|---|
-| `hkf-person-category` | `text` | `values: [artist, athlete, author, cleric, engineer, entrepreneur, jurist, musician, physician, politician, ruler, scholar, scientist, soldier]` |
+| `hkf-person-category` | `text` | `values: [artist, athlete, author, cleric, diplomat, engineer, entrepreneur, jurist, musician, physician, politician, ruler, scholar, scientist, soldier]` |
 | `hkf-organisation-category` | `text` | `values: [association, authority, company, foundation, institute, ngo, party, religious, school, union, university]` |
 | `hkf-source-kind` | `text` | `values: [article, book, paper, podcast, transcript, video, web]` |
 
@@ -210,7 +210,7 @@ entfernen darf sie keine, weil das vorhandene Notizen ungültig machte.
 
 ## 2.3 Die Properties des Vokabulars
 
-Die 70 Property-Namen, die die achtzehn Typdefinitionen aus §3 zusichern —
+Die 71 Property-Namen, die die neunzehn Typdefinitionen aus §3 zusichern —
 an einer Stelle, damit sich nachschlagen lässt, was ein Name bedeutet, ohne
 jede Typdefinition zu öffnen. Die notizübergreifenden Properties aus Core A.2
 stehen nicht darin; sie gelten ohnehin für jede Notiz.
@@ -231,7 +231,7 @@ beide gegeneinander.
 
 | Property | Typangabe | In den Typen |
 |---|---|---|
-| `about` | `hkf-link-list` | note |
+| `about` | `hkf-link-list` | daily, note |
 | `accessed` | `date` | source |
 | `address` | `text` | place |
 | `affiliations` | `hkf-link-or-text-list:organisation` | person |
@@ -251,6 +251,7 @@ beide gegeneinander.
 | `code` | `hkf-country` | country |
 | `compares` | `hkf-link-list` | **comparison** |
 | `country` | `hkf-link:country` | city, place |
+| `covers` | `text` | summary |
 | `date` | `date` | event |
 | `description` | `text` | **bundle**, **typedef** |
 | `died` | `date` | person |
@@ -288,11 +289,12 @@ beide gegeneinander.
 | `provisional` | `checkbox` | typedef |
 | `published` | `date` | source |
 | `published_year` | `hkf-year` | source |
-| `related` | `hkf-link-or-url-list` | city, comparison, concept, country, event, hint, note, organisation, person, place, source, specification, term, topic |
+| `related` | `hkf-link-or-url-list` | city, comparison, concept, country, daily, event, hint, note, organisation, person, place, source, specification, summary, term, topic |
 | `required_bundles` | `list` | bundle |
 | `seat` | `hkf-link:place,city,country` | organisation |
 | `source` | `text` | bundle |
 | `starts_at` | `datetime` | event |
+| `summarizes` | `hkf-link:source` | **summary** |
 | `supersedes` | `hkf-link:specification` | specification |
 | `terms` | `hkf-link-list:term` | concept |
 | `unit` | `text` | proptype |
@@ -305,10 +307,11 @@ beide gegeneinander.
 
 # 3. Typdefinitionen
 
-Siebzehn Typen. Die ersten drei sind die **Kern-Typen** — ohne sie ließe sich
-keine Ablage beschreiben. Die vierzehn danach sind das **Vokabular**: Gegenstände,
+Neunzehn Typen. Die ersten drei sind die **Kern-Typen** — ohne sie ließe sich
+keine Ablage beschreiben. Die sechzehn danach sind das **Vokabular**: Gegenstände,
 die in nahezu jeder Wissensbasis vorkommen, die Quellen, auf die sie sich
-beruft, und die wenigen, mit denen sie über sich selbst spricht.
+beruft, was aus ihnen gelesen wurde, und die wenigen Typen, mit denen eine
+Ablage über sich selbst spricht.
 
 | Typ | Verzeichnis | Zweck |
 |---|---|---|
@@ -322,39 +325,43 @@ beruft, und die wenigen, mit denen sie über sich selbst spricht.
 | `country` | `Countries` | Ein Staat. |
 | `event` | `Events` | Ein Geschehen zu einer bestimmten Zeit. |
 | `source` | — | Ein Werk, auf das sich die Wissensbasis beruft. |
+| `summary` | `Summaries` | Was eine Quelle sagt, auf drei Seiten. |
 | `term` | `Terms` | Ein definierter Begriff. |
 | `concept` | `Concepts` | Eine Sache und der Stand des Wissens über sie. |
 | `comparison` | `Comparisons` | Eine Gegenüberstellung mehrerer Gegenstände entlang benannter Dimensionen. |
 | `topic` | `Topics` | Ein Themengebiet als Einstiegspunkt. |
 | `note` | `Notes` | Eine Notiz ohne spezifischeren Typ. |
+| `daily` | — | Was an einem Tag anfiel. |
 | `specification` | `Specifications` | Ein normatives Dokument, an das sich die Wissensbasis hält. |
 | `hint` | `Hints` | Eine Festlegung, wie diese Wissensbasis geführt wird. |
 
-**Zwei Typen tragen ein `dir`, die anderen fünfzehn nicht.** Deren
+**Drei Typen tragen ein `dir`, die übrigen nicht.** Deren
 Verzeichnisse ergeben sich aus der Vorgabe „Typname groß geschrieben, mit
 angehängtem `s`" (Core §3.7); ein Werkzeug kennt den Ablageort damit, ohne die
 Typdefinition zu lesen.
 
-**`source` hat gar kein Verzeichnis.** Als einziger Typ liegt er unmittelbar
-unter seinem Bereich, also nach Vorgabe in `50-Sources/` (Core §3.2.2). Die
-Spalte oben lässt seine Zelle darum leer.
+**Zwei Typen haben gar kein Verzeichnis.** `source` liegt unmittelbar unter
+seinem Bereich, also nach Vorgabe in `50-Sources/` (Core §3.2.2), `daily`
+ebenso unter `journal_base`, dort nach Jahr und Monat geteilt (Core §3.2.5).
+Die Spalte oben lässt ihre Zellen darum leer.
 
-Die Vorgabe ist mechanisch und kein Sprachgefühl — bei `city` und `country`
-ergäbe sie `Citys` und `Countrys`. Beide schreiben darum ein `dir` und heißen
-`Cities` und `Countries`. Der Preis ist genau der, gegen den die Vorgaberegel
-sonst schützt: Wer diese beiden Verzeichnisse sucht, muss die Typdefinition
-lesen. Für zwei Namen, die jeder Leser sonst für einen Fehler hielte, ist er
-tragbar.
+Die Vorgabe ist mechanisch und kein Sprachgefühl — bei `city`, `country` und
+`summary` ergäbe sie `Citys`, `Countrys` und `Summarys`. Alle drei schreiben
+darum ein `dir` und heißen `Cities`, `Countries` und `Summaries`. Der Preis ist
+genau der, gegen den die Vorgaberegel sonst schützt: Wer diese Verzeichnisse
+sucht, muss die Typdefinition lesen. Für drei Namen, die jeder Leser sonst für
+einen Fehler hielte, ist er tragbar.
 
 Nicht zu verwechseln mit der Property `dir`, die `typedef` in §3.1 zusichert:
 Die trägt eine *andere* Typdefinition, wenn sie abweichen will.
 
-**Sieben Properties sind Pflicht**, alle übrigen optional: `description` in
+**Acht Properties sind Pflicht**, alle übrigen optional: `description` in
 `typedef`, `form` in `proptype`, `id` und `description` in `bundle`, `version`
-in `specification`, `compares` in `comparison` und `lang` in `term`. Jede
-trägt den Gegenstand ihrer Notiz — ein Property-Typ ohne Wertform, eine
-Spezifikation ohne Fassung, ein Vergleich ohne Verglichene und ein Begriff
-ohne Sprache sagen nichts. Sonst fordert keiner dieser Typen etwas über `type`
+in `specification`, `compares` in `comparison`, `lang` in `term` und
+`summarizes` in `summary`. Jede trägt den Gegenstand ihrer Notiz — ein
+Property-Typ ohne Wertform, eine Spezifikation ohne Fassung, ein Vergleich ohne
+Verglichene, ein Begriff ohne Sprache und eine Zusammenfassung ohne ihr Werk
+sagen nichts. Sonst fordert keiner dieser Typen etwas über `type`
 hinaus; er sichert nur zu, was die genannten Properties bedeuten.
 
 Eine **Vorgabe** (Core §3.7) tragen genau zwei Properties, beide Checkboxen:
@@ -684,6 +691,11 @@ und fasst zusammen, **was es sagt**, gegliedert nach seinem eigenen Aufbau,
 je Kapitel oder Hauptabschnitt eine Überschrift. Was man daraus **für die
 eigene Sache schließt**, gehört nicht hierher, sondern in eine `note` oder ein
 `concept`, das per `sources` auf die Quelle verweist.
+
+**Die Quellennotiz wächst mit dem Werk, eine Zusammenfassung nicht.** Wer die
+Lektüre verdichtet braucht, legt daneben eine `summary` an: drei Seiten, die
+Kernaussagen und fünf Vorschläge, was sich daraus schreiben ließe (§3.19). Die
+Quellennotiz bleibt davon unberührt.
 
 **Die Werkart ist eine Property und kein Typ.** Ein Buch, ein Aufsatz, ein
 Video und eine Webseite unterscheiden sich in dem, was über sie zu wissen
@@ -1107,6 +1119,75 @@ bleiben, unvollständig und ohne Verbindungen. Geprüft wird an ihm dasselbe wie
 an jeder Notiz, nicht mehr.
 ```
 
+## 3.19 `summary`
+
+```markdown
+---
+type: typedef
+title: Zusammenfassung
+description: Was eine Quelle sagt, auf drei Seiten.
+dir: Summaries
+---
+
+# Properties
+
+| Property | Typ | Pflicht | Vorgabe | Beschreibung |
+|---|---|---|---|---|
+| summarizes | hkf-link:source | ja | — | Die Quelle, die zusammengefasst wird |
+| covers | text | nein | — | Welcher Teil des Werks, wenn nicht das ganze, etwa `Kapitel 1 bis 3` |
+| related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
+
+# Aufbau
+
+Was eine Notiz dieses Typs beantwortet, in dieser Reihenfolge. Anders als bei
+den übrigen Typen bleibt hier kein Abschnitt weg: Eine Zusammenfassung ohne
+Kernaussagen oder ohne Vorschläge ist keine. `# Verbindungen` steht immer
+zuletzt (§5.6).
+
+| Abschnitt | Beantwortet |
+|---|---|
+| ohne Überschrift | Worum es in der Quelle geht, in wenigen Sätzen. |
+| `## Kernaussagen` | Die tragenden Argumente und Erkenntnisse, jedes mit seiner Fundstelle im Werk. |
+| `## Essayvorschläge` | Fünf Vorschläge, was sich aus der Quelle schreiben ließe, jeder mit seiner These in einem Satz. |
+
+# Konventionen
+
+Eine Quellennotiz gibt das Werk wieder, gegliedert nach dessen eigenem Aufbau,
+und wächst mit ihm (§3.8). Eine Zusammenfassung ist die **Lektüre**: verdichtet,
+begrenzt und um das ergänzt, was sich aus dem Werk machen ließe. Beide stehen
+nebeneinander, weil das eine so lang wird wie sein Gegenstand und das andere
+nicht.
+
+**Drei Seiten sind die Grenze.** Der Body SOLLTE 9.000 Zeichen nicht
+überschreiten, also rund drei Seiten DIN A4. Die Grenze ist der Zweck des Typs
+und keine Formalie: Wer eine Zusammenfassung liest, will nicht das Werk noch
+einmal lesen. Was nicht hineinpasst, gehört in die Quellennotiz oder in ein
+`concept`.
+
+**Die fünf Vorschläge gehören zur Notiz und sind kein Anhang.** Jeder nennt
+eine These und einen Satz dazu, warum sie trägt. Geschrieben wird der Essay
+woanders, unter `output_base` (Core §3.2.4). Ein Vorschlag behauptet nichts
+über die Welt, darum bleibt die Zusammenfassung eine Wissensnotiz und wandert
+nicht selbst unter die Erzeugnisse.
+
+Fünf ist eine gesetzte Zahl und keine gemessene. Sie ist groß genug, dass es
+beim Naheliegenden nicht bleibt, und klein genug, dass jeder Vorschlag noch
+durchdacht ist.
+
+`summarizes` nimmt genau eine Quelle und ist Pflicht: Eine Zusammenfassung
+ohne ihr Werk sagt nicht, wovon sie handelt. Zwei Werke nebeneinanderzustellen
+ist Sache eines `comparison` (§3.11).
+
+Eine Quelle darf mehrere Zusammenfassungen tragen, etwa je Lesart oder je
+Zweck, und sie braucht keine. Welcher Teil des Werks gemeint ist, sagt
+`covers`. Ohne die Angabe gilt das ganze. Ein umfangreiches Werk wird oft in
+Tranchen gelesen, und eine Zusammenfassung je Tranche ist besser als keine.
+
+**Das Verzeichnis heißt `Summaries`.** Die Vorgabe aus Core §3.7 ergäbe
+`Summarys`, wie sie bei `city` und `country` `Citys` und `Countrys` ergäbe
+(§3.16, §3.17).
+```
+
 ---
 
 # 4. Konformität
@@ -1117,8 +1198,8 @@ Eine Wissensbasis führt HKF Config konform, wenn
 2. jede Typdefinition aus §3 und jeder Property-Typ aus §2 vorhanden ist und
    der dortigen Fassung entspricht — Verzeichnis, Property-Namen und deren
    Typangaben,
-3. allein `city` und `country` ein `dir` tragen, und zwar `Cities`
-   beziehungsweise `Countries`, und
+3. allein `city`, `country` und `summary` ein `dir` tragen, und zwar
+   `Cities`, `Countries` beziehungsweise `Summaries`, und
 4. die `values` der beiden Aufzählungen aus §2.2 nicht gekürzt wurden.
 
 Vorhanden heißt: als Notiz in `Typedefs/` beziehungsweise `Proptypes/`. Ob
