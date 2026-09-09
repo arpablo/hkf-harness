@@ -23,6 +23,24 @@ modified_by: claude-opus-5
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Werks in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
+# Aufbau
+
+Was eine Notiz dieses Typs beantwortet, in dieser Reihenfolge. Der mittlere Teil folgt dem Werk und nicht einer eigenen Gliederung: je Teil, Kapitel oder Hauptabschnitt eine Überschrift. `# Verbindungen` steht immer zuletzt (§5.6).
+
+| Abschnitt | Beantwortet |
+|---|---|
+| ohne Überschrift | Die Zitationsangaben in Prosa, und in ein bis zwei Sätzen, wovon das Werk als Ganzes handelt. |
+| `# Kernaussagen` | Was das Werk im Ganzen behauptet, in wenigen Punkten. |
+| je Hauptabschnitt eine Überschrift | Was dort verhandelt wird, in Prosa, mit Verweisen auf die Notizen, die daraus entstanden sind. |
+| `# Was die Quelle offenlässt` | Wo das Werk selbst spekuliert, sich widerspricht oder eine Frage offen nennt. |
+| `# Tranchen` | Bei einer großen Quelle der Stand des Lesens. Wird von `hk-tranchen` geführt und nicht von Hand. |
+
+**Der erste Satz ist der schwerste und wird trotzdem verlangt.** Wovon ein Werk als Ganzes handelt, in ein bis zwei Sätzen: Wer das nicht sagen kann, hat das Werk nicht verstanden, sondern nur seine Kapitel gelesen. Der Satz entsteht nach der ersten Durchsicht und wird genauer, je weiter die Lektüre kommt.
+
+**`# Kernaussagen` entsteht zuletzt.** Vor der letzten Tranche wüsste man nur, was die ersten Kapitel behaupten.
+
+**`# Was die Quelle offenlässt` steht nicht in der Quelle.** Der Abschnitt sagt das einleitend, sonst liest er sich wie ein Befund des Werks. Was hier steht, ist beobachtet und nicht behauptet: eine Spekulation, die der Autor selbst kennzeichnet, ein Widerspruch zwischen zwei Kapiteln, eine Frage, die er als offen bezeichnet. Ein eigener Einwand gehört nicht hierher, sondern in eine `note`.
+
 # Konventionen
 
 Eine Quellennotiz beschreibt das Werk, auf das sich die Wissensbasis beruft, und fasst zusammen, **was es sagt**, gegliedert nach seinem eigenen Aufbau, je Kapitel oder Hauptabschnitt eine Überschrift. Was man daraus **für die eigene Sache schließt**, gehört nicht hierher, sondern in eine `note` oder ein `concept`, das per `sources` auf die Quelle verweist.

@@ -690,6 +690,37 @@ description: Ein Werk, auf das sich die Wissensbasis beruft.
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Werks in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
+# Aufbau
+
+Was eine Notiz dieses Typs beantwortet, in dieser Reihenfolge. Der
+mittlere Teil folgt dem Werk und nicht einer eigenen Gliederung: je
+Teil, Kapitel oder Hauptabschnitt eine Überschrift. `# Verbindungen`
+steht immer zuletzt (§5.6).
+
+| Abschnitt | Beantwortet |
+|---|---|
+| ohne Überschrift | Die Zitationsangaben in Prosa, und in ein bis zwei Sätzen, wovon das Werk als Ganzes handelt. |
+| `# Kernaussagen` | Was das Werk im Ganzen behauptet, in wenigen Punkten. |
+| je Hauptabschnitt eine Überschrift | Was dort verhandelt wird, in Prosa, mit Verweisen auf die Notizen, die daraus entstanden sind. |
+| `# Was die Quelle offenlässt` | Wo das Werk selbst spekuliert, sich widerspricht oder eine Frage offen nennt. |
+| `# Tranchen` | Bei einer großen Quelle der Stand des Lesens. Wird von `hk-tranchen` geführt und nicht von Hand. |
+
+**Der erste Satz ist der schwerste und wird trotzdem verlangt.** Wovon
+ein Werk als Ganzes handelt, in ein bis zwei Sätzen: Wer das nicht sagen
+kann, hat das Werk nicht verstanden, sondern nur seine Kapitel gelesen.
+Der Satz entsteht nach der ersten Durchsicht und wird genauer, je weiter
+die Lektüre kommt.
+
+**`# Kernaussagen` entsteht zuletzt.** Vor der letzten Tranche wüsste
+man nur, was die ersten Kapitel behaupten.
+
+**`# Was die Quelle offenlässt` steht nicht in der Quelle.** Der
+Abschnitt sagt das einleitend, sonst liest er sich wie ein Befund des
+Werks. Was hier steht, ist beobachtet und nicht behauptet: eine
+Spekulation, die der Autor selbst kennzeichnet, ein Widerspruch zwischen
+zwei Kapiteln, eine Frage, die er als offen bezeichnet. Ein eigener
+Einwand gehört nicht hierher, sondern in eine `note`.
+
 # Konventionen
 
 Eine Quellennotiz beschreibt das Werk, auf das sich die Wissensbasis beruft,
@@ -851,6 +882,31 @@ description: Eine Gegenüberstellung mehrerer Gegenstände entlang benannter Dim
 | compares | hkf-link-list | ja | — | Die verglichenen Gegenstände, mindestens zwei |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
+# Aufbau
+
+Was eine Notiz dieses Typs beantwortet, in dieser Reihenfolge. Hier
+bleibt kein Abschnitt weg: Ein Vergleich ohne Dimensionen ist eine
+Behauptung, einer ohne Urteil eine Tabelle. `# Verbindungen` steht immer
+zuletzt (§5.6).
+
+| Abschnitt | Beantwortet |
+|---|---|
+| ohne Überschrift | Was verglichen wird und welche Frage der Vergleich beantworten soll. |
+| `## Dimensionen` | In welchen Hinsichten verglichen wird, als Tabelle mit einer Zeile je Hinsicht. |
+| `## Urteil` | Das eigene Urteil, mit seiner Begründung. |
+
+**Der Vergleich spricht in eigenen Worten.** Zwei Werke gebrauchen
+denselben Begriff selten gleich, und wer die Sprache eines der beiden
+übernimmt, hat die Frage schon zu dessen Gunsten entschieden. Die
+Dimensionen werden darum so benannt, dass beide Seiten sich darin
+wiederfinden, und die Begriffe der Verglichenen stehen als deren
+Begriffe da.
+
+**Ein Widerspruch wird festgehalten und nicht geglättet.** Dass zwei
+Quellen dasselbe verschieden sehen, ist eine Auskunft über den
+Gegenstand. Jede Deutung steht bei ihrer Quelle, und das Urteil sagt,
+welche von beiden warum weiter trägt. Trägt keine weiter, sagt es das.
+
 # Konventionen
 
 Der Gegenstand eines Vergleichs ist kein Ding, sondern ein Verhältnis. Der
@@ -881,6 +937,22 @@ description: Ein Themengebiet als Einstiegspunkt.
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Gegenstands in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
+# Aufbau
+
+Was eine Notiz dieses Typs beantwortet, in dieser Reihenfolge. `#
+Verbindungen` steht immer zuletzt (§5.6).
+
+| Abschnitt | Beantwortet |
+|---|---|
+| ohne Überschrift | Was das Thema umfasst und wo seine Grenzen liegen. |
+| `## Einstiege` | Über welche Notizen man das Thema betritt, jede mit einem Satz dazu, wofür sie steht. |
+
+**Ein Thema trägt keine eigenen Tatsachen.** Was hier stünde, stünde ein
+zweites Mal da und veraltete an einer der beiden Stellen. Die
+Einstiegsliste ist geordnet und nicht vollständig: Sie nennt die
+Notizen, mit denen ein Leser anfangen soll, nicht alle, die zum Thema
+gehören. Wer alle sucht, fragt den Bestand ab.
+
 # Konventionen
 
 Ein Thema ordnet, ein Begriff definiert, ein Konzept sammelt. Der Body ist
@@ -903,6 +975,25 @@ description: Eine Notiz ohne spezifischeren Typ.
 |---|---|---|---|---|
 | about | hkf-link-list | nein | — | Worauf sich die Notiz bezieht |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
+
+# Aufbau
+
+Was eine Notiz dieses Typs beantwortet, in dieser Reihenfolge. Der Typ
+ist ein Auffangtyp, und die Gliederung ist entsprechend weit: Ein
+Abschnitt, für den es nichts gibt, bleibt weg. `# Verbindungen` steht
+immer zuletzt (§5.6).
+
+| Abschnitt | Beantwortet |
+|---|---|
+| ohne Überschrift | Was festgehalten wird und bei welchem Anlass. |
+| `## Befund` | Was sich gezeigt hat, mit Fundstelle, wo es eine gibt. |
+| `## Was daraus folgt` | Was zu tun, zu prüfen oder weiterzuverfolgen ist. |
+
+**Hält die Notiz eine Lektüre fest, trennt sie drei Dinge sichtbar:**
+was das Werk behauptet, was über den Gegenstand berichtet wird, und was
+der Lesende selbst einwendet. Ein Einwand, der aussieht wie eine Aussage
+des Autors, ist ein Fehler und keine Geschmacksfrage. Die Fundstelle
+steht bei der Behauptung, nicht beim Einwand.
 
 # Konventionen
 
