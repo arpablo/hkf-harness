@@ -13,12 +13,13 @@ Die Struktur ist darauf ausgelegt, dass ein Sprachmodell eine Wissensbasis mit
 möglichst wenig Kontext benutzen kann: Eine einzige Datei nennt alle Typen samt
 Verzeichnis, eine weitere den vollständigen Vertrag eines Typs.
 
-## Die drei Dateien
+## Die vier Dateien
 
 | | |
 |---|---|
 | [`HKF-Core-V1.0.md`](HKF-Core-V1.0.md) | Wie eine Ablage aufgebaut ist |
 | [`HKF-Config-V1.0.md`](HKF-Config-V1.0.md) | Alle Typdefinitionen und Property-Typen |
+| [`HKF-Harness-V1.0.md`](HKF-Harness-V1.0.md) | Wie eine Umsetzung gebaut ist, und welche Skills, Agenten und Werkzeuge sie enthält |
 | [`hkf-core-1.0.schema.json`](hkf-core-1.0.schema.json) | Das Frontmatter als JSON Schema, normativ (Core Anhang B.4) |
 
 **Core** beschreibt Verzeichnisse, Wertformen, Verweise, Typdefinitionen als
@@ -28,6 +29,12 @@ Bauform, das Bundle-Format und die drei Methoden `hk-import`, `hk-export` und
 **Config** ist das Inventar: zwanzig Typdefinitionen und achtzehn
 Property-Typen. Alle zusammen bilden die Grundausstattung: Jede Ablage bekommt
 sie beim Anlegen, geliefert wird davon nichts.
+
+**Harness** beschreibt die Umsetzung: die sieben Bereiche einer Ablage, die
+Schicht aus Skills und Agenten darüber, und im Abschnitt „Der Bestand" jeden
+Skill, jeden Agenten und jedes Werkzeug mit einer Zeile dazu, was er tut. Diese
+Tabellen sind normativ, und `tools/bestand.py` hält sie gegen das Verzeichnis.
+Core und Config gelten für jede Umsetzung, Harness nur für diese.
 
 Der Schnitt liegt zwischen **Mechanik und Inventar**. Dass eine Notiz im
 Verzeichnis ihres Typs liegt, sagt Core. Welche Typen es gibt, sagt Config.
@@ -52,8 +59,9 @@ Jetzt gibt es nur noch diesen Ort. Was hier steht, ist die Spezifikation und
 zugleich die Fassung, die der Harness umsetzt. `CORE` in
 [`lib/hkf/__init__.py`](../lib/hkf/__init__.py) nennt ihre Nummer.
 
-Wer HKF umsetzen will, ohne den Harness zu benutzen, braucht die drei Dateien
-in diesem Verzeichnis und sonst nichts daraus.
+Wer HKF umsetzen will, ohne den Harness zu benutzen, braucht Core, Config und
+das Schema und sonst nichts daraus. `HKF-Harness-V1.0.md` beschreibt diese eine
+Umsetzung und bindet niemanden sonst.
 
 ## Wo der Rest liegt
 
@@ -64,12 +72,13 @@ in diesem Verzeichnis und sonst nichts daraus.
 
 ## Prüfung
 
-Zwei Skripte halten die Spezifikation gegen das, was daneben liegt. Wer sie
+Drei Skripte halten die Spezifikation gegen das, was daneben liegt. Wer sie
 ändert, führt beide aus, bevor er den Rest für unverändert hält.
 
 ```
 python3 tools/inventar.py          Prosa, Schema und Grundausstattung gegeneinander
 python3 tools/grundausstattung.py  die Vorlage gegen Anhang A und §3.5.1
+python3 tools/bestand.py           die Tabellen in Harness gegen skills/, agents/ und bin/
 ```
 
 Das Inventar steht dreimal: als Tabelle in `HKF-Config-V1.0.md`, als `$defs`

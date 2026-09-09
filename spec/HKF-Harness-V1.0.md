@@ -1,0 +1,600 @@
+---
+type: specification
+title: HKF Harness V1.0 — Werkzeuge für eine Wissensbasis
+description: Die Festlegungen, die vor den Werkzeugen kommen — wo die Ablage liegt, was im Harness liegt und was nicht, und wer die Kurationspolitik führt.
+status: draft
+---
+
+# HKF Harness V1.0
+
+Das Repository, das eine Wissensbasis nach **HKF Core 1.0** bedienbar macht:
+die Werkzeuge, dazu die Fassung der Spezifikation, die sie umsetzen, und
+obenauf eine dünne Schicht für Sprachmodelle. Es steht auf GitHub und ist von
+jeder Wissensbasis getrennt, die es bedient.
+
+Der Satz, aus dem alles Übrige folgt:
+
+> Eine HKB ist ein gewöhnlicher Obsidian-Vault. Sie lässt sich ohne KI
+> benutzen und füllen.
+
+## Drei Teile, zwei Proben
+
+| | Was es ist | Wo |
+|---|---|---|
+| **HKF** | die Spezifikation: wie ein Bundle und eine konforme HKB aufgebaut sind. Sonst nichts. | `hkf-harness/spec` |
+| **Harness** | Werkzeuge und die Spezifikation, die sie umsetzen | `hkf-harness` |
+| **Wissensbasis** | Inhalt | ein Vault, irgendwo |
+
+- **Nimm den Harness weg.** Die Wissensbasis bleibt ein Obsidian-Vault, den
+  ein Mensch liest, füllt und verlinkt. Es fehlt die Prüfung, sonst nichts.
+- **Nimm die Wissensbasis weg.** Der Harness bleibt ein Werkzeugkasten, der
+  jede andere HKB bedient.
+
+Was eine der beiden Proben nicht besteht, liegt am falschen Ort.
+
+## Die sieben Bereiche einer Ablage
+
+Seit Core §3.1 gliedert sich eine Wissensbasis in sieben Bereiche, jeder mit
+eigenem Basispfad in der Wurzeldatei:
+
+```text
+00-Inbox/     Unsortiertes, von HKF nicht geprüft
+10-Journal/   die Tageseinträge, nach Jahr und Monat
+40-Wiki/      der Inhalt — Persons, Terms, Concepts, Bundles …
+50-Sources/   die Quellennotizen, ohne Typverzeichnis darunter
+60-Output/    die Erzeugnisse — Essays, Texts, Publications
+80-Media/     Images, Videos, Audios, Documents
+90-System/    Typedefs, Proptypes, Types
+```
+
+Wer den Vault öffnet, sieht in `40-Wiki/` die Sachen und nicht das Gerüst. Die
+Zahlenpräfixe ordnen die sieben in jedem Dateibrowser; die Namen sind Vorgaben
+und lassen sich in `hkb.md` ändern.
+
+**Welcher Bereich für einen Typ gilt, sagt seine Typdefinition** mit `base`
+(Core §3.2). Ohne die Angabe gilt `wiki`. Vier Typnamen brauchen sie nicht,
+weil ihr Bereich im Namen steht: `typedef`, `proptype`, `source`, `daily`.
+
+**Die Inbox ist der einzige ungeprüfte Ort.** Dort darf liegen, was die
+Regeln nicht erfüllt: ein Ausschnitt, ein Fragment, eine Datei ohne
+Frontmatter. `hk-lint` sieht nicht hinein (Core §3.2.6). Sie steht trotzdem in
+der Wurzeldatei, damit ein Werkzeug den Pfad nicht raten muss.
+
+**Was aus einem Erzeugnis gebaut wird, liegt außerhalb.** Ein Manuskript, ein
+EPUB, ein Cover sind jederzeit neu baubar und tragen nichts, was nicht schon
+in den Notizen steht. Sie gehen nach `$HKF_ARTEFAKTE/<name der ablage>/`,
+Vorgabe `~/hkf-artefakte`. Eine Ablage führt, woraus etwas wird, und nicht,
+was daraus wurde.
+
+**Die Notiz-ID trägt den Bereich nicht.** Sie ist `<typverzeichnis>/<name>` —
+`Persons/ada-lovelace`, `economy-1832`, `Typedefs/person` — und bleibt
+darum stehen, wenn ein Bereich umzieht.
+
+**Eine Lieferung kennt keine Bereiche.** Dort liegt eine Notiz, wo sie will;
+wohin sie kommt, entscheidet erst der Import (Core §4.3).
+
+## 1. Was im Harness liegt
+
+```
+hkf-harness/
+  HKF-Harness-V1.0.md   dieses Dokument
+  spec/                 HKF Core und Config: die Spezifikation selbst
+  bin/                  hk-init, hk-lint, hk-import, hk-export, hk-ingest,
+                        hk-tranchen, hk-types
+  lib/hkf/              Ablage, Frontmatter, Schema, Grammatik, Vorlage,
+                        Fassung, Einlesen
+  py                    das Python des Harness
+  tools/                inventar.py — hält Prosa, Schema und
+                        Grundausstattung gegeneinander,
+                        grundausstattung.py — die Vorlage gegen Anhang A
+  templates/            die Grundausstattung für hk-init
+  skills/               die KI-Schicht: hkb und sieben Operationen
+  agents/               die Subagenten, die für einen Skill lesen
+  test/                 die Rauchprobe
+```
+
+**Die Spezifikation liegt im Harness, und zwar im Original.** Ein Harness
+setzt genau eine Fassung um; welche, muss aus seiner Auslieferung hervorgehen
+und nicht aus dem Zustand eines fremden Repositorys. Bis zum 07.09.2026 stand
+sie in `hkf-spec` und hier als Kopie, die ein Skript gleich hielt. Seit HKF
+nicht mehr für Dritte zitierbar sein muss, trägt die Trennung nicht mehr, was
+sie kostet. Was unter `spec/` steht, trägt die Nummer, gegen die `hk-lint`
+prüft, und wird hier fortgeschrieben.
+
+**Der Harness bringt sein eigenes Python mit.** Er nimmt nicht, was im PATH
+steht: Zwei Interpreter mit zwei Fassungen derselben Bibliothek liegen auf
+einer Maschine schnell nebeneinander, und dann hinge das Ergebnis einer
+Prüfung daran, welcher zuerst gefunden wurde. Interpreterfassung und
+Abhängigkeiten sind festgenagelt, die Umgebung liegt außerhalb des
+Repositoriums, und die Werkzeuge finden sie von selbst. Das ist dieselbe
+Trennung wie bei `HKB_PATH`, nur nach unten: Was der Harness zum Laufen
+braucht, gehört ihm und nicht der Maschine.
+
+**Dieses Dokument liegt nicht unter `spec/`.** Dort steht allein HKF: Core,
+Config und das Frontmatter-Schema, die drei Dateien, die auch ohne diesen
+Harness gelten. Die Harness-Spezifikation gehört dem Harness und steht darum
+in seiner Wurzel, neben der `README.md` — die sagt, wie man ihn benutzt,
+dieses Dokument sagt, was er ist.
+
+## 2. Die KI-Schicht liegt obenauf und kann nichts allein
+
+**Kein Skill tut etwas, das kein Script tut.** Ein Skill wählt aus, erklärt,
+fragt zurück und urteilt dort, wo die Spezifikation ein Urteil verlangt — die
+Bedeutungsprüfung (§5.5), die Identität einer ankommenden Notiz (§6.1), die
+Verknüpfung (§5.6). Alles Mechanische gehört ins Script.
+
+Der Grund ist der Satz oben. Sobald eine Operation nur über ein Modell
+erreichbar ist, stimmt „geht auch ohne KI" nicht mehr. Dazu kommt die
+Verlässlichkeit: Ein Programm findet einen gebrochenen Wikilink immer, ein
+Modell meistens.
+
+**Ein Subagent ist Teil dieser Schicht und untersteht derselben Regel.** Er
+liest, wo ein Script nicht lesen kann, also eine PDF, eine Webseite, ein Buch,
+und gibt zurück, was er gefunden hat. Sein Zweck ist der Kontext: Wer eine große
+Quelle im laufenden Gespräch liest, hat sie danach im Rücken, und die Notizen
+aus den letzten Kapiteln werden flacher als die aus den ersten. Ein Agent
+liest in seinem eigenen Kontext und gibt ein belegtes Destillat zurück.
+
+**Ein Subagent darf schreiben, wenn das Schreiben selbst das Urteil ist.**
+Die Tabelle unter „Der Bestand" sagt je Agent, ob er es tut. Wer eine Notiz
+formuliert, faellt in jedem Satz Entscheidungen, die kein Script faellen kann,
+und ein Agent tut das in einem Kontext, in dem nichts anderes liegt. Gemessen
+an einem Durchlauf ueber eine Buchquelle: von Hand geschriebene Notizen trugen
+28 Verstoesse gegen die Schreibregeln, die von einem Agenten geschriebenen
+keinen. Die Grenze verschiebt sich damit, sie faellt nicht weg. Was mechanisch
+zu haben ist, bleibt in `bin/`, und ein Agent, der eine Wikilink-Liste sortiert
+oder eine Property nachtraegt, tut die Arbeit eines Scripts.
+
+Daraus folgt die Reihenfolge beim Bauen: erst `bin/`, dann `agents/` und
+`skills/`.
+
+### Verteilt wird sie als Plugin
+
+Ein Modell findet eine Fähigkeit nur, wo es sucht. Der Harness ist deshalb ein
+Claude-Code-Plugin: `.claude-plugin/plugin.json` an der Wurzel, daneben die
+Bausteine in `skills/`, `agents/`, `commands/` und `bin/`. Das Plugin heißt
+`hkf`, und alles darin trägt diesen Namensraum, also `hkf:hkb-quelle`.
+
+Der Grund ist nicht Bequemlichkeit. Ein Bestand aus einzeln gesetzten Symlinks
+verrottet, weil niemand ihn zählt. In diesem Harness fehlte der Zeiger auf
+`hkb-typseite` von seiner Entstehung an, und die Werkzeuge in `bin/` lagen auf
+keinem Pfad, obwohl jeder Skill sie beim bloßen Namen aufruft. Beides fiel
+niemandem auf, weil es nichts gab, das es prüft. Ein Plugin nimmt seine
+Bausteine vollständig oder gar nicht, und `bin/` liegt danach auf dem Pfad.
+
+Zwei Wege hinein. Der Marktplatz in `.claude-plugin/marketplace.json` dient der
+Verteilung an andere und kopiert in einen Cache. Auf der Maschine, auf der das
+Repository selbst liegt, taugt das nicht, weil eine Änderung dort nie ankäme.
+Dafür gibt es den zweiten Weg: Ein Verzeichnis unter `~/.claude/skills/`, das
+ein Plugin-Manifest trägt, wird als Plugin geladen. Ein Symlink genügt, und das
+Repository bleibt die gelesene Fassung. `hk-install` setzt ihn.
+
+**Was daneben von Hand gesetzt wurde, muss weg.** Ein gleichnamiger Eintrag
+unter `~/.claude/skills/` oder `~/.claude/agents/` verdrängt die Fassung aus
+dem Plugin, ohne es zu sagen. `hk-install` entfernt die Zeiger, die in dieses
+Repository führen, und lässt einen Zeiger auf einen fremden Harness stehen: Ihn
+umzuhängen entzöge dem anderen seine Skills.
+
+### Der Kanon kommt aus einem Hook und nicht aus einer erzeugten Datei
+
+Was in jeder Sitzung gilt, muss in jeder Sitzung dastehen. Ein Skill leistet
+das nicht, er wird geladen, wenn er gebraucht wird. Ein naheliegender Weg ist
+eine Datei im Vault, die das Modell immer liest, und genau den geht ein zweiter
+Harness in diesem Haus: Ein Generator von 1412 Zeilen leitet aus einem Manifest
+eine `CLAUDE.md` ab, dazu zwei Projektionen, zwei Hook-Konfigurationen, die
+Agentenfassungen beider Laufzeiten und die Skill-Zeiger. Acht Artefakte, die
+niemand von Hand anfassen darf, dazu eine Drift-Prüfung als Hook und eine
+zweite im `pre-commit`, damit es auffällt, wenn es doch jemand tut.
+
+Dieser Harness erzeugt nichts davon. Ein `SessionStart`-Hook liest die
+Wurzeldatei, setzt Kanon, Stimme und die `hint`-Notizen zusammen und gibt den
+Text als Sitzungskontext zurück. **In der Ablage entsteht dabei nichts.** Damit
+fallen die Erzeugnisse weg, die Drift-Prüfungen, die sie bewachen, und die
+Manifestschicht, aus der sie stammen. §4 bleibt unangetastet, und ein fremder
+Vault lässt sich bedienen, ohne ihn vorher umzubauen.
+
+Vier Schichten, in dieser Reihenfolge, und die spätere geht der früheren vor:
+
+| | |
+|---|---|
+| `core/` | wer hier arbeitet, wie zusammengearbeitet wird, Sprache und Schreibregeln |
+| `profiles/voices/<voice>.md` | die Stimme, die die Wurzeldatei nennt |
+| `Hints/` in der Ablage | was **diese** Ablage für sich festgelegt hat (§7) |
+| die Lage | welche Ablage aktiv ist und aus welcher Stufe ihr Pfad stammt |
+
+Nur die erste Schicht ist personenbezogen, und zwar in genau einer Datei:
+`core/identitaet.md`. Wer den Harness übernimmt, ersetzt sie und lässt den Rest
+stehen.
+
+Ein zweiter Hook auf `Write` und `Edit` hält an, was gegen die harten
+Schreibregeln verstößt. Er untersteht derselben Regel wie ein Skill: Er prüft
+mechanische Invarianten und schreibt nichts. Warnungen halten niemanden auf,
+außerhalb einer Ablage tut er nichts, und ein Prüfer, der nicht laufen kann,
+ist kein Regelverstoß.
+
+## 3. Die Wissensbasis wird über eine Umgebungsvariable gefunden
+
+Vorbild ist der Skill
+[`llm-wiki`](file:///Users/arminpfarr/.hermes/skills/research/llm-wiki/SKILL.md),
+der keinen Pfad nennt, sondern eine Variable:
+
+```bash
+HKB="${HKB_PATH:-$HOME/hkb}"
+```
+
+| | |
+|---|---|
+| Variable | `HKB_PATH` |
+| Vorgabe | `~/hkb`, wenn nicht gesetzt |
+| Ort der Definition | Umgebung des Aufrufers, `~/.claude/settings.json` unter `env`, oder eine `.env` |
+| Prüfung | `$HKB/hkb.md` lesen und die Property `hkf` prüfen. Fehlt die Datei, ist der Pfad keine Ablage — abbrechen, nicht raten. |
+
+- **Kein Werkzeug schreibt einen Pfad fest.** Nicht in Beispielen, nicht in
+  Prüfroutinen.
+- **Das Arbeitsverzeichnis ist nicht die Ablage.** Wer `.` annimmt, schreibt
+  irgendwann in ein fremdes Verzeichnis.
+- **Mehrere Wissensbasen sind der Normalfall.** Die Reihenfolge ist:
+  Argument auf der Kommandozeile → `HKB_PATH` → Vorgabe.
+
+### Die Inbox nach derselben Ordnung
+
+Was eingelesen werden soll, wartet in einem Verzeichnis außerhalb der Ablage:
+Web-Clippings, Scans, `.md`-Dateien, die nur auf ein Original zeigen.
+`hk-ingest` findet es, statt es übergeben zu bekommen.
+
+| | |
+|---|---|
+| Variable | `HKF_INBOX` |
+| Vorgabe | `~/hkf-inbox`, wenn nicht gesetzt |
+| Reihenfolge | Argument (`--inbox`) → `HKF_INBOX` → Vorgabe |
+
+**Die Inbox liegt nie in der Ablage.** Was unter deren Wurzelverzeichnis
+liegt, gehört nach Core §3.2 dazu und würde von `hk-lint` geprüft; ein
+Verzeichnis mit rohen PDFs bestünde diese Prüfung nicht — und soll es auch
+nicht. Aus demselben Grund steht ihr Pfad nicht in `hkb.md`: Anhang A.1 zählt
+die Properties der Wurzeldatei abschließend auf, und ein Pfad dort gälte auf
+einer Maschine und bräche, sobald der Vault umzieht.
+
+**Nach dem Einlesen wird verschoben, nie gelöscht:**
+`<inbox>/erledigt/<bundle-id>/`.
+
+## 4. Keine Werkzeugdatei liegt in der Wissensbasis
+
+`HenniHKF-Core` führte einmal `AGENTS.md` und `CLAUDE.md`. Beide gehören dem
+Werkzeug, nicht der Ablage, und beide gehen denselben Weg.
+
+`CLAUDE.md` ist der klarere Fall: ein Satz, der auf `AGENTS.md` zeigt, benannt
+nach genau einem Produkt. Die Spezifikation kennt die Datei nicht — kein
+Vorkommen in Core, kein Wort in §7.2 —, aber `make-hkb-template.py` kopiert
+sie in jede neu erzeugte Wissensbasis.
+
+`AGENTS.md` war der schwierigere Fall, weil Core sie in einem eigenen
+Abschnitt „Einstieg für Werkzeuge" empfahl. **Der Abschnitt ist gestrichen**,
+und die nachfolgenden Nummern sind nachgerückt: aus §5.5 bis §5.8 wurde §5.4
+bis §5.7.
+
+Die Spezifikation sagte dort schon fast alles selbst: Die Datei „ist keine
+Notiz und gehört nicht zur Ablage", sie wird „weder geprüft noch
+ausgeliefert", ihr Inhalt ist „zum größten Teil abgeleitet". Zuerst zog der
+Harness daraus den Schluss, sie ins Arbeitsverzeichnis zu erzeugen und über
+die `.gitignore` draußen zu halten.
+
+**Auch das ist gestrichen.** Der Grund liegt in der KI-Schicht: Seit die
+Skills unter `skills/` liegen, stehen die sieben Regeln dort — einmal, beim
+Werkzeug, versioniert und geprüft. Eine erzeugte Kopie daneben sagte
+dasselbe noch einmal, veraltete für sich und trug an eigenem Inhalt nur die
+Typtabelle, die ohnehin in `hkb.md` steht. Was ein Modell wissen muss, bringt
+es mit; was diese eine Wissensbasis auszeichnet, steht in ihr.
+
+Der Einwand, den der gestrichene Core-Abschnitt vorbrachte, war: „Ein Modell,
+das einen Vault öffnet, sieht zunächst nur Markdown-Dateien." Das stimmt —
+aber ein Modell öffnet keinen Vault allein. Es kommt mit einem Harness, und
+der bringt die Spezifikation mit. Wer ohne Harness kommt, findet den Einstieg
+im Format selbst: `hkb.md` trägt `spec` mit der URL.
+
+Was für **diese** Wissensbasis gilt, gehört seitdem nicht in eine Datei
+daneben, sondern hinein. HKF Config führt dafür den Typ `hint`: Jede Festlegung
+ist eine eigene Notiz unter `Hints/`, mit `applies_to` auf die Typdefinition,
+für die sie gilt. Sie wird geprüft, verlinkt und mit der Ablage versioniert —
+alles, was eine erzeugte und ignorierte `AGENTS.md` nie war.
+
+Wer trotzdem eine Datei daneben legen will, legt sie von Hand an. Sie gehört
+dann ihm, nicht dem Werkzeug: Kein Werkzeug überschreibt sie, keine
+`.gitignore` hält sie zurück.
+
+Aus demselben Grund ist **§7.2 Punkt 9 entfallen**. Dort hing die Konformität
+einer HKB daran, dass `hk-import`, `hk-export` und `hk-lint` „verfügbar sind"
+— eine Eigenschaft der Umgebung, nicht der Ablage. Eine HKB in einem
+Zip-Archiv hat keine Werkzeuge und ist trotzdem korrekt aufgebaut.
+
+Was daraus folgt:
+
+- `CLAUDE.md` und `AGENTS.md` aus `HenniHKF-Core` entfernen.
+- Die Kopierzeile für `CLAUDE.md` und die Erzeugung von `AGENTS.md` aus
+  `make-hkb-template.py` und aus `hk-init` herausnehmen; `templates/AGENTS.md`
+  entfällt.
+- Den Abschnitt „Einstieg für Werkzeuge" in `HenniHKF-Lab/README.md`
+  nachziehen; er beschreibt beide Dateien noch als Teil der Beispiel-HKB.
+
+### Der Vorlagenordner ist die Ausnahme
+
+Eine Obsidian-Vorlage kann nicht draußen bleiben. Das Templates-Plugin
+sucht sie im Vault, und der Vault ist die Wissensbasis. Sie ist damit die
+eine Werkzeugdatei, die drinnen liegt — und der Grund, aus dem **Core
+§3.2.3** ein drittes Verzeichnis unter `config_base` zulässt, ohne es zur
+Ablage zu rechnen.
+
+`HenniHKF-Core` führt ihn als `90-System/Templates/`: ein Template je
+registriertem Typ, benannt `Template <Typ>.md`. Jedes trägt den `type` und
+die Properties seiner Typdefinition, leer. Ausgefüllt wird, was bekannt ist;
+`hk-lint --fix` nimmt heraus, was leer geblieben ist (Core §6.3). Die
+Zeitangaben stehen als `{{date}}` und **müssen in Anführungszeichen**: Ohne
+sie liest der YAML-Parser `{{…}}` als Abbildung, und die Datei hat kein
+Frontmatter mehr.
+
+Die Werkzeuge übergehen den Ordner an vier Stellen — den beiden Durchgängen
+von `hk-lint`, dem Sammeln des Exports und dem Bestand des Imports. Eine
+Regel, einmal geschrieben: `ablage.konfigfremd`. Die einzige Ausnahme ist das
+Umschreiben der Verweise beim Umbenennen eines Typverzeichnisses; es läuft
+auch über die Vorlagen, damit ein Verweis darin nicht schal wird.
+
+Was daraus folgt:
+
+- `hk-init` liefert die Templates **nicht** mit. Die Grundausstattung ist die
+  Menge der Typdefinitionen und Property-Typen ohne `bundles` (Core §5.3) —
+  Vorlagen gehören nicht dazu, und welche Typen eine Wissensbasis am Ende
+  führt, weiß sie besser als der Generator. Ob `hk-init` sie aus den
+  registrierten Typen erzeugen sollte, ist offen.
+- `hk-lint` meldet ein fremdes Verzeichnis unter `config_base` nicht. Das ist
+  gewollt und in Core §3.2.3 als Preis benannt.
+
+### Die Typseiten liegen daneben und gehören dazu
+
+`90-System/Types/` sieht aus wie der Vorlagenordner und ist das Gegenteil.
+Eine Typseite ist zwar auch keine Notiz — sie trägt kein `type`, sondern
+`definition` —, aber **auf sie zeigt etwas**: jede Notiz, die `type` in der
+Linkform führt (Core §3.3). Ein Verweis auf eine Datei außerhalb der Ablage
+ließe sich nicht auflösen, also gehört `Types/` hinein. Auf eine Vorlage
+zeigt nichts, also bleibt sie draußen. Das ist der ganze Unterschied, und er
+entscheidet beide Fälle.
+
+`HenniHKF-Core` führt je Typ eine Typseite und eine Base:
+
+```text
+90-System/Types/Type Person.md     definition → Typedefs/person, aliases
+90-System/Bases/Person.base        Tabelle aller Notizen dieses Typs
+```
+
+`Bases/` ist Obsidian und nicht HKF: `.base`-Dateien sind kein Markdown,
+tragen kein Frontmatter und kommen in keiner Prüfung vor. Der Ordner liegt
+unter `config_base` und damit — wie der Vorlagenordner — außerhalb der
+Ablage.
+
+**Der Typname steht nicht im Dateinamen der Typseite, sondern in ihrer
+`definition`.** Das war die Entscheidung, an der alles Übrige hängt: Ein
+Werkzeug, das `Type Person` zerlegte, um auf `person` zu kommen, wäre an eine
+Benennungskonvention gebunden, die Core nicht vorschreiben will. So liest es
+einen Verweis, den es ohnehin auflösen kann, und die Wissensbasis nennt ihre
+Typseiten, wie sie will.
+
+**Die Linkform reist nicht mit** (Core §4.2). `hk-export` schreibt den
+Typnamen als Text zurück, `hk-import` macht daraus wieder einen Verweis, wenn
+die aufnehmende Ablage eine Typseite für den Typ führt — auch in der
+Bundle-Notiz und in einer vorläufigen Typdefinition, die der Import selbst
+anlegt. Beides läuft über `importieren._typwert` und `ablage.typseiten`; im
+Prüfmodul liest `Bestand` die Typseiten mit allem anderen ein und löst `type`
+in einem zweiten Durchgang auf, weil eine Notiz vor ihrer Typseite gelesen
+sein kann.
+
+Was daraus folgt:
+
+- Der Rundlauf ist verlustfrei und geprüft: eine HKB ganz in der Linkform,
+  Export in ein Bundle mit Textform, Import in eine HKB mit Typseiten ergibt
+  wieder die Linkform, Import in eine ohne ergibt Text.
+- `hk-init` legt kein `Types/` an. Eine frische Wissensbasis führt `type` als
+  Text; wer Typseiten will, ruft `hk-types`, und der Import zieht danach von
+  allein nach.
+- `hk-types` legt sie an — je Typ eine Typseite und eine Base, wiederholbar,
+  und mit `--umstellen` bringt es `type` in allen vorhandenen Notizen auf die
+  Linkform. Der Skill [`hkb-typseite`](skills/hkb-typseite/SKILL.md) liegt
+  darüber und entscheidet, was das Skript nicht entscheidet: ob die Ablage
+  die Linkform überhaupt will, wie die Typseiten heißen und was in ihrem Body
+  steht.
+
+## 5. Jede Wissensbasis ist ein Git-Repository
+
+Eine Wissensbasis ohne Geschichte ist ein Verzeichnis, in dem gearbeitet wird,
+ohne dass jemand nachsehen kann. `hk-init` legt deshalb nicht nur die
+Grundausstattung an, sondern auch das Repository:
+
+1. `git init`
+2. `.gitignore` schreiben
+3. alles hinzufügen, ein erster Commit: `hkb: Grundausstattung`
+
+`make-hkb-template.py` schreibt die `.gitignore` heute schon, ruft aber kein
+`git init` auf. Das ist die Lücke.
+
+```gitignore
+# Sitzungsprotokolle und Suchindex der Werkzeugumgebung
+.memsearch/
+
+# persönliches Fensterlayout von Obsidian
+.obsidian/workspace.json
+
+# macOS
+.DS_Store
+```
+
+Der Rest von `.obsidian/` **bleibt versioniert**: Wikilinks, vollständige
+Pfade, die registrierten Property-Typen. Das ist Teil des Formats, nicht
+Geschmack — ein Vault ohne diese Konfiguration zeigt Datum, Zahl und Liste
+falsch an. Es ist zugleich der Grund, warum die Trennung nicht am Wort
+„Obsidian" verläuft: Die Vault-Konfiguration gehört der Ablage, die Anleitung
+für Modelle dem Werkzeug.
+
+Für die Werkzeuge gilt: **Commit nach jedem abgeschlossenen Vorgang**, nicht
+nach jeder Datei — ein Import ist ein Commit, ein `hk-lint --fix` ist ein
+Commit. **Nie blind `git add -A`.** **Kein Push ohne Auftrag.**
+
+## 6. Obsidian ohne Bildschirm
+
+Läuft der Harness auf einer Maschine ohne Oberfläche — Server, Cron, Agent im
+Hintergrund —, gibt es keine Obsidian-App, die den Vault abgleicht.
+`obsidian-headless` erledigt das über Obsidian Sync ohne GUI.
+
+```bash
+# Node.js 22+
+npm install -g obsidian-headless
+
+ob login --email <adresse> --password '<passwort>'
+ob sync-create-remote --name "Meine Wissensbasis"
+
+cd "$HKB_PATH"
+ob sync-setup --vault "<vault-id>"
+ob sync
+```
+
+Dauerhaft mit `ob sync --continuous`, unter systemd oder als LaunchAgent, mit
+dem Arbeitsverzeichnis auf `$HKB_PATH`.
+
+Das ist **Zubehör, keine Voraussetzung**: Es betrifft die Maschine, auf der
+der Harness läuft, nicht das Format. Zwei Dinge dabei — `.git/` gehört nicht
+in den Sync, und vor einem größeren Schreibvorgang einmal `ob sync`, danach
+noch einmal, sonst entstehen Konflikte, die niemand gesehen hat.
+
+## 7. Die Kurationspolitik ist Inhalt
+
+Ken Moriwakis minimales LLM-Wiki
+([Medium, 24. Mai 2026](https://medium.com/@ken.moriwaki/building-a-minimal-llm-wiki-19a2fb0e9ac7))
+führt eine `schema.md` — die Datei, die das Modell liest, bevor es schreibt.
+Sie erfüllt vier Aufgaben auf einmal:
+
+| Was in `schema.md` steht | Wo es in HKF steht |
+|---|---|
+| Gegenstand der Wissensbasis | `name` in `hkb.md` |
+| „Concept pages live in `wiki/concepts/`" | der Abschnitt `# Typen` in `hkb.md`, normativ die `Typedefs/` |
+| Frontmatter-Block, Tag-Taxonomie | Property-Tabelle des Typs, `Proptypes/`, Anhang B.4 |
+| Konventionen für Verweise und Zeitangaben | die Spezifikation |
+| **wann eine Notiz entsteht, was bei Widerspruch geschieht** | **nirgends** |
+
+Die ersten vier stehen in HKF als Tabellen da und nicht als Fließtext, also
+prüft `hk-lint` sie. Moriwakis Prototyp muss dafür ein Modell ein Audit
+schreiben lassen — und der Artikel hält selbst fest, dass dieses Audit
+Widersprüche übersehen, übertreiben oder erfinden kann. Genau der Unterschied,
+der in §2 die Reihenfolge bestimmt.
+
+Die letzte Zeile ist die Lücke, und sie gehört nicht in die Spezifikation:
+Core beschreibt das Format, nicht den Gebrauch.
+
+Sie gehört aber auch nicht in den Harness. Wann in **dieser** Wissensbasis
+etwas eine eigene Notiz wert ist, welche Quellen als belastbar gelten, wie
+weit zusammengefasst werden darf — das gehört zu dieser einen Wissensbasis und
+zieht mit ihr um. Also **eine gewöhnliche Notiz in der Ablage**, vom Typ
+`hint` aus HKF Config. Sie ist dann Inhalt wie jeder andere — versioniert,
+verlinkbar, prüfbar — und sie besteht die erste Probe: Ein Mensch, der die
+Wissensbasis ohne KI führt, hat denselben Nutzen davon.
+
+Ursprünglich stand hier `specification`. Das war der falsche Typ: Eine
+Spezifikation kommt von außen und wird eingehalten, ein Hinweis wird selbst
+gefasst. Seit es `hint` gibt, ist er der genauere.
+
+Der Harness liest sie, wenn es sie gibt. Was er selbst mitbringt, ist die
+Politik, die für **jede** HKB gilt: der Ablauf eines Ingests, wann committet
+wird, wann zurückgefragt statt entschieden wird, und das Verbot der glatten
+Zusammenfassung. Moriwaki nennt das Risiko `over-synthesis` und hält es für
+gefährlicher als Halluzination — ein Modell macht aus Uneinigkeit einen
+Konsens, und eine saubere Notiz strahlt Autorität aus, die ihr Inhalt nicht
+deckt.
+
+## Der Bestand
+
+Diese Tabellen sind normativ und werden von `test/smoke.py` gegen das
+Verzeichnis geprueft. Ein Skill, ein Agent oder ein Werkzeug, das hier
+fehlt oder das es nicht gibt, ist ein Fehler und keine Ungenauigkeit.
+
+**Die Namen sagen, was etwas ist.** `hk-` ist ein ausfuehrbares Werkzeug
+in `bin/`. `hkb-` ist ein Skill, der an einer Wissensbasis arbeitet. Ein
+Skill ohne Praefix arbeitet an etwas anderem. Agenten tragen Vornamen.
+Der Unterschied zwischen `hk-` und `hkb-` ist ein einziger Buchstabe und
+traegt trotzdem die ganze Unterscheidung zwischen Programm und Prompt.
+
+### Skills
+
+| Skill | Was er tut |
+|---|---|
+| `artefakt-pruefen` | Ein einzelnes Artefakt gegen Mechanik, Stimme und Kanon prüfen und die Befunde nach Schwere übergeben, ohne den Text selbst zu ändern |
+| `bild` | Ein einzelnes Bild über den Magnific-Connector erzeugen und in der Ablage ablegen, mit Vorgaben für Modell, Seitenverhältnis, Format, Zielordner, Name, Stil, Sprache und Referenzbild |
+| `bild-callout` | In eine Notiz an den passenden Stellen ai-image-Callouts schreiben, mit englischem Szenen-Prompt und deutschem Alt-Text, parametrisiert mit note, style, project und character |
+| `bild-cover` | Ein Hochformat-Coverbild für eine Publikation erzeugen, mit Titel, Autor und Verlag im Bild, und es dort ablegen, wo hk-epub es findet |
+| `bild-notiz` | Für alle ai-image-Callouts einer Notiz die Bilder erzeugen, notiz-eigen ablegen und einbetten |
+| `bild-sidecars` | Für alle Bilder eines Verzeichnisses die Metadaten-JSONs daneben erzeugen (Name, Alt-Text, Beschreibung, Tags), ohne die Bilder in diesen Kontext zu holen |
+| `git-sicherheit` | Sicher mit Git in einer Ablage arbeiten: den fremden Arbeitsbaum respektieren, nichts Destruktives ohne Auftrag, Inhalt und Werkzeug getrennt committen |
+| `hkb` | Grundlagen für die Arbeit an einer Wissensbasis nach HKF Core: wo sie liegt, welche Regeln gelten, welche Werkzeuge es gibt |
+| `hkb-erzaehlung` | Eine Wissensbasis führen, die Erzählprosa enthält: Figuren, Schauplätze, Motive und Requisiten als Kanon, den Zeitraum als Kontinuität, die Beurteilung neben dem Text |
+| `hkb-export` | Ein Bundle aus einer Wissensbasis herausschreiben und die Befunde beurteilen, die dabei anfallen — vorläufige Typen, Verweise aus der Lieferung hinaus, Mediendateien ohne Verweis |
+| `hkb-hennibock` | Eine Notiz aus der Wissensbasis an eine HenniBock-Instanz übertragen und die Kapitelkette einer Publikation führen |
+| `hkb-hinweis` | Festhalten, was für diese eine Wissensbasis gilt: wann eine Notiz entsteht, welche Quellen zählen, wie weit zusammengefasst wird |
+| `hkb-import` | Ein HKF-Bundle in eine Wissensbasis übernehmen und dabei die Urteile fällen, die hk-import verweigert — die Bedeutungsprüfung zweier gleichnamiger Typen und die Identität einer ankommenden Notiz |
+| `hkb-lint` | Eine Wissensbasis oder eine Lieferung gegen HKF Core prüfen, die erlaubten Korrekturen anwenden und die Befunde beurteilen, die kein Werkzeug beheben darf |
+| `hkb-notiz` | Eine Notiz in einer Wissensbasis nach HKF Core anlegen oder fortschreiben — Typ wählen, nur zugesicherte Properties setzen, Verweise qualifizieren, Zeitangaben führen |
+| `hkb-publikation` | Aus Texten einer Wissensbasis eine Publikation bauen: den Container anlegen, Texte in eine Lesereihenfolge bringen, den Stand prüfen |
+| `hkb-quelle` | Aus einer Quelle eine Lieferung machen — Quellennotiz mit Zitationsangaben und Zusammenfassung, dazu die Notizen, die aus ihr entstehen |
+| `hkb-suche` | Eine Frage gegen eine Wissensbasis beantworten: die Notizen finden, sie lesen, die Antwort aus ihnen bilden und mit Verweisen belegen |
+| `hkb-text` | Einen deutschsprachigen Text prüfen und heben: die harten Regeln messen, die weichen Muster beurteilen, die Stimme und den Kanon der Ablage prüfen |
+| `hkb-typ` | Einen eigenen Typ in einer Wissensbasis nach HKF Core anlegen oder seine Property-Tabelle erweitern |
+| `hkb-typseite` | Typseiten und Bases für die Typen einer Wissensbasis anlegen, damit `type` als Verweis geschrieben werden kann statt als Wort |
+| `hkb-wikidata` | Die `wikidata_id` einer Notiz bestimmen: Kandidaten holen, den richtigen wählen, eintragen |
+| `humanize` | Prüft deutschsprachigen Text auf KI-Schreibmuster und überarbeitet die betroffenen Stellen, ohne Substanz oder Belege zu verlieren |
+| `memory` | Eine Erkenntnis festhalten, die über die Sitzung hinaus gelten soll, und den Index nachziehen |
+| `skill-bauen` | Einen neuen Skill für das hkf-Plugin anlegen: Ordner, Frontmatter, Namensregel und die Frage, was ein Skill überhaupt tun darf |
+| `vault-pflege` | Einen Obsidian-Vault pflegen, ohne ihn zu beschädigen: Frontmatter, Links, Anhänge und die Einstellungen unter .obsidian |
+
+### Agenten
+
+| Agent | Was er tut | Schreibt |
+|---|---|---|
+| `astrid` | Einen fertigen Sachtext lektorieren: Mechanik messen, Frontmatter prüfen, Stimme und Kanon beurteilen, kürzen vor umschreiben | ja |
+| `bebildern` | Für genau einen ai-image-Callout das Bild erzeugen, die Varianten ansehen, die beste ablegen und den Alt-Text gegen das Ergebnis abgleichen | ja |
+| `bild-sidecar` | Schreibt henni-image-Sidecar-JSONs für eine Liste von Bilddateien | ja |
+| `doris` | Den Bestand einer erzählenden Wissensbasis als Ganzes lesen und eine Agenda schreiben: was über viele Texte hinweg trägt, was sich abnutzt, wo der Kanon auseinanderläuft | ja |
+| `marlene` | Die Erstfassung eines längeren Sachtextes schreiben: eine Wissensnotiz, eine Quellenzusammenfassung, ein Konzept, ein Vergleich | ja |
+| `wilma` | Eine Quelle oder eine Tranche daraus lesen und als belegtes Destillat zurückgeben: Zitationsangaben, Aufbau, Kernaussagen mit Fundstelle, wörtliche Zitate und die Kandidaten für neue Notizen | nein |
+
+### Werkzeuge
+
+| Werkzeug | Was es tut |
+|---|---|
+| `hk-ablage` | Welche Ablage bearbeitet wird |
+| `hk-bilder` | Bilddateien ohne Sidecar sammeln und als Batch-Dateien ablegen |
+| `hk-buch` | Aus einer Publikation ein Manuskript schreiben |
+| `hk-epub` | Aus einem Manuskript ein EPUB bauen |
+| `hk-erwaehnungen` | Unverlinkte Erwaehnungen einer Notiz zu Verweisen machen |
+| `hk-export` | Ein Bundle aus der Wissensbasis herausschreiben (Core §6.2) |
+| `hk-export-wiki` | Die Ablage als Lieferung fuer HenniWiki herausschreiben |
+| `hk-import` | Ein Bundle in die Wissensbasis übernehmen (Core §6.1) |
+| `hk-ingest` | Eine Quelle in eine Lieferung einlesen |
+| `hk-init` | Eine leere Wissensbasis anlegen |
+| `hk-install` | Den Harness dort einhaengen, wo ein Modell ihn findet |
+| `hk-kapitel` | Welches Kapitel als naechstes erscheint |
+| `hk-kontext` | Was in dieser Ablage gilt |
+| `hk-kontinuitaet` | Was in einem Erzaehlbestand auseinanderlaeuft |
+| `hk-lint` | Prueft eine Wissensbasis gegen HKF Core (§6.3) |
+| `hk-obsidian` | Die schnelle Auskunft aus der laufenden App |
+| `hk-publikation` | Die Lesereihenfolge einer Publikation fuehren |
+| `hk-publish` | Eine Notiz an eine HenniBock-Instanz uebertragen |
+| `hk-suche` | Notizen einer Ablage finden |
+| `hk-text` | Deutschsprachige Texte gegen die Schreibregeln pruefen |
+| `hk-tranchen` | Die Tranchen einer grossen Quelle fuehren |
+| `hk-types` | Typseiten und Bases fuer die Typen einer Wissensbasis |
+| `hk-verweise` | Kurze Wikilinks zu qualifizierten machen (§3.6) |
+| `hk-wikidata` | Kandidaten fuer die `wikidata_id` einer Notiz vorlegen |
+
+## Offen
+
+- **Name und Ort des Repositorys** — `hkf-harness` neben `hkf-kb-template`,
+  und was aus `HenniHKF-Lab` wird. `hkf-spec` und `hkf-base` sind am
+  07.09.2026 gelöscht worden; die Spezifikation liegt seither unter `spec/`,
+  das Vokabular seit Config 1.0 in der Grundausstattung.
+- **`HKF_BUNDLE_PATH`** — erledigt: Eine Lieferung bekommt ihren Pfad im
+  Aufruf. `HKF_INBOX` deckt den einen Fall ab, in dem ein Vorgabeverzeichnis
+  trägt — dort wartet etwas, das noch keinen Namen hat.

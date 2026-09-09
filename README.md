@@ -19,7 +19,7 @@ Wissensbasis liegt etwas, was hierher gehört. Zwei Proben:
 
 
 Was ein Harness ist und wo die Grenze zur Wissensbasis verläuft, steht in
-[`HKF-Harness-V1.0.md`](HKF-Harness-V1.0.md). Diese Datei sagt, wie man ihn
+[`HKF-Harness-V1.0.md`](spec/HKF-Harness-V1.0.md). Diese Datei sagt, wie man ihn
 benutzt; jene sagt, was er ist.
 ## Wo der Rest liegt
 
@@ -243,7 +243,7 @@ nicht.
 ## Was wo liegt
 
 ```
-spec/        HKF Core und Config: die Spezifikation selbst, siehe spec/README.md
+spec/        Core, Config und Harness: die Spezifikation selbst, siehe spec/README.md
 lib/hkf/     ablage, frontmatter, schema, grammatik, pruefen, korrigieren,
              importieren, exportieren, einlesen, notiz, vorlage, fassung,
              obsidian (die Obsidian-CLI, mit ihren Eigenheiten an einer Stelle)

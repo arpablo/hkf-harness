@@ -2638,6 +2638,13 @@ Was an diesem Tag anfiel.
         r = lauf(sys.executable, os.path.join(WURZEL, "tools", "inventar.py"))
         probe("Config, Schema und templates/hkb/ nennen dasselbe",
               r.returncode == 0, r.stdout + r.stderr)
+
+        # Dieselbe Sorge eine Ebene hoeher: Die KI-Schicht war nirgends
+        # aufgezaehlt, und wer im Text eines Skills auf `hk-ingest` stiess,
+        # konnte nicht entscheiden, ob das ein Werkzeug oder ein Skill ist.
+        r = lauf(sys.executable, os.path.join(WURZEL, "tools", "bestand.py"))
+        probe("Der Harness nennt die Skills, Agenten und Werkzeuge, die es gibt",
+              r.returncode == 0, r.stdout + r.stderr)
     finally:
         shutil.rmtree(ziel, ignore_errors=True)
 
