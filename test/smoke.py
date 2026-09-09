@@ -2236,6 +2236,23 @@ Verweis auf [[Notes/gibt-es-nicht|etwas]].
               "Ein Absatz, der umbrochen ist, mit einem" in g, g)
         probe("und der Verweis löst wieder auf",
               "|Verweis über den Umbruch]]" in g, g)
+
+        # §5.6: eine Adresse steht unter `# Verbindungen` wie eine Notiz.
+        vorher_v = io.open(n, encoding="utf-8").read()
+        io.open(n, "w", encoding="utf-8").write(
+            vorher_v.rstrip("\n") +
+            "\n\n# Verbindungen\n\n- [Grace Hopper in der Wikipedia]"
+            "(https://de.wikipedia.org/wiki/Grace_Hopper) — der Artikel zum "
+            "selben Gegenstand\n")
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        probe("eine Adresse unter `# Verbindungen` ist kein Befund",
+              "weder qualifizierter Wikilink noch Adresse" not in r.stdout, r.stdout)
+        io.open(n, "w", encoding="utf-8").write(
+            vorher_v.rstrip("\n") + "\n\n# Verbindungen\n\n- kein Verweis — Grund\n")
+        r = lauf(os.path.join(BIN, "hk-lint"), ziel)
+        probe("eine Zeile ohne Verweis dagegen schon",
+              "weder qualifizierter Wikilink noch Adresse" in r.stdout, r.stdout)
+        io.open(n, "w", encoding="utf-8").write(vorher_v)
         r = lauf(os.path.join(BIN, "hk-lint"), "--strict", ziel)
         probe("die Ablage ist danach ohne Befund",
               "Hinweise                   0" in r.stdout, r.stdout)

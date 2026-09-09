@@ -1924,11 +1924,19 @@ eigenen Abschnitt:
 - [[Organisations/analytical-society|Analytical Society]] — beide Notizen nennen einander
 - [[Persons/charles-babbage|Charles Babbage]] — im Body dieser Notiz genannt
 - [[Places/london|London]] — mit der Lieferung biografie-2026 als Wirkungsort gekommen
+- [Ada Lovelace in der Wikipedia](https://de.wikipedia.org/wiki/Ada_Lovelace) — der Artikel zum selben Gegenstand
 ```
 
 - Der Abschnitt heißt `# Verbindungen` und ist der **letzte** der Notiz.
-- Jede Zeile ist ein Listenpunkt aus einem qualifizierten Wikilink nach §3.6,
-  dann ` — `, dann **der Grund**: ein Halbsatz, warum der Verweis dasteht.
+- Jede Zeile ist ein Listenpunkt aus einem Verweis, dann ` — `, dann **der
+  Grund**: ein Halbsatz, warum der Verweis dasteht. Der Verweis ist entweder
+  ein qualifizierter Wikilink nach §3.6 oder ein Markdown-Link auf eine
+  Adresse, `[Text](https://…)`.
+- **Eine Adresse gehört hierher wie eine Notiz.** Was eine Wissensbasis mit
+  der Welt verbindet, ist nicht weniger eine Verbindung als das, was sie mit
+  sich selbst verbindet, und ein Leser sucht beides an derselben Stelle. Die
+  Adresse steht zusätzlich in `related`, das sie als `hkf-link-or-url-list`
+  ohnehin aufnimmt.
 - **Der Grund ist Pflicht.** Ohne ihn wäre der Abschnitt nur eine zweite,
   schlechtere Backlink-Ansicht — die hat Obsidian schon. Mit ihm sieht der
   nächste Leser, Mensch oder Modell, ob der Verweis noch trägt, ohne beide

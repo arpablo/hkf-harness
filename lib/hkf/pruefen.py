@@ -633,17 +633,24 @@ def _siehe_auch(b, befunde):
         for zeile in teil.strip("\n").splitlines():
             if not zeile.strip():
                 continue
-            m = re.match(r"^- (\[\[([^\]|\\]+)(?:\|([^\]]*))?\]\])(.*)$", zeile)
+            m = re.match(r"^- (\[\[([^\]|\\]+)(?:\|([^\]]*))?\]\]"
+                         r"|\[([^\]]+)\]\((https?://[^)\s]+)\))(.*)$", zeile)
             if not m:
-                befunde.append(Befund(e["rel"], "Zeile unter `# Verbindungen` ist kein "
-                                      "qualifizierter Wikilink: %r" % zeile.strip()))
+                befunde.append(Befund(e["rel"], "Zeile unter `# Verbindungen` ist weder "
+                                      "qualifizierter Wikilink noch Adresse: %r"
+                                      % zeile.strip()))
                 continue
-            link, ziel, alias, rest = m.group(1), m.group(2), m.group(3), m.group(4)
+            link, rest = m.group(1), m.group(6)
+            # Eine Adresse traegt ihren Text als Anzeige und die URL als Ziel.
+            adresse = m.group(5) is not None
+            ziel = m.group(5) if adresse else m.group(2)
+            alias = m.group(4) if adresse else m.group(3)
             if not rest.startswith(" — ") or not rest[3:].strip():
                 befunde.append(Befund(e["rel"], "%s steht ohne Grund unter "
                                       "`# Verbindungen` (§5.6)." % link))
             aliase.append((alias or ziel).lower())
-            ziele.append((ziel, link))
+            if not adresse:
+                ziele.append((ziel, link))
             if any(ziel in x for x in abgelehnt):
                 befunde.append(Befund(e["rel"], "%s steht zugleich unter `# Siehe "
                                       "auch` und in `rejected_links` (§5.6)." % link))

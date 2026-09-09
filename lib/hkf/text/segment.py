@@ -67,7 +67,7 @@ BACKTICK_RUN = re.compile(r"`+")
 EM_DASH = "\u2014"
 # Der Trenner steht nach dem Wikilink und nur einmal je Eintrag (§5.6). Was
 # dahinter kommt, ist der Grund, und der ist Prosa.
-TRENNER = re.compile(r"\]\]\s*(\u2014)")
+TRENNER = re.compile(r"(?:\]\]|\))\s*(\u2014)")
 UEBERSCHRIFT = re.compile(r"^#{1,6}\s+\S")
 SIEHE_AUCH = re.compile(r"^#{1,6}\s+Verbindungen\s*$")
 TABELLENZEILE = re.compile(r"^\s*\|")
@@ -162,8 +162,9 @@ def _alt_wert(chars: list[str], text: str, body: int, content: str) -> None:
 def _trenner(chars: list[str], body: int, content: str) -> None:
     """Der Trenner in `# Verbindungen` (§5.6), und nur er.
 
-    Er folgt dem Wikilink und kommt je Eintrag einmal vor. Der Grund dahinter
-    ist deutsche Prosa und bleibt geprüft.
+    Er folgt dem Verweis und kommt je Eintrag einmal vor. Der Verweis ist ein
+    Wikilink oder eine Adresse (§5.6), endet also auf `]]` oder auf `)`. Der
+    Grund dahinter ist deutsche Prosa und bleibt geprüft.
     """
     treffer = TRENNER.search(content)
     if treffer:
