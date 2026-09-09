@@ -96,10 +96,20 @@ Ein Eingriff endet nicht am Text. Danach:
 
 ## Die Rollen
 
-`marlene` schreibt die Erstfassung, `astrid` lektoriert sie, `doris` liest den
-Bestand als Ganzes und schreibt eine Agenda. Nur `doris` sieht, was über viele
-Texte hinweg passiert, und sie schreibt genau eine Datei. Das ist der Grund,
-warum man sie laufen lassen kann.
+Der Agent `frida` schreibt die Erstfassung eines erzählenden Textes, `herta`
+lektoriert sie. Für analytische Texte stehen daneben `marlene` und `astrid`; wer
+den falschen Auftrag bekommt, gibt ihn zurück, statt in der fremden Stimme zu
+arbeiten.
+
+Der Agent `doris` liest den Bestand als Ganzes und schreibt eine Agenda. Nur sie
+sieht, was über viele Texte hinweg passiert, und sie schreibt genau eine Datei.
+Das ist der Grund, warum man sie laufen lassen kann.
+
+**Wie eine Ablage ihre Rollen zuschneidet, steht in ihren `hint`-Notizen und
+nicht im Agenten.** Welcher Zweig eines Bestandes noch verfolgt wird, in welchem
+Rhythmus eine Agenda entsteht, wie lang sie werden darf: Das ist eine Festlegung
+dieser Ablage (siehe `hkf:hkb-hinweis`). Ein Agent, der so etwas eingebaut hat,
+taugt für genau eine Ablage.
 
 ## Was nicht geklappt hat
 

@@ -261,8 +261,8 @@ tools/       inventar.py hält Prosa, Schema und Grundausstattung gegeneinander,
 templates/   die Grundausstattung, aus der hk-init schöpft
 bundles/     Typen, die nicht jede Ablage braucht, als Lieferung zum Import
 skills/      die KI-Schicht: hkb und sieben Operationen, siehe skills/README.md
-agents/      die Subagenten: wilma liest, marlene schreibt, astrid lektoriert,
-             doris liest den Bestand
+agents/      die Subagenten: wilma liest, marlene und frida schreiben,
+             astrid und herta lektorieren, doris liest den Bestand
 commands/    die Slash-Kommandos, siehe hk-install
 hooks/       sitzung.py spielt den Kanon ein, schreibregeln.py blockt
 core/        der Kanon: Identität, Zusammenarbeit, Sprache, Schreibregeln, YAML
