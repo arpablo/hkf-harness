@@ -289,15 +289,33 @@ Importnachweis.
 ### Die Liste anlegen
 
 Ein erster Wilma-Lauf holt **nur den Aufbau**, nicht die Substanz. Er wird
-zum Überschriften-Gerüst der Zusammenfassung und zugleich zur Tranchenliste:
+zum Überschriften-Gerüst der Zusammenfassung, zur Tranchenliste und zur
+Lesekarte:
 
 ```bash
-hk-tranchen <quellennotiz> --anlegen -     # Wilmas `## Tranchenvorschlag`, Zeile für Zeile
+hk-tranchen <quellennotiz> --anlegen -     # Wilmas `## Tranchenvorschlag`
+hk-lesekarte <quellennotiz> --anlegen -    # Wilmas `## Notiz-Kandidaten`
 hk-tranchen <quellennotiz>                 # zeigt die Liste
+hk-lesekarte <quellennotiz>                # zeigt die Karte
 ```
 
-Durchgereicht wird **nur dieser Abschnitt**, nicht das ganze Destillat: Sonst
-würde jede Aufzählung darin eine Tranche.
+Durchgereicht wird jeweils **nur der eine Abschnitt**, nicht das ganze
+Destillat: Sonst würde jede Aufzählung darin eine Tranche.
+
+### Zwei Listen, und sie sagen Verschiedenes
+
+**Die Tranchenliste sagt, welches Kapitel dran ist. Die Lesekarte sagt, welcher
+Gegenstand schon behandelt ist.** Das ist nicht dasselbe, und darum reicht die
+eine nicht. Eine Person kommt in vier Tranchen vor. Ohne einen Stand je
+Gegenstand entscheidet jede von ihnen neu, ob sie eine Notiz bekommt, und die
+Entscheidung aus Tranche zwei ist in Tranche sieben vergessen.
+
+Die beiden liegen auch verschieden. Die Tranchenliste steht als Abschnitt
+`# Tranchen` in der Quellennotiz, weil sie eine Auskunft über die Quelle ist:
+Sie sagt einem späteren Leser, welches Material gelesen wurde und wann. Die
+Lesekarte ist reiner Laufzustand und liegt als `.hkf/lesekarte-<quelle>.yaml`
+neben der Wurzeldatei der Lieferung. Sie geht beim Import nicht mit, und
+niemand muss sie je lesen.
 
 Die Liste steht danach als Abschnitt `# Tranchen` in der Quellennotiz und ist
 **der Stand des Laufs, nicht dein Gedächtnis**. Das ist der Grund, warum sie
@@ -321,17 +339,45 @@ Dann, für genau diese Tranche:
 
 1. **Wilma starten**, mit der Abgrenzung als Auftrag. Ein Auftrag, eine
    Tranche — auch im Durchlauf.
-2. **Prüfen, was es schon gibt** (Schritt ④ oben), und zwar in der Ablage
+2. **Die Karte lesen**, bevor du entscheidest:
+
+   ```bash
+   hk-lesekarte <quellennotiz> --offen
+   ```
+
+   Was dort mit `angelegt` oder `ergaenzt` steht, ist erledigt und wird
+   fortgeschrieben statt neu angelegt. Was `zurueckgestellt` oder `verworfen`
+   trägt, bleibt es, bis ein Grund dagegen steht. Nur was offen ist, ist eine
+   Entscheidung.
+3. **Prüfen, was es schon gibt** (Schritt ④ oben), und zwar in der Ablage
    *und* in der Lieferung: Die frühere Tranche hat vielleicht schon eine
    Notiz angelegt, an die diese hier anschließt.
-3. **Eintragen**: die Notizen aus den Kandidaten, den zugehörigen Abschnitt
+4. **Eintragen**: die Notizen aus den Kandidaten, den zugehörigen Abschnitt
    der Zusammenfassung, und was Wilma unter Lücken gefunden hat.
-4. **`hk-lint <ziel>`** muss grün sein, bevor die Tranche abgehakt wird.
+
+   Was Wilma in dieser Tranche findet und die Karte nicht führt, trägst du
+   nach, statt es still anzulegen:
+
+   ```bash
+   hk-lesekarte <quellennotiz> --nachtragen "Arab Bureau — create_or_extend — Kitcheners Apparat in Kairo"
+   ```
+
+   Der Eintrag ist danach als nachgetragen gekennzeichnet. So bleibt lesbar,
+   was der Aufbau-Lauf hergab und was unterwegs dazukam.
+5. **Die Karte festschreiben**, je Gegenstand einmal:
+
+   ```bash
+   hk-lesekarte <quellennotiz> --setzen lord-fisher --zustand angelegt --notiz Persons/lord-fisher
+   ```
+
+   Das ist der Schritt, den man am leichtesten vergisst und am teuersten
+   bezahlt: Die nächste Tranche erwägt den Gegenstand sonst noch einmal.
+6. **`hk-lint <ziel>`** muss grün sein, bevor die Tranche abgehakt wird.
    **Einmal je Tranche, nicht je Notiz.** Ein Lauf über die Lieferung sagt
    dasselbe wie dreißig Läufe über einzelne Dateien und kostet ein
    Dreißigstel. Dasselbe gilt für `hk-text`: Der Gate gehört ans Ende eines
    Schreibdurchgangs, nicht zwischen zwei Absätze.
-5. **Abhaken:**
+7. **Abhaken:**
 
 ```bash
 hk-tranchen <quellennotiz> --abhaken 3 --ertrag "3 neu, 5 fortgeschrieben"

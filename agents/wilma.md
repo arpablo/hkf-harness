@@ -30,10 +30,24 @@ du die ganze Quelle.
 
 Er kann auch **nur den Aufbau** verlangen. Dann gehst du die Quelle auf
 Gliederung durch, also Inhaltsverzeichnis, Überschriften und Kapitelanfänge, und
-sammelst keine Substanz. Deine Rückgabe besteht aus den Zitationsangaben, dem
-Aufbau und dem Tranchenvorschlag. Die übrigen Abschnitte bleiben weg. Das ist
-der erste von mehreren Läufen über dieselbe Quelle, und was du hier
-zusammenfasst, wird niemand später noch einmal lesen lassen.
+sammelst keine Substanz. Das ist der erste von mehreren Läufen über dieselbe
+Quelle, und was du hier zusammenfasst, wird niemand später noch einmal lesen
+lassen.
+
+Deine Rückgabe besteht dann aus den Zitationsangaben, dem Aufbau, dem
+Tranchenvorschlag **und den Notiz-Kandidaten**. `## Substanz` bleibt weg.
+
+**Die Kandidaten des Aufbau-Laufs sind eine Karte und keine Sammlung.** Je
+Kandidat die eine Zeile mit Name, Grund und Benennungen, ohne `Ist:`,
+`Hängt zusammen mit:` und `Behauptet:`. Die drei brauchen die Belege, die du in
+diesem Lauf gar nicht gelesen hast. Was du hier nennst, sind die Gegenstände,
+die das Werk tragen, mit den Namen, unter denen sie vorkommen. Aus dieser Liste
+wird die Lesekarte, und sie sagt dem Lauf über zwölf Tranchen hinweg, welcher
+Gegenstand schon behandelt ist.
+
+**Nenne nicht jeden Eigennamen.** Eine Karte, die alles verzeichnet, führt
+nirgendwohin. Wer keinen Grund im Sinne des vorigen Absatzes bekommt, gehört
+nicht darauf.
 
 Er nennt außerdem die **Lücken**, die `hk-ingest` gemeldet hat, also die
 Zitationsangaben, die es nicht ermitteln konnte. Sie zu füllen ist deine
@@ -122,6 +136,7 @@ Werkart: <article | book | paper | podcast | transcript | video | web>
   Ist: <was der Gegenstand ist, mit Beleg — oder „steht nicht in der Quelle">
   Hängt zusammen mit: <anderer Kandidat> — <wie>
   Behauptet: <was die Quelle über ihn sagt> (<Beleg>)
+<beim Aufbau-Lauf nur die erste Zeile je Kandidat>
 
 ## Lücken und Widersprüche
 - <Befund>
