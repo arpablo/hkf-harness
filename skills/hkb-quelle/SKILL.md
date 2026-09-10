@@ -45,7 +45,8 @@ entscheidet erst der Import (§4.3).
 
 > `hk-ingest` → **Wilma** liest → **Marlene** schreibt → du entscheidest und fügst zusammen.
 >
-> Bei einer großen Quelle je Tranche einmal, geführt von `hk-tranchen`.
+> Bei einer großen Quelle je Tranche einmal, geführt von `hk-tranchen`, und
+> davor einmal **Edith** über die Gegenstände, geführt von `hk-lesekarte`.
 
 Erst das Mechanische: kopieren oder nicht, `sha256`, die Quellennotiz mit dem,
 was sicher bekannt ist, und eine Liste der Lücken. Dann liest **Wilma** die
@@ -137,7 +138,10 @@ Schreibregeln, [[hkb-notiz]] und den `# Aufbau` des Typs selbst und prüft mit
 `hk-text --gate`, bevor sie meldet. Was sie schreiben soll, ist unten
 beschrieben, und sie kennt es aus ihrem eigenen Auftrag:
 
-1. **Bestimmen.** Was *ist* der Gegenstand? Der erste Absatz beantwortet das,
+1. **Bestimmen, falls es noch niemand getan hat.** Steht die Notiz schon da
+   und trägt einen Bestimmungsabsatz, hat `edith` ihn geschrieben. Dann lässt
+   du ihn stehen und fängst bei Schritt 2 an. Was *ist* der Gegenstand? Der
+   erste Absatz beantwortet das,
    bevor irgendetwas aus der Quelle erzählt wird: was für ein Ding er ist, wann
    und wo er bestand, wofür er einsteht. Wilmas Zeile `Ist:` ist das Material,
    und was du ohnehin in `description` schreibst, gehört ausformuliert auch in
@@ -329,6 +333,31 @@ Eine Tranche ist so groß, dass **ein** Wilma-Lauf sie trägt — ein Teil, ein
 Kapitelblock, ein Stundenabschnitt eines Transkripts. Zu klein geschnitten
 zerreißt sie Zusammenhänge, zu groß geschnitten liefert sie ein dünnes
 Destillat.
+
+### Vor der ersten Tranche: die Gegenstände bestimmen
+
+Starte den Subagenten `edith` mit der Quellennotiz, einer Gruppe der Karte und
+ihrem Zieltyp. Sie legt für jeden Eintrag mit `create_or_extend` die Notiz an
+und schreibt **nur die erste Schicht**: was der Gegenstand ist, unabhängig von
+dieser Quelle, mit `aliases` und `wikidata_id`. Die Quelle sieht sie nicht.
+
+**Der Grund ist die Reihenfolge.** Beide Schichten im selben Durchgang zu
+schreiben heißt, die Bestimmung unter dem Eindruck genau eines Autors zu
+schreiben, während sein Kapitel im Kontext liegt. Was die Dardanellen sind,
+steht danach so da, wie dieses eine Werk sie braucht. Edith läuft davor und
+schlägt nach, statt zu lesen.
+
+Über den Typ entscheidest du und nicht sie. Sie bekommt die Gruppe genannt,
+wie `marlene` sie bekommt.
+
+**Was sie nicht nachschlagen kann, bekommt keine Bestimmung**, sondern eine
+Notiz mit Titel, Typ und `aliases`. Das ist gewollt: Die erste Aussage kommt
+dann aus der Quelle und trägt ihre Fundstelle. Sie meldet diese Namen einzeln.
+
+In einer **Lieferung** bleibt `wikidata_id` leer, weil `hk-wikidata` nur an
+einer Wissensbasis arbeitet. Nach dem Import holt `hk-wikidata --alle` sie
+nach. Das ist der eine Punkt, an dem der Ablauf heute noch einen zweiten
+Durchgang braucht.
 
 ### Ein Durchgang je Tranche
 

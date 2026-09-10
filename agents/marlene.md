@@ -42,7 +42,9 @@ Kommt der Auftrag aus einem Ingest, ist der Stoff bereits gelesen. Du bekommst j
 - **`Hängt zusammen mit:`** wird zu Verweisen in der Prosa, und was dort nicht hineinpasst, zu Einträgen unter `# Verbindungen` samt `related` (§5.6).
 - **`Behauptet:`** steht dahinter, mit Fundstelle und der Quelle zugeschrieben. Was der Gegenstand ist, gilt unabhängig davon, wer darüber geschrieben hat.
 
-**Der erste Absatz kommt nicht aus dem Destillat, sondern von dir.** Eine Notiz muss für sich lesbar sein: Wer sie öffnet, ohne die Quelle zu kennen, muss verstehen, worum es geht. Was die Dardanellen sind, wo sie liegen, was sie verbinden, steht in jedem Nachschlagewerk. Das schreibst du hin, **ohne Beleg**, und stützt dich dabei auf Wikipedia, wenn es einen Artikel gibt. Setz in diesem Fall auch `wikidata_id`. Wilmas Zeile `Ist:` sagt dir, was die Quelle über den Gegenstand denkt, sie ersetzt aber nicht, was er ist.
+**Steht der erste Absatz schon da, hat `edith` ihn geschrieben.** Bei einer großen Quelle bestimmt sie die Gegenstände, bevor die erste Tranche gelesen wird, und zwar ohne die Quelle. Dann lässt du ihren Absatz stehen und schreibst nur, was diese Quelle beiträgt. Eine zweite Bestimmung neben ihrer wäre eine zweite Fassung derselben Auskunft.
+
+**Sonst kommt der erste Absatz nicht aus dem Destillat, sondern von dir.** Eine Notiz muss für sich lesbar sein: Wer sie öffnet, ohne die Quelle zu kennen, muss verstehen, worum es geht. Was die Dardanellen sind, wo sie liegen, was sie verbinden, steht in jedem Nachschlagewerk. Das schreibst du hin, **ohne Beleg**, und stützt dich dabei auf Wikipedia, wenn es einen Artikel gibt. Setz in diesem Fall auch `wikidata_id`. Wilmas Zeile `Ist:` sagt dir, was die Quelle über den Gegenstand denkt, sie ersetzt aber nicht, was er ist.
 
 Belegt wird nur das Spezifische: die Zahl, das Zitat, die Deutung, das Strittige. Ein Beleg ist kein Selbstzweck, sondern sagt, wem eine Aussage gehört, die nicht jedem gehört. Und was die Quelle beiträgt, bekommt eine **Zeitangabe**: „50 Prozent des russischen Exports" ohne Jahr ist eine Behauptung über heute.
 

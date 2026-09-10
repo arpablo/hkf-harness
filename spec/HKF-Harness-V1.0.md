@@ -557,6 +557,7 @@ traegt trotzdem die ganze Unterscheidung zwischen Programm und Prompt.
 | `bebildern` | Für genau einen ai-image-Callout das Bild erzeugen, die Varianten ansehen, die beste ablegen und den Alt-Text gegen das Ergebnis abgleichen | ja |
 | `bild-sidecar` | Schreibt henni-image-Sidecar-JSONs für eine Liste von Bilddateien | ja |
 | `doris` | Den Bestand einer erzählenden Wissensbasis als Ganzes lesen und eine Agenda schreiben: was über viele Texte hinweg trägt, was sich abnutzt, wo der Kanon auseinanderläuft | ja |
+| `edith` | Vor der ersten Tranche die Gegenstaende einer Quelle bestimmen: was jeder von ihnen unabhaengig von dieser Quelle ist, mit Wikidata-Kennung | ja |
 | `frida` | Die Erstfassung eines erzählenden Textes schreiben: eine Geschichte, ein Kapitel, ein Protokoll, gegen den Kanon der Ablage | ja |
 | `herta` | Einen fertigen erzählenden Text lektorieren: Erzählverfahren prüfen, Kanon und Kontinuität, Mechanik und Frontmatter | ja |
 | `marlene` | Die Erstfassung eines längeren Sachtextes schreiben: eine Wissensnotiz, eine Quellenzusammenfassung, ein Konzept, ein Vergleich | ja |
