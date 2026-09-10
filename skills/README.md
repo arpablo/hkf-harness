@@ -24,6 +24,7 @@ einen gebrochenen Wikilink immer, ein Modell meistens.
 | [`hkb-import`](hkb-import/SKILL.md) | Eine Lieferung übernehmen — und die Urteile fällen und aufschreiben, die `hk-import` verweigert |
 | [`hkb-export`](hkb-export/SKILL.md) | Eine Lieferung herausschreiben und beurteilen, ob sie weitergegeben werden kann |
 | [`hkb-lint`](hkb-lint/SKILL.md) | Prüfen, korrigieren lassen, und die Befunde abarbeiten, die kein Werkzeug beheben darf |
+| [`hkb-ingest`](hkb-ingest/SKILL.md) | Aus einer Quelle eine Lieferung machen, in der die Quellennotiz sagt, was das Werk behauptet |
 | [`hkb-quelle`](hkb-quelle/SKILL.md) | Aus einer Quelle eine Lieferung machen — und wahlweise gleich importieren |
 | [`hkb-suche`](hkb-suche/SKILL.md) | Eine Frage gegen die Wissensbasis beantworten und mit Verweisen belegen |
 | [`hkb-wikidata`](hkb-wikidata/SKILL.md) | Unter den Kandidaten von `hk-wikidata` den richtigen Gegenstand wählen und eintragen |
@@ -56,10 +57,11 @@ kann. Ohne ihn brechen die vier oberen ab und sagen warum:
 | [`bild-cover`](bild-cover/SKILL.md) | Das Hochformat-Cover einer Publikation für `hk-epub` |
 | [`bild-sidecars`](bild-sidecars/SKILL.md) | Die Metadaten-JSONs neben die Bilder eines Verzeichnisses schreiben |
 
-**Ein Skill ruft einen Agenten.** `hkb-quelle` liest eine Quelle nie
-selbst, sondern schickt [`wilma`](../agents/wilma.md) — sie liest in ihrem
-eigenen Kontext und gibt ein belegtes Destillat zurück. Für die Regel oben
-ändert das nichts: Ein Agent liest, er schreibt nicht.
+**Ein Skill ruft einen Agenten.** `hkb-ingest` liest eine Quelle nie
+selbst, sondern schickt [`berta`](../agents/berta.md). Sie liest in ihrem
+eigenen Kontext und legt Evidenzkarten ins Journal, statt ein Destillat
+zurückzugeben. Was daraus eine Notiz wird, entscheidet sich später, wenn die
+Thesen des Werks feststehen.
 
 Drei davon tragen die eigentliche Last. **`hkb-import`** ist der Ort, an dem
 die drei Urteile aus der Spezifikation fallen und als Zeile in

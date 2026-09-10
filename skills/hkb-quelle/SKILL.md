@@ -1,9 +1,17 @@
 ---
 name: hkb-quelle
-description: "Aus einer Quelle eine Lieferung machen — Quellennotiz mit Zitationsangaben und Zusammenfassung, dazu die Notizen, die aus ihr entstehen. Wahlweise gleich in die Wissensbasis importieren. Eine große Quelle wird in Tranchen gelesen, einzeln oder auf Anordnung im Durchlauf. Verwenden bei: Quelle einlesen, diese URL einlesen, ein Buch erfassen, ein Clipping verarbeiten, Ingest, Bundle aus einer Quelle bauen, Tranche lesen, alle Tranchen durchlaufen."
+description: "Abgelöst durch hkb-ingest und nur noch da, bis der neue Ablauf an einer Quelle bestanden hat. Der alte Weg über wilma und Tranchen. Verwenden bei: einen angefangenen Tranchendurchlauf zu Ende bringen, ausdrücklich nach dem alten Weg gefragt."
 ---
 
 # Aus einer Quelle eine Lieferung machen
+
+> **Dieser Skill ist abgelöst.** Für eine neue Quelle gilt [[hkb-ingest]].
+> Dort steht die These vor der Notiz, und darum entscheidet sich erst nach
+> dem Lesen, wer ein Blatt bekommt. Der Weg hier schreibt je Tranche sofort
+> und kann deshalb nicht entscheiden, was eine Notiz wert ist.
+>
+> Er bleibt liegen, bis der neue Ablauf an einer Quelle bestanden hat, und
+> für einen Durchlauf, der schon angefangen ist.
 
 Zuerst [[hkb]] lesen. Du bekommst eine Quelle — eine Adresse, eine Datei, ein
 Stück aus der Inbox — und lieferst eine fertige Lieferung: die Quellennotiz

@@ -25,23 +25,22 @@ Einzelne Karten holst du dir mit `--these <id>`, wo du sie brauchst.
 
 Die Quelle liest du nicht. Sie ist geschlossen.
 
-## Der Aufbau, und er steht fest
+## Der Aufbau, und er steht in der Typdefinition
 
-```markdown
-# Die Frage
-<Ein Satz. Welche Frage beantwortet dieses Werk.>
+Die Abschnittsnamen erfindest du nicht. Sie stehen im `# Aufbau` der
+Typdefinition `source`, und du liest sie dort nach, bevor du anfängst.
 
-# Die Antwort
-<Ein Absatz. Die Antwort des Autors, mit den Mechanismen, die sie tragen.>
+`# Kernaussagen` trägt drei Teile in dieser Reihenfolge:
 
-# Hauptthesen
-<steht schon da, du rührst es nicht an>
+1. **Die Frage des Werks.** Ein Satz.
+2. **Die Antwort.** Ein Absatz, mit den Mechanismen, die sie tragen.
+3. **Die Hauptthesen einzeln.** Die stehen schon da, von den Läufen vor dir.
+   Du rührst sie nicht an, du schreibst darüber.
 
-# Wo die Erklärung dünn wird
-<Was der Autor selbst offenlässt, einschränkt oder nicht deckt.>
-```
+`# Was die Quelle offenlässt` schreibst du aus `--grenzen`.
 
-Erst danach folgt der Aufbau des Werks, und der ist Apparat.
+Erst danach folgt der Aufbau des Werks, und der ist Apparat. Ist er lang und
+kapitelweise, kürze ihn.
 
 **Eine Zusammenfassung, die dem Aufbau der Quelle folgt, ist der Fehler und
 nicht die Form.** Wer ein Buch nach Kapiteln referiert, hat es nicht
@@ -52,6 +51,9 @@ Kapitel danach als Beleg.
 
 Er trennt zweierlei, was leicht durcheinandergerät: was der Autor selbst
 offenlässt, und was ungelesen geblieben ist. Beides gehört hin, aber getrennt.
+
+`# Was die Quelle offenlässt` steht nicht in der Quelle. Der Abschnitt sagt
+das einleitend, sonst liest er sich wie ein Befund des Werks.
 
 Meldet `--stand` eine These als offen oder dünn, steht das dort. Du glättest
 daraus keine geschlossene Gesamtthese. Eine Lieferung, die mehr behauptet als

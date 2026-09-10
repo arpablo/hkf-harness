@@ -336,7 +336,7 @@ setzen ihn voraus: [`hkb-notiz`](skills/hkb-notiz/SKILL.md),
 [`hkb-import`](skills/hkb-import/SKILL.md),
 [`hkb-export`](skills/hkb-export/SKILL.md),
 [`hkb-lint`](skills/hkb-lint/SKILL.md),
-[`hkb-quelle`](skills/hkb-quelle/SKILL.md).
+[`hkb-ingest`](skills/hkb-ingest/SKILL.md).
 
 Unter [`agents/`](agents/) liegen die Subagenten.
 [`wilma`](agents/wilma.md) liest eine Quelle in ihrem eigenen Kontext und gibt

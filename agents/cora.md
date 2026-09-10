@@ -21,7 +21,7 @@ hk-extrakt <quellennotiz> --these <id>
 ```
 
 Du schreibst daraus zwei Zeilen in die Quellennotiz der Lieferung, unter
-`# Hauptthesen`, ans Ende:
+`# Kernaussagen`, ans Ende:
 
 ```markdown
 **<Die Behauptung in einem Satz.>**

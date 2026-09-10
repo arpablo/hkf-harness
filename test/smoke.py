@@ -2581,6 +2581,13 @@ Verweis auf [[Notes/gibt-es-nicht|etwas]].
         probe("danach ist nichts mehr zu lesen",
               r.returncode == 1 and "Alle Strecken sind gelesen" in r.stdout,
               r.stdout)
+        r = lauf(HK_EX, q, "--strecken")
+        probe("--strecken speist hk-tranchen für den Nachweis in der Notiz",
+              r.returncode == 0 and r.stdout.splitlines()[0] == "Teil I"
+              and "# Gelesen: 1, 2, 3" in r.stdout, r.stdout)
+        r = lauf(HK_TR, q, "--anlegen", "-", "--force", input=r.stdout)
+        probe("und hk-tranchen nimmt die Ausgabe unverändert",
+              r.returncode == 0 and "3 Tranchen" in r.stdout, r.stdout)
         probe("hk-lint sieht Plan und Journal nicht",
               lauf(os.path.join(BIN, "hk-lint"), ziel).returncode == 0)
         r = lauf(HK_EX, os.path.join(ziel, WIKI, "Persons", "grace-hopper.md"))

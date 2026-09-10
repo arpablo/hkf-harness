@@ -12,6 +12,7 @@
     hk-extrakt <quellennotiz> --grenzen                wo das Werk selbst duenn wird
     hk-extrakt <quellennotiz> --gegenstaende           wer eine Notiz bekommt
     hk-extrakt <quellennotiz> --gegenstand <name>      die Karten zu einem
+    hk-extrakt <quellennotiz> --strecken               fuer hk-tranchen --anlegen
 
     --schwelle N   ab wie vielen Thesen ein Gegenstand eine Notiz bekommt (2)
     --gedeckt N    ab wie vielen Karten eine These als gedeckt gilt (3)
@@ -502,6 +503,28 @@ def grenzen(plan, karten):
     return 0
 
 
+def strecken(plan, karten):
+    """Die Abgrenzungen fuer `hk-tranchen --anlegen -`.
+
+    Der Plan liegt unter `AgentDashboard/` und reist nicht in der Lieferung
+    mit. Ohne diesen Schritt weiss nach dem Import niemand mehr, welcher Teil
+    des Werks gelesen wurde. Das ist eine Auskunft ueber die Quelle und
+    gehoert einem Leser, nicht dem Lauf.
+    """
+    if plan is None:
+        raise Fehler("Zu dieser Quelle liegt kein Plan.")
+    for s in plan["strecken"]:
+        print(s["abschnitt"] or s["id"])
+    print("# Gelesen: %s" % (", ".join(
+        "%d" % i for i, s in enumerate(plan["strecken"], 1)
+        if s["zustand"] == "gelesen") or "keine"))
+    for i, s in enumerate(plan["strecken"], 1):
+        if s["zustand"] == "gelesen":
+            n = sum(1 for k in karten if k.get("strecke") == s["id"])
+            print("#   %d  %s  %d Karten" % (i, s["id"], n))
+    return 0
+
+
 def gegenstand(plan, karten, name):
     """Die Karten zu einem Gegenstand, ueber alle Thesen hinweg.
 
@@ -665,6 +688,8 @@ def main(argv):
             return gelesen(plan, planpf, werte["gelesen"])
         if werte.get("these"):
             return these(plan, karten, werte["these"])
+        if werte.get("strecken"):
+            return strecken(plan, karten)
         if werte.get("grenzen"):
             return grenzen(plan, karten)
         if werte.get("gegenstand"):

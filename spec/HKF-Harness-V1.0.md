@@ -535,6 +535,7 @@ traegt trotzdem die ganze Unterscheidung zwischen Programm und Prompt.
 | `hkb-hennibock` | Eine Notiz aus der Wissensbasis an eine HenniBock-Instanz übertragen und die Kapitelkette einer Publikation führen |
 | `hkb-hinweis` | Festhalten, was für diese eine Wissensbasis gilt: wann eine Notiz entsteht, welche Quellen zählen, wie weit zusammengefasst wird |
 | `hkb-import` | Ein HKF-Bundle in eine Wissensbasis übernehmen und dabei die Urteile fällen, die hk-import verweigert — die Bedeutungsprüfung zweier gleichnamiger Typen und die Identität einer ankommenden Notiz |
+| `hkb-ingest` | Aus einer Quelle eine Lieferung machen, in der die Quellennotiz sagt, was das Werk behauptet: die Thesen stehen fest, bevor die erste Zeile gelesen wird |
 | `hkb-lint` | Eine Wissensbasis oder eine Lieferung gegen HKF Core prüfen, die erlaubten Korrekturen anwenden und die Befunde beurteilen, die kein Werkzeug beheben darf |
 | `hkb-notiz` | Eine Notiz in einer Wissensbasis nach HKF Core anlegen oder fortschreiben — Typ wählen, nur zugesicherte Properties setzen, Verweise qualifizieren, Zeitangaben führen |
 | `hkb-publikation` | Aus Texten einer Wissensbasis eine Publikation bauen: den Container anlegen, Texte in eine Lesereihenfolge bringen, den Stand prüfen |
