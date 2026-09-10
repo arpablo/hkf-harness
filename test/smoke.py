@@ -268,6 +268,43 @@ def main():
         probe("nennt das falsche Datum", "created" in r.stdout, r.stdout)
         probe("nennt den unmaskierten Strich", "Tabellenzelle" in r.stdout, r.stdout)
 
+        # Der Zuschnitt aendert nicht, was geprueft wird, sondern was gemeldet
+        # wird. Ohne Probe faellt niemandem auf, wenn er anfaengt zu
+        # verschweigen, was an den genannten Dateien selbst haengt.
+        print("hk-lint mit Notizen als Argument")
+        kaputt = os.path.join(ziel, KONFIG, "Typedefs", "kaputt.md")
+        sauber = os.path.join(ziel, WIKI, "Notes", "sauber.md")
+        os.makedirs(os.path.dirname(sauber), exist_ok=True)
+        io.open(sauber, "w", encoding="utf-8").write(
+            "---\ntype: note\ntitle: Sauber\ndescription: Ohne Befund.\n"
+            "created: 2026-09-10\nmodified: 2026-09-10T09:00:00\n---\n\n"
+            "# Sauber\n\nEin Absatz in einer Zeile.\n")
+        r = lauf(os.path.join(BIN, "hk-lint"), kaputt)
+        probe("sagt an, dass zugeschnitten wurde", "zugeschnitten" in r.stdout,
+              r.stdout[:200])
+        probe("meldet die Befunde der genannten Notiz",
+              r.returncode == 1 and "title" in r.stdout, r.stdout)
+        probe("zaehlt die uebrige Ablage, statt sie aufzuzaehlen",
+              "Übrige Ablage" in r.stdout, r.stdout)
+        r = lauf(os.path.join(BIN, "hk-lint"), sauber)
+        probe("eine saubere Notiz laeuft durch, obwohl die Ablage Befunde hat",
+              r.returncode == 0, r.stdout)
+        probe("und sagt trotzdem, dass daneben etwas liegt",
+              "Übrige Ablage" in r.stdout and "0 Fehler" not in r.stdout.split(
+                  "Übrige Ablage")[1][:40], r.stdout)
+        probe("findet die Ablage von der Datei aus nach oben",
+              lauf(os.path.join(BIN, "hk-lint"), sauber,
+                   env=dict(os.environ, HKB_PATH=tempfile.gettempdir())
+                   ).returncode == 0)
+        probe("weist --fix je Datei ab",
+              lauf(os.path.join(BIN, "hk-lint"), sauber, "--fix").returncode == 2)
+        probe("weist --strict je Datei ab",
+              lauf(os.path.join(BIN, "hk-lint"), sauber, "--strict").returncode == 2)
+        probe("weist eine Datei ausserhalb der genannten Ablage ab",
+              lauf(os.path.join(BIN, "hk-lint"), sauber,
+                   tempfile.gettempdir()).returncode == 2)
+        os.remove(sauber)
+        os.rmdir(os.path.dirname(sauber))
 
         print("hk-lint --fix")
         # frisch anfangen: der Block davor hat absichtlich kaputt gemacht,

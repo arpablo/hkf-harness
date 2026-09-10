@@ -3,12 +3,20 @@
 """hk-lint — prueft eine Wissensbasis gegen HKF Core (§6.3).
 
     hk-lint [pfad] [--fix] [--strict]
+    hk-lint <notiz.md>...
 
 Ohne Pfad gilt $HKB_PATH, sonst ~/hkb. Geprueft wird eine Wissensbasis
 (`hkb.md`) oder eine Lieferung (`hbundle.md`) — §6.3 gilt fuer beide, mit
 den Unterschieden, die §4 und §7.1 machen: Ein Bundle hat keine
 Typverzeichnisse, seine Notizen liegen, wo sie wollen, und `bundles` und
 `rejected_links` stehen dort nicht.
+
+**Mit Notizen als Argument wird der Bericht zugeschnitten**, nicht die
+Pruefung: Es laeuft dasselbe wie sonst, gemeldet wird aber nur, was an den
+genannten Dateien haengt, und der Rest steht als eine Zahl darunter. Dafuer
+gibt es den Zuschnitt. Wer drei Notizen geschrieben hat und danach pruefen
+laesst, bekommt sonst dreissig Hinweise vorgelegt, die seit Wochen dastehen.
+Die Ablage findet sich dabei von der ersten Datei aus nach oben.
 
     --fix      die zwoelf Handgriffe aus §6.3 ausfuehren und danach erneut pruefen
     --strict   zusaetzlich melden, welche Properties eine Notiz fuehrt, die ihr
@@ -37,13 +45,49 @@ def main(argv):
     strict = "--strict" in argv
     fix = "--fix" in argv
     args = [a for a in argv if not a.startswith("-")]
+    # Eine Ablage ist ein Verzeichnis, eine Notiz eine Datei. Das trennt die
+    # beiden Aufrufformen, ohne dass eine Option sie ansagen muesste.
+    dateien = [a for a in args if os.path.isfile(a)]
+    rest = [a for a in args if a not in dateien]
+    if dateien and len(rest) > 1:
+        sys.stderr.write("Mehr als ein Pfad neben den Notizen: %s\n"
+                         % ", ".join(rest)); return 2
+    # Bei genannten Notizen bestimmt die erste von ihnen die Ablage und nicht
+    # `HKB_PATH` oder die gemerkte Wahl: Sonst pruefte ein Aufruf gegen eine
+    # Ablage, in der die Datei gar nicht liegt, und wiese sie dann ab.
+    gesucht = args[0] if args else None
+    if dateien:
+        gesucht = rest[0] if rest else ablage.aufwaerts(
+            os.path.dirname(os.path.abspath(dateien[0])))
+        if not gesucht:
+            sys.stderr.write("%s liegt in keiner Ablage (§3.1).\n"
+                             % dateien[0]); return 2
     try:
-        hkb, art = ablage.finde_ablage(args[0] if args else None)
+        hkb, art = ablage.finde_ablage(gesucht)
     except ablage.KeineAblage as e:
         sys.stderr.write(str(e) + "\n"); return 2
 
-    print("%s — %s%s" % (hkb, "Wissensbasis" if art == "hkb" else "Lieferung",
-                         ", mit --fix" if fix else ""))
+    zuschnitt = None
+    if dateien:
+        if fix:
+            sys.stderr.write("--fix gilt der ganzen Ablage (§6.3) und nicht "
+                             "einzelnen Notizen.\n"); return 2
+        if strict:
+            sys.stderr.write("--strict zaehlt ueber den Bestand und nicht "
+                             "ueber einzelne Notizen.\n"); return 2
+        zuschnitt = []
+        for d in dateien:
+            ab = os.path.abspath(d)
+            if os.path.relpath(ab, hkb).startswith(".."):
+                sys.stderr.write("%s liegt nicht in %s.\n" % (d, hkb)); return 2
+            zuschnitt.append(ab)
+
+    print("%s — %s%s%s" % (hkb, "Wissensbasis" if art == "hkb" else "Lieferung",
+                           ", mit --fix" if fix else "",
+                           ", zugeschnitten auf %d %s" % (
+                               len(dateien),
+                               "Notiz" if len(dateien) == 1 else "Notizen")
+                           if zuschnitt else ""))
     if fix and art != "hkb":
         sys.stderr.write("--fix gilt nur für eine Wissensbasis; eine Lieferung "
                          "wird gelesen, nicht geändert (§6.2).\n")
@@ -73,7 +117,7 @@ def main(argv):
     # uebergeht es ohnehin.
     bereiche = ablage.bereiche(hkb) if art == "hkb" else {}
     geprueft = 0
-    for p in ablage.dateien(hkb):
+    for p in (zuschnitt if zuschnitt else ablage.dateien(hkb)):
         rel = os.path.relpath(p, hkb)
         if ablage.konfigfremd(*ablage.bereich_von(bereiche, rel)):
             continue
@@ -96,6 +140,16 @@ def main(argv):
         grammatik.pruefe_datei(p, gr_befunde, name=rel)
 
     bestand, struktur = pruefmodul.pruefen(hkb, art)
+    daneben = []
+    if zuschnitt:
+        # Gemeldet wird nach dem Namen, den der Befund traegt, und der ist
+        # bereichsrelativ. Den Weg dorthin kennt nur der Bestand, also wird er
+        # dort nachgeschlagen und nicht aus dem Pfad gerechnet.
+        gewaehlt = set(zuschnitt)
+        gemeint = set(e["rel"] for e in bestand.notizen.values()
+                      if e["pfad"] in gewaehlt)
+        daneben = [b for b in struktur if b.datei not in gemeint]
+        struktur = [b for b in struktur if b.datei in gemeint]
     fehler = [b for b in struktur if b.grad == pruefmodul.FEHLER]
     hinweise = [b for b in struktur if b.grad == pruefmodul.HINWEIS]
 
@@ -109,6 +163,12 @@ def main(argv):
     print("  %-26s %d" % ("Hinweise", len(hinweise)))
     for b in hinweise:
         print("    ·", b)
+    if zuschnitt:
+        # Eine Zahl und keine Liste: Sie sagt, ob die Ablage im Ganzen steht,
+        # ohne den Bericht wieder zu fuellen, den der Zuschnitt geleert hat.
+        andere = len([b for b in daneben if b.grad == pruefmodul.FEHLER])
+        print("  %-26s %d Fehler, %d Hinweise (nicht angezeigt)"
+              % ("Übrige Ablage", andere, len(daneben) - andere))
 
     if strict:
         zeilen = pruefmodul.undeklariert(bestand)
