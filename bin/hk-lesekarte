@@ -5,6 +5,7 @@
     hk-lesekarte <quellennotiz>                       zeigt die Karte
     hk-lesekarte <quellennotiz> --anlegen <datei|->   legt sie aus Wilmas Kandidaten an
     hk-lesekarte <quellennotiz> --offen               was noch aussteht
+    hk-lesekarte <quellennotiz> --offen --behandlung B   davon nur eine Sorte
     hk-lesekarte <quellennotiz> --nachtragen <zeile>  einen Eintrag ergaenzen
     hk-lesekarte <quellennotiz> --setzen <id>         eine Entscheidung festschreiben
 
@@ -192,12 +193,23 @@ def _ist_offen(e):
             and e.get("zustand", "offen") == "offen")
 
 
-def offen(karte):
+def offen(karte, nur=None):
+    """Was noch aussteht. `nur` grenzt auf eine Behandlung ein.
+
+    Der Faktenagent arbeitet allein an `create_or_extend` und soll die uebrigen
+    gar nicht erst sehen. Wer die Liste ungefiltert bekommt, sucht sich das
+    Seine heraus und irrt sich dabei irgendwann.
+    """
     if karte is None:
         raise Fehler("Diese Quellennotiz traegt keine Lesekarte.")
+    if nur is not None and nur is not True and nur not in BEHANDLUNGEN:
+        raise Fehler("--behandlung kennt nur %s." % ", ".join(BEHANDLUNGEN))
     aus = [e for e in karte["eintraege"] if _ist_offen(e)]
+    if isinstance(nur, str):
+        aus = [e for e in aus if e.get("behandlung") == nur]
     if not aus:
-        print("Kein Eintrag steht mehr offen.")
+        print("Kein Eintrag steht mehr offen%s."
+              % (" mit `%s`" % nur if isinstance(nur, str) else ""))
         return 1
     ohne = [e for e in aus if e.get("behandlung", "offen") == "offen"]
     print("%d von %d Eintraegen offen" % (len(aus), len(karte["eintraege"])))
@@ -348,7 +360,7 @@ def main(argv):
         if werte.get("setzen"):
             return setzen(pfad, karte, werte["setzen"], werte)
         if werte.get("offen"):
-            return offen(karte)
+            return offen(karte, werte.get("behandlung"))
         return zeigen(quellpfad, karte, pfad)
     except (Fehler, ablage.KeineAblage, frontmatter.Unlesbar) as e:
         sys.stderr.write(str(e) + "\n")
