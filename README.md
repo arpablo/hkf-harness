@@ -262,8 +262,8 @@ templates/   die Grundausstattung, aus der hk-init schöpft
 bundles/     Typen, die nicht jede Ablage braucht, als Lieferung zum Import
 skills/      die KI-Schicht: hkb und sieben Operationen, siehe skills/README.md
 agents/      die Subagenten: wilma liest, edith bestimmt, marlene und frida
-             schreiben, astrid und herta lektorieren, doris liest den Bestand;
-             alva, berta, cora und dina bilden den Evidenz-Compiler
+             schreiben, astrid und herta lektorieren, doris liest den Bestand,
+             alva, berta, cora und dina machen den Ingest einer großen Quelle
 commands/    die Slash-Kommandos, siehe hk-install
 hooks/       sitzung.py spielt den Kanon ein, schreibregeln.py blockt
 core/        der Kanon: Identität, Zusammenarbeit, Sprache, Schreibregeln, YAML
@@ -352,11 +352,20 @@ geht, messen sie mit `hk-text` und `hk-lint`, statt danach zu urteilen. Ihre
 Stimme holen sie sich mit `hk-kontext` — ein Subagent sieht nicht, was die
 Hauptsitzung bekommen hat.
 
-Der Evidenz-Compiler hat vier eigene Agenten: [`alva`](agents/alva.md) plant
-die Werkfragen, [`berta`](agents/berta.md) schreibt lokatorgenaue Evidenz,
-[`cora`](agents/cora.md) schreibt Themenpatches gegen einen HKF-Bundle-Baum und
-[`dina`](agents/dina.md) kompiliert die abschließende Synthese ebenfalls in
-diesen Baum. Sie geben keine Langtexte im Chat weiter.
+**Der Ingest einer großen Quelle hat vier eigene Agenten**, und ihre
+Reihenfolge ist der ganze Trick: Die These kommt vor der Notiz.
+[`alva`](agents/alva.md) bestimmt aus wenigen Prozent des Werks seine
+Werkfrage und seine Thesen. [`berta`](agents/berta.md) liest je eine
+Lesestrecke und legt Evidenzkarten ins Journal, ohne eine einzige Notiz zu
+schreiben. Erst danach macht [`cora`](agents/cora.md) aus den Karten die
+Thesenabschnitte und die Gegenstandsnotizen, und
+[`dina`](agents/dina.md) schreibt den Kopf der Quellennotiz.
+
+Wer erst liest und dabei schreibt, kennt die Thesen noch nicht und kann
+deshalb nicht entscheiden, was eine Notiz wert ist. Wer nicht entscheiden
+kann, legt an. Das Journal führt [`hk-extrakt`](bin/hk-extrakt), und dort
+steht auch die Schwelle, ab der ein Gegenstand ein Blatt bekommt. Keiner der
+vier gibt einen Langtext im Chat zurück.
 
 **Damit ein Modell sie findet**, ist der Harness ein Plugin. Das Manifest steht
 in `.claude-plugin/`, die Bausteine liegen an der Wurzel: `skills/`, `agents/`,

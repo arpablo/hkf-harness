@@ -2490,6 +2490,9 @@ Verweis auf [[Notes/gibt-es-nicht|etwas]].
         probe("und die Karten erben die Strecke, ohne sie in der Zeile",
               '"strecke": "s1"' in io.open(journal, encoding="utf-8").read(),
               io.open(journal, encoding="utf-8").read()[:200])
+        r = lauf(HK_EX, q, "--grenzen")
+        probe("ohne eine einzige Grenze sagt das Werkzeug, dass das selten stimmt",
+              r.returncode == 1 and "nur bestaetigt" in r.stdout, r.stdout)
         vor = io.open(journal, encoding="utf-8").read()
         r = lauf(HK_EX, q, "--anfuegen", "-", "--strecke", "s2",
                  input='{"these":"t2","behauptung":"A","lokator":"S. 9"}\n'
@@ -2519,19 +2522,35 @@ Verweis auf [[Notes/gibt-es-nicht|etwas]].
                        '"Hussein"]}\n'
                        '{"these":"t3","art":"gegenbeleg",'
                        '"behauptung":"Die Zusage war eingeschraenkt.",'
-                       '"lokator":"S. 91","gegenstaende":["Hussein"]}\n')
+                       '"lokator":"S. 91","gegenstaende":["Hussein"]}\n'
+                       '{"these":"t1","art":"grenze",'
+                       '"behauptung":"Die Finanzierung bleibt offen.",'
+                       '"lokator":"S. 140"}\n')
         probe("die zweite Strecke geht durch",
-              r.returncode == 0 and "2 Karten aufgenommen" in r.stdout, r.stdout)
+              r.returncode == 0 and "3 Karten aufgenommen" in r.stdout, r.stdout)
+        r = lauf(HK_EX, q, "--grenzen")
+        probe("--grenzen sammelt, wo das Werk selbst dünn wird",
+              r.returncode == 0 and "[grenze]" in r.stdout
+              and "[gegenbeleg]" in r.stdout, r.stdout)
         r = lauf(HK_EX, q, "--stand")
         probe("--stand nennt gedeckt, dünn und ohne Beleg",
               r.returncode == 0 and "t1     gedeckt" in r.stdout
               and "Duenn: t2, t3" in r.stdout, r.stdout)
-        probe("und zählt den Gegenbeleg gesondert",
-              "(1 gegen)" in r.stdout, r.stdout)
+        probe("und zählt Gegenbeleg und Grenze gesondert",
+              "(1 dagegen)" in r.stdout, r.stdout)
         r = lauf(HK_EX, q, "--these", "t3")
         probe("--these gibt dem schreibenden Lauf seine Karten",
               r.returncode == 0 and "[gegenbeleg]" in r.stdout
               and "S. 91" in r.stdout, r.stdout)
+        r = lauf(HK_EX, q, "--gegenstand", "hussein")
+        probe("--gegenstand sammelt die Karten eines Gegenstands über Thesen",
+              r.returncode == 0 and "Hussein — 2 Karten aus 2 Thesen" in r.stdout
+              and "S. 88" in r.stdout and "S. 91" in r.stdout, r.stdout)
+        probe("und der Name muss dabei nicht auf den Buchstaben stimmen",
+              "These t2" in r.stdout and "These t3" in r.stdout, r.stdout)
+        r = lauf(HK_EX, q, "--gegenstand", "Lawrence")
+        probe("ein Gegenstand ohne Karte wird abgewiesen und sagt, was es gibt",
+              r.returncode == 2 and "Arab Bureau" in r.stderr, r.stderr)
         r = lauf(HK_EX, q, "--gegenstaende")
         probe("--gegenstaende nimmt auf, wer zwei Thesen trägt",
               r.returncode == 0 and "- Arab Bureau" in r.stdout

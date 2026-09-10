@@ -9,7 +9,9 @@
     hk-extrakt <quellennotiz> --gelesen <id>           Strecke ohne Ertrag
     hk-extrakt <quellennotiz> --stand                  Abdeckung je These
     hk-extrakt <quellennotiz> --these <id>             die Karten einer These
+    hk-extrakt <quellennotiz> --grenzen                wo das Werk selbst duenn wird
     hk-extrakt <quellennotiz> --gegenstaende           wer eine Notiz bekommt
+    hk-extrakt <quellennotiz> --gegenstand <name>      die Karten zu einem
 
     --schwelle N   ab wie vielen Thesen ein Gegenstand eine Notiz bekommt (2)
     --gedeckt N    ab wie vielen Karten eine These als gedeckt gilt (3)
@@ -46,6 +48,11 @@ Das Journal ist JSONL, eine Karte je Zeile:
      "mechanismus": "…", "lokator": "S. 214", "zitat": "…",
      "gegenstaende": ["Kitchener", "Arab Bureau"]}
 
+`art` ist `beleg`, `gegenbeleg`, `definition` oder `grenze`. Eine `grenze`
+haelt fest, wo der Autor selbst offenlaesst oder einschraenkt. Ohne diese Art
+laesst sich der vierte Teil des Kopfes nicht schreiben, und die Quellennotiz
+taeuscht dann eine Geschlossenheit vor, die das Werk nicht hat.
+
 `--strecke` traegt die Karten ein, `strecke` steht darum nicht in der Zeile.
 Eine einzige fehlerhafte Zeile weist den ganzen Stapel ab. Ein halb
 geschriebenes Journal waere schlimmer als ein wiederholter Aufruf.
@@ -72,7 +79,7 @@ SCHWELLE = 2
 # nur verschoben.
 JOURNAL_WARNUNG = 300_000
 
-ARTEN = ("beleg", "gegenbeleg", "definition")
+ARTEN = ("beleg", "gegenbeleg", "definition", "grenze")
 PFLICHT = ("these", "behauptung", "lokator")
 GRENZEN = {"behauptung": 400, "mechanismus": 400, "zitat": 500,
            "lokator": 60, "these": 16, "art": 16}
@@ -349,7 +356,7 @@ def _abdeckung(plan, karten, gedeckt):
     aus = []
     for t in plan["thesen"]:
         meine = [k for k in karten if k["these"] == t["id"]]
-        gegen = sum(1 for k in meine if k.get("art") == "gegenbeleg")
+        gegen = sum(1 for k in meine if k.get("art") in ("gegenbeleg", "grenze"))
         if not meine:
             zustand = "offen"
         elif len(meine) < gedeckt:
@@ -383,7 +390,7 @@ def stand(quellpfad, plan, karten, pfad, gedeckt):
     for t, n, gegen, zustand in zeilen:
         marke = "%-8s %3d" % (zustand, n)
         if gegen:
-            marke += " (%d gegen)" % gegen
+            marke += " (%d dagegen)" % gegen
         print("  %-6s %-22s %s" % (t["id"], marke, t["behauptung"][:60]))
     print()
     fehlend = [t["id"] for t, n, _, z in zeilen if z == "offen"]
@@ -463,6 +470,74 @@ def these(plan, karten, id_):
         if k.get("gegenstaende"):
             print("  Gegenstaende: %s" % ", ".join(k["gegenstaende"]))
     return 0 if meine else 1
+
+
+def grenzen(plan, karten):
+    """Wo das Werk selbst duenn wird.
+
+    Der vierte Teil des Kopfes steht im Maszstab, und er hat keine eigene
+    Quelle: Er besteht aus dem, was die Lesezuege als `grenze` und
+    `gegenbeleg` angetragen haben. Ohne diesen Aufruf muesste der
+    schreibende Lauf das ganze Journal sehen, um vier Zeilen zu finden.
+    """
+    if plan is None:
+        raise Fehler("Zu dieser Quelle liegt kein Plan.")
+    meine = [k for k in karten if k.get("art") in ("gegenbeleg", "grenze")]
+    titel = {t["id"]: t["behauptung"] for t in plan["thesen"]}
+    print("%d Karten halten eine Grenze oder einen Gegenbeleg fest."
+          % len(meine))
+    print()
+    for id_ in [t["id"] for t in plan["thesen"]]:
+        seine = [k for k in meine if k["these"] == id_]
+        if not seine:
+            continue
+        print("These %s: %s" % (id_, titel[id_]))
+        for k in seine:
+            print("- [%s] %s (%s)" % (k["art"], k["behauptung"], k["lokator"]))
+        print()
+    if not meine:
+        print("Kein Lauf hat eine Grenze angetragen. Das ist selten wahr und "
+              "meist ein Zeichen, dass die Lesezuege nur bestaetigt haben.")
+        return 1
+    return 0
+
+
+def gegenstand(plan, karten, name):
+    """Die Karten zu einem Gegenstand, ueber alle Thesen hinweg.
+
+    Wer eine Notiz schreibt, braucht genau diese und nicht das Journal. Der
+    Abgleich ist ohne Ruecksicht auf Grosz- und Kleinschreibung, weil ein
+    Lesezug denselben Namen zweimal verschieden schreibt.
+    """
+    if plan is None:
+        raise Fehler("Zu dieser Quelle liegt kein Plan.")
+    if name is True:
+        raise Fehler("--gegenstand verlangt einen Namen.")
+    gesucht = name.strip().lower()
+    meine = [k for k in karten
+             if any(g.lower() == gesucht for g in k.get("gegenstaende") or [])]
+    if not meine:
+        gibt = sorted({g for k in karten for g in k.get("gegenstaende") or []})
+        raise Fehler("Keine Karte nennt `%s`. Das Journal fuehrt %s."
+                     % (name, ", ".join(gibt) or "keinen Gegenstand"))
+    # Wie er im Journal steht, nicht wie er erfragt wurde.
+    name = next(g for g in meine[0]["gegenstaende"] if g.lower() == gesucht)
+    titel = {t["id"]: t["behauptung"] for t in plan["thesen"]}
+    thesen = sorted({k["these"] for k in meine})
+    print("%s — %d Karten aus %d Thesen." % (name, len(meine), len(thesen)))
+    print()
+    for id_ in [t["id"] for t in plan["thesen"] if t["id"] in thesen]:
+        print("These %s: %s" % (id_, titel[id_]))
+        for k in [x for x in meine if x["these"] == id_]:
+            marke = "" if k.get("art") == "beleg" else " [%s]" % k.get("art")
+            print("- %s%s (%s)" % (k["behauptung"], marke, k["lokator"]))
+            if k.get("mechanismus"):
+                print("  Mechanismus: %s" % k["mechanismus"])
+            if k.get("zitat"):
+                print("  Zitat: %s" % k["zitat"])
+        print()
+    print("Diese Notiz traegt, was hier steht, und nichts weiter.")
+    return 0
 
 
 def gegenstaende(plan, karten, schwelle):
@@ -590,6 +665,10 @@ def main(argv):
             return gelesen(plan, planpf, werte["gelesen"])
         if werte.get("these"):
             return these(plan, karten, werte["these"])
+        if werte.get("grenzen"):
+            return grenzen(plan, karten)
+        if werte.get("gegenstand"):
+            return gegenstand(plan, karten, werte["gegenstand"])
         if werte.get("gegenstaende"):
             return gegenstaende(plan, karten, _zahl(werte, "schwelle", SCHWELLE))
         if werte.get("naechste"):
