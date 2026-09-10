@@ -2374,8 +2374,9 @@ Verweis auf [[Notes/gibt-es-nicht|etwas]].
         probe("die eingerückten Zeilen des Destillats bleiben draußen",
               "erster-seelord" not in r.stdout and "behauptet" not in r.stdout,
               r.stdout)
-        karte = os.path.join(ziel, ".hkf", "lesekarte-eine-zitierte-seite.yaml")
-        probe("die Karte liegt unter .hkf und nicht in der Notiz",
+        karte = os.path.join(ziel, "00-Inbox", "AgentDashboard",
+                             "lesekarte-eine-zitierte-seite.yaml")
+        probe("die Karte liegt unter inbox_base und nicht in der Notiz",
               os.path.isfile(karte)
               and io.open(q, encoding="utf-8").read() == vorher, r.stdout)
         inhalt = io.open(karte, encoding="utf-8").read()

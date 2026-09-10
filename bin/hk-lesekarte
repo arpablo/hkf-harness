@@ -20,10 +20,17 @@ vier Tranchen vor, und ohne einen Stand je Gegenstand entscheidet jede Tranche
 neu, ob sie eine Notiz bekommt.
 
 **Die Karte ist Prozesszustand und kein Inhalt.** Sie liegt darum nicht in der
-Quellennotiz, sondern als `.hkf/lesekarte-<quelle>.yaml` neben der Wurzeldatei
-der Lieferung. Was gelesen wurde und wann, steht weiter im Abschnitt
-`# Tranchen` der Quellennotiz — das ist eine Auskunft ueber die Quelle und
-gehoert einem Leser. Welche Entitaet noch offen ist, gehoert dem Lauf.
+Quellennotiz, sondern unter `<inbox_base>/AgentDashboard/`. Dieser Bereich ist
+der einzige, den Core ausdruecklich von der Pruefung ausnimmt: „Unsortiertes,
+von HKF nicht geprueft" (§3.2.6). Genau dorthin gehoert ein Arbeitszettel, den
+niemand liest und der keine Aussage ueber den Gegenstand macht.
+
+Was gelesen wurde und wann, steht weiter im Abschnitt `# Tranchen` der
+Quellennotiz — das ist eine Auskunft ueber die Quelle und gehoert einem Leser.
+Welche Entitaet noch offen ist, gehoert dem Lauf.
+
+Der Name des Bereichs kommt aus der Wurzeldatei und steht hier nicht fest. Eine
+Lieferung hat keine Bereiche (§4), dort gilt die Vorgabe `00-Inbox`.
 
 `--anlegen` liest Wilmas Abschnitt `## Notiz-Kandidaten`, Zeile fuer Zeile:
 
@@ -44,7 +51,7 @@ from hkf.quelle import Fehler, quellennotiz                    # noqa: E402
 
 FORMAT = "hkf-lesekarte"
 FASSUNG = 1
-VERZEICHNIS = ".hkf"
+DASHBOARD = "AgentDashboard"
 
 BEHANDLUNGEN = ("offen", "create_or_extend", "link_if_exists", "context_only")
 ZUSTAENDE = ("offen", "angelegt", "ergaenzt", "zurueckgestellt", "verworfen")
@@ -65,8 +72,13 @@ def kartenpfad(quellpfad):
     wurzel = ablage.aufwaerts(os.path.dirname(os.path.abspath(quellpfad)))
     if not wurzel:
         raise Fehler("%s liegt in keiner Ablage (§3.1)." % quellpfad)
+    try:
+        inbox = ablage.bereiche(wurzel)["inbox_base"]
+    except Exception:
+        inbox = ablage.VORGABEN["inbox_base"]      # eine Lieferung hat keine
     stamm = os.path.basename(quellpfad)[:-3]
-    return os.path.join(wurzel, VERZEICHNIS, "lesekarte-%s.yaml" % stamm)
+    return os.path.join(wurzel, inbox or ablage.VORGABEN["inbox_base"],
+                        DASHBOARD, "lesekarte-%s.yaml" % stamm)
 
 
 def lesen(pfad):
@@ -219,7 +231,7 @@ def anlegen(quellpfad, pfad, karte, herkunft, force):
     if not eintraege:
         raise Fehler("%s: keinen Kandidaten gefunden."
                      % ("die Standardeingabe" if herkunft == "-" else herkunft))
-    wurzel = os.path.dirname(os.path.dirname(pfad))
+    wurzel = os.path.dirname(os.path.dirname(os.path.dirname(pfad)))
     sichern(pfad, {"format": FORMAT, "version": FASSUNG,
                    "quelle": os.path.relpath(os.path.abspath(quellpfad),
                                              wurzel).replace(os.sep, "/"),

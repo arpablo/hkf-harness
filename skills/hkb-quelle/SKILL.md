@@ -313,9 +313,10 @@ Entscheidung aus Tranche zwei ist in Tranche sieben vergessen.
 Die beiden liegen auch verschieden. Die Tranchenliste steht als Abschnitt
 `# Tranchen` in der Quellennotiz, weil sie eine Auskunft über die Quelle ist:
 Sie sagt einem späteren Leser, welches Material gelesen wurde und wann. Die
-Lesekarte ist reiner Laufzustand und liegt als `.hkf/lesekarte-<quelle>.yaml`
-neben der Wurzeldatei der Lieferung. Sie geht beim Import nicht mit, und
-niemand muss sie je lesen.
+Lesekarte ist reiner Laufzustand und liegt unter
+`<inbox_base>/AgentDashboard/`. Das ist der einzige Bereich, den Core
+ausdrücklich von der Prüfung ausnimmt: „Unsortiertes, von HKF nicht geprüft"
+(§3.2.6). Sie geht beim Import nicht mit, und niemand muss sie je lesen.
 
 Die Liste steht danach als Abschnitt `# Tranchen` in der Quellennotiz und ist
 **der Stand des Laufs, nicht dein Gedächtnis**. Das ist der Grund, warum sie
