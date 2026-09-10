@@ -36,10 +36,10 @@ Aufzaehlung darin als Tranche.
 import datetime, io, os, re, sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
-from hkf import ablage, frontmatter, notiz                    # noqa: E402
+from hkf import ablage, frontmatter, notiz, quelle            # noqa: E402
+from hkf.quelle import Fehler, quellennotiz                   # noqa: E402
 
 WERKZEUG = "hk-tranchen"
-QUELLTYP = "source"
 UEBERSCHRIFT = "Tranchen"
 SPALTEN = ("Nr", "Abgrenzung", "Stand", "Ertrag")
 OFFEN = "offen"
@@ -49,10 +49,6 @@ LEER = "—"
 # Eine Tabellenzelle endet am naechsten `|`, das nicht mit `\` geschuetzt ist.
 ZELLE = re.compile(r"(?<!\\)\|")
 VORSATZ = re.compile(r"^(?:[-*+]\s+|\d+[.)]\s+)")
-
-
-class Fehler(Exception):
-    pass
 
 
 # ── Der Abschnitt ───────────────────────────────────────────────────────
@@ -113,41 +109,6 @@ def einsetzen(body, block):
 
 
 # ── Die Quellennotiz ────────────────────────────────────────────────────
-
-def _typname(pfad, wert):
-    """Der Typ einer Notiz, in Text- wie in Linkform (Core §3.3)."""
-    ziel = notiz.linkziel(wert)
-    if ziel is None:
-        return str(wert or "").strip()
-    seite = "/".join(ziel.split("/")[-2:])
-    verz = os.path.dirname(os.path.abspath(pfad))
-    while True:
-        try:
-            wurzel, art = ablage.finde_ablage(verz)
-        except ablage.KeineAblage:
-            eltern = os.path.dirname(verz)
-            if eltern == verz:
-                return ""
-            verz = eltern
-            continue
-        if art != "hkb":
-            return ""
-        konfig = os.path.join(wurzel, ablage.bereiche(wurzel)["config_base"])
-        return ablage.typseiten(konfig).get(seite, "")
-
-
-def quellennotiz(pfad):
-    """(kopf, body) einer Quellennotiz — sonst `Fehler`."""
-    if not os.path.isfile(pfad):
-        raise Fehler("%s: keine Datei." % pfad)
-    daten, _ = frontmatter.lesen(pfad)
-    typ = _typname(pfad, daten.get("type"))
-    if typ != QUELLTYP:
-        raise Fehler("%s: `type` ist %s und nicht `source`. Tranchen führt "
-                     "eine Quellennotiz." % (pfad, typ and "`%s`" % typ or "leer"))
-    kopf, body = notiz.teilen(io.open(pfad, encoding="utf-8").read())
-    return kopf, body
-
 
 def sichern(pfad, kopf, body):
     """Schreiben und die Änderung hinschreiben (Core §3.3, Regel 5)."""
