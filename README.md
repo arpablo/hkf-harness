@@ -251,7 +251,7 @@ lib/hkf/text/ der Schreibregelprüfer: segment, engine, rules, rhythm_lint
 lib/hkf/hennibock/ die Übertragung an eine HenniBock-Instanz
 rules/       deutsch.json, der Basissatz der Schreibregeln
 bin/         hk-init, hk-lint, hk-import, hk-export, hk-export-wiki, hk-ingest,
-             hk-tranchen, hk-types, hk-ablage, hk-text, hk-install,
+             hk-tranchen, hk-lesekarte, hk-types, hk-ablage, hk-text, hk-install,
              hk-suche, hk-obsidian, hk-erwaehnungen, hk-kontext, hk-publikation, hk-verweise,
              hk-wikidata,
              hk-buch, hk-epub, hk-kontinuitaet, hk-publish, hk-kapitel

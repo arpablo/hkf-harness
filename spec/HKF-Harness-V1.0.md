@@ -580,6 +580,7 @@ traegt trotzdem die ganze Unterscheidung zwischen Programm und Prompt.
 | `hk-kapitel` | Welches Kapitel als naechstes erscheint |
 | `hk-kontext` | Was in dieser Ablage gilt |
 | `hk-kontinuitaet` | Was in einem Erzaehlbestand auseinanderlaeuft |
+| `hk-lesekarte` | Den Stand der Entitaeten einer grossen Quelle fuehren: Behandlung und Zustand je Gegenstand, neben der Lieferung |
 | `hk-lint` | Prueft eine Wissensbasis gegen HKF Core (§6.3), mit Notizen als Argument auf sie zugeschnitten |
 | `hk-obsidian` | Die schnelle Auskunft aus der laufenden App |
 | `hk-publikation` | Die Lesereihenfolge einer Publikation fuehren |

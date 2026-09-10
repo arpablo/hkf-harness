@@ -2358,6 +2358,69 @@ Verweis auf [[Notes/gibt-es-nicht|etwas]].
         probe("eine Notiz, die keine Quelle ist, wird abgewiesen",
               r.returncode == 2 and "nicht `source`" in r.stderr, r.stderr)
 
+        print("hk-lesekarte: der Stand der Entitäten steht daneben")
+        HK_LK = os.path.join(BIN, "hk-lesekarte")
+        vorher = io.open(q, encoding="utf-8").read()
+        r = lauf(HK_LK, q, "--anlegen", "-",
+                 input="## Notiz-Kandidaten\n"
+                       "- Lord Fisher — trägt die Reformlinie — "
+                       "genannt als: Fisher, Admiral Fisher\n"
+                       "  Ist: Erster Seelord (S. 44)\n"
+                       "  Behauptet: er habe die Flotte umgestellt (S. 47)\n"
+                       "- Café Groppi — context_only — nur ein Schauplatz\n"
+                       "- Dardanellen — die Meerenge, um die Teil III kreist\n")
+        probe("--anlegen macht aus den Kandidaten drei Einträge",
+              r.returncode == 0 and "3 Eintraege angelegt" in r.stdout, r.stdout)
+        probe("die eingerückten Zeilen des Destillats bleiben draußen",
+              "erster-seelord" not in r.stdout and "behauptet" not in r.stdout,
+              r.stdout)
+        karte = os.path.join(ziel, ".hkf", "lesekarte-eine-zitierte-seite.yaml")
+        probe("die Karte liegt unter .hkf und nicht in der Notiz",
+              os.path.isfile(karte)
+              and io.open(q, encoding="utf-8").read() == vorher, r.stdout)
+        inhalt = io.open(karte, encoding="utf-8").read()
+        probe("ein Akzent im Namen überlebt in der Kennung",
+              "id: cafe-groppi" in inhalt, inhalt)
+        probe("eine Behandlung in der Zeile wird übernommen",
+              "behandlung: context_only" in inhalt, inhalt)
+        r = lauf(HK_LK, q, "--anlegen", "-", input="- X\n")
+        probe("eine zweite Karte nur mit --force",
+              r.returncode == 2 and "--force" in r.stderr, r.stderr)
+        r = lauf(HK_LK, q, "--setzen", "lord-fisher",
+                 "--behandlung", "create_or_extend")
+        probe("--setzen vergibt die Behandlung",
+              r.returncode == 0 and "create_or_extend/offen" in r.stdout, r.stdout)
+        stand = io.open(karte, encoding="utf-8").read()
+        r = lauf(HK_LK, q, "--setzen", "cafe-groppi", "--zustand", "angelegt")
+        probe("`angelegt` ohne `create_or_extend` ist ein Widerspruch",
+              r.returncode == 2 and "create_or_extend" in r.stderr, r.stderr)
+        probe("und die Karte bleibt dabei Zeichen für Zeichen dieselbe",
+              io.open(karte, encoding="utf-8").read() == stand,
+              io.open(karte, encoding="utf-8").read())
+        r = lauf(HK_LK, q, "--setzen", "lord-fisher", "--zustand", "angelegt",
+                 "--notiz", "Persons/lord-fisher")
+        probe("mit der Behandlung geht es",
+              r.returncode == 0 and "Persons/lord-fisher" in r.stdout, r.stdout)
+        r = lauf(HK_LK, q, "--offen")
+        probe("--offen zeigt, was noch aussteht",
+              r.returncode == 0 and "dardanellen" in r.stdout
+              and "lord-fisher" not in r.stdout, r.stdout)
+        r = lauf(HK_LK, q, "--nachtragen", "Arab Bureau — create_or_extend — "
+                                           "Kitcheners Apparat in Kairo")
+        probe("--nachtragen ergänzt einen Eintrag",
+              r.returncode == 0 and "arab-bureau" in r.stdout, r.stdout)
+        probe("und merkt ihn als nachgetragen an",
+              "nachgetragen: true" in io.open(karte, encoding="utf-8").read(),
+              io.open(karte, encoding="utf-8").read())
+        r = lauf(HK_LK, q, "--setzen", "gibt-es-nicht", "--zustand", "verworfen")
+        probe("eine unbekannte Kennung wird abgewiesen",
+              r.returncode == 2 and "keinen Eintrag" in r.stderr, r.stderr)
+        probe("hk-lint sieht die Karte nicht",
+              lauf(os.path.join(BIN, "hk-lint"), ziel).returncode == 0)
+        r = lauf(HK_LK, os.path.join(ziel, WIKI, "Persons", "grace-hopper.md"))
+        probe("eine Notiz, die keine Quelle ist, wird abgewiesen",
+              r.returncode == 2 and "nicht `source`" in r.stderr, r.stderr)
+
         print("hk-types: Typseiten, Bases und die Linkform von `type`")
         r = lauf(os.path.join(BIN, "hk-types"), ziel, "--umstellen")
         probe("das Skript läuft durch", r.returncode == 0, r.stdout)
