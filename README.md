@@ -262,7 +262,8 @@ templates/   die Grundausstattung, aus der hk-init schöpft
 bundles/     Typen, die nicht jede Ablage braucht, als Lieferung zum Import
 skills/      die KI-Schicht: hkb und sieben Operationen, siehe skills/README.md
 agents/      die Subagenten: wilma liest, edith bestimmt, marlene und frida
-             schreiben, astrid und herta lektorieren, doris liest den Bestand
+             schreiben, astrid und herta lektorieren, doris liest den Bestand;
+             alva, berta, cora und dina bilden den Evidenz-Compiler
 commands/    die Slash-Kommandos, siehe hk-install
 hooks/       sitzung.py spielt den Kanon ein, schreibregeln.py blockt
 core/        der Kanon: Identität, Zusammenarbeit, Sprache, Schreibregeln, YAML
@@ -337,7 +338,7 @@ setzen ihn voraus: [`hkb-notiz`](skills/hkb-notiz/SKILL.md),
 [`hkb-lint`](skills/hkb-lint/SKILL.md),
 [`hkb-quelle`](skills/hkb-quelle/SKILL.md).
 
-Unter [`agents/`](agents/) liegen drei Subagenten.
+Unter [`agents/`](agents/) liegen die Subagenten.
 [`wilma`](agents/wilma.md) liest eine Quelle in ihrem eigenen Kontext und gibt
 ein belegtes Destillat zurück. `hkb-quelle` ruft sie und liest nie selbst —
 wer ein Buch im laufenden Gespräch liest, hat es danach im Rücken, und die
@@ -350,6 +351,12 @@ Ablage, und für sie gilt dieselbe Regel wie für einen Skill: Was mechanisch
 geht, messen sie mit `hk-text` und `hk-lint`, statt danach zu urteilen. Ihre
 Stimme holen sie sich mit `hk-kontext` — ein Subagent sieht nicht, was die
 Hauptsitzung bekommen hat.
+
+Der Evidenz-Compiler hat vier eigene Agenten: [`alva`](agents/alva.md) plant
+die Werkfragen, [`berta`](agents/berta.md) schreibt lokatorgenaue Evidenz,
+[`cora`](agents/cora.md) schreibt Themenpatches gegen einen HKF-Bundle-Baum und
+[`dina`](agents/dina.md) kompiliert die abschließende Synthese ebenfalls in
+diesen Baum. Sie geben keine Langtexte im Chat weiter.
 
 **Damit ein Modell sie findet**, ist der Harness ein Plugin. Das Manifest steht
 in `.claude-plugin/`, die Bausteine liegen an der Wurzel: `skills/`, `agents/`,

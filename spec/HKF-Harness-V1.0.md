@@ -553,9 +553,13 @@ traegt trotzdem die ganze Unterscheidung zwischen Programm und Prompt.
 
 | Agent | Was er tut | Schreibt |
 |---|---|---|
+| `alva` | Erstellt für den Evidenz-Compiler einen Quellenplan mit Werkfrage, Erklärungsthemen und offenen Fragen | ja |
 | `astrid` | Einen fertigen Sachtext lektorieren: Mechanik messen, Frontmatter prüfen, Stimme und Kanon beurteilen, kürzen vor umschreiben | ja |
 | `bebildern` | Für genau einen ai-image-Callout das Bild erzeugen, die Varianten ansehen, die beste ablegen und den Alt-Text gegen das Ergebnis abgleichen | ja |
+| `berta` | Liest ein vorbereitetes Quellensegment und schreibt lokatorgenaue Evidenzkarten als JSONL | ja |
 | `bild-sidecar` | Schreibt henni-image-Sidecar-JSONs für eine Liste von Bilddateien | ja |
+| `cora` | Schreibt aus einem abgegrenzten Evidenzpaket einen isolierten Patch gegen einen HKF-Bundle-Baum für eine Quellennotiz oder Wissensnotiz | ja |
+| `dina` | Schreibt aus Plan, Abdeckungsstand und Evidenzindex die quellengebundene Synthese als Patch gegen einen HKF-Bundle-Baum | ja |
 | `doris` | Den Bestand einer erzählenden Wissensbasis als Ganzes lesen und eine Agenda schreiben: was über viele Texte hinweg trägt, was sich abnutzt, wo der Kanon auseinanderläuft | ja |
 | `edith` | Vor der ersten Tranche die Gegenstaende einer Quelle bestimmen: was jeder von ihnen unabhaengig von dieser Quelle ist, mit Wikidata-Kennung | ja |
 | `frida` | Die Erstfassung eines erzählenden Textes schreiben: eine Geschichte, ein Kapitel, ein Protokoll, gegen den Kanon der Ablage | ja |
