@@ -2422,6 +2422,152 @@ Verweis auf [[Notes/gibt-es-nicht|etwas]].
         probe("eine Notiz, die keine Quelle ist, wird abgewiesen",
               r.returncode == 2 and "nicht `source`" in r.stderr, r.stderr)
 
+        print("hk-extrakt: die These kommt vor der Notiz")
+        HK_EX = os.path.join(BIN, "hk-extrakt")
+        journal = os.path.join(ziel, "00-Inbox", "AgentDashboard",
+                               "extrakt-eine-zitierte-seite.jsonl")
+        planpf = os.path.join(ziel, "00-Inbox", "AgentDashboard",
+                              "plan-eine-zitierte-seite.yaml")
+        PLAN = ("werkfrage: Warum entstand keine neue Ordnung?\n"
+                "thesen:\n"
+                "  - id: t1\n"
+                "    behauptung: Die Aufteilung folgte Ressortinteressen.\n"
+                "    mechanismus: Behoerden gaben widerspruechliche Zusagen.\n"
+                "  - id: t2\n"
+                "    behauptung: Kitchener setzte auf das Kalifat.\n"
+                "  - id: t3\n"
+                "    behauptung: Die Zusagen widersprachen sich.\n"
+                "strecken:\n"
+                "  - id: s1\n"
+                "    abschnitt: Teil I\n"
+                "    thesen: [t1]\n"
+                "  - id: s2\n"
+                "    abschnitt: Teil II\n"
+                "    thesen: [t2, t3]\n"
+                "  - id: s3\n"
+                "    abschnitt: Teil III\n"
+                "    thesen: [t1]\n")
+        r = lauf(HK_EX, q)
+        probe("ohne Plan sagt das Werkzeug, was fehlt",
+              r.returncode == 0 and "--plan" in r.stdout, r.stdout)
+        r = lauf(HK_EX, q, "--plan", "-", input="thesen: [{id: t1}]\n")
+        probe("ein Plan ohne Werkfrage wird abgewiesen",
+              r.returncode == 2 and "werkfrage" in r.stderr, r.stderr)
+        r = lauf(HK_EX, q, "--plan", "-",
+                 input="werkfrage: X\nthesen:\n  - id: t1\n    behauptung: Y\n"
+                       "strecken:\n  - id: s1\n    thesen: [t9]\n")
+        probe("eine Strecke zu einer unbekannten These auch",
+              r.returncode == 2 and "`t9`" in r.stderr, r.stderr)
+        viele = "werkfrage: X\nthesen:\n" + "".join(
+            "  - id: t%d\n    behauptung: Y%d\n" % (i, i) for i in range(1, 12))
+        r = lauf(HK_EX, q, "--plan", "-", input=viele)
+        probe("mehr als neun Thesen nur mit --force",
+              r.returncode == 2 and "--force" in r.stderr, r.stderr)
+        r = lauf(HK_EX, q, "--plan", "-", input=PLAN)
+        probe("--plan legt Werkfrage, Thesen und Strecken an",
+              r.returncode == 0 and "3 Thesen, 3 Strecken" in r.stdout, r.stdout)
+        probe("der Plan liegt neben der Lesekarte und nicht in der Notiz",
+              os.path.isfile(planpf), planpf)
+        r = lauf(HK_EX, q, "--plan", "-", input=PLAN)
+        probe("ein zweiter Plan nur mit --force",
+              r.returncode == 2 and "--force" in r.stderr, r.stderr)
+        r = lauf(HK_EX, q, "--naechste")
+        probe("--naechste nimmt die Strecke mit der unbelegten These",
+              r.returncode == 0 and "`s1`" in r.stdout
+              and "unbelegte These t1" in r.stdout, r.stdout)
+        S1 = ('{"these":"t1","behauptung":"Zwei Ressorts sagten dasselbe zu.",'
+              '"lokator":"S. 44","gegenstaende":["Arab Bureau","Kitchener"]}\n'
+              '{"these":"t1","behauptung":"Das Ressort behielt seine Linie.",'
+              '"lokator":"S. 51","gegenstaende":["Arab Bureau"]}\n'
+              '{"these":"t1","behauptung":"Die Runde tagte im Cafe.",'
+              '"lokator":"S. 63","gegenstaende":["Cafe Groppi"]}\n')
+        r = lauf(HK_EX, q, "--anfuegen", "-", input=S1)
+        probe("--anfuegen ohne --strecke wird abgewiesen",
+              r.returncode == 2 and "--strecke" in r.stderr, r.stderr)
+        r = lauf(HK_EX, q, "--anfuegen", "-", "--strecke", "s1", input=S1)
+        probe("mit --strecke nimmt es die Karten auf",
+              r.returncode == 0 and "3 Karten aufgenommen" in r.stdout, r.stdout)
+        probe("und die Karten erben die Strecke, ohne sie in der Zeile",
+              '"strecke": "s1"' in io.open(journal, encoding="utf-8").read(),
+              io.open(journal, encoding="utf-8").read()[:200])
+        vor = io.open(journal, encoding="utf-8").read()
+        r = lauf(HK_EX, q, "--anfuegen", "-", "--strecke", "s2",
+                 input='{"these":"t2","behauptung":"A","lokator":"S. 9"}\n'
+                       '{"these":"t2","behauptung":"B","lokator":"S. 9",'
+                       '"kapitel":"3"}\n')
+        probe("ein unbekanntes Feld weist den ganzen Stapel ab",
+              r.returncode == 2 and "kapitel" in r.stderr
+              and "Zeile 2" in r.stderr, r.stderr)
+        probe("und das Journal bleibt dabei Zeichen für Zeichen dasselbe",
+              io.open(journal, encoding="utf-8").read() == vor)
+        r = lauf(HK_EX, q, "--anfuegen", "-", "--strecke", "s2",
+                 input='{"these":"t2","behauptung":"%s","lokator":"S. 9"}\n'
+                       % ("x" * 401))
+        probe("eine zu lange Behauptung wird abgewiesen",
+              r.returncode == 2 and "401 Zeichen" in r.stderr, r.stderr)
+        r = lauf(HK_EX, q, "--anfuegen", "-", "--strecke", "s2",
+                 input='{"these":"t7","behauptung":"A","lokator":"S. 9"}\n')
+        probe("eine Karte ohne These im Plan ist ein Befund und keine Karte",
+              r.returncode == 2 and "Befund" in r.stderr, r.stderr)
+        r = lauf(HK_EX, q, "--anfuegen", "-", "--strecke", "s1",
+                 input='{"these":"t1","behauptung":"A","lokator":"S. 9"}\n')
+        probe("eine gelesene Strecke wird nicht zweimal gelesen",
+              r.returncode == 2 and "--force" in r.stderr, r.stderr)
+        r = lauf(HK_EX, q, "--anfuegen", "-", "--strecke", "s2",
+                 input='{"these":"t2","behauptung":"Kitchener schrieb an ihn.",'
+                       '"lokator":"S. 88","gegenstaende":["Arab Bureau",'
+                       '"Hussein"]}\n'
+                       '{"these":"t3","art":"gegenbeleg",'
+                       '"behauptung":"Die Zusage war eingeschraenkt.",'
+                       '"lokator":"S. 91","gegenstaende":["Hussein"]}\n')
+        probe("die zweite Strecke geht durch",
+              r.returncode == 0 and "2 Karten aufgenommen" in r.stdout, r.stdout)
+        r = lauf(HK_EX, q, "--stand")
+        probe("--stand nennt gedeckt, dünn und ohne Beleg",
+              r.returncode == 0 and "t1     gedeckt" in r.stdout
+              and "Duenn: t2, t3" in r.stdout, r.stdout)
+        probe("und zählt den Gegenbeleg gesondert",
+              "(1 gegen)" in r.stdout, r.stdout)
+        r = lauf(HK_EX, q, "--these", "t3")
+        probe("--these gibt dem schreibenden Lauf seine Karten",
+              r.returncode == 0 and "[gegenbeleg]" in r.stdout
+              and "S. 91" in r.stdout, r.stdout)
+        r = lauf(HK_EX, q, "--gegenstaende")
+        probe("--gegenstaende nimmt auf, wer zwei Thesen trägt",
+              r.returncode == 0 and "- Arab Bureau" in r.stdout
+              and "- Hussein" in r.stdout, r.stdout)
+        probe("wer in der Thesenbehauptung genannt ist, zählt auch bei einer",
+              "- Kitchener" in r.stdout
+              and "Thesenbehauptung genannt" in r.stdout, r.stdout)
+        probe("wer unter der Schwelle bleibt, wird Erwähnung und keine Notiz",
+              "# Cafe Groppi — nur t1" in r.stdout, r.stdout)
+        kandidaten = r.stdout
+        r = lauf(HK_EX, q, "--gegenstaende", "--schwelle", "3")
+        probe("--schwelle verschiebt die Grenze",
+              "# Arab Bureau — nur t1, t2" in r.stdout, r.stdout)
+        r = lauf(HK_LK, q, "--anlegen", "-", "--force", input=kandidaten)
+        probe("die Ausgabe frisst hk-lesekarte unverändert",
+              r.returncode == 0 and "3 Eintraege angelegt" in r.stdout, r.stdout)
+        probe("und die Kommentarzeilen fallen dabei heraus",
+              "cafe-groppi" not in io.open(karte, encoding="utf-8").read(),
+              io.open(karte, encoding="utf-8").read())
+        r = lauf(HK_EX, q, "--naechste")
+        probe("bleibt eine dünne These ohne Strecke, sagt das Werkzeug es",
+              r.returncode == 1 and "Ungedeckt bleibt" in r.stdout
+              and "`t2`" in r.stdout, r.stdout)
+        r = lauf(HK_EX, q, "--gelesen", "s3")
+        probe("--gelesen hakt eine Strecke ohne Ertrag ab",
+              r.returncode == 0 and "Noch offen: 0 von 3" in r.stdout, r.stdout)
+        r = lauf(HK_EX, q, "--naechste")
+        probe("danach ist nichts mehr zu lesen",
+              r.returncode == 1 and "Alle Strecken sind gelesen" in r.stdout,
+              r.stdout)
+        probe("hk-lint sieht Plan und Journal nicht",
+              lauf(os.path.join(BIN, "hk-lint"), ziel).returncode == 0)
+        r = lauf(HK_EX, os.path.join(ziel, WIKI, "Persons", "grace-hopper.md"))
+        probe("eine Notiz, die keine Quelle ist, wird abgewiesen",
+              r.returncode == 2 and "nicht `source`" in r.stderr, r.stderr)
+
         print("hk-types: Typseiten, Bases und die Linkform von `type`")
         r = lauf(os.path.join(BIN, "hk-types"), ziel, "--umstellen")
         probe("das Skript läuft durch", r.returncode == 0, r.stdout)

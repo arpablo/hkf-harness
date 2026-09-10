@@ -48,11 +48,10 @@ import io, os, re, sys, unicodedata
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "lib"))
 import yaml                                                    # noqa: E402
 from hkf import ablage, frontmatter                            # noqa: E402
-from hkf.quelle import Fehler, quellennotiz                    # noqa: E402
+from hkf.quelle import Fehler, arbeitszettel, quellennotiz     # noqa: E402
 
 FORMAT = "hkf-lesekarte"
 FASSUNG = 1
-DASHBOARD = "AgentDashboard"
 
 BEHANDLUNGEN = ("offen", "create_or_extend", "link_if_exists", "context_only")
 ZUSTAENDE = ("offen", "angelegt", "ergaenzt", "zurueckgestellt", "verworfen")
@@ -70,16 +69,7 @@ GENANNT = re.compile(r"^genannt als:\s*", re.I)
 
 def kartenpfad(quellpfad):
     """Wo die Karte zu dieser Quellennotiz liegt."""
-    wurzel = ablage.aufwaerts(os.path.dirname(os.path.abspath(quellpfad)))
-    if not wurzel:
-        raise Fehler("%s liegt in keiner Ablage (§3.1)." % quellpfad)
-    try:
-        inbox = ablage.bereiche(wurzel)["inbox_base"]
-    except Exception:
-        inbox = ablage.VORGABEN["inbox_base"]      # eine Lieferung hat keine
-    stamm = os.path.basename(quellpfad)[:-3]
-    return os.path.join(wurzel, inbox or ablage.VORGABEN["inbox_base"],
-                        DASHBOARD, "lesekarte-%s.yaml" % stamm)
+    return arbeitszettel(quellpfad, "lesekarte-%s.yaml")
 
 
 def lesen(pfad):

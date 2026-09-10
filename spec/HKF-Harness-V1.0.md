@@ -574,6 +574,7 @@ traegt trotzdem die ganze Unterscheidung zwischen Programm und Prompt.
 | `hk-erwaehnungen` | Unverlinkte Erwaehnungen einer Notiz zu Verweisen machen |
 | `hk-export` | Ein Bundle aus der Wissensbasis herausschreiben (Core §6.2) |
 | `hk-export-wiki` | Die Ablage als Lieferung fuer HenniWiki herausschreiben |
+| `hk-extrakt` | Das Evidenzjournal einer Quelle fuehren: Plan, Karten, Abdeckung, Schwelle |
 | `hk-import` | Ein Bundle in die Wissensbasis übernehmen (Core §6.1) |
 | `hk-ingest` | Eine Quelle in eine Lieferung einlesen |
 | `hk-init` | Eine leere Wissensbasis anlegen |
