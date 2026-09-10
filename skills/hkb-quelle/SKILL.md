@@ -18,6 +18,11 @@ einzige Unterschied zwischen den beiden Fällen.
 > „A single source can trigger updates across 5-15 wiki pages. This is normal
 > and desired — it's the compounding effect."
 
+**Die Zahl ist eine Beobachtung und kein Soll.** Wie viele Notizen aus einer
+Quelle entstehen, sagt die Quelle und nicht dieser Skill. Eine Aufforderung,
+auf fünf bis fünfzehn zu kommen, erzeugt genau die Notizen, für die es keinen
+Grund gibt. Was einen Grund hergibt, steht unter „Wann eine Notiz entsteht".
+
 **Eine Lieferung mit nur einer Quellennotiz ist in aller Regel eine
 unfertige Lieferung.** Die Quellennotiz sagt, was gelesen wurde; sie ist der
 Beleg, nicht das Ergebnis. Das Ergebnis sind die Begriffe, Konzepte, Personen
@@ -115,8 +120,9 @@ unter `<media_base>/Clippings/`, und `file` zeigt darauf; die Notiz trägt die
 Zusammenfassung. `hk-ingest` legt beides an.
 
 **⑥ Eintragen — dann die Entitäten.** Geh Wilmas `## Notiz-Kandidaten`
-**einzeln** durch und entscheide je Kandidat: eigene Notiz, Abschnitt in einer
-anderen Notiz, oder nichts. Die Schwelle steht unten. Diese Entscheidung ist
+**einzeln** durch und gib jedem Kandidaten eine der drei Behandlungen
+`create_or_extend`, `link_if_exists` oder `context_only`. Sie stehen unten,
+zusammen mit der Frage, an der sie sich entscheiden. Diese Entscheidung ist
 deine.
 
 **Geschrieben wird von `marlene`, nicht von dir.** Gib ihr **den Pfad zum
@@ -209,8 +215,11 @@ der Kurzbeleg.
 sein. Dann sag:
 
 - was in der Lieferung liegt, nach Typ,
-- **welche Kandidaten du verworfen hast und warum** — nicht die Zahl, die
-  Gruppen,
+- **welche Kandidaten welche Behandlung bekommen haben** — die beiden ohne
+  eigene Notiz nach Gruppen und mit dem Grund, nicht als Zahl. Das ist der
+  Ort, an dem eine Entscheidung über einen Kandidaten festgehalten wird:
+  Kommt er in einer späteren Tranche wieder, behält er seine Behandlung,
+  statt neu erwogen zu werden,
 - **welche Notizen ohne Bestimmungssatz blieben**, weil die Quelle ihn nicht
   hergibt — sie warten auf eine zweite Quelle,
 - welche Zitationsangaben offen blieben.
@@ -404,13 +413,43 @@ brauchbarer Anfang: **eine eigene Notiz, wenn ein Gegenstand in zwei Quellen
 vorkommt oder in dieser einen zentral ist** — für eine beiläufige Erwähnung
 keine.
 
-Drei Fälle, in denen ein Kandidat trotzdem keine Notiz wird:
+### Drei Behandlungen, und jede wird begründet
 
-| Fall | Wohin statt dessen |
+Ein Kandidat bekommt genau eine davon:
+
+| Behandlung | Wann sie gilt | Was daraus folgt |
+|---|---|---|
+| `create_or_extend` | Der Gegenstand trägt eine eigene Frage oder Erklärung, die auch außerhalb dieser Quelle etwas erklärt. | Seine Notiz entsteht oder wird fortgeschrieben. |
+| `link_if_exists` | Er hilft dem Zusammenhang, rechtfertigt aber keine eigene Notiz. | Gibt es die Notiz schon, wird dorthin verlinkt. Sonst geschieht nichts. |
+| `context_only` | Die Erwähnung erklärt eine Szene, ein Zitat, eine Nebenbemerkung. | Sie bleibt in der Quellennotiz oder im Fließtext stehen. |
+
+**Über die Behandlung entscheidet die Rolle für die Frage der Quelle und nicht
+der Bekanntheitsgrad.** Churchill kann in einem Buch über die Dardanellen ein
+unverzichtbarer Bezugspunkt sein oder eine dekorative Nennung. Beide Male
+heißt er Churchill. Was die beiden Fälle trennt, ist die Frage, ob das Werk
+ohne ihn eine andere stellte. Dass ein Name im Text vorkommt, sagt darüber
+nichts, und dass ein Leser ihn kennt, erst recht nicht.
+
+**Die Gegenprobe für `create_or_extend`:** Nenne in einem Halbsatz die Frage
+oder die Erklärung, die dieser Gegenstand trägt. Geht das nicht, ist es keine,
+und der Kandidat gehört in eine der beiden anderen Behandlungen.
+
+Drei Fälle, die regelmäßig vorkommen und in denen die Antwort feststeht:
+
+| Fall | Behandlung |
 |---|---|
-| Er ist ein **Bestandteil** eines größeren Gegenstands der Quelle | ein Abschnitt in dessen Notiz |
-| Er ist eine **Aufzählung** ohne eigenen Begriff dahinter — „zwölf Prüfungen", „dreizehn Kennzahlen" | bleibt in der Zusammenfassung der Quellennotiz |
-| Die Quelle nennt ihn nur **im Vorbeigehen** | gar nicht; höchstens ein Wikilink, wenn es die Notiz schon gibt |
+| Er ist ein **Bestandteil** eines größeren Gegenstands der Quelle | `create_or_extend`, aber für den größeren Gegenstand. Der Bestandteil wird ein Abschnitt in dessen Notiz. |
+| Er ist eine **Aufzählung** ohne eigenen Begriff dahinter, etwa „zwölf Prüfungen" oder „dreizehn Kennzahlen" | `context_only` |
+| Die Quelle nennt ihn nur **im Vorbeigehen** | `link_if_exists` |
+
+**Eine Erwähnung ist noch kein Arbeitsauftrag.** Eine Notiz über einen
+Gegenstand, zu dem die Quelle nichts zu sagen hatte, ist teurer als keine. Sie
+steht danach im Bestand und behauptet allein dadurch, dass es hier etwas zu
+wissen gibt.
+
+Das ist keine Aufforderung, sparsam zu sein. Oben steht, dass eine Lieferung
+mit nur einer Quellennotiz unfertig ist, und beides gilt: je Kandidat eine
+Behandlung, und je `create_or_extend` ein Grund.
 
 Eine `comparison` verlangt `compares` mit mindestens zwei Verweisen. Gibt die
 Quelle nur einen der verglichenen Gegenstände her, entsteht **keine** — sonst

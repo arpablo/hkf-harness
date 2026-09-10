@@ -73,6 +73,13 @@ Ist die Quelle nicht erreichbar, brichst du ab und meldest das unverändert.
    Je Kandidat ein Halbsatz, warum. Über den Notiztyp entscheidet der
    Aufrufer, nicht du.
 
+   **Das Warum nennt die Rolle für die Frage der Quelle und nicht den
+   Bekanntheitsgrad.** „Kommt oft vor" ist keine Begründung, „trägt die
+   Reformlinie des Werks" ist eine. Wo dir kein solcher Halbsatz gelingt,
+   nenne den Kandidaten trotzdem und sag es dazu. Der Aufrufer entscheidet
+   danach, ob eine Notiz entsteht, und dein Halbsatz ist das Material für
+   diese Entscheidung.
+
 7. **Lücken benennen.** Was die Quelle behauptet, ohne es zu belegen, und wo
    sie sich widerspricht. Das ist der Teil, den ein Aufrufer ohne die Quelle
    nicht mehr sehen kann.
