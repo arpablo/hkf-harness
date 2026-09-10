@@ -2471,6 +2471,11 @@ Verweis auf [[Notes/gibt-es-nicht|etwas]].
         r = lauf(HK_EX, q, "--plan", "-", input=PLAN)
         probe("ein zweiter Plan nur mit --force",
               r.returncode == 2 and "--force" in r.stderr, r.stderr)
+        r = lauf(HK_EX, q, "--thesen")
+        probe("--thesen gibt dem Lesezug den Wortlaut und den Mechanismus",
+              r.returncode == 0
+              and "Behoerden gaben widerspruechliche Zusagen." in r.stdout
+              and "Warum entstand keine neue Ordnung?" in r.stdout, r.stdout)
         r = lauf(HK_EX, q, "--naechste")
         probe("--naechste nimmt die Strecke mit der unbelegten These",
               r.returncode == 0 and "`s1`" in r.stdout
@@ -2533,9 +2538,12 @@ Verweis auf [[Notes/gibt-es-nicht|etwas]].
               r.returncode == 0 and "[grenze]" in r.stdout
               and "[gegenbeleg]" in r.stdout, r.stdout)
         r = lauf(HK_EX, q, "--stand")
-        probe("--stand nennt gedeckt, dünn und ohne Beleg",
-              r.returncode == 0 and "t1     gedeckt" in r.stdout
-              and "Duenn: t2, t3" in r.stdout, r.stdout)
+        probe("eine These ist nicht gedeckt, solange eine Strecke fehlt",
+              r.returncode == 0 and "t1     duenn      4 Karten 1/2 Strecken"
+              in r.stdout, r.stdout)
+        probe("--stand zeigt je These die Karten und die gelesenen Strecken",
+              "t2     duenn      1 Karten 1/1 Strecken" in r.stdout
+              and "Duenn: t1, t2, t3" in r.stdout, r.stdout)
         probe("und zählt Gegenbeleg und Grenze gesondert",
               "(1 dagegen)" in r.stdout, r.stdout)
         r = lauf(HK_EX, q, "--these", "t3")
@@ -2571,9 +2579,8 @@ Verweis auf [[Notes/gibt-es-nicht|etwas]].
               "cafe-groppi" not in io.open(karte, encoding="utf-8").read(),
               io.open(karte, encoding="utf-8").read())
         r = lauf(HK_EX, q, "--naechste")
-        probe("bleibt eine dünne These ohne Strecke, sagt das Werkzeug es",
-              r.returncode == 1 and "Ungedeckt bleibt" in r.stdout
-              and "`t2`" in r.stdout, r.stdout)
+        probe("--naechste nimmt danach die Strecke der noch dünnen These",
+              r.returncode == 0 and "`s3`" in r.stdout, r.stdout)
         r = lauf(HK_EX, q, "--gelesen", "s3")
         probe("--gelesen hakt eine Strecke ohne Ertrag ab",
               r.returncode == 0 and "Noch offen: 0 von 3" in r.stdout, r.stdout)
@@ -2581,6 +2588,11 @@ Verweis auf [[Notes/gibt-es-nicht|etwas]].
         probe("danach ist nichts mehr zu lesen",
               r.returncode == 1 and "Alle Strecken sind gelesen" in r.stdout,
               r.stdout)
+        r = lauf(HK_EX, q, "--stand")
+        probe("und t1 ist gedeckt, sobald beide seiner Strecken gelesen sind",
+              "t1     gedeckt    4 Karten 2/2 Strecken" in r.stdout, r.stdout)
+        probe("t2 bleibt dünn, weil eine Karte unter der Marke liegt",
+              "Duenn: t2, t3" in r.stdout, r.stdout)
         r = lauf(HK_EX, q, "--strecken")
         probe("--strecken speist hk-tranchen für den Nachweis in der Notiz",
               r.returncode == 0 and r.stdout.splitlines()[0] == "Teil I"

@@ -8,6 +8,7 @@
     hk-extrakt <quellennotiz> --anfuegen <datei|-> --strecke <id>
     hk-extrakt <quellennotiz> --gelesen <id>           Strecke ohne Ertrag
     hk-extrakt <quellennotiz> --stand                  Abdeckung je These
+    hk-extrakt <quellennotiz> --thesen                 die Thesen im Wortlaut
     hk-extrakt <quellennotiz> --these <id>             die Karten einer These
     hk-extrakt <quellennotiz> --grenzen                wo das Werk selbst duenn wird
     hk-extrakt <quellennotiz> --gegenstaende           wer eine Notiz bekommt
@@ -353,18 +354,32 @@ def gelesen(plan, planpf, strecke):
 # ── Der Stand ───────────────────────────────────────────────────────────
 
 def _abdeckung(plan, karten, gedeckt):
-    """Je These: wie viele Karten, und wie es darum steht."""
+    """Je These: Karten, gelesene Strecken, und wie es darum steht.
+
+    **Die Zahl der Karten allein sagt nichts ueber die Deckung.** Die erste
+    Strecke eines Buchs liefert zu fast jeder These ein paar Saetze, weil ein
+    Autor seine Thesen in der Einleitung anreiszt. Wer daraus `gedeckt`
+    schlieszt, hoert nach einem Zwoelftel des Werks auf. Genau das passierte
+    beim ersten Lauf an Fromkin.
+
+    Gedeckt ist eine These darum erst, wenn **jede Strecke gelesen ist, die
+    der Plan ihr zugewiesen hat**, und dann noch genug Karten daliegen. Der
+    Plan sagt, wo die These verhandelt wird, und das ist eine Aussage ueber
+    das Werk. Die Kartenzahl ist nur ein Ertrag.
+    """
     aus = []
     for t in plan["thesen"]:
         meine = [k for k in karten if k["these"] == t["id"]]
         gegen = sum(1 for k in meine if k.get("art") in ("gegenbeleg", "grenze"))
-        if not meine:
-            zustand = "offen"
+        ihre = [s for s in plan["strecken"] if t["id"] in s["thesen"]]
+        fertig = [s for s in ihre if s["zustand"] == "gelesen"]
+        if len(fertig) < len(ihre):
+            zustand = "duenn" if meine else "offen"
         elif len(meine) < gedeckt:
             zustand = "duenn"
         else:
             zustand = "gedeckt"
-        aus.append((t, len(meine), gegen, zustand))
+        aus.append((t, len(meine), gegen, zustand, len(fertig), len(ihre)))
     return aus
 
 
@@ -388,14 +403,14 @@ def stand(quellpfad, plan, karten, pfad, gedeckt):
              len(plan["strecken"]) - len(offen), len(plan["strecken"])))
     print("Werkfrage: %s" % plan["werkfrage"])
     print()
-    for t, n, gegen, zustand in zeilen:
-        marke = "%-8s %3d" % (zustand, n)
+    for t, n, gegen, zustand, fertig, ihre in zeilen:
+        marke = "%-8s %3d Karten %d/%d Strecken" % (zustand, n, fertig, ihre)
         if gegen:
             marke += " (%d dagegen)" % gegen
-        print("  %-6s %-22s %s" % (t["id"], marke, t["behauptung"][:60]))
+        print("  %-6s %-38s %s" % (t["id"], marke, t["behauptung"][:52]))
     print()
-    fehlend = [t["id"] for t, n, _, z in zeilen if z == "offen"]
-    duenn = [t["id"] for t, n, _, z in zeilen if z == "duenn"]
+    fehlend = [t["id"] for t, n, _, z, _, _ in zeilen if z == "offen"]
+    duenn = [t["id"] for t, n, _, z, _, _ in zeilen if z == "duenn"]
     if fehlend:
         print("Ohne Beleg: %s" % ", ".join(fehlend))
     if duenn:
@@ -414,7 +429,7 @@ def naechste(plan, karten, gedeckt):
     """
     if plan is None:
         raise Fehler("Zu dieser Quelle liegt kein Plan.")
-    zustand = {t["id"]: z for t, _, _, z in _abdeckung(plan, karten, gedeckt)}
+    zustand = {t["id"]: z for t, _, _, z, _, _ in _abdeckung(plan, karten, gedeckt)}
     offen = [s for s in plan["strecken"] if s["zustand"] == "offen"]
     if not offen:
         print("Alle Strecken sind gelesen.")
@@ -471,6 +486,25 @@ def these(plan, karten, id_):
         if k.get("gegenstaende"):
             print("  Gegenstaende: %s" % ", ".join(k["gegenstaende"]))
     return 0 if meine else 1
+
+
+def thesen(plan):
+    """Die Thesen im Wortlaut, fuer den lesenden Lauf.
+
+    `--stand` kuerzt auf eine Zeile und taugt zum Ueberblick. Wer damit
+    lesen soll, bekaeme eine abgeschnittene Behauptung und keinen
+    Mechanismus. Das ist genau das, woran ein Lesezug scheitert.
+    """
+    if plan is None:
+        raise Fehler("Zu dieser Quelle liegt kein Plan.")
+    print("Werkfrage: %s" % plan["werkfrage"])
+    print()
+    for t in plan["thesen"]:
+        print("%s  %s" % (t["id"], t["behauptung"]))
+        if t.get("mechanismus"):
+            print("    Mechanismus: %s" % t["mechanismus"])
+        print()
+    return 0
 
 
 def grenzen(plan, karten):
@@ -688,6 +722,8 @@ def main(argv):
             return gelesen(plan, planpf, werte["gelesen"])
         if werte.get("these"):
             return these(plan, karten, werte["these"])
+        if werte.get("thesen"):
+            return thesen(plan)
         if werte.get("strecken"):
             return strecken(plan, karten)
         if werte.get("grenzen"):

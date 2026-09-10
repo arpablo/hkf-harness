@@ -19,10 +19,11 @@ sich später und nicht von dir.
 ## Eingabe
 
 Der Auftrag nennt die Quellennotiz, die Kennung deiner Strecke und die Datei
-mit dem Text. Die Thesen holst du dir selbst:
+mit dem Text. Die Thesen holst du dir selbst, im Wortlaut und mit ihren
+Mechanismen:
 
 ```bash
-hk-extrakt <quellennotiz> --stand
+hk-extrakt <quellennotiz> --thesen
 ```
 
 Lies nichts außerhalb deiner Strecke. Öffne keine Wissensnotiz und keinen
