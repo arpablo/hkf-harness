@@ -75,8 +75,14 @@ Koordination. Du meldest, dass der Text so weit ist.
 
 ```bash
 hk-text --gate <verzeichnis>
-hk-lint
+hk-lint <datei>...
 ```
+
+**`hk-lint` mit den Dateien, die du geschrieben hast**, alle in einem Aufruf.
+Ohne sie prüft es die ganze Ablage und legt dir Hinweise vor, die nicht von dir
+sind. Geprüft wird so wie so alles, gemeldet nur deins, und eine Zeile am Ende
+sagt, ob der Rest steht. Liegt das Ziel in einer Lieferung, reicht `hk-lint
+<lieferung>`: Dort steht ohnehin nur, was dieser Lauf angelegt hat.
 
 Beides muss durchlaufen, **einmal am Ende und nicht nach jeder Datei**. Ein
 Lauf über das Verzeichnis sagt dasselbe wie zwanzig über einzelne Dateien und

@@ -49,8 +49,13 @@ die Koordination und wird ein `hint` (siehe `hkf:hkb-hinweis`).
 
 ```bash
 hk-text <datei>
-hk-lint
+hk-lint <datei>
 ```
+
+**`hk-lint` mit den Dateien, die du angefasst hast.** Ohne sie prüft es die
+ganze Ablage und legt dir Hinweise vor, die seit Wochen dastehen und nicht
+von dir sind. Geprüft wird so wie so alles, gemeldet nur deins, und eine
+Zeile am Ende sagt, ob der Rest der Ablage steht.
 
 ## Rückgabe
 

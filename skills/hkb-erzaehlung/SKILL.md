@@ -107,7 +107,7 @@ Rechnung statt einer Kontrastfunktion.
 
 Ein Eingriff endet nicht am Text. Danach:
 
-1. `hk-text <datei>` und `hk-lint`.
+1. `hk-text <datei>` und `hk-lint <datei>`.
 2. `hk-kontinuitaet --richten`, wenn Figuren, Orte oder Motive dazugekommen
    sind.
 3. Jede neue Figur, jedes neue Motiv gegen die Schwelle prüfen: zweiter
