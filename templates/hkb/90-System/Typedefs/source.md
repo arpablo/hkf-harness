@@ -33,7 +33,6 @@ Was eine Notiz dieses Typs beantwortet, in dieser Reihenfolge. Der mittlere Teil
 | `# Kernaussagen` | Was das Werk im Ganzen behauptet, in wenigen Punkten. |
 | je Hauptabschnitt eine Überschrift | Was dort verhandelt wird, in Prosa, mit Verweisen auf die Notizen, die daraus entstanden sind. |
 | `# Was die Quelle offenlässt` | Wo das Werk selbst spekuliert, sich widerspricht oder eine Frage offen nennt. |
-| `# Tranchen` | Bei einer großen Quelle der Stand des Lesens. Wird von `hk-tranchen` geführt und nicht von Hand. |
 
 **Der erste Satz ist der schwerste und wird trotzdem verlangt.** Wovon ein Werk als Ganzes handelt, in ein bis zwei Sätzen: Wer das nicht sagen kann, hat das Werk nicht verstanden, sondern nur seine Kapitel gelesen. Der Satz entsteht nach der ersten Durchsicht und wird genauer, je weiter die Lektüre kommt.
 

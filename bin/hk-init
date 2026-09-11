@@ -32,8 +32,7 @@ nichts: keinen Inhalt und keine Lieferung.
    Verweise sind qualifizierte Wikilinks. Wer Gegenstände verwaltet, für die
    kein Typ da ist, legt eine eigene Typdefinition in `90-System/Typedefs/`
    an. Das Vokabular kommt nicht mehr als Lieferung, es ist schon hier.
-3. **Einlesen.** `hk-ingest` macht aus einer Quelle eine Lieferung,
-   `hk-import` nimmt sie herein.
+3. **Übernehmen.** `hk-import` nimmt eine Lieferung herein.
 
 ## Was hier liegt
 

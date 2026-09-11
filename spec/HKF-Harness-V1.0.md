@@ -79,8 +79,7 @@ wohin sie kommt, entscheidet erst der Import (Core §4.3).
 hkf-harness/
   HKF-Harness-V1.0.md   dieses Dokument
   spec/                 HKF Core und Config: die Spezifikation selbst
-  bin/                  hk-init, hk-lint, hk-import, hk-export, hk-ingest,
-                        hk-tranchen, hk-types
+  bin/                  hk-init, hk-lint, hk-import, hk-export, hk-types
   lib/hkf/              Ablage, Frontmatter, Schema, Grammatik, Vorlage,
                         Fassung, Einlesen
   py                    das Python des Harness
@@ -235,28 +234,6 @@ HKB="${HKB_PATH:-$HOME/hkb}"
   irgendwann in ein fremdes Verzeichnis.
 - **Mehrere Wissensbasen sind der Normalfall.** Die Reihenfolge ist:
   Argument auf der Kommandozeile → `HKB_PATH` → Vorgabe.
-
-### Die Inbox nach derselben Ordnung
-
-Was eingelesen werden soll, wartet in einem Verzeichnis außerhalb der Ablage:
-Web-Clippings, Scans, `.md`-Dateien, die nur auf ein Original zeigen.
-`hk-ingest` findet es, statt es übergeben zu bekommen.
-
-| | |
-|---|---|
-| Variable | `HKF_INBOX` |
-| Vorgabe | `~/hkf-inbox`, wenn nicht gesetzt |
-| Reihenfolge | Argument (`--inbox`) → `HKF_INBOX` → Vorgabe |
-
-**Die Inbox liegt nie in der Ablage.** Was unter deren Wurzelverzeichnis
-liegt, gehört nach Core §3.2 dazu und würde von `hk-lint` geprüft; ein
-Verzeichnis mit rohen PDFs bestünde diese Prüfung nicht — und soll es auch
-nicht. Aus demselben Grund steht ihr Pfad nicht in `hkb.md`: Anhang A.1 zählt
-die Properties der Wurzeldatei abschließend auf, und ein Pfad dort gälte auf
-einer Maschine und bräche, sobald der Vault umzieht.
-
-**Nach dem Einlesen wird verschoben, nie gelöscht:**
-`<inbox>/erledigt/<bundle-id>/`.
 
 ## 4. Keine Werkzeugdatei liegt in der Wissensbasis
 
@@ -572,7 +549,6 @@ traegt trotzdem die ganze Unterscheidung zwischen Programm und Prompt.
 | `hk-export` | Ein Bundle aus der Wissensbasis herausschreiben (Core §6.2) |
 | `hk-export-wiki` | Die Ablage als Lieferung fuer HenniWiki herausschreiben |
 | `hk-import` | Ein Bundle in die Wissensbasis übernehmen (Core §6.1) |
-| `hk-ingest` | Eine Quelle in eine Lieferung einlesen |
 | `hk-init` | Eine leere Wissensbasis anlegen |
 | `hk-install` | Den Harness dort einhaengen, wo ein Modell ihn findet |
 | `hk-kapitel` | Welches Kapitel als naechstes erscheint |
@@ -584,7 +560,6 @@ traegt trotzdem die ganze Unterscheidung zwischen Programm und Prompt.
 | `hk-publish` | Eine Notiz an eine HenniBock-Instanz uebertragen |
 | `hk-suche` | Notizen einer Ablage finden |
 | `hk-text` | Deutschsprachige Texte gegen die Schreibregeln pruefen |
-| `hk-tranchen` | Die Tranchen einer grossen Quelle fuehren |
 | `hk-types` | Typseiten und Bases fuer die Typen einer Wissensbasis |
 | `hk-verweise` | Kurze Wikilinks zu qualifizierten machen (§3.6) |
 | `hk-wikidata` | Kandidaten fuer die `wikidata_id` einer Notiz vorlegen |
@@ -596,5 +571,4 @@ traegt trotzdem die ganze Unterscheidung zwischen Programm und Prompt.
   07.09.2026 gelöscht worden; die Spezifikation liegt seither unter `spec/`,
   das Vokabular seit Config 1.0 in der Grundausstattung.
 - **`HKF_BUNDLE_PATH`** — erledigt: Eine Lieferung bekommt ihren Pfad im
-  Aufruf. `HKF_INBOX` deckt den einen Fall ab, in dem ein Vorgabeverzeichnis
-  trägt — dort wartet etwas, das noch keinen Namen hat.
+  Aufruf.

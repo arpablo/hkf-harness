@@ -703,7 +703,6 @@ steht immer zuletzt (§5.6).
 | `# Kernaussagen` | Was das Werk im Ganzen behauptet, in wenigen Punkten. |
 | je Hauptabschnitt eine Überschrift | Was dort verhandelt wird, in Prosa, mit Verweisen auf die Notizen, die daraus entstanden sind. |
 | `# Was die Quelle offenlässt` | Wo das Werk selbst spekuliert, sich widerspricht oder eine Frage offen nennt. |
-| `# Tranchen` | Bei einer großen Quelle der Stand des Lesens. Wird von `hk-tranchen` geführt und nicht von Hand. |
 
 **Der erste Satz ist der schwerste und wird trotzdem verlangt.** Wovon
 ein Werk als Ganzes handelt, in ein bis zwei Sätzen: Wer das nicht sagen

@@ -4,7 +4,7 @@
 
 Die KI-Schicht war bis zuletzt nirgends aufgezaehlt. Wer wissen wollte,
 welche Skills es gibt, musste `ls` sagen, und wer im Text eines Skills auf
-`hk-ingest` stiess, konnte nicht entscheiden, ob das ein Werkzeug oder ein
+einen Namen stiess, konnte nicht entscheiden, ob das ein Werkzeug oder ein
 Skill ist. Ein Buchstabe trennt beides, und nichts hielt die Namen gegen den
 Bestand.
 

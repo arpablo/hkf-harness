@@ -2001,143 +2001,26 @@ Verweis auf [[Notes/gibt-es-nicht|etwas]].
         os.remove(os.path.join(ziel, WIKI, "dinge", "drei-extends.md"))
         shutil.rmtree(e_b, ignore_errors=True)
 
-        print("hk-ingest")
-        inbox = os.path.abspath(os.path.join(ziel, "..", "probe-inbox"))
-        shutil.rmtree(inbox, ignore_errors=True)
-        os.makedirs(inbox)
-        umg = dict(os.environ, HKF_INBOX=inbox)
-        io.open(os.path.join(inbox, "artikel.md"), "w", encoding="utf-8").write(
-            "---\ntitle: Die Maschine von Turin\n"
-            "source: https://example.org/turin\nauthor: Jean Rossi\n"
-            "published: 2024-03-11\ncreated: 2026-08-30T09:12:00\n"
-            "site: Computing History Review\n"
-            "description: Ein Überblick.\nseltsam:\n  tief: ja\n---\n\n"
-            "Der erfasste Text der Seite.\n")
-        io.open(os.path.join(inbox, "buch.md"), "w", encoding="utf-8").write(
-            "---\ntype: source\nkind: book\n"
-            "title: On the Economy of Machinery\n"
-            "url: https://example.org/verlag/economy\n"
-            "file: https://nas.example.org/economy.pdf\n"
-            "published_year: 1832\n---\n")
-        io.open(os.path.join(inbox, "scan.pdf"), "wb").write(b"%PDF-1.4\n%%EOF\n")
-
-        r = lauf(os.path.join(BIN, "hk-ingest"), env=umg)
-        probe("ohne Argumente zeigt es die Inbox",
-              "3 Stück" in r.stdout and "Es wurde nichts geschrieben" in r.stdout,
-              r.stdout)
-        probe("und lässt die Werkart der PDF offen",
-              "scan.pdf" in r.stdout and "Werkart offen" in r.stdout, r.stdout)
-        probe("dabei entsteht keine Lieferung",
-              set(os.listdir(inbox)) == {"artikel.md", "buch.md", "scan.pdf"})
-
-        lief = os.path.abspath(os.path.join(ziel, "..", "probe-lieferung"))
-        shutil.rmtree(lief, ignore_errors=True)
-        r = lauf(os.path.join(BIN, "hk-ingest"), "--alles", "--bundle", lief,
-                 "--id", "probe-ingest", env=umg)
-        probe("--alles liest die .md-Stücke ein", r.returncode == 0, r.stdout)
-        clip = os.path.join(lief, "Sources", "die-maschine-von-turin.md")
-        probe("ein Clipping wird zur Quellennotiz", os.path.isfile(clip))
-        c = io.open(clip, encoding="utf-8").read() if os.path.isfile(clip) else ""
-        probe("das Clipper-Frontmatter ist abgebildet",
-              "type: source" in c and "kind: web" in c
-              and "url: https://example.org/turin" in c
-              and "- Jean Rossi" in c and "published_year: 2024" in c, c)
-        roh = os.path.join(lief, "Media", "Clippings",
-                           "die-maschine-von-turin.md")
-        probe("der erfasste Text wird kopiert, statt in den Body zu wandern",
-              os.path.isfile(roh)
-              and "Der erfasste Text der Seite."
-              in io.open(roh, encoding="utf-8").read()
-              and "Der erfasste Text der Seite." not in c, c)
-        probe("und `file` zeigt darauf",
-              "file: \"[[Media/Clippings/die-maschine-von-turin.md" in c, c)
-        probe("`checksum` ist gesetzt", "checksum: sha256:" in c, c)
-        hb = io.open(os.path.join(lief, "hbundle.md"), encoding="utf-8").read()
-        probe("die Typtabelle nennt keinen Typ der Grundausstattung (§3.8)",
-              "# Typen" in hb and "| source |" not in hb, hb)
-        probe("Unabbildbares wird verworfen und gemeldet",
-              "seltsam" not in c and "seltsam" in r.stdout, r.stdout)
-        buch = os.path.join(lief, "Sources", "on-the-economy-of-machinery.md")
-        probe("ein .md mit `type: source` wird die Notiz und kopiert nichts",
-              os.path.isfile(buch)
-              and "file: https://nas.example.org/economy.pdf"
-              in io.open(buch, encoding="utf-8").read()
-              and not os.path.isfile(os.path.join(
-                  lief, "Media", "Clippings",
-                  "on-the-economy-of-machinery.md")))
-        probe("fehlende Zitationsangaben werden gemeldet, nicht geraten",
-              "authors" in r.stdout and "Was noch fehlt" in r.stdout, r.stdout)
-        probe("eine nackte Datei wird eingelesen, die Werkart bleibt offen",
-              os.path.isfile(os.path.join(lief, "Sources", "scan.md"))
-              and "die Werkart (`kind`) steht nicht fest" in r.stdout, r.stdout)
-        probe("die eingelesenen Stücke sind verschoben, nicht gelöscht",
-              os.path.isfile(os.path.join(inbox, "erledigt", "probe-ingest",
-                                          "artikel.md")))
-        probe("die Lieferung ist konform",
-              lauf(os.path.join(BIN, "hk-lint"), lief).returncode == 0)
-
-        probe("die PDF landet unter Media/Documents/",
-              os.path.isfile(os.path.join(lief, "Media", "Documents", "scan.pdf")),
-              r.stdout)
-        # Dasselbe Stueck noch einmal, diesmal mit genannter Werkart.
-        io.open(os.path.join(inbox, "scan2.pdf"), "wb").write(
-            b"%PDF-1.4\n% zweiter\n%%EOF\n")
-        r = lauf(os.path.join(BIN, "hk-ingest"), "scan2.pdf", "--kind", "book",
-                 "--bundle", lief, "--id", "probe-ingest", env=umg)
-        s2 = os.path.join(lief, "Sources", "scan2.md")
-        probe("mit --kind steht die Werkart in der Notiz",
-              os.path.isfile(s2)
-              and "kind: book" in io.open(s2, encoding="utf-8").read(),
-              r.stdout)
-        probe("und die Lücke wird dann nicht mehr gemeldet",
-              "die Werkart (`kind`) steht nicht fest" not in r.stdout, r.stdout)
-
-        l2 = os.path.abspath(os.path.join(ziel, "..", "probe-lieferung-2"))
-        shutil.rmtree(l2, ignore_errors=True)
-        r = lauf(os.path.join(BIN, "hk-ingest"), "--bundle", l2, "--kind", "book",
-                 "--title", "On the Economy of Machinery",
-                 "--authors", "Charles Babbage", "--published-year", "1832",
-                 "--ausfertigung", "https://nas.example.org/economy.pdf",
-                 "--id", "haendisch", env=umg)
-        probe("händisch mit --ausfertigung kopiert nichts",
-              not os.path.isdir(os.path.join(l2, "Media")), r.stdout)
-        probe("und schreibt dieselbe Quellennotiz",
-              os.path.isfile(os.path.join(l2, "Sources",
-                                          "on-the-economy-of-machinery.md")))
-        # Ein Codepfad, zwei Eingaenge: der direkte Ingest ist der
-        # Bundle-Ingest mit sofortigem Import.
-        io.open(os.path.join(inbox, "seite.md"), "w", encoding="utf-8").write(
-            "---\ntype: source\nkind: web\ntitle: Eine zitierte Seite\n"
-            "url: https://example.org/seite\n---\n\nEine Zusammenfassung.\n")
-        r = lauf(os.path.join(BIN, "hk-ingest"), "--alles", "--hkb", ziel, env=umg)
-        probe("--hkb importiert die Lieferung gleich mit",
-              "1 neu" in r.stdout and "Übernommen" in r.stdout, r.stdout)
-        probe("die Quellennotiz landet unter source_base",
-              os.path.isfile(os.path.join(ziel, QUELLEN,
-                                          "eine-zitierte-seite.md")))
-        probe("und die Ablage bleibt konform",
-              lauf(os.path.join(BIN, "hk-lint"), ziel).returncode == 0)
-        shutil.copy(os.path.join(inbox, "erledigt", "eine-zitierte-seite",
-                                 "seite.md"), os.path.join(inbox, "seite.md"))
-        r = lauf(os.path.join(BIN, "hk-ingest"), "--alles", "--hkb", ziel, env=umg)
-        probe("ein zweiter Lauf erkennt die unveränderte Quelle",
-              "nicht geändert" in r.stdout, r.stdout)
-
-        for d in (inbox, lief, l2):
-            shutil.rmtree(d, ignore_errors=True)
-
-        print("hk-ingest: was der erste Praxiseinsatz zutage brachte")
+        print("hk-lint auf einer Lieferung mit heiklem Frontmatter")
         k = os.path.abspath(os.path.join(ziel, "..", "probe-kolon"))
         shutil.rmtree(k, ignore_errors=True)
-        r = lauf(os.path.join(BIN, "hk-ingest"), "--bundle", k, "--kind", "web",
-                 "--title", "Ein Titel: mit Doppelpunkt",
-                 "--url", "https://example.org/x", "--id", "kolon", env=umg)
+        _schreib(os.path.join(k, "hbundle.md"),
+                 '---\nhkf: "1.0"\ntype: bundle\nid: kolon\n'
+                 'title: "Ein Titel: mit Doppelpunkt"\n'
+                 'description: Eine Lieferung zur Probe.\n'
+                 'version: "2026-01-01"\n---\n\n'
+                 "# Typen\n\n| Typ | Verzeichnis | Zweck |\n|---|---|---|\n")
+        _schreib(os.path.join(k, "Sources", "eine-seite.md"),
+                 "---\ntype: source\nkind: web\ntitle: Eine Seite\n"
+                 "url: https://example.org/x\n"
+                 "created: 2026-01-01\nmodified: 2026-01-01T00:00:00\n---\n\n"
+                 "Eine Seite im Netz.\n")
         probe("ein Titel mit Doppelpunkt bleibt gültiges YAML (B.4)",
-              lauf(os.path.join(BIN, "hk-lint"), k).returncode == 0, r.stdout)
+              lauf(os.path.join(BIN, "hk-lint"), k).returncode == 0,
+              lauf(os.path.join(BIN, "hk-lint"), k).stdout)
         probe("und die Lieferung meldet auch --strict nichts",
               lauf(os.path.join(BIN, "hk-lint"), "--strict", k).returncode == 0,
               lauf(os.path.join(BIN, "hk-lint"), "--strict", k).stdout)
-
         # Eine Lieferung liefert keinen Typ der Grundausstattung mit (§7.1
         # Punkt 2); `--strict` darf ihre Properties nicht fuer undeklariert
         # halten, nur weil die Typdefinition nicht beiliegt.
@@ -2316,48 +2199,6 @@ Verweis auf [[Notes/gibt-es-nicht|etwas]].
               "\n1. der erste\n2. der zweite\n" in g, g)
         io.open(n, "w", encoding="utf-8").write(vorher)
 
-        print("hk-tranchen: der Stand einer großen Quelle steht in der Notiz")
-        q = os.path.join(ziel, QUELLEN, "eine-zitierte-seite.md")
-        HK_TR = os.path.join(BIN, "hk-tranchen")
-        r = lauf(HK_TR, q, "--anlegen", "-",
-                 input="## Tranchenvorschlag\n- Teil I (Kap. 1-7)\n"
-                       "- Teil II: Kitchener | Khartoum (Kap. 8-12)\n"
-                       "\n3. Teil III (Kap. 13-25)\n")
-        probe("--anlegen macht aus dem Vorschlag drei Tranchen",
-              r.returncode == 0 and "3 Tranchen angelegt" in r.stdout, r.stdout)
-        g = io.open(q, encoding="utf-8").read()
-        probe("die Liste steht als Abschnitt `# Tranchen` in der Quellennotiz",
-              "\n# Tranchen\n" in g, g)
-        probe("ein `|` in der Abgrenzung bleibt in der Zelle geschützt",
-              "Kitchener \\| Khartoum" in g, g)
-        probe("und die Notiz sagt, dass sie geändert wurde (Regel 5)",
-              "modified_by: hk-tranchen" in g.split("---")[1], g)
-        r = lauf(HK_TR, q, "--naechste")
-        probe("--naechste nennt die erste offene Tranche",
-              r.returncode == 0 and "Tranche 1 von 3" in r.stdout, r.stdout)
-        r = lauf(HK_TR, q, "--abhaken", "1", "--ertrag", "3 neu, 5 fortgeschrieben")
-        probe("--abhaken schreibt sie fest",
-              r.returncode == 0 and "Noch offen: 2 von 3" in r.stdout, r.stdout)
-        r = lauf(HK_TR, q, "--abhaken", "1")
-        probe("und ein zweites Mal nur mit --force",
-              r.returncode == 2 and "--force" in r.stderr, r.stderr)
-        r = lauf(HK_TR, q, "--naechste")
-        probe("der Lauf steht danach bei Tranche 2",
-              "Tranche 2 von 3" in r.stdout, r.stdout)
-        lauf(HK_TR, q, "--abhaken", "2")
-        lauf(HK_TR, q, "--abhaken", "3")
-        r = lauf(HK_TR, q, "--naechste")
-        probe("ist nichts mehr offen, gibt --naechste 1 zurück",
-              r.returncode == 1 and "erledigt" in r.stdout, r.stdout)
-        probe("der Ertrag der ersten Tranche steht noch da",
-              "3 neu, 5 fortgeschrieben"
-              in io.open(q, encoding="utf-8").read())
-        probe("die Ablage bleibt konform",
-              lauf(os.path.join(BIN, "hk-lint"), ziel).returncode == 0)
-        r = lauf(HK_TR, os.path.join(ziel, WIKI, "Persons", "grace-hopper.md"))
-        probe("eine Notiz, die keine Quelle ist, wird abgewiesen",
-              r.returncode == 2 and "nicht `source`" in r.stderr, r.stderr)
-
         print("hk-types: Typseiten, Bases und die Linkform von `type`")
         r = lauf(os.path.join(BIN, "hk-types"), ziel, "--umstellen")
         probe("das Skript läuft durch", r.returncode == 0, r.stdout)
@@ -2380,11 +2221,6 @@ Verweis auf [[Notes/gibt-es-nicht|etwas]].
         r = lauf(os.path.join(BIN, "hk-types"), ziel)
         probe("ein zweiter Lauf legt nichts an", "nichts anzulegen" in r.stdout,
               r.stdout)
-        r = lauf(os.path.join(BIN, "hk-tranchen"),
-                 os.path.join(ziel, QUELLEN, "eine-zitierte-seite.md"))
-        probe("hk-tranchen erkennt eine Quellennotiz auch in der Linkform",
-              r.returncode == 0 and "3 Tranchen" in r.stdout,
-              r.stdout + r.stderr)
         # Der Export schreibt die Textform zurueck (§4.2).
         aus = os.path.abspath(os.path.join(ziel, "..", "typ-lieferung"))
         shutil.rmtree(aus, ignore_errors=True)
@@ -2677,7 +2513,7 @@ Was an diesem Tag anfiel.
               r.returncode == 0, r.stdout + r.stderr)
 
         # Dieselbe Sorge eine Ebene hoeher: Die KI-Schicht war nirgends
-        # aufgezaehlt, und wer im Text eines Skills auf `hk-ingest` stiess,
+        # aufgezaehlt, und wer im Text eines Skills auf einen Namen stiess,
         # konnte nicht entscheiden, ob das ein Werkzeug oder ein Skill ist.
         r = lauf(sys.executable, os.path.join(WURZEL, "tools", "bestand.py"))
         probe("Der Harness nennt die Skills, Agenten und Werkzeuge, die es gibt",

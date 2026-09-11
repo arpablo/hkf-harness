@@ -139,8 +139,6 @@ Python 3 und PyYAML.
 | `hk-import <bundle>` | übernimmt eine Lieferung (§6.1): Typen abgleichen, Notizen und Mediendateien einsortieren, Verweise umschreiben, verknüpfen, Bundle-Notiz und Typtabelle fortschreiben | **läuft** |
 | `hk-export <id> <ziel>` | schreibt eine Lieferung heraus (§6.2): Notizen, Typdefinitionen und Mediendateien der Lieferung in den typbezogenen Baum, Verweise ohne Ablagepfad | **läuft** |
 | `hk-export-wiki <ziel>` | schreibt die ganze Ablage als Lieferung für einen Leser heraus: Notizen zeichengleich mit ihren Verweisen, die verwiesenen Medien samt Sidecar, dazu `hkweb.json` mit dem Präfix. Inbox und Journal bleiben zu Hause | **läuft** |
-| `hk-ingest [<stück>]` | liest eine Quelle ein: Typ feststellen, Ausfertigung ablegen oder verzeichnen, `sha256` bilden, Quellennotiz und `hbundle.md` schreiben, die Lücken melden. Mit `--hkb` gleich importieren | **läuft** |
-| `hk-tranchen <quellennotiz>` | führt die Tranchen einer großen Quelle im Abschnitt `# Tranchen` der Quellennotiz: `--anlegen` legt die Liste an, `--naechste` sagt, welche dran ist, `--abhaken` schreibt eine fest | **läuft** |
 | `hk-types [--umstellen]` | legt Typseiten und Bases an, damit `type` ein Verweis sein darf (§3.3) | **läuft** |
 | `hk-ablage [<pfad>]` | sagt, welche Ablage bearbeitet wird, und merkt eine Wahl für dieses Arbeitsverzeichnis. `--liste` zeigt, was zur Wahl steht | **läuft** |
 | `hk-text [--gate] [--rhythm]` | prüft deutschsprachige Texte gegen die Schreibregeln. `--gate` blockiert, der Bericht nicht | **läuft** |
@@ -245,13 +243,13 @@ nicht.
 ```
 spec/        Core, Config und Harness: die Spezifikation selbst, siehe spec/README.md
 lib/hkf/     ablage, frontmatter, schema, grammatik, pruefen, korrigieren,
-             importieren, exportieren, einlesen, notiz, vorlage, fassung,
+             importieren, exportieren, notiz, vorlage, fassung,
              obsidian (die Obsidian-CLI, mit ihren Eigenheiten an einer Stelle)
 lib/hkf/text/ der Schreibregelprüfer: segment, engine, rules, rhythm_lint
 lib/hkf/hennibock/ die Übertragung an eine HenniBock-Instanz
 rules/       deutsch.json, der Basissatz der Schreibregeln
-bin/         hk-init, hk-lint, hk-import, hk-export, hk-export-wiki, hk-ingest,
-             hk-tranchen, hk-types, hk-ablage, hk-text, hk-install,
+bin/         hk-init, hk-lint, hk-import, hk-export, hk-export-wiki,
+             hk-types, hk-ablage, hk-text, hk-install,
              hk-suche, hk-obsidian, hk-erwaehnungen, hk-kontext, hk-publikation, hk-verweise,
              hk-wikidata,
              hk-buch, hk-epub, hk-kontinuitaet, hk-publish, hk-kapitel
