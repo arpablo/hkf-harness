@@ -38,6 +38,6 @@ Fünf ist eine gesetzte Zahl und keine gemessene. Sie ist groß genug, dass es b
 
 `summarizes` nimmt genau eine Quelle und ist Pflicht: Eine Zusammenfassung ohne ihr Werk sagt nicht, wovon sie handelt. Zwei Werke nebeneinanderzustellen ist Sache eines `comparison` (§3.11).
 
-Eine Quelle darf mehrere Zusammenfassungen tragen, etwa je Lesart oder je Zweck, und sie braucht keine. Welcher Teil des Werks gemeint ist, sagt `covers`. Ohne die Angabe gilt das ganze. Ein umfangreiches Werk wird oft in Tranchen gelesen, und eine Zusammenfassung je Tranche ist besser als keine.
+Eine Quelle darf mehrere Zusammenfassungen tragen, etwa je Lesart oder je Zweck, und sie braucht keine. Welcher Teil des Werks gemeint ist, sagt `covers`. Ohne die Angabe gilt das ganze.
 
 **Das Verzeichnis heißt `Summaries`.** Die Vorgabe aus Core §3.7 ergäbe `Summarys`, wie sie bei `city` und `country` `Citys` und `Countrys` ergäbe (§3.16, §3.17).

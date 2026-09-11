@@ -19,7 +19,7 @@ modified_by: claude-opus-5
 | url | hkf-url | nein | — | Fundstelle des Werks: wo es veröffentlicht ist |
 | file | hkf-file:document,clipping / hkf-url | nein | — | Ausfertigung des Werks: als Datei in der Ablage oder als Adresse, etwa auf einem Dateiserver |
 | accessed | date | nein | — | Datum des Abrufs |
-| checksum | text | nein | — | `sha256:<hex>` über die Ausfertigung. Sagt beim nächsten Einlesen, ob sich die Quelle geändert hat |
+| checksum | text | nein | — | `sha256:<hex>` über die Ausfertigung. Sagt bei der nächsten Prüfung, ob sich die Quelle geändert hat |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Werks in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
@@ -36,7 +36,7 @@ Was eine Notiz dieses Typs beantwortet, in dieser Reihenfolge. Der mittlere Teil
 
 **Der erste Satz ist der schwerste und wird trotzdem verlangt.** Wovon ein Werk als Ganzes handelt, in ein bis zwei Sätzen: Wer das nicht sagen kann, hat das Werk nicht verstanden, sondern nur seine Kapitel gelesen. Der Satz entsteht nach der ersten Durchsicht und wird genauer, je weiter die Lektüre kommt.
 
-**`# Kernaussagen` entsteht zuletzt.** Vor der letzten Tranche wüsste man nur, was die ersten Kapitel behaupten.
+**`# Kernaussagen` entsteht zuletzt.** Vor dem Ende der Lektüre wüsste man nur, was die ersten Kapitel behaupten.
 
 **`# Was die Quelle offenlässt` steht nicht in der Quelle.** Es ist die vierte Schicht aus Core §3.3. Der Abschnitt sagt das einleitend, sonst liest er sich wie ein Befund des Werks. Was hier steht, ist beobachtet und nicht behauptet: eine Spekulation, die der Autor selbst kennzeichnet, ein Widerspruch zwischen zwei Kapiteln, eine Frage, die er als offen bezeichnet. Ein eigener Einwand gehört nicht hierher, sondern in eine `note`.
 
@@ -54,6 +54,6 @@ Eine Quellennotiz beschreibt das Werk, auf das sich die Wissensbasis beruft, und
 
 **Ist `file` ein Clipping, steht der erfasste Text dort und nicht im Body.** Ein Clipping ist eine Mediendatei unter `<media_base>/Clippings/` (Core §3.2.1), also Rohmaterial, das niemand pflegt und das darum auch niemand prüft. Die Notiz daneben trägt die Zusammenfassung. Das ist der ganze Unterschied zwischen einer erfassten und einer bloß zitierten Seite, und er verlangt keinen eigenen Typ: Die Datei ist da oder sie ist es nicht.
 
-`checksum` sagt beim nächsten Einlesen, ob sich die Quelle geändert hat. Eine Webseite ändert sich still, und ohne die Prüfsumme fiele das erst auf, wenn die Zusammenfassung schon nicht mehr stimmt.
+`checksum` sagt bei der nächsten Prüfung, ob sich die Quelle geändert hat. Eine Webseite ändert sich still, und ohne die Prüfsumme fiele das erst auf, wenn die Zusammenfassung schon nicht mehr stimmt.
 
 `published` und `published_year` schließen einander aus, wie `born` und `born_year` bei einer Person (§3.4). Ein Buch von 1989 hat einen Tag, der niemanden interessiert, ein Beitrag vom 28. Juli 2026 hat einen, der zählt. Eine Angabe zu erzwingen, die die Quelle nicht hergibt, brächte nur falsche Genauigkeit. Beide in eine Property zu legen ginge auch nicht, weil Alternativen dieselbe Wertform haben müssen (§3.7.2).

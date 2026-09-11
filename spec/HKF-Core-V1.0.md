@@ -367,8 +367,8 @@ und die Prüfsumme, die daneben in der Quellennotiz steht, wäre hinfällig. Was
 Quellennotiz, wo sie will; wohin sie beim Import kommt, sagt §4.3.
 
 Eine Quellennotiz beschreibt nicht die Sache, sondern das Werk, in dem über
-sie geschrieben steht. Sie ist Apparat, nicht Inhalt, und wächst mit jedem
-Einlesen weiter. Darum liegt sie nicht zwischen den übrigen Notizen, sondern
+sie geschrieben steht. Sie ist Apparat, nicht Inhalt, und wächst mit jeder
+Lektüre weiter. Darum liegt sie nicht zwischen den übrigen Notizen, sondern
 mit ihresgleichen unter `source_base`:
 
 ```text
@@ -662,8 +662,8 @@ gingen 50 Prozent des Exports" ist ohne Jahreszahl eine Aussage über die
 Gegenwart. Ein Beleg ersetzt keine Zeitangabe.
 
 **Widerspricht eine zweite Quelle der ersten, gewinnt keine von beiden.** Der
-Widerspruch ist eine Auskunft über den Gegenstand und kein Fehler, den ein
-Ingest wegräumt. Beide Deutungen bleiben stehen, jede bei ihrer Quelle. Steht
+Widerspruch ist eine Auskunft über den Gegenstand und kein Fehler, den man
+wegräumt. Beide Deutungen bleiben stehen, jede bei ihrer Quelle. Steht
 der Widerspruch für sich, wird er ein `comparison` (§3.11).
 
 **HKF prüft diese Regel nicht.** Kein Werkzeug kann einen Bericht von einer

@@ -1,6 +1,6 @@
 ---
 name: hkb-import
-description: "Ein HKF-Bundle in eine Wissensbasis übernehmen und dabei die Urteile fällen, die hk-import verweigert — die Bedeutungsprüfung zweier gleichnamiger Typen und die Identität einer ankommenden Notiz. Verwenden bei: Bundle importieren, Lieferung einlesen, hk-import, ein Bundle nachladen."
+description: "Ein HKF-Bundle in eine Wissensbasis übernehmen und dabei die Urteile fällen, die hk-import verweigert — die Bedeutungsprüfung zweier gleichnamiger Typen und die Identität einer ankommenden Notiz. Verwenden bei: Bundle importieren, Lieferung übernehmen, hk-import, ein Bundle nachladen."
 ---
 
 # Eine Lieferung übernehmen

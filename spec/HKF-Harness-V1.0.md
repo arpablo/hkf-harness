@@ -81,7 +81,7 @@ hkf-harness/
   spec/                 HKF Core und Config: die Spezifikation selbst
   bin/                  hk-init, hk-lint, hk-import, hk-export, hk-types
   lib/hkf/              Ablage, Frontmatter, Schema, Grammatik, Vorlage,
-                        Fassung, Einlesen
+                        Fassung
   py                    das Python des Harness
   tools/                inventar.py — hält Prosa, Schema und
                         Grundausstattung gegeneinander,
@@ -127,12 +127,10 @@ erreichbar ist, stimmt „geht auch ohne KI" nicht mehr. Dazu kommt die
 Verlässlichkeit: Ein Programm findet einen gebrochenen Wikilink immer, ein
 Modell meistens.
 
-**Ein Subagent ist Teil dieser Schicht und untersteht derselben Regel.** Er
-liest, wo ein Script nicht lesen kann, also eine PDF, eine Webseite, ein Buch,
-und gibt zurück, was er gefunden hat. Sein Zweck ist der Kontext: Wer eine große
-Quelle im laufenden Gespräch liest, hat sie danach im Rücken, und die Notizen
-aus den letzten Kapiteln werden flacher als die aus den ersten. Ein Agent
-liest in seinem eigenen Kontext und gibt ein belegtes Destillat zurück.
+**Ein Subagent ist Teil dieser Schicht und untersteht derselben Regel.** Sein
+Zweck ist der Kontext: Was einmal im laufenden Gespräch liegt, zahlt jeder
+weitere Zug mit. Ein Agent arbeitet in einem eigenen Kontext und gibt zurück,
+was gebraucht wird, statt alles, was er gesehen hat.
 
 **Ein Subagent darf schreiben, wenn das Schreiben selbst das Urteil ist.**
 Die Tabelle unter „Der Bestand" sagt je Agent, ob er es tut. Wer eine Notiz
@@ -476,9 +474,8 @@ Spezifikation kommt von außen und wird eingehalten, ein Hinweis wird selbst
 gefasst. Seit es `hint` gibt, ist er der genauere.
 
 Der Harness liest sie, wenn es sie gibt. Was er selbst mitbringt, ist die
-Politik, die für **jede** HKB gilt: der Ablauf eines Ingests, wann committet
-wird, wann zurückgefragt statt entschieden wird, und das Verbot der glatten
-Zusammenfassung. Moriwaki nennt das Risiko `over-synthesis` und hält es für
+Politik, die für **jede** HKB gilt: wann committet wird, wann zurückgefragt
+statt entschieden wird, und das Verbot der glatten Zusammenfassung. Moriwaki nennt das Risiko `over-synthesis` und hält es für
 gefährlicher als Halluzination — ein Modell macht aus Uneinigkeit einen
 Konsens, und eine saubere Notiz strahlt Autorität aus, die ihr Inhalt nicht
 deckt.

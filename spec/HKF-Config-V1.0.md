@@ -686,7 +686,7 @@ description: Ein Werk, auf das sich die Wissensbasis beruft.
 | url | hkf-url | nein | — | Fundstelle des Werks: wo es veröffentlicht ist |
 | file | hkf-file:document,clipping / hkf-url | nein | — | Ausfertigung des Werks: als Datei in der Ablage oder als Adresse, etwa auf einem Dateiserver |
 | accessed | date | nein | — | Datum des Abrufs |
-| checksum | text | nein | — | `sha256:<hex>` über die Ausfertigung. Sagt beim nächsten Einlesen, ob sich die Quelle geändert hat |
+| checksum | text | nein | — | `sha256:<hex>` über die Ausfertigung. Sagt bei der nächsten Prüfung, ob sich die Quelle geändert hat |
 | wikidata_id | hkf-wikidata | nein | — | Kennung des Werks in Wikidata |
 | related | hkf-link-or-url-list | nein | — | Verwandtes: Notizen oder Adressen. Nimmt auf, was unter „Verbindungen“ steht |
 
@@ -710,7 +710,7 @@ kann, hat das Werk nicht verstanden, sondern nur seine Kapitel gelesen.
 Der Satz entsteht nach der ersten Durchsicht und wird genauer, je weiter
 die Lektüre kommt.
 
-**`# Kernaussagen` entsteht zuletzt.** Vor der letzten Tranche wüsste
+**`# Kernaussagen` entsteht zuletzt.** Vor dem Ende der Lektüre wüsste
 man nur, was die ersten Kapitel behaupten.
 
 **`# Was die Quelle offenlässt` steht nicht in der Quelle.** Es ist die
@@ -764,7 +764,7 @@ prüft. Die Notiz daneben trägt die Zusammenfassung. Das ist der ganze
 Unterschied zwischen einer erfassten und einer bloß zitierten Seite, und er
 verlangt keinen eigenen Typ: Die Datei ist da oder sie ist es nicht.
 
-`checksum` sagt beim nächsten Einlesen, ob sich die Quelle geändert hat. Eine
+`checksum` sagt bei der nächsten Prüfung, ob sich die Quelle geändert hat. Eine
 Webseite ändert sich still, und ohne die Prüfsumme fiele das erst auf, wenn
 die Zusammenfassung schon nicht mehr stimmt.
 
@@ -1278,8 +1278,7 @@ ist Sache eines `comparison` (§3.11).
 
 Eine Quelle darf mehrere Zusammenfassungen tragen, etwa je Lesart oder je
 Zweck, und sie braucht keine. Welcher Teil des Werks gemeint ist, sagt
-`covers`. Ohne die Angabe gilt das ganze. Ein umfangreiches Werk wird oft in
-Tranchen gelesen, und eine Zusammenfassung je Tranche ist besser als keine.
+`covers`. Ohne die Angabe gilt das ganze.
 
 **Das Verzeichnis heißt `Summaries`.** Die Vorgabe aus Core §3.7 ergäbe
 `Summarys`, wie sie bei `city` und `country` `Citys` und `Countrys` ergäbe
