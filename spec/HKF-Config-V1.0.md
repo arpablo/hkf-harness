@@ -692,40 +692,24 @@ description: Ein Werk, auf das sich die Wissensbasis beruft.
 
 # Aufbau
 
-Was eine Notiz dieses Typs beantwortet, in dieser Reihenfolge.
-`# Verbindungen` steht immer zuletzt (§5.6).
+Was eine Notiz dieses Typs beantwortet, in dieser Reihenfolge. Der
+mittlere Teil folgt dem Werk und nicht einer eigenen Gliederung: je
+Teil, Kapitel oder Hauptabschnitt eine Überschrift. `# Verbindungen`
+steht immer zuletzt (§5.6).
 
 | Abschnitt | Beantwortet |
 |---|---|
 | ohne Überschrift | Die Zitationsangaben in Prosa, und in ein bis zwei Sätzen, wovon das Werk als Ganzes handelt. |
-| `# Kernaussagen` | Was das Werk behauptet: die Frage, die Antwort, die Hauptthesen einzeln. |
+| `# Kernaussagen` | Was das Werk im Ganzen behauptet, in wenigen Punkten. |
+| je Hauptabschnitt eine Überschrift | Was dort verhandelt wird, in Prosa, mit Verweisen auf die Notizen, die daraus entstanden sind. |
 | `# Was die Quelle offenlässt` | Wo das Werk selbst spekuliert, sich widerspricht oder eine Frage offen nennt. |
-| je Hauptabschnitt eine Überschrift | Der Aufbau des Werks, knapp, mit Verweisen auf die Notizen daraus. Apparat und nicht Ergebnis. |
 | `# Tranchen` | Bei einer großen Quelle der Stand des Lesens. Wird von `hk-tranchen` geführt und nicht von Hand. |
-
-**Die Notiz hat bestanden, wenn ein Leser nach fünfzehn Zeilen weiß, was
-das Werk behauptet.** Nicht, worüber es handelt. Was es behauptet. Alles
-Weitere in einer Lieferung ist Belegapparat: Die Entitätsnotizen tragen
-die Fundstellen, an denen sich die Behauptung prüfen lässt. Sie sind
-nicht das Ergebnis.
 
 **Der erste Satz ist der schwerste und wird trotzdem verlangt.** Wovon
 ein Werk als Ganzes handelt, in ein bis zwei Sätzen: Wer das nicht sagen
 kann, hat das Werk nicht verstanden, sondern nur seine Kapitel gelesen.
 Der Satz entsteht nach der ersten Durchsicht und wird genauer, je weiter
 die Lektüre kommt.
-
-**`# Kernaussagen` trägt drei Teile, in dieser Reihenfolge.** Erst die
-Frage des Werks in einem Satz. Dann die Antwort in einem Absatz, mit den
-Mechanismen, die sie tragen. Dann die Hauptthesen einzeln, je eine Zeile
-Behauptung und eine Zeile, woran der Autor sie zeigt. Eine These ist ein
-Satz, den man bestreiten kann. Ein Thema ist keine These.
-
-**Eine Zusammenfassung, die dem Aufbau der Quelle folgt, ist der Fehler
-und nicht die Form.** Wer ein Buch nach Kapiteln referiert, hat es nicht
-verstanden. Wer es verstanden hat, sagt zuerst die These und benutzt die
-Kapitel danach als Beleg. Darum steht der Aufbau des Werks hinter den
-Kernaussagen und nicht davor, und er bleibt kurz.
 
 **`# Kernaussagen` entsteht zuletzt.** Vor der letzten Tranche wüsste
 man nur, was die ersten Kapitel behaupten.
@@ -741,8 +725,8 @@ in eine `note`.
 # Konventionen
 
 Eine Quellennotiz beschreibt das Werk, auf das sich die Wissensbasis beruft,
-und sagt, **was es behauptet**. Der Aufbau des Werks steht danach, je Kapitel
-oder Hauptabschnitt eine Überschrift, und er ist knapp. Was man daraus **für die
+und fasst zusammen, **was es sagt**, gegliedert nach seinem eigenen Aufbau,
+je Kapitel oder Hauptabschnitt eine Überschrift. Was man daraus **für die
 eigene Sache schließt**, gehört nicht hierher, sondern in eine `note` oder ein
 `concept`, das per `sources` auf die Quelle verweist.
 

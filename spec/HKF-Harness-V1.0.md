@@ -153,7 +153,7 @@ Daraus folgt die Reihenfolge beim Bauen: erst `bin/`, dann `agents/` und
 Ein Modell findet eine Fähigkeit nur, wo es sucht. Der Harness ist deshalb ein
 Claude-Code-Plugin: `.claude-plugin/plugin.json` an der Wurzel, daneben die
 Bausteine in `skills/`, `agents/`, `commands/` und `bin/`. Das Plugin heißt
-`hkf`, und alles darin trägt diesen Namensraum, also `hkf:hkb-quelle`.
+`hkf`, und alles darin trägt diesen Namensraum, also `hkf:hkb-notiz`.
 
 Der Grund ist nicht Bequemlichkeit. Ein Bestand aus einzeln gesetzten Symlinks
 verrottet, weil niemand ihn zählt. In diesem Harness fehlte der Zeiger auf
@@ -535,11 +535,9 @@ traegt trotzdem die ganze Unterscheidung zwischen Programm und Prompt.
 | `hkb-hennibock` | Eine Notiz aus der Wissensbasis an eine HenniBock-Instanz übertragen und die Kapitelkette einer Publikation führen |
 | `hkb-hinweis` | Festhalten, was für diese eine Wissensbasis gilt: wann eine Notiz entsteht, welche Quellen zählen, wie weit zusammengefasst wird |
 | `hkb-import` | Ein HKF-Bundle in eine Wissensbasis übernehmen und dabei die Urteile fällen, die hk-import verweigert — die Bedeutungsprüfung zweier gleichnamiger Typen und die Identität einer ankommenden Notiz |
-| `hkb-ingest` | Aus einer Quelle eine Lieferung machen, in der die Quellennotiz sagt, was das Werk behauptet: die Thesen stehen fest, bevor die erste Zeile gelesen wird |
 | `hkb-lint` | Eine Wissensbasis oder eine Lieferung gegen HKF Core prüfen, die erlaubten Korrekturen anwenden und die Befunde beurteilen, die kein Werkzeug beheben darf |
 | `hkb-notiz` | Eine Notiz in einer Wissensbasis nach HKF Core anlegen oder fortschreiben — Typ wählen, nur zugesicherte Properties setzen, Verweise qualifizieren, Zeitangaben führen |
 | `hkb-publikation` | Aus Texten einer Wissensbasis eine Publikation bauen: den Container anlegen, Texte in eine Lesereihenfolge bringen, den Stand prüfen |
-| `hkb-quelle` | Aus einer Quelle eine Lieferung machen — Quellennotiz mit Zitationsangaben und Zusammenfassung, dazu die Notizen, die aus ihr entstehen |
 | `hkb-suche` | Eine Frage gegen eine Wissensbasis beantworten: die Notizen finden, sie lesen, die Antwort aus ihnen bilden und mit Verweisen belegen |
 | `hkb-text` | Einen deutschsprachigen Text prüfen und heben: die harten Regeln messen, die weichen Muster beurteilen, die Stimme und den Kanon der Ablage prüfen |
 | `hkb-typ` | Einen eigenen Typ in einer Wissensbasis nach HKF Core anlegen oder seine Property-Tabelle erweitern |
@@ -554,19 +552,13 @@ traegt trotzdem die ganze Unterscheidung zwischen Programm und Prompt.
 
 | Agent | Was er tut | Schreibt |
 |---|---|---|
-| `alva` | Die Thesen einer Quelle bestimmen, bevor sie gelesen wird: Werkfrage, fuenf bis neun Thesen und die Lesestrecken, die sie tragen | ja |
 | `astrid` | Einen fertigen Sachtext lektorieren: Mechanik messen, Frontmatter prüfen, Stimme und Kanon beurteilen, kürzen vor umschreiben | ja |
 | `bebildern` | Für genau einen ai-image-Callout das Bild erzeugen, die Varianten ansehen, die beste ablegen und den Alt-Text gegen das Ergebnis abgleichen | ja |
-| `berta` | Eine Lesestrecke einmal lesen und daraus lokatorgenaue Evidenzkarten ins Journal schreiben | ja |
 | `bild-sidecar` | Schreibt henni-image-Sidecar-JSONs für eine Liste von Bilddateien | ja |
-| `cora` | Aus den Karten zu einer These oder einem Gegenstand ein Stueck der Lieferung schreiben: einen Thesenabschnitt oder eine Gegenstandsnotiz | ja |
-| `dina` | Den Kopf der Quellennotiz schreiben: die Frage des Werks, die Antwort mit ihren Mechanismen und wo die Erklaerung duenn wird | ja |
 | `doris` | Den Bestand einer erzählenden Wissensbasis als Ganzes lesen und eine Agenda schreiben: was über viele Texte hinweg trägt, was sich abnutzt, wo der Kanon auseinanderläuft | ja |
-| `edith` | Vor der ersten Tranche die Gegenstaende einer Quelle bestimmen: was jeder von ihnen unabhaengig von dieser Quelle ist, mit Wikidata-Kennung | ja |
 | `frida` | Die Erstfassung eines erzählenden Textes schreiben: eine Geschichte, ein Kapitel, ein Protokoll, gegen den Kanon der Ablage | ja |
 | `herta` | Einen fertigen erzählenden Text lektorieren: Erzählverfahren prüfen, Kanon und Kontinuität, Mechanik und Frontmatter | ja |
 | `marlene` | Die Erstfassung eines längeren Sachtextes schreiben: eine Wissensnotiz, eine Quellenzusammenfassung, ein Konzept, ein Vergleich | ja |
-| `wilma` | Eine Quelle oder eine Tranche daraus lesen und als belegtes Destillat zurückgeben: Zitationsangaben, Aufbau, Kernaussagen mit Fundstelle, wörtliche Zitate und die Kandidaten für neue Notizen | nein |
 
 ### Werkzeuge
 
@@ -579,7 +571,6 @@ traegt trotzdem die ganze Unterscheidung zwischen Programm und Prompt.
 | `hk-erwaehnungen` | Unverlinkte Erwaehnungen einer Notiz zu Verweisen machen |
 | `hk-export` | Ein Bundle aus der Wissensbasis herausschreiben (Core §6.2) |
 | `hk-export-wiki` | Die Ablage als Lieferung fuer HenniWiki herausschreiben |
-| `hk-extrakt` | Das Evidenzjournal einer Quelle fuehren: Plan, Karten, Abdeckung, Schwelle |
 | `hk-import` | Ein Bundle in die Wissensbasis übernehmen (Core §6.1) |
 | `hk-ingest` | Eine Quelle in eine Lieferung einlesen |
 | `hk-init` | Eine leere Wissensbasis anlegen |
@@ -587,7 +578,6 @@ traegt trotzdem die ganze Unterscheidung zwischen Programm und Prompt.
 | `hk-kapitel` | Welches Kapitel als naechstes erscheint |
 | `hk-kontext` | Was in dieser Ablage gilt |
 | `hk-kontinuitaet` | Was in einem Erzaehlbestand auseinanderlaeuft |
-| `hk-lesekarte` | Den Stand der Entitaeten einer grossen Quelle fuehren: Behandlung und Zustand je Gegenstand, unter `<inbox_base>/AgentDashboard/` |
 | `hk-lint` | Prueft eine Wissensbasis gegen HKF Core (§6.3), mit Notizen als Argument auf sie zugeschnitten |
 | `hk-obsidian` | Die schnelle Auskunft aus der laufenden App |
 | `hk-publikation` | Die Lesereihenfolge einer Publikation fuehren |

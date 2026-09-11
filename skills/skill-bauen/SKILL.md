@@ -79,8 +79,7 @@ Sprachleistung verlangt. `bild` läuft deshalb auf einem günstigen Tier.
 ## Ein Skill ruft einen Agenten
 
 Wo viel gelesen und wenig zurückgegeben wird, gehört die Arbeit in einen
-eigenen Kontext. `hkb-quelle` liest eine Quelle nie selbst, sondern schickt
-`wilma`. `bild-notiz` sieht kein Bild an, das tut `bild-callout`.
+eigenen Kontext. `bild-notiz` sieht kein Bild an, das tut `bild-callout`.
 
 Der Gewinn ist nicht Parallelität, sondern dass der Bestand nicht im
 Hauptkontext liegen bleibt. Ein Agent, der zwölf Bilder ansieht und einen Pfad

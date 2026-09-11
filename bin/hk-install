@@ -129,7 +129,7 @@ def einrichten():
         print("  ·", g)
     print()
     print("Das Plugin heißt `%s`. Skills und Agenten tragen den Namensraum "
-          "davor,\netwa `%s:hkb-quelle` und `%s:wilma`. Die Werkzeuge aus "
+          "davor,\netwa `%s:hkb-notiz` und `%s:marlene`. Die Werkzeuge aus "
           "`bin/` liegen\ndanach auf dem Pfad. Neustart oder `/reload-plugins`."
           % (NAME, NAME, NAME))
     return 0

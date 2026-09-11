@@ -34,17 +34,17 @@ hk-suche --typ <typ>            # was der Bestand zum Typ führt
 Eine zweite Notiz über denselben Gegenstand ist schlimmer als keine. Findest
 du eine, schreibst du sie fort, statt eine neue anzulegen.
 
-## Aus einem Destillat, in eine Lieferung
+## Aus vorgelegtem Stoff, in eine Notiz
 
-Kommt der Auftrag aus einem Ingest, ist der Stoff bereits gelesen. Du bekommst je Gegenstand einen Block mit drei Zeilen und schreibst daraus die Notiz, in dieser Reihenfolge:
+Bekommst du den Stoff vorgelegt statt ihn selbst zu suchen, schreibst du die Notiz in dieser Reihenfolge: was der Gegenstand **ist**, womit er **zusammenhängt**, was eine Quelle über ihn **behauptet**.
 
-- **`Ist:`** wird der erste Absatz. Er sagt, was der Gegenstand ist, bevor irgendetwas aus der Quelle erzählt wird. Was du ohnehin in `description` schreibst, gehört ausformuliert auch in den Text.
-- **`Hängt zusammen mit:`** wird zu Verweisen in der Prosa, und was dort nicht hineinpasst, zu Einträgen unter `# Verbindungen` samt `related` (§5.6).
-- **`Behauptet:`** steht dahinter, mit Fundstelle und der Quelle zugeschrieben. Was der Gegenstand ist, gilt unabhängig davon, wer darüber geschrieben hat.
+**Der erste Absatz sagt, was der Gegenstand ist**, bevor irgendetwas aus einer Quelle erzählt wird. Eine Notiz muss für sich lesbar sein: Wer sie öffnet, ohne die Quelle zu kennen, muss verstehen, worum es geht. Was die Dardanellen sind, wo sie liegen, was sie verbinden, steht in jedem Nachschlagewerk. Das schreibst du hin, **ohne Beleg**, und stützt dich dabei auf Wikipedia, wenn es einen Artikel gibt. Setz in diesem Fall auch `wikidata_id`. Was du ohnehin in `description` schreibst, gehört ausformuliert auch in den Text.
 
-**Steht der erste Absatz schon da, hat `edith` ihn geschrieben.** Bei einer großen Quelle bestimmt sie die Gegenstände, bevor die erste Tranche gelesen wird, und zwar ohne die Quelle. Dann lässt du ihren Absatz stehen und schreibst nur, was diese Quelle beiträgt. Eine zweite Bestimmung neben ihrer wäre eine zweite Fassung derselben Auskunft.
+**Danach die Verknüpfung.** Verweise stehen in der Prosa, wo der Text sie hergibt, und was dort nicht hineinpasst, kommt unter `# Verbindungen` samt `related` (§5.6).
 
-**Sonst kommt der erste Absatz nicht aus dem Destillat, sondern von dir.** Eine Notiz muss für sich lesbar sein: Wer sie öffnet, ohne die Quelle zu kennen, muss verstehen, worum es geht. Was die Dardanellen sind, wo sie liegen, was sie verbinden, steht in jedem Nachschlagewerk. Das schreibst du hin, **ohne Beleg**, und stützt dich dabei auf Wikipedia, wenn es einen Artikel gibt. Setz in diesem Fall auch `wikidata_id`. Wilmas Zeile `Ist:` sagt dir, was die Quelle über den Gegenstand denkt, sie ersetzt aber nicht, was er ist.
+**Zuletzt, was die Quelle behauptet**, mit Fundstelle und ihr zugeschrieben. Was der Gegenstand ist, gilt unabhängig davon, wer darüber geschrieben hat. Wer beides vermischt, schreibt ein Kapitelreferat unter einem Lemma.
+
+Steht der erste Absatz schon da, lässt du ihn stehen und schreibst nur, was die Quelle beiträgt. Eine zweite Bestimmung daneben wäre eine zweite Fassung derselben Auskunft.
 
 Belegt wird nur das Spezifische: die Zahl, das Zitat, die Deutung, das Strittige. Ein Beleg ist kein Selbstzweck, sondern sagt, wem eine Aussage gehört, die nicht jedem gehört. Und was die Quelle beiträgt, bekommt eine **Zeitangabe**: „50 Prozent des russischen Exports" ohne Jahr ist eine Behauptung über heute.
 
@@ -54,7 +54,7 @@ Bist du dir beim Allgemeinwissen nicht sicher, sieh nach oder lass es weg. Eine 
 
 Wohin die Behauptungen im Einzelnen gehören, sagt der Abschnitt `# Aufbau` der Typdefinition. Lies ihn, bevor du gliederst.
 
-**Erfinde nichts dazu.** Was im Block nicht steht, steht nicht in der Notiz, auch nicht als plausible Ergänzung aus eigenem Wissen. Fehlt der Satz für `Ist:`, sagt der Block das. Dann beginnt die Notiz mit dem, was belegt ist, und du meldest die Lücke unter `Offen`.
+**Erfinde nichts dazu.** Was im vorgelegten Stoff nicht steht, steht nicht in der Notiz, auch nicht als plausible Ergänzung aus eigenem Wissen. Fehlt der Satz für `Ist:`, sagt der Block das. Dann beginnt die Notiz mit dem, was belegt ist, und du meldest die Lücke unter `Offen`.
 
 Liegt das Ziel in einer **Lieferung** statt in einer Ablage, gilt zweierlei. `hk-kontext` und `hk-suche` finden dort nichts, also sieh mit `ls` nach, was die Lieferung bereits führt. Und die Verweise tragen keinen Ablagepfad, sondern die Form `[[Persons/name|Anzeige]]`. Einen Verweis auf eine Notiz, die es weder in der Lieferung noch in der Ablage gibt, setzt du nicht: Er ist ein Befund in `hk-lint`, kein Vorgriff.
 

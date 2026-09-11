@@ -251,7 +251,7 @@ lib/hkf/text/ der Schreibregelprüfer: segment, engine, rules, rhythm_lint
 lib/hkf/hennibock/ die Übertragung an eine HenniBock-Instanz
 rules/       deutsch.json, der Basissatz der Schreibregeln
 bin/         hk-init, hk-lint, hk-import, hk-export, hk-export-wiki, hk-ingest,
-             hk-tranchen, hk-lesekarte, hk-types, hk-ablage, hk-text, hk-install,
+             hk-tranchen, hk-types, hk-ablage, hk-text, hk-install,
              hk-suche, hk-obsidian, hk-erwaehnungen, hk-kontext, hk-publikation, hk-verweise,
              hk-wikidata,
              hk-buch, hk-epub, hk-kontinuitaet, hk-publish, hk-kapitel
@@ -261,9 +261,8 @@ tools/       inventar.py hält Prosa, Schema und Grundausstattung gegeneinander,
 templates/   die Grundausstattung, aus der hk-init schöpft
 bundles/     Typen, die nicht jede Ablage braucht, als Lieferung zum Import
 skills/      die KI-Schicht: hkb und sieben Operationen, siehe skills/README.md
-agents/      die Subagenten: wilma liest, edith bestimmt, marlene und frida
-             schreiben, astrid und herta lektorieren, doris liest den Bestand,
-             alva, berta, cora und dina machen den Ingest einer großen Quelle
+agents/      die Subagenten: marlene und frida schreiben, astrid und herta
+             lektorieren, doris liest den Bestand
 commands/    die Slash-Kommandos, siehe hk-install
 hooks/       sitzung.py spielt den Kanon ein, schreibregeln.py blockt
 core/        der Kanon: Identität, Zusammenarbeit, Sprache, Schreibregeln, YAML
@@ -335,16 +334,9 @@ setzen ihn voraus: [`hkb-notiz`](skills/hkb-notiz/SKILL.md),
 [`hkb-typ`](skills/hkb-typ/SKILL.md),
 [`hkb-import`](skills/hkb-import/SKILL.md),
 [`hkb-export`](skills/hkb-export/SKILL.md),
-[`hkb-lint`](skills/hkb-lint/SKILL.md),
-[`hkb-ingest`](skills/hkb-ingest/SKILL.md).
+[`hkb-lint`](skills/hkb-lint/SKILL.md).
 
 Unter [`agents/`](agents/) liegen die Subagenten.
-[`wilma`](agents/wilma.md) liest eine Quelle in ihrem eigenen Kontext und gibt
-ein belegtes Destillat zurück. `hkb-quelle` ruft sie und liest nie selbst —
-wer ein Buch im laufenden Gespräch liest, hat es danach im Rücken, und die
-Notizen aus den letzten Kapiteln werden flacher als die aus den ersten. Ein
-Agent liest, er schreibt nicht; für die Regel oben ändert er nichts.
-
 [`marlene`](agents/marlene.md) schreibt die Erstfassung eines längeren
 Sachtextes, [`astrid`](agents/astrid.md) lektoriert ihn. Beide schreiben in die
 Ablage, und für sie gilt dieselbe Regel wie für einen Skill: Was mechanisch
@@ -352,25 +344,10 @@ geht, messen sie mit `hk-text` und `hk-lint`, statt danach zu urteilen. Ihre
 Stimme holen sie sich mit `hk-kontext` — ein Subagent sieht nicht, was die
 Hauptsitzung bekommen hat.
 
-**Der Ingest einer großen Quelle hat vier eigene Agenten**, und ihre
-Reihenfolge ist der ganze Trick: Die These kommt vor der Notiz.
-[`alva`](agents/alva.md) bestimmt aus wenigen Prozent des Werks seine
-Werkfrage und seine Thesen. [`berta`](agents/berta.md) liest je eine
-Lesestrecke und legt Evidenzkarten ins Journal, ohne eine einzige Notiz zu
-schreiben. Erst danach macht [`cora`](agents/cora.md) aus den Karten die
-Thesenabschnitte und die Gegenstandsnotizen, und
-[`dina`](agents/dina.md) schreibt den Kopf der Quellennotiz.
-
-Wer erst liest und dabei schreibt, kennt die Thesen noch nicht und kann
-deshalb nicht entscheiden, was eine Notiz wert ist. Wer nicht entscheiden
-kann, legt an. Das Journal führt [`hk-extrakt`](bin/hk-extrakt), und dort
-steht auch die Schwelle, ab der ein Gegenstand ein Blatt bekommt. Keiner der
-vier gibt einen Langtext im Chat zurück.
-
 **Damit ein Modell sie findet**, ist der Harness ein Plugin. Das Manifest steht
 in `.claude-plugin/`, die Bausteine liegen an der Wurzel: `skills/`, `agents/`,
 `commands/` und `bin/`. Das Plugin heißt `hkf`, und alles darin trägt den
-Namensraum davor, also `hkf:hkb-quelle` und `hkf:wilma`. Die Werkzeuge aus
+Namensraum davor, also `hkf:hkb-notiz` und `hkf:marlene`. Die Werkzeuge aus
 `bin/` liegen dabei auf dem Pfad, ohne dass jemand ihn pflegt.
 
 Wie beides auf einen Rechner kommt, steht oben unter
@@ -486,50 +463,6 @@ Kopien zu führen. Sie findet den Harness über `HKF_HARNESS`, sonst nebenan.
   Beobachtung).
 - **`HKF_BUNDLE_PATH`** — Vorgabeverzeichnis für Lieferungen; festlegen, wenn
   eine Lieferung öfter am selben Ort landet.
-- **Der Ingest destilliert nach Kapiteln, nicht nach Gegenständen** — und
-  verliert dabei, was die Quelle über eine Entity sagt. `hkb-quelle` bindet die
-  Zusammenfassung an den Aufbau der Quelle, was für die Quellennotiz richtig
-  ist. Es prägt aber den ganzen Lauf: Die abgeleiteten Notizen entstehen
-  kapitelweise aus Wilmas `## Aufbau` statt aus allem, was das Werk über einen
-  Gegenstand hergibt. Der Fall, an dem es auffiel: Fromkin nennt John Fisher
-  „the retired Admiral of the Fleet" und „Lord Fisher", und dass die Umstellung
-  der Flotte von Kohle auf Öl auf ihn zurückging. In der Wissensbasis steht der
-  Rang nirgends, der Titel einmal — im Body der Notiz über Churchill, weil das
-  Buch es dort erzählt —, und Fishers eigene Notiz trägt nur die
-  Dardanellen-Episode. Der Anspruch, an dem sich das messen muss, steht in
-  Karpathys Skizze eines LLM-Wikis: Eine Quelle wird gelesen und in die
-  bestehenden Seiten integriert, die über Quellen hinweg wachsen
-  (https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f). Zu tun:
-  - **Erledigt (a794727):** Jede Notiz sagt im ersten Absatz, worum es geht.
-    Wilma liefert je Kandidat eine Zeile `Ist:`, der Ingest macht daraus den
-    Anfang des Bodys. Die Notiz „Komitee für Einheit und Fortschritt" begann
-    mit italienischen Geheimbünden, und was das Komitee ist, stand allein in
-    `description`.
-  - **Erledigt (cc1734e):** `aliases` aus den Benennungen der Quelle. Ohne sie
-    greift die Verknüpfung nach §6.1 Schritt 9 nicht: „Lord Fisher" steht als
-    bloßer Text im Bestand, weil der Titel „John Fisher" lautet.
-  - **Erledigt (c6faa71):** `hk-lint --strict` nennt je Typ, was er zusichert
-    und keine Notiz führt. Kein Befund, eine Zahl. Geplant waren hier zwei
-    Warnungen; die eine, die eine unverlinkte Nennung meldet, fiel bei der
-    Messung durch: Sie traf zwei Notizen von 122 und hätte den Fisher-Fall
-    nicht gefunden, weil die Verbindung dort längst besteht.
-  - **Erledigt (bd40fa3):** Der Ingest arbeitet an Entitäten statt an
-    Kapiteln — bestimmen, verknüpfen, behaupten, in dieser Reihenfolge. Wilma
-    sammelt je Kandidat quer durch die Tranche und trennt, was der Gegenstand
-    ist, von dem, was die Quelle über ihn behauptet. Bestehende Notizen werden
-    erweitert, ein Widerspruch zwischen zwei Quellen wird eine `comparison`
-    statt einer Überschreibung.
-  - Bei tranchierten Quellen gehört dieser Durchgang ans Ende, wo alle Tranchen
-    vorliegen. Sonst bleibt jede Person auf das Kapitel beschränkt, in dem sie
-    zuerst auftritt.
-  - Eine Sollstruktur je Typ, als Abschnitt `# Aufbau` neben `# Properties` in
-    der Typdefinition, die Ingest und `hkb-notiz` beide lesen. Der
-    Bestimmungssatz ist ihr erster Teil, die übrigen Abschnitte hängen an einer
-    Entscheidung über das Datenmodell.
-  - Was die Quelle gar nicht hergibt, bleibt der kleinere Rest. Dreiundfünfzig
-    Personennotizen tragen keine Lebensdaten, weil Fromkin keine nennt. Dafür
-    braucht es einen Vervollständigungsschritt aus einer zweiten Quelle, und
-    die 52 vorhandenen `wikidata_id` sind der naheliegende Anfang.
 - **Regeln ohne Durchsetzung** — `hooks/hooks.json` referenziert
   `${CLAUDE_PLUGIN_ROOT}` und greift damit nur, wo der Harness als Plugin
   liegt. Unter `~/.claude/skills/` lädt ihn niemand, und die harten

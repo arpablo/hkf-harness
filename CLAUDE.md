@@ -68,8 +68,3 @@ Im Arbeitsbaum liegt regelmäßig, was jemand anders begonnen hat. **Nicht
 anfassen, nicht mitcommitten, nicht zurücksetzen.** `git status --short` steht
 vor jeder Änderung, und was fremd ist, wird benannt statt aufgeräumt. Näheres
 im Skill `hkf:git-sicherheit`.
-
-## Das laufende Vorhaben
-
-Der Ingest wird neu gedacht. Ziele, Maßstab und Rahmenparameter stehen in
-`ingest-ziele.md` und sind abgestimmt. Wer daran arbeitet, liest sie zuerst.
